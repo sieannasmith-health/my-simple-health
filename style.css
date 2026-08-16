@@ -131,3 +131,36 @@ main > section:first-child img {
     object-fit: cover;
     border-radius: 4px;
 }
+/* =========================
+   TOPICS SECTION
+========================= */
+
+.topics-section {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.section-label {
+    margin: 0 0 18px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--sage);
+}
+
+.topics-section h2 {
+    margin: 0 auto 20px;
+    max-width: 650px;
+    font-size: 42px;
+    line-height: 1.1;
+}
+
+.section-intro {
+    max-width: 620px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.7;
+}
