@@ -170,47 +170,49 @@ main > section:first-child img {
 
 .topic-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-top: 60px;
-    text-align: left;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 32px;
+    margin-top: 56px;
+    text-align: center;
 }
 
 .topic-card {
-    padding: 32px;
-    border: 1px solid var(--soft-line);
-    background-color: var(--cream);
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
 }
 
 .topic-card span {
-    display: block;
-    margin-bottom: 32px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background-color: var(--cream);
+    color: var(--forest);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    font-weight: 400;
 }
 
 .topic-card h3 {
-    margin: 0 0 16px;
-    font-size: 26px;
+    margin: 0 0 10px;
+    font-size: 21px;
     color: var(--forest);
 }
 
 .topic-card p {
-    margin: 0 0 28px;
-    font-size: 15px;
+    margin: 0 auto;
+    max-width: 190px;
+    font-size: 13px;
     line-height: 1.7;
 }
 
 .topic-card a {
-    color: var(--forest);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.topic-card a:hover {
-    color: var(--sage);
+    display: none;
 }
 /* =========================
    RESPONSIVE DESIGN
