@@ -99,3 +99,18 @@ main > section:first-child > p:last-of-type {
     font-size: 17px;
     line-height: 1.7;
 }
+main > section:first-child a {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 14px 24px;
+    background-color: var(--forest);
+    color: var(--warm-white);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+main > section:first-child a:hover {
+    background-color: var(--sage);
+}
