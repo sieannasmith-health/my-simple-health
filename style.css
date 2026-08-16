@@ -41,4 +41,40 @@ h3 {
 .container {
   width: min(90%, 1200px);
   margin: 0 auto;
+}/* =========================
+   HEADER + NAVIGATION
+========================= */
+
+header {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--soft-line);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+nav a {
+    color: var(--charcoal);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+nav a:hover {
+    color: var(--sage);
 }
