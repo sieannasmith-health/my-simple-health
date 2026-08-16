@@ -476,41 +476,55 @@ main > section:first-child img {
 }
 
 }
-<section class="mission-section">
+/* =========================
+   OUR MISSION
+========================= */
 
-    <div class="mission-photo">
-        <div class="mission-image placeholder-image"></div>
-    </div>
+.mission-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 40px;
+}
+.mission-content {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+}
 
-    <div class="mission-content">
-        <p class="section-label">HI, I'M SIEANNA.</p>
+.mission-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forest);
+    margin-bottom: 18px;
+}
 
-        <h2>My mission</h2>
+.mission-content h2 {
+    margin: 0 0 24px;
+    font-size: 42px;
+    line-height: 1.15;
+    color: var(--forest);
+}
 
-        <p>
-            I created My Simple Health to translate complex health evidence
-            into practical education you can actually use.
-        </p>
+.mission-content p {
+    max-width: 650px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text);
+}
 
-        <p>
-            My goal is to empower you with knowledge, realistic strategies,
-            and tools that support long-term health and prevention—one step at a time.
-        </p>
+@media (max-width: 800px) {
+    .mission-section {
+        padding: 70px 24px;
+    }
 
-        <a href="#">LEARN MORE ABOUT MY MISSION →</a>
-    </div>
+    .mission-content h2 {
+        font-size: 34px;
+    }
 
-    <aside class="mission-quote">
-        <span class="quote-mark">“</span>
-
-        <p>
-            Health isn’t about perfection.<br>
-            It’s about progress, consistency,<br>
-            and choices that support<br>
-            your future.
-        </p>
-
-        <div class="quote-leaf">❧</div>
-    </aside>
-
-</section>
+    .mission-content p {
+        font-size: 15px;
+    }
+}
