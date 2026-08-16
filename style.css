@@ -87,4 +87,15 @@ main > section:first-child {
     max-width: 1200px;
     margin: 0 auto;
     padding: 100px 0 110px;
+}main > section:first-child h2 {
+    font-size: 64px;
+    line-height: 1.05;
+    margin: 18px 0 24px;
+    max-width: 650px;
+}
+
+main > section:first-child > p:last-of-type {
+    max-width: 620px;
+    font-size: 17px;
+    line-height: 1.7;
 }
