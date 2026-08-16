@@ -599,3 +599,43 @@ main > section:first-child img {
         padding: 36px 24px;
     }
 }
+/* =========================
+   MISSION LAYOUT FIX
+========================= */
+
+.mission-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1.25fr 1fr !important;
+    width: 90% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 90px 0 !important;
+    gap: 40px !important;
+    align-items: stretch !important;
+}
+
+.mission-photo,
+.mission-content,
+.mission-quote {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    grid-column: auto !important;
+}
+
+.mission-photo {
+    min-height: 320px;
+}
+
+.mission-image {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 320px;
+    background-color: var(--cream);
+}
+
+@media (max-width: 800px) {
+    .mission-section {
+        grid-template-columns: 1fr !important;
+    }
+}
