@@ -114,3 +114,20 @@ main > section:first-child a {
 main > section:first-child a:hover {
     background-color: var(--sage);
 }
+/* =========================
+   HERO TWO-COLUMN LAYOUT
+========================= */
+
+main > section:first-child {
+    display: grid;
+    grid-template-columns: 45% 55%;
+    align-items: center;
+    gap: 50px;
+}
+
+main > section:first-child img {
+    width: 100%;
+    height: 520px;
+    object-fit: cover;
+    border-radius: 4px;
+}
