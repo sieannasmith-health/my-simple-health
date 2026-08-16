@@ -370,6 +370,8 @@ main > section:first-child img {
 
 .recipe-card {
     flex: 0 0 220px;
+    width: 220px;
+    max-width: 220px;
     scroll-snap-align: start;
     border: 1px solid var(--soft-line);
     background: white;
