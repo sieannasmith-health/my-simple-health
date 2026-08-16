@@ -78,3 +78,13 @@ nav a {
 nav a:hover {
     color: var(--sage);
 }
+/* =========================
+   HERO SECTION
+========================= */
+
+main > section:first-child {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 0 110px;
+}
