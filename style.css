@@ -1,0 +1,44 @@
+/* ================================
+   MY SIMPLE HEALTH
+   Global Design System
+   ================================ */
+
+:root {
+  --forest: #173D2B;
+  --sage: #7D9460;
+  --cream: #F5F1E7;
+  --warm-white: #FCFBF7;
+  --charcoal: #252822;
+  --soft-line: #D8D3C7;
+}
+
+/* Basic page setup */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--warm-white);
+  color: var(--charcoal);
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Elegant headings */
+
+h1,
+h2,
+h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  color: var(--forest);
+}
+
+/* Keep content from stretching too wide */
+
+.container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+}
