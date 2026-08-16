@@ -212,3 +212,43 @@ main > section:first-child img {
 .topic-card a:hover {
     color: var(--sage);
 }
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 800px) {
+
+    header {
+        flex-direction: column;
+        gap: 18px;
+        text-align: center;
+    }
+
+    nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    main > section:first-child {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        padding: 70px 0 80px;
+    }
+
+    main > section:first-child h2 {
+        font-size: 46px;
+    }
+
+    main > section:first-child img {
+        height: 420px;
+    }
+
+    .topic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .topics-section h2 {
+        font-size: 36px;
+    }
+}
