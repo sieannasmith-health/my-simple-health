@@ -215,6 +215,117 @@ main > section:first-child img {
     display: none;
 }
 /* =========================
+   LATEST ARTICLES
+========================= */
+
+.articles-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 90px 40px;
+}
+
+.articles-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--soft-line);
+    padding-bottom: 16px;
+}
+
+.articles-heading h2 {
+    margin: 0;
+    font-size: 30px;
+    color: var(--forest);
+}
+
+.articles-heading a {
+    color: var(--forest);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.article-card {
+    border: 1px solid var(--soft-line);
+    background: white;
+}
+
+.article-image {
+    height: 180px;
+    background-color: var(--cream);
+}
+
+.article-content {
+    padding: 24px;
+}
+
+.article-category {
+    margin: 0 0 10px;
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.article-card h3,
+.resource-card h3 {
+    margin: 0 0 14px;
+    color: var(--forest);
+    font-size: 21px;
+    line-height: 1.25;
+}
+
+.article-card .article-content > p:not(.article-category),
+.resource-card p {
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.article-card a,
+.resource-card a {
+    color: var(--forest);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.resource-card {
+    padding: 40px 28px;
+    background-color: var(--cream);
+    text-align: center;
+    border: 1px solid var(--soft-line);
+}
+
+.resource-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background-color: var(--sage);
+    color: var(--forest);
+    font-size: 28px;
+}
+
+.resource-card a {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 13px 18px;
+    background-color: var(--forest);
+    color: white;
+}
+/* =========================
    RESPONSIVE DESIGN
 ========================= */
 @media (max-width: 1050px) {
