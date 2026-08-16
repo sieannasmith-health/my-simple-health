@@ -476,3 +476,41 @@ main > section:first-child img {
 }
 
 }
+<section class="mission-section">
+
+    <div class="mission-photo">
+        <div class="mission-image placeholder-image"></div>
+    </div>
+
+    <div class="mission-content">
+        <p class="section-label">HI, I'M SIEANNA.</p>
+
+        <h2>My mission</h2>
+
+        <p>
+            I created My Simple Health to translate complex health evidence
+            into practical education you can actually use.
+        </p>
+
+        <p>
+            My goal is to empower you with knowledge, realistic strategies,
+            and tools that support long-term health and prevention—one step at a time.
+        </p>
+
+        <a href="#">LEARN MORE ABOUT MY MISSION →</a>
+    </div>
+
+    <aside class="mission-quote">
+        <span class="quote-mark">“</span>
+
+        <p>
+            Health isn’t about perfection.<br>
+            It’s about progress, consistency,<br>
+            and choices that support<br>
+            your future.
+        </p>
+
+        <div class="quote-leaf">❧</div>
+    </aside>
+
+</section>
