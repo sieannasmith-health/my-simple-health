@@ -796,3 +796,59 @@ main > section:first-child img {
         gap: 24px !important;
     }
 }
+/* =========================
+   HEALTHY RECIPES POLISH
+========================= */
+
+.recipes-section {
+    width: 90% !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding: 55px 0 65px !important;
+}
+
+.recipes-grid {
+    gap: 14px !important;
+    align-items: stretch;
+}
+
+.recipe-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-image {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+}
+
+.recipe-card h3 {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 68px;
+    padding: 12px 10px !important;
+    margin: 0 !important;
+    line-height: 1.2;
+    text-align: center;
+}
+
+@media (max-width: 800px) {
+    .recipes-section {
+        padding: 45px 0 50px !important;
+    }
+
+    .recipes-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .recipes-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
