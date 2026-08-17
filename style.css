@@ -1126,3 +1126,53 @@ main > section:first-child img {
         gap: 15px 22px;
     }
 }
+/* ========================================
+   MOBILE OVERFLOW FIX
+======================================== */
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+@media (max-width: 800px) {
+
+    /* Latest Articles */
+    .articles-section {
+        width: 90%;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 55px 0;
+    }
+
+    .articles-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .articles-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+        gap: 24px;
+    }
+
+    .article-card,
+    .resource-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .article-image,
+    .article-card img {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .article-content {
+        width: 100%;
+        min-width: 0;
+    }
+}
