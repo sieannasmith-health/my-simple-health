@@ -1384,3 +1384,71 @@ body {
         font-size: 26px;
     }
 }
+/* ========================================
+   TOPICS PAGE - FINAL LAYOUT FIXES
+======================================== */
+
+.topics-page {
+    display: block;
+}
+
+.topics-page .topics-intro {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.topics-page .topic-card {
+    height: auto;
+    min-height: 0;
+}
+
+.topics-page .topic-card-content {
+    height: auto;
+    min-height: 0;
+}
+
+.topics-page .topic-link {
+    display: inline-flex !important;
+    align-items: center;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border-radius: 0 !important;
+
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.4px;
+
+    color: var(--forest) !important;
+}
+
+@media (max-width: 800px) {
+    .topics-page .topics-intro {
+        margin-bottom: 40px;
+    }
+
+    .topics-page .topic-card {
+        height: auto;
+        min-height: 0;
+    }
+
+    .topics-page .topic-card-content {
+        padding: 24px;
+        height: auto;
+        min-height: 0;
+    }
+
+    .topics-page .topic-link {
+        margin-top: 4px !important;
+    }
+}
