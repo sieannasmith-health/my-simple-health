@@ -632,6 +632,8 @@ main > section:first-child img {
     height: 100% !important;
     min-height: 320px;
     background-color: var(--cream);
+    object-fit: cover;
+    object-position: center 20%;
 }
 
 @media (max-width: 800px) {
