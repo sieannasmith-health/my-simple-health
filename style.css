@@ -1176,3 +1176,19 @@ body {
         min-width: 0;
     }
 }
+/* Healthy Recipes mobile heading */
+.recipes-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.recipes-heading h2 {
+    font-size: 36px;
+    line-height: 1.15;
+}
+
+.recipes-heading a {
+    font-size: 11px;
+    white-space: nowrap;
+}
