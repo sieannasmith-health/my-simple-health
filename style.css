@@ -1192,3 +1192,105 @@ body {
     font-size: 11px;
     white-space: nowrap;
 }
+/* ========================================
+   HEALTH TOPICS PAGE
+======================================== */
+
+.topics-page {
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.topics-intro {
+    max-width: 680px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.topics-intro .eyebrow {
+    margin: 0 0 14px;
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.topics-intro h2 {
+    margin: 0 0 18px;
+    font-size: 52px;
+    line-height: 1.05;
+}
+
+.topics-intro > p:last-child {
+    margin: 0 auto;
+    max-width: 600px;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.topics-page .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+}
+
+.topics-page .topic-card {
+    display: block;
+    padding: 30px 20px;
+    color: var(--charcoal);
+    text-decoration: none;
+    border: 1px solid var(--soft-line);
+    background: white;
+    text-align: center;
+}
+
+.topics-page .topic-card span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--forest);
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.topics-page .topic-card h3 {
+    margin: 0 0 12px;
+    font-size: 22px;
+}
+
+.topics-page .topic-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+    .topics-page .topics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .topics-page {
+        padding: 60px 0;
+    }
+
+    .topics-intro {
+        margin-bottom: 40px;
+    }
+
+    .topics-intro h2 {
+        font-size: 40px;
+    }
+
+    .topics-page .topics-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}
