@@ -879,7 +879,7 @@ main > section:first-child img {
     align-items: center;
     justify-content: center;
 
-    background: var(--green);
+    background: var(--forest);
     color: white;
     font-size: 24px;
 }
@@ -919,7 +919,7 @@ main > section:first-child img {
     padding: 16px 24px;
 
     border: none;
-    background: var(--green);
+    background: var(--forest);
     color: white;
 
     font-size: 11px;
