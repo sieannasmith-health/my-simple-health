@@ -1452,3 +1452,116 @@ body {
         margin-top: 4px !important;
     }
 }
+/* ========================================
+   LATEST IN NUTRITION
+======================================== */
+
+.nutrition-latest {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.nutrition-section-heading {
+    max-width: 720px;
+    margin-bottom: 42px;
+}
+
+.nutrition-section-heading .eyebrow {
+    margin-bottom: 12px;
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.nutrition-section-heading h2 {
+    margin: 0 0 16px;
+    font-size: 44px;
+    line-height: 1.1;
+}
+
+.nutrition-section-heading > p:last-child {
+    margin: 0;
+    max-width: 650px;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.nutrition-article-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+.nutrition-article {
+    display: flex;
+    flex-direction: column;
+}
+
+.article-image-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 22px;
+    background: var(--cream);
+    border: 1px solid var(--soft-line);
+}
+
+.nutrition-article .article-category {
+    margin: 0 0 10px;
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.3px;
+}
+
+.nutrition-article h3 {
+    margin: 0 0 12px;
+    font-size: 25px;
+    line-height: 1.2;
+}
+
+.nutrition-article > p:not(.article-category) {
+    margin: 0 0 20px;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.nutrition-article > a {
+    margin-top: auto;
+    color: var(--forest);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Featured article gets extra emphasis */
+.nutrition-article.featured {
+    grid-column: span 1;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+
+    .nutrition-latest {
+        padding: 60px 0;
+    }
+
+    .nutrition-section-heading {
+        margin-bottom: 32px;
+    }
+
+    .nutrition-section-heading h2 {
+        font-size: 36px;
+    }
+
+    .nutrition-article-grid {
+        grid-template-columns: 1fr;
+        gap: 38px;
+    }
+
+    .nutrition-article h3 {
+        font-size: 24px;
+    }
+}
