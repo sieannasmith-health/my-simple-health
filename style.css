@@ -2038,7 +2038,8 @@ body {
 }
 
 .home-hero::after,
-.nutrition-hero::after {
+.nutrition-hero::after,
+.movement-hero::after {
     content: "";
     position: absolute;
     top: 0;
@@ -2058,7 +2059,8 @@ body {
 
 @media (max-width: 800px) {
     .home-hero::after,
-    .nutrition-hero::after {
+    .nutrition-hero::after,
+    .movement-hero::after {
         display: none;
     }
 }
