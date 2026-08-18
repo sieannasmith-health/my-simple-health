@@ -2222,6 +2222,22 @@ body {
 .movement-article-card {
     padding: 26px;
 }
+.movement-topics {
+    padding: 60px 0;
+}
+
+.movement-topics-grid {
+    grid-template-columns: 1fr;
+}
+
+.movement-topic-card {
+    padding: 28px 0;
+    border-right: none !important;
+}
+
+.movement-topic-card:nth-child(odd) {
+    border-right: none;
+}
 /* ================================
    LATEST MOVEMENT ARTICLES
 ================================ */
