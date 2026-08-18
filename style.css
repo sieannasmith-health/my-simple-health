@@ -1777,3 +1777,59 @@ body {
         width: 100%;
     }
 }
+/* ========================================
+   NUTRITION HERO - WIDE EDITORIAL LAYOUT
+======================================== */
+
+.nutrition-hero {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-columns: 45% 55% !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+
+    background: #f7f4ec;
+}
+
+.nutrition-hero-text {
+    padding: 70px 60px 70px max(5%, calc((100vw - 1200px) / 2));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.nutrition-hero-image {
+    width: 100%;
+    min-width: 0;
+}
+
+.nutrition-hero-image img {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 520px;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+    display: block;
+}
+
+/* Mobile */
+
+@media (max-width: 800px) {
+
+    .nutrition-hero {
+        grid-template-columns: 1fr !important;
+    }
+
+    .nutrition-hero-text {
+        padding: 50px 24px 36px;
+    }
+
+    .nutrition-hero-image img {
+        min-height: 0;
+        height: 330px !important;
+    }
+}
