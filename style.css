@@ -2503,3 +2503,30 @@ body {
         font-size: 17px;
     }
 }
+/* Final mobile header alignment */
+
+@media (max-width: 800px) {
+
+    .site-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        padding: 22px 24px !important;
+    }
+
+    .site-logo {
+        margin: 0 !important;
+        flex-shrink: 0;
+    }
+
+    .menu-button {
+        display: block !important;
+        margin-left: auto;
+    }
+
+    .search-toggle {
+        margin: 0 !important;
+    }
+}
