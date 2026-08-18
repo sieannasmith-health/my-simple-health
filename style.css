@@ -2083,6 +2083,83 @@ body {
     font-size: 14px;
     font-weight: 600;
 }
+/* ================================
+   POPULAR MOVEMENT TOPICS
+================================ */
+
+.movement-topics {
+    width: min(90%, 1200px);
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.movement-topics-header {
+    margin-bottom: 40px;
+}
+
+.movement-topics-header .section-eyebrow {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    color: var(--sage);
+}
+
+.movement-topics-header h2 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.movement-topics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--soft-line);
+}
+
+.movement-topic-card {
+    display: block;
+    padding: 34px 28px;
+    color: var(--charcoal);
+    text-decoration: none;
+    border-bottom: 1px solid var(--soft-line);
+}
+
+.movement-topic-card:nth-child(odd) {
+    border-right: 1px solid var(--soft-line);
+}
+
+.movement-topic-number {
+    display: block;
+    margin-bottom: 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    color: var(--sage);
+}
+
+.movement-topic-card h3 {
+    margin: 0 0 10px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+    font-weight: 400;
+    color: var(--forest);
+}
+
+.movement-topic-card p {
+    margin: 0 0 18px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.movement-topic-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--forest);
+}
 /* Mobile */
 
 @media (max-width: 800px) {
