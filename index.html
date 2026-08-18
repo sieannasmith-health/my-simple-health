@@ -365,6 +365,34 @@
     </div>
 
 </footer>
+<script>
+    function toggleSearch() {
+        const searchBox = document.getElementById("searchBox");
+        const searchInput = document.getElementById("siteSearch");
 
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+    }
+
+    function runSearch() {
+        const searchInput = document.getElementById("siteSearch");
+        const query = searchInput.value.trim();
+
+        if (query) {
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+        }
+    }
+
+    document.getElementById("siteSearch").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            runSearch();
+        }
+    });
+</script>
 </body>
 </html>
