@@ -1890,3 +1890,31 @@ body {
     min-width: 0 !important;
     padding: 14px 24px !important;
 }
+/* Home hero soft image blend */
+
+.home-hero {
+    position: relative;
+}
+
+.home-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 45%;
+    width: 90px;
+
+    background: linear-gradient(
+        to right,
+        #f7f4ec 0%,
+        rgba(247, 244, 236, 0.7) 25%,
+        rgba(247, 244, 236, 0) 100%
+    );
+
+    pointer-events: none;
+}
+@media (max-width: 800px) {
+    .home-hero::after {
+        display: none;
+    }
+}
