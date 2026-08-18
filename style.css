@@ -2446,3 +2446,60 @@ body {
         padding: 28px !important;
     }
 }
+/* ==============================
+   MOBILE NAVIGATION
+============================== */
+
+.menu-button {
+    display: none;
+}
+
+@media (max-width: 800px) {
+
+    .site-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 28px;
+    }
+
+    .site-logo {
+        font-size: 28px;
+        white-space: nowrap;
+    }
+
+    .menu-button {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--forest);
+        font-size: 26px;
+        cursor: pointer;
+        padding: 8px;
+    }
+
+    .site-nav {
+        display: none !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: var(--warm-white);
+        padding: 24px 28px;
+        border-top: 1px solid var(--soft-line);
+        border-bottom: 1px solid var(--soft-line);
+    }
+
+    .site-nav.active {
+        display: flex !important;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .site-nav a {
+        display: block;
+        font-size: 17px;
+    }
+}
