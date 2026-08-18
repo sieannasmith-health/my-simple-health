@@ -1833,3 +1833,52 @@ body {
         height: 330px !important;
     }
 }
+/* ========================================
+   HOME HERO - WIDE EDITORIAL LAYOUT
+======================================== */
+
+.home-hero {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-columns: 45% 55% !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+
+    background: #f7f4ec;
+}
+
+.home-hero .hero-text {
+    padding: 70px 60px 70px max(5%, calc((100vw - 1200px) / 2));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.home-hero > img {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 520px;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+    display: block;
+}
+
+@media (max-width: 800px) {
+
+    .home-hero {
+        grid-template-columns: 1fr !important;
+    }
+
+    .home-hero .hero-text {
+        padding: 50px 24px 36px;
+    }
+
+    .home-hero > img {
+        min-height: 0;
+        height: 330px !important;
+    }
+}
