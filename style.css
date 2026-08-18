@@ -2421,3 +2421,28 @@ body {
         padding: 28px !important;
     }
 }
+@media (max-width: 800px) {
+
+    .movement-latest {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 60px 40px !important;
+        overflow: hidden !important;
+    }
+
+    .movement-latest-grid {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .movement-article-card {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 0 20px 0 !important;
+        padding: 28px !important;
+    }
+}
