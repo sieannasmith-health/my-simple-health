@@ -2530,3 +2530,39 @@ body {
         margin: 0 !important;
     }
 }
+@media (max-width: 800px) {
+
+    .site-header {
+        display: grid !important;
+        grid-template-columns: 1fr auto auto !important;
+        align-items: center !important;
+        column-gap: 14px !important;
+        padding: 20px 24px !important;
+    }
+
+    .site-logo {
+        grid-column: 1;
+        margin: 0 !important;
+        font-size: 28px !important;
+    }
+
+    .menu-button {
+        grid-column: 2;
+        margin: 0 !important;
+        padding: 8px !important;
+    }
+
+    .header-search {
+        grid-column: 3;
+        margin: 0 !important;
+        position: relative;
+    }
+
+    .search-button {
+        margin: 0 !important;
+    }
+
+    .site-nav {
+        top: 100% !important;
+    }
+}
