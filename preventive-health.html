@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Preventive Health | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="#">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- =========================================
+         PREVENTIVE HEALTH HERO
+    ========================================== -->
+
+    <section class="movement-hero preventive-hero">
+
+        <div class="movement-hero-text">
+
+            <p class="topic-eyebrow">PREVENTIVE HEALTH</p>
+
+            <h2>
+                Stay Ahead.<br>
+                Stay Well.
+            </h2>
+
+            <p class="topic-hero-description">
+                Preventive health is about understanding your risks,
+                keeping up with recommended care, and making everyday
+                choices that support your long-term well-being.
+            </p>
+
+            <div class="topic-hero-links">
+                <a href="#">Screenings</a>
+                <a href="#">Checkups</a>
+                <a href="#">Vaccines</a>
+                <a href="#">Health Basics</a>
+            </div>
+
+        </div>
+
+        <div class="movement-hero-image">
+            <img
+                src="topic-preventive.png"
+                alt="Preventive health and routine care"
+            >
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         FEATURED IN PREVENTIVE HEALTH
+    ========================================== -->
+
+    <section class="movement-featured">
+
+        <p class="section-eyebrow">
+            FEATURED IN PREVENTIVE HEALTH
+        </p>
+
+        <h2>
+            Small steps can protect your future health.
+        </h2>
+
+        <p class="section-intro">
+            Learn how routine care, health screenings, and preventive
+            habits can help you stay informed and proactive about your health.
+        </p>
+
+        <div class="movement-featured-grid">
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Preventive Care: Where to Start
+                </h3>
+
+                <p>
+                    Understand the basics of routine preventive care and
+                    how to keep track of the health services you may need.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Know Your Health Numbers
+                </h3>
+
+                <p>
+                    Learn why measures like blood pressure, cholesterol,
+                    and blood glucose can provide useful information about your health.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Make the Most of Your Checkup
+                </h3>
+
+                <p>
+                    Prepare for routine visits so you can ask better questions,
+                    understand your results, and leave with clear next steps.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         LATEST PREVENTIVE HEALTH ARTICLES
+    ========================================== -->
+
+    <section class="movement-latest">
+
+        <div class="movement-latest-header">
+
+            <p class="section-eyebrow">
+                LATEST PREVENTIVE HEALTH ARTICLES
+            </p>
+
+            <h2>
+                Understand your preventive care.
+            </h2>
+
+        </div>
+
+
+        <div class="movement-latest-grid">
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        SCREENINGS
+                    </span>
+
+                    <h3>
+                        What Health Screenings Should You Know About?
+                    </h3>
+
+                    <p>
+                        A practical introduction to common preventive
+                        screenings and why timing can vary by age and risk.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        ROUTINE CARE
+                    </span>
+
+                    <h3>
+                        Why Regular Checkups Still Matter
+                    </h3>
+
+                    <p>
+                        Routine care can create opportunities to review
+                        risk factors, medications, screenings, and health goals.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        HEALTH BASICS
+                    </span>
+
+                    <h3>
+                        Understanding Blood Pressure Numbers
+                    </h3>
+
+                    <p>
+                        Learn what systolic and diastolic blood pressure
+                        mean and why monitoring them can be useful.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         POPULAR PREVENTIVE HEALTH TOPICS
+    ========================================== -->
+
+    <section class="movement-topics">
+
+        <div class="movement-topics-header">
+
+            <p class="section-eyebrow">
+                POPULAR PREVENTIVE HEALTH TOPICS
+            </p>
+
+            <h2>
+                Explore preventive health by topic.
+            </h2>
+
+        </div>
+
+
+        <div class="movement-topics-grid">
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    01
+                </span>
+
+                <h3>
+                    Health Screenings
+                </h3>
+
+                <p>
+                    Understand common screenings and how preventive
+                    recommendations may change over time.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Screenings →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    02
+                </span>
+
+                <h3>
+                    Routine Checkups
+                </h3>
+
+                <p>
+                    Make routine visits more useful by knowing what
+                    to discuss and how to prepare.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Checkups →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    03
+                </span>
+
+                <h3>
+                    Vaccines &amp; Prevention
+                </h3>
+
+                <p>
+                    Learn the role preventive services can play in
+                    reducing risk and supporting community health.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Prevention →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    04
+                </span>
+
+                <h3>
+                    Know Your Numbers
+                </h3>
+
+                <p>
+                    Understand common health measurements and what
+                    they can tell you about your overall health.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Health Numbers →
+                </span>
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         NEWSLETTER
+    ========================================== -->
+
+    <section class="newsletter-section">
+
+        <div class="newsletter-icon">
+            ✉
+        </div>
+
+        <div class="newsletter-copy">
+
+            <h2>
+                Stay inspired.
+            </h2>
+
+            <p>
+                Evidence-informed health tips and practical resources
+                delivered to your inbox.
+            </p>
+
+        </div>
+
+
+        <form class="newsletter-form">
+
+            <input
+                type="text"
+                placeholder="First name"
+                aria-label="First name"
+            >
+
+            <input
+                type="email"
+                placeholder="Email address"
+                aria-label="Email address"
+            >
+
+            <button type="submit">
+                SUBSCRIBE
+            </button>
+
+            <p class="newsletter-note">
+                No spam, ever. Unsubscribe anytime.
+            </p>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>MY SIMPLE HEALTH</h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="#">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="#">About Me</a>
+            <a href="#">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>LET'S STAY CONNECTED</h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+</body>
+
+</html>
