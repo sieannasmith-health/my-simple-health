@@ -1638,3 +1638,38 @@ body {
     font-weight: 600;
     text-decoration: none;
 }
+/* Popular Nutrition Topics */
+
+.nutrition-popular-topics {
+    padding: 30px;
+    border: 1px solid #d8d8d2;
+    background: #faf9f5;
+}
+
+.nutrition-popular-topics .nutrition-hub-heading {
+    margin-bottom: 20px;
+}
+
+.nutrition-topic-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    padding: 16px 0;
+    border-bottom: 1px solid #d8d8d2;
+
+    color: var(--forest);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.nutrition-topic-link:last-child {
+    border-bottom: none;
+}
+
+.nutrition-topic-link span:last-child {
+    font-size: 18px;
+    font-weight: 400;
+}
