@@ -2010,6 +2010,79 @@ body {
     font-size: 14px;
     font-weight: 600;
 }
+/* ================================
+   LATEST MOVEMENT ARTICLES
+================================ */
+
+.movement-latest {
+    width: min(90%, 1200px);
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.movement-latest-header {
+    margin-bottom: 36px;
+}
+
+.movement-latest-header .section-eyebrow {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    color: var(--sage);
+}
+
+.movement-latest-header h2 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.movement-latest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.movement-article-card {
+    background: var(--cream);
+    border: 1px solid var(--soft-line);
+    padding: 32px;
+}
+
+.article-category {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    color: var(--sage);
+}
+
+.movement-article-card h3 {
+    margin: 0 0 14px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.movement-article-card p {
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.movement-article-card a {
+    color: var(--forest);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
 /* Mobile */
 
 @media (max-width: 800px) {
@@ -2060,6 +2133,90 @@ body {
 .movement-featured-card {
     padding: 26px;
 }
+}
+.movement-latest {
+    padding: 60px 0;
+}
+
+.movement-latest-grid {
+    grid-template-columns: 1fr;
+}
+
+.movement-article-card {
+    padding: 26px;
+}
+/* ================================
+   LATEST MOVEMENT ARTICLES
+================================ */
+
+.movement-latest {
+    width: min(90%, 1200px);
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.movement-latest-header {
+    margin-bottom: 36px;
+}
+
+.movement-latest-header .section-eyebrow {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    color: var(--sage);
+}
+
+.movement-latest-header h2 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.movement-latest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.movement-article-card {
+    background: var(--cream);
+    border: 1px solid var(--soft-line);
+    padding: 32px;
+}
+
+.article-category {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    color: var(--sage);
+}
+
+.movement-article-card h3 {
+    margin: 0 0 14px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.movement-article-card p {
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.movement-article-card a {
+    color: var(--forest);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
 }
 /* ========================================
    HOME HERO - WIDE EDITORIAL LAYOUT
