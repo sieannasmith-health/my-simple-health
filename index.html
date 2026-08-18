@@ -29,9 +29,26 @@
         <a href="#">Contact</a>
     </nav>
 
-    <button class="search-button" aria-label="Search">
+ <div class="header-search">
+
+    <button class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()">
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
+
+    <div class="search-box" id="searchBox">
+        <input type="search"
+               id="siteSearch"
+               placeholder="Search My Simple Health..."
+               aria-label="Search My Simple Health">
+
+        <button type="button" onclick="runSearch()">
+            Search
+        </button>
+    </div>
+
+</div>
 
 </header>
 
