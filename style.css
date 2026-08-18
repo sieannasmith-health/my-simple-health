@@ -1934,6 +1934,80 @@ body {
     border-radius: 0 !important;
     display: block;
 }
+/* =========================================
+   FEATURED IN MOVEMENT
+   ========================================= */
+
+.movement-featured {
+    width: min(90%, 1200px);
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.movement-featured .section-eyebrow {
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    color: var(--sage);
+}
+
+.movement-featured h2 {
+    margin: 0 0 16px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.movement-featured .section-intro {
+    max-width: 650px;
+    margin: 0 0 42px;
+
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--charcoal);
+}
+
+.movement-featured-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.movement-featured-card {
+    padding: 32px;
+
+    background: var(--cream);
+    border: 1px solid var(--soft-line);
+}
+
+.movement-featured-card h3 {
+    margin: 0 0 14px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.movement-featured-card p {
+    margin: 0 0 24px;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.movement-featured-card a {
+    color: var(--forest);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
 /* Mobile */
 
 @media (max-width: 800px) {
@@ -1972,6 +2046,17 @@ body {
 .movement-hero .topic-hero-links a {
     width: 100%;
     text-align: center;
+}
+   .movement-featured {
+    padding: 60px 0;
+}
+
+.movement-featured-grid {
+    grid-template-columns: 1fr;
+}
+
+.movement-featured-card {
+    padding: 26px;
 }
 }
 /* ========================================
