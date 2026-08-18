@@ -15,18 +15,43 @@
 
 <body>
 
-    <header>
-        <h1>My Simple Health</h1>
+   <header class="site-header">
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="#">About</a>
-            <a href="topics.html">Topics</a>
-            <a href="#">Recipes</a>
-            <a href="#">Blog</a>
-            <a href="#">Contact</a>
-        </nav>
-    </header>
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="#">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+            <input type="search"
+                   id="siteSearch"
+                   placeholder="Search My Simple Health..."
+                   aria-label="Search My Simple Health">
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+        </div>
+
+    </div>
+
+</header>
 
 
     <main>
@@ -101,6 +126,34 @@
         </section>
 
     </main>
+<script>
+    function toggleSearch() {
+        const searchBox = document.getElementById("searchBox");
+        const searchInput = document.getElementById("siteSearch");
 
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+    }
+
+    function runSearch() {
+        const searchInput = document.getElementById("siteSearch");
+        const query = searchInput.value.trim();
+
+        if (query) {
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+        }
+    }
+
+    document.getElementById("siteSearch").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            runSearch();
+        }
+    });
+</script>
 </body>
 </html>
