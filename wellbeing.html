@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wellbeing | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="#">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- =========================================
+         WELLBEING HERO
+    ========================================== -->
+
+    <section class="movement-hero wellbeing-hero">
+
+        <div class="movement-hero-text">
+
+            <p class="topic-eyebrow">WELLBEING</p>
+
+            <h2>
+                Feel Well.<br>
+                Live Well.
+            </h2>
+
+            <p class="topic-hero-description">
+                Wellbeing is about more than one healthy habit.
+                It is shaped by how you manage stress, make time
+                for rest, care for yourself, and create routines
+                that support your everyday life.
+            </p>
+
+            <div class="topic-hero-links">
+                <a href="#">Stress</a>
+                <a href="#">Self-Care</a>
+                <a href="#">Rest &amp; Recovery</a>
+                <a href="#">Healthy Habits</a>
+            </div>
+
+        </div>
+
+        <div class="movement-hero-image">
+            <img
+                src="topic-wellbeing.png"
+                alt="Everyday wellbeing and self-care"
+            >
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         FEATURED IN WELLBEING
+    ========================================== -->
+
+    <section class="movement-featured">
+
+        <p class="section-eyebrow">
+            FEATURED IN WELLBEING
+        </p>
+
+        <h2>
+            Make space for feeling well.
+        </h2>
+
+        <p class="section-intro">
+            Explore practical ways to manage stress, support recovery,
+            care for yourself, and build routines that make everyday
+            life feel more sustainable.
+        </p>
+
+
+        <div class="movement-featured-grid">
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Understanding Everyday Stress
+                </h3>
+
+                <p>
+                    Learn how stress affects your body and mind,
+                    what can contribute to it, and why recovery matters.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Self-Care That Actually Supports You
+                </h3>
+
+                <p>
+                    Move beyond the buzzword and explore realistic
+                    ways to care for your physical and emotional well-being.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+
+            <article class="movement-featured-card">
+
+                <h3>
+                    Why Rest Is Productive Too
+                </h3>
+
+                <p>
+                    Rest and recovery are important parts of a healthy
+                    life, not something you have to earn after doing more.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         LATEST WELLBEING ARTICLES
+    ========================================== -->
+
+    <section class="movement-latest">
+
+        <div class="movement-latest-header">
+
+            <p class="section-eyebrow">
+                LATEST WELLBEING ARTICLES
+            </p>
+
+            <h2>
+                Support your everyday well-being.
+            </h2>
+
+        </div>
+
+
+        <div class="movement-latest-grid">
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        STRESS
+                    </span>
+
+                    <h3>
+                        Simple Ways to Manage Everyday Stress
+                    </h3>
+
+                    <p>
+                        Small practices can help you create moments
+                        of calm and make everyday stress feel more manageable.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        REST &amp; RECOVERY
+                    </span>
+
+                    <h3>
+                        Why Your Body Needs Time to Recover
+                    </h3>
+
+                    <p>
+                        Recovery gives your body and mind opportunities
+                        to restore energy, adapt, and prepare for what comes next.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <article class="movement-article-card">
+
+                <div class="movement-article-content">
+
+                    <span class="article-category">
+                        HEALTHY HABITS
+                    </span>
+
+                    <h3>
+                        Building Routines That Support Your Wellbeing
+                    </h3>
+
+                    <p>
+                        Create realistic routines that support your health
+                        without making everyday life feel like another project.
+                    </p>
+
+                    <a href="#">
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         POPULAR WELLBEING TOPICS
+    ========================================== -->
+
+    <section class="movement-topics">
+
+        <div class="movement-topics-header">
+
+            <p class="section-eyebrow">
+                POPULAR WELLBEING TOPICS
+            </p>
+
+            <h2>
+                Explore wellbeing by topic.
+            </h2>
+
+        </div>
+
+
+        <div class="movement-topics-grid">
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    01
+                </span>
+
+                <h3>
+                    Stress
+                </h3>
+
+                <p>
+                    Understand everyday stress and explore practical
+                    strategies for managing it.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Stress →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    02
+                </span>
+
+                <h3>
+                    Self-Care
+                </h3>
+
+                <p>
+                    Build realistic practices that support your
+                    physical and emotional well-being.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Self-Care →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    03
+                </span>
+
+                <h3>
+                    Rest &amp; Recovery
+                </h3>
+
+                <p>
+                    Learn why slowing down and recovering are
+                    meaningful parts of supporting your health.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Recovery →
+                </span>
+
+            </a>
+
+
+            <a href="#" class="movement-topic-card">
+
+                <span class="movement-topic-number">
+                    04
+                </span>
+
+                <h3>
+                    Healthy Habits
+                </h3>
+
+                <p>
+                    Create everyday routines that support your
+                    health, energy, and quality of life.
+                </p>
+
+                <span class="movement-topic-link">
+                    Explore Healthy Habits →
+                </span>
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         NEWSLETTER
+    ========================================== -->
+
+    <section class="newsletter-section">
+
+        <div class="newsletter-icon">
+            ✉
+        </div>
+
+        <div class="newsletter-copy">
+
+            <h2>
+                Stay inspired.
+            </h2>
+
+            <p>
+                Evidence-informed health tips and practical resources
+                delivered to your inbox.
+            </p>
+
+        </div>
+
+
+        <form class="newsletter-form">
+
+            <input
+                type="text"
+                placeholder="First name"
+                aria-label="First name"
+            >
+
+            <input
+                type="email"
+                placeholder="Email address"
+                aria-label="Email address"
+            >
+
+            <button type="submit">
+                SUBSCRIBE
+            </button>
+
+            <p class="newsletter-note">
+                No spam, ever. Unsubscribe anytime.
+            </p>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<!-- =========================================
+     FOOTER
+========================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a
+                    href="https://www.instagram.com/hellomysimplehealth/"
+                    aria-label="Instagram"
+                >
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a
+                    href="https://www.linkedin.com/company/143299965/"
+                    aria-label="LinkedIn"
+                >
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a
+                    href="https://www.pinterest.com/hellomysimplehealth/"
+                    aria-label="Pinterest"
+                >
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a
+                    href="mailto:hello.mysimplehealth@gmail.com"
+                    aria-label="Email"
+                >
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                EXPLORE
+            </h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="#">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                ABOUT
+            </h3>
+
+            <a href="#">About Me</a>
+            <a href="#">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+</body>
+</html>
