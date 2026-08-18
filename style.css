@@ -1869,6 +1869,29 @@ body {
         min-height: 0;
         height: 330px !important;
     }
+.movement-hero {
+    grid-template-columns: 1fr !important;
+}
+
+.movement-hero-text {
+    padding: 50px 24px 36px;
+}
+
+.movement-hero-image img {
+    min-height: 0;
+    height: 330px !important;
+}
+
+.movement-hero .topic-hero-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.movement-hero .topic-hero-links a {
+    width: 100%;
+    text-align: center;
+}
 }
 /* ========================================
    HOME HERO - WIDE EDITORIAL LAYOUT
