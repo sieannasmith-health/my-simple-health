@@ -1882,3 +1882,11 @@ body {
         height: 330px !important;
     }
 }
+/* Home hero button fix */
+
+.home-hero .hero-text > a {
+    align-self: flex-start;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 14px 24px !important;
+}
