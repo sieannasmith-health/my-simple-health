@@ -1599,3 +1599,42 @@ body {
     margin: 0;
     color: var(--forest);
 }
+/* Nutrition article list */
+
+.nutrition-latest {
+    min-width: 0;
+}
+
+.nutrition-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.nutrition-list-item {
+    padding: 22px 0;
+    border-bottom: 1px solid #d8d8d2;
+}
+
+.nutrition-list-item:first-child {
+    padding-top: 0;
+}
+
+.nutrition-list-text h3 {
+    font-size: 21px;
+    line-height: 1.3;
+    margin: 6px 0 8px;
+    color: var(--forest);
+}
+
+.nutrition-list-text > p:not(.article-category) {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.nutrition-list-text a {
+    color: var(--forest);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
