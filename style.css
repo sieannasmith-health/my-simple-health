@@ -1574,3 +1574,28 @@ body {
     display: block;
     margin-bottom: 22px;
 }
+/* Nutrition content hub */
+
+.nutrition-content-hub {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+.nutrition-hub-heading {
+    margin-bottom: 30px;
+}
+
+.nutrition-hub-heading .eyebrow {
+    margin-bottom: 10px;
+}
+
+.nutrition-hub-heading h2 {
+    font-size: 32px;
+    margin: 0;
+    color: var(--forest);
+}
