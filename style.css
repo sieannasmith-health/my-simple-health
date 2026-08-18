@@ -1673,3 +1673,24 @@ body {
     font-size: 18px;
     font-weight: 400;
 }
+/* Nutrition content hub mobile */
+
+@media (max-width: 800px) {
+    .nutrition-hub {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 60px 24px;
+    }
+
+    .nutrition-popular-topics {
+        padding: 24px;
+    }
+
+    .nutrition-hub-heading h2 {
+        font-size: 28px;
+    }
+
+    .nutrition-list-text h3 {
+        font-size: 20px;
+    }
+}
