@@ -45,38 +45,67 @@ h3 {
    HEADER + NAVIGATION
 ========================= */
 
-header {
+/* =========================
+   HEADER + NAVIGATION
+   ========================= */
+
+.site-header {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 0;
-    display: flex;
+    padding: 24px 0;
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
+    column-gap: 50px;
+
+    background: var(--warm-white);
     border-bottom: 1px solid var(--soft-line);
 }
 
-header h1 {
-    margin: 0;
+.site-logo {
+    font-family: Georgia, "Times New Roman", serif;
     font-size: 28px;
+    font-weight: 400;
     letter-spacing: -0.5px;
+    color: var(--forest);
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-nav {
+.site-nav {
     display: flex;
     align-items: center;
-    gap: 28px;
+    justify-content: space-evenly;
+    width: 100%;
 }
 
-nav a {
+.site-nav a {
     color: var(--charcoal);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
 }
 
-nav a:hover {
-    color: var(--sage);
+.site-nav a:hover {
+    color: var(--forest);
+}
+
+.search-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    border: none;
+    background: transparent;
+    color: var(--forest);
+    font-size: 18px;
+    cursor: pointer;
 }
 /* =========================
    HERO SECTION
