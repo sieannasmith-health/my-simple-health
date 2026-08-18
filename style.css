@@ -1901,6 +1901,8 @@ body {
    ========================================= */
 
 .movement-hero {
+    position: relative;
+    overflow: hidden;
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
