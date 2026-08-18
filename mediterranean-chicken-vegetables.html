@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mediterranean Chicken & Vegetables | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        /* =========================================
+           RECIPE PAGE
+        ========================================== */
+
+        .single-recipe {
+            background: var(--warm-white);
+        }
+
+        .recipe-page-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+
+        /* Breadcrumb */
+
+        .recipe-breadcrumb {
+            padding: 32px 0 22px;
+            font-size: 12px;
+            color: var(--sage);
+        }
+
+        .recipe-breadcrumb a {
+            color: var(--sage);
+            text-decoration: none;
+        }
+
+
+        /* Hero */
+
+        .recipe-detail-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 54px;
+            align-items: center;
+            padding: 28px 0 72px;
+        }
+
+        .recipe-detail-copy {
+            padding-right: 10px;
+        }
+
+        .recipe-detail-category {
+            margin: 0 0 14px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.8px;
+            color: var(--sage);
+        }
+
+        .recipe-detail-copy h1 {
+            margin: 0 0 24px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(48px, 5vw, 72px);
+            font-weight: 400;
+            line-height: 1.03;
+            color: var(--forest);
+        }
+
+        .recipe-detail-description {
+            margin: 0 0 30px;
+
+            font-size: 17px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+        .recipe-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+
+            border-top: 1px solid var(--soft-line);
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .recipe-meta-item {
+            padding: 18px 12px 18px 0;
+        }
+
+        .recipe-meta-item span {
+            display: block;
+            margin-bottom: 5px;
+
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            color: var(--sage);
+        }
+
+        .recipe-meta-item strong {
+            font-size: 15px;
+            color: var(--forest);
+        }
+
+        .recipe-detail-image {
+            position: relative;
+        }
+
+        .recipe-detail-image img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+
+        /* Main Recipe Body */
+
+        .recipe-body {
+            display: grid;
+            grid-template-columns: 0.82fr 1.18fr;
+            gap: 70px;
+
+            padding: 82px 0;
+            border-top: 1px solid var(--soft-line);
+        }
+
+        .recipe-section-title {
+            margin: 0 0 26px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+
+        /* Ingredients */
+
+        .ingredients-panel {
+            align-self: start;
+
+            background: var(--cream);
+            padding: 34px;
+        }
+
+        .ingredients-panel ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .ingredients-panel li {
+            position: relative;
+            padding: 0 0 16px 22px;
+            margin-bottom: 16px;
+
+            border-bottom: 1px solid rgba(23, 61, 43, 0.12);
+
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--charcoal);
+        }
+
+        .ingredients-panel li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 9px;
+
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--sage);
+        }
+
+        .ingredients-panel li:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+
+        /* Instructions */
+
+        .instructions-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: recipe-step;
+        }
+
+        .instructions-list li {
+            counter-increment: recipe-step;
+
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 18px;
+
+            padding: 0 0 30px;
+            margin-bottom: 30px;
+
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .instructions-list li::before {
+            content: counter(recipe-step);
+
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--sage);
+            border-radius: 50%;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18px;
+            color: var(--forest);
+        }
+
+        .instructions-list p {
+            margin: 2px 0 0;
+            font-size: 16px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+
+        /* Notes */
+
+        .recipe-notes {
+            padding: 64px 0;
+            background: var(--cream);
+        }
+
+        .recipe-notes-grid {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .recipe-notes h2 {
+            margin: 0 0 18px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 34px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .recipe-notes p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+
+        /* Nutrition */
+
+        .recipe-nutrition {
+            padding: 78px 0;
+        }
+
+        .recipe-nutrition-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+        .recipe-nutrition h2 {
+            margin: 0 0 14px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .recipe-nutrition-intro {
+            max-width: 720px;
+            margin: 0 0 34px;
+
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--charcoal);
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+
+            border-top: 1px solid var(--soft-line);
+            border-left: 1px solid var(--soft-line);
+        }
+
+        .nutrition-item {
+            padding: 24px;
+
+            border-right: 1px solid var(--soft-line);
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .nutrition-item span {
+            display: block;
+            margin-bottom: 7px;
+
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.3px;
+            color: var(--sage);
+        }
+
+        .nutrition-item strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+
+        /* Related Recipes */
+
+        .related-recipes {
+            padding: 76px 0 90px;
+            background: var(--cream);
+        }
+
+        .related-recipes-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+        .related-recipes-header {
+            margin-bottom: 34px;
+        }
+
+        .related-recipes-header p {
+            margin: 0 0 8px;
+
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.6px;
+            color: var(--sage);
+        }
+
+        .related-recipes-header h2 {
+            margin: 0;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 40px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .related-recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .related-recipe-card {
+            background: var(--warm-white);
+        }
+
+        .related-recipe-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .related-recipe-card div {
+            padding: 20px;
+        }
+
+        .related-recipe-card span {
+            display: block;
+            margin-bottom: 7px;
+
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: var(--sage);
+        }
+
+        .related-recipe-card h3 {
+            margin: 0 0 12px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 21px;
+            font-weight: 400;
+            line-height: 1.25;
+            color: var(--forest);
+        }
+
+        .related-recipe-card a {
+            color: var(--forest);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+
+        /* Mobile */
+
+        @media (max-width: 800px) {
+
+            .recipe-breadcrumb {
+                padding-top: 24px;
+            }
+
+            .recipe-detail-hero {
+                grid-template-columns: 1fr;
+                gap: 34px;
+                padding-bottom: 56px;
+            }
+
+            .recipe-detail-copy h1 {
+                font-size: 50px;
+            }
+
+            .recipe-detail-image {
+                order: 2;
+            }
+
+            .recipe-meta {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .recipe-body {
+                grid-template-columns: 1fr;
+                gap: 48px;
+                padding: 60px 0;
+            }
+
+            .ingredients-panel {
+                padding: 28px;
+            }
+
+            .recipe-notes-grid {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .related-recipes-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 480px) {
+
+            .recipe-page-inner {
+                width: calc(100% - 48px);
+            }
+
+            .recipe-detail-copy h1 {
+                font-size: 44px;
+            }
+
+            .recipe-detail-description {
+                font-size: 16px;
+            }
+
+            .recipe-meta-item {
+                padding-right: 8px;
+            }
+
+            .recipe-meta-item strong {
+                font-size: 14px;
+            }
+
+            .recipe-section-title {
+                font-size: 34px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="single-recipe">
+
+    <div class="recipe-page-inner">
+
+        <!-- Breadcrumb -->
+
+        <div class="recipe-breadcrumb">
+            <a href="recipes.html">Recipes</a>
+            &nbsp;/&nbsp;
+            Sheet Pan Meals
+        </div>
+
+
+        <!-- Hero -->
+
+        <section class="recipe-detail-hero">
+
+            <div class="recipe-detail-copy">
+
+                <p class="recipe-detail-category">
+                    SHEET PAN MEALS
+                </p>
+
+                <h1>
+                    Mediterranean Chicken &amp; Vegetables
+                </h1>
+
+                <p class="recipe-detail-description">
+                    Juicy herb-seasoned chicken roasted alongside colorful
+                    vegetables for a simple, satisfying sheet pan meal.
+                    Bright lemon, garlic, and Mediterranean-inspired herbs
+                    bring everything together with minimal cleanup.
+                </p>
+
+                <div class="recipe-meta">
+
+                    <div class="recipe-meta-item">
+                        <span>PREP</span>
+                        <strong>15 min</strong>
+                    </div>
+
+                    <div class="recipe-meta-item">
+                        <span>COOK</span>
+                        <strong>25 min</strong>
+                    </div>
+
+                    <div class="recipe-meta-item">
+                        <span>SERVES</span>
+                        <strong>4</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="recipe-detail-image">
+
+                <img
+                    src="mediterranean-chicken-vegetables.png"
+                    alt="Mediterranean chicken and roasted vegetables on a sheet pan"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- Ingredients + Instructions -->
+
+        <section class="recipe-body">
+
+
+            <aside class="ingredients-panel">
+
+                <h2 class="recipe-section-title">
+                    Ingredients
+                </h2>
+
+                <ul>
+
+                    <li>4 boneless, skinless chicken breasts</li>
+
+                    <li>1 medium zucchini, chopped</li>
+
+                    <li>1 red bell pepper, chopped</li>
+
+                    <li>1 yellow bell pepper, chopped</li>
+
+                    <li>1 small red onion, cut into wedges</li>
+
+                    <li>1 cup cherry tomatoes</li>
+
+                    <li>2 tablespoons olive oil</li>
+
+                    <li>3 garlic cloves, minced</li>
+
+                    <li>1 tablespoon fresh lemon juice</li>
+
+                    <li>1 teaspoon dried oregano</li>
+
+                    <li>1 teaspoon dried basil</li>
+
+                    <li>½ teaspoon paprika</li>
+
+                    <li>½ teaspoon salt, or to taste</li>
+
+                    <li>¼ teaspoon black pepper</li>
+
+                    <li>Fresh parsley and lemon wedges for serving</li>
+
+                </ul>
+
+            </aside>
+
+
+            <div class="instructions-panel">
+
+                <h2 class="recipe-section-title">
+                    Instructions
+                </h2>
+
+                <ol class="instructions-list">
+
+                    <li>
+                        <p>
+                            Preheat the oven to 425°F. Line a large sheet pan
+                            with parchment paper or lightly coat it with cooking spray.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Add the zucchini, bell peppers, red onion, and cherry
+                            tomatoes to the sheet pan. Drizzle with about half of
+                            the olive oil and toss to coat.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Place the chicken breasts among the vegetables.
+                            Drizzle the remaining olive oil and lemon juice over
+                            the chicken and vegetables.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Sprinkle everything with garlic, oregano, basil,
+                            paprika, salt, and black pepper. Turn the chicken
+                            and vegetables as needed so the seasoning is evenly distributed.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Roast for about 22 to 25 minutes, or until the chicken
+                            is cooked through and the vegetables are tender with
+                            lightly browned edges.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Let the chicken rest for several minutes before slicing.
+                            Finish with fresh parsley and lemon wedges, then serve warm.
+                        </p>
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- Notes -->
+
+    <section class="recipe-notes">
+
+        <div class="recipe-notes-grid">
+
+            <div>
+
+                <h2>
+                    Make it your own.
+                </h2>
+
+                <p>
+                    Swap in vegetables you already have, such as broccoli,
+                    asparagus, yellow squash, or mushrooms. Keep similarly sized
+                    vegetables together so they roast at roughly the same rate.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Simple serving ideas.
+                </h2>
+
+                <p>
+                    Enjoy this meal as-is or serve it with quinoa, brown rice,
+                    couscous, roasted potatoes, or warm whole-grain pita.
+                    A spoonful of tzatziki or hummus also pairs well with the
+                    Mediterranean flavors.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Nutrition -->
+
+    <section class="recipe-nutrition">
+
+        <div class="recipe-nutrition-inner">
+
+            <h2>
+                Nutrition
+            </h2>
+
+            <p class="recipe-nutrition-intro">
+                Approximate nutrition information per serving. Values can vary
+                depending on ingredient brands, portion sizes, and substitutions.
+            </p>
+
+            <div class="nutrition-grid">
+
+                <div class="nutrition-item">
+                    <span>CALORIES</span>
+                    <strong>340</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>PROTEIN</span>
+                    <strong>39 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>CARBOHYDRATES</span>
+                    <strong>16 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>FAT</span>
+                    <strong>14 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>FIBER</span>
+                    <strong>4 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>SODIUM</span>
+                    <strong>430 mg</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>SATURATED FAT</span>
+                    <strong>3 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>SERVING SIZE</span>
+                    <strong>¼ recipe</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Related Recipes -->
+
+    <section class="related-recipes">
+
+        <div class="related-recipes-inner">
+
+            <div class="related-recipes-header">
+
+                <p>
+                    MORE SHEET PAN MEALS
+                </p>
+
+                <h2>
+                    Try these next.
+                </h2>
+
+            </div>
+
+
+            <div class="related-recipes-grid">
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="garlic-herb-chicken-broccolini.png"
+                        alt="Garlic Herb Chicken and Broccolini"
+                    >
+
+                    <div>
+                        <span>SHEET PAN</span>
+
+                        <h3>
+                            Garlic Herb Chicken &amp; Broccolini
+                        </h3>
+
+                        <a href="#">
+                            View Recipe →
+                        </a>
+                    </div>
+
+                </article>
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="lemon-herb-salmon-vegetables.png"
+                        alt="Lemon Herb Salmon and Vegetables"
+                    >
+
+                    <div>
+                        <span>SHEET PAN</span>
+
+                        <h3>
+                            Lemon Herb Salmon &amp; Vegetables
+                        </h3>
+
+                        <a href="#">
+                            View Recipe →
+                        </a>
+                    </div>
+
+                </article>
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="honey-garlic-shrimp-green-beans.png"
+                        alt="Honey Garlic Shrimp and Green Beans"
+                    >
+
+                    <div>
+                        <span>SHEET PAN</span>
+
+                        <h3>
+                            Honey Garlic Shrimp &amp; Green Beans
+                        </h3>
+
+                        <a href="#">
+                            View Recipe →
+                        </a>
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Newsletter -->
+
+    <section class="newsletter-section">
+
+        <div class="newsletter-icon">
+            ✉
+        </div>
+
+        <div class="newsletter-copy">
+
+            <h2>
+                Stay inspired.
+            </h2>
+
+            <p>
+                Evidence-informed health tips, practical resources,
+                and new recipes delivered to your inbox.
+            </p>
+
+        </div>
+
+
+        <form class="newsletter-form">
+
+            <input
+                type="text"
+                placeholder="First name"
+                aria-label="First name"
+            >
+
+            <input
+                type="email"
+                placeholder="Email address"
+                aria-label="Email address"
+            >
+
+            <button type="submit">
+                SUBSCRIBE
+            </button>
+
+            <p class="newsletter-note">
+                No spam, ever. Unsubscribe anytime.
+            </p>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<!-- Footer -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>MY SIMPLE HEALTH</h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="#">About Me</a>
+            <a href="#">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>LET'S STAY CONNECTED</h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+</html>
