@@ -2401,3 +2401,23 @@ body {
         display: none;
     }
 }
+@media (max-width: 800px) {
+
+    .movement-latest {
+        width: auto !important;
+        margin: 0 !important;
+        padding: 60px 40px !important;
+    }
+
+    .movement-latest-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+
+    .movement-article-card {
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 28px !important;
+    }
+}
