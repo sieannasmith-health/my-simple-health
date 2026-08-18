@@ -2566,3 +2566,43 @@ body {
         top: 100% !important;
     }
 }
+/* FINAL MOBILE HEADER - ONE ROW */
+@media (max-width: 800px) {
+
+    .site-header {
+        display: grid !important;
+        grid-template-columns: 1fr auto auto !important;
+        align-items: center !important;
+        gap: 18px !important;
+
+        padding: 22px 24px !important;
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    .site-logo {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 28px !important;
+        line-height: 1.1 !important;
+        justify-self: start !important;
+    }
+
+    .menu-button {
+        display: block !important;
+        margin: 0 !important;
+        padding: 4px !important;
+        justify-self: end !important;
+    }
+
+    .search-toggle {
+        margin: 0 !important;
+        padding: 4px !important;
+        justify-self: end !important;
+    }
+
+    .site-nav {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+}
