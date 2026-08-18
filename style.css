@@ -1891,12 +1891,13 @@ body {
     padding: 14px 24px !important;
 }
 /* Home hero soft image blend */
-
-.home-hero {
+.home-hero,
+.nutrition-hero {
     position: relative;
 }
 
-.home-hero::after {
+.home-hero::after,
+.nutrition-hero::after {
     content: "";
     position: absolute;
     top: 0;
@@ -1913,8 +1914,10 @@ body {
 
     pointer-events: none;
 }
+
 @media (max-width: 800px) {
-    .home-hero::after {
+    .home-hero::after,
+    .nutrition-hero::after {
         display: none;
     }
 }
