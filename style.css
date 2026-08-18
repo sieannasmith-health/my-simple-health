@@ -1576,7 +1576,7 @@ body {
 }
 /* Nutrition content hub */
 
-.nutrition-content-hub {
+.nutrition-hub {
     max-width: 1200px;
     margin: 0 auto;
     padding: 80px 40px;
@@ -1601,7 +1601,7 @@ body {
 }
 /* Nutrition article list */
 
-.nutrition-latest {
+.nutrition-latest-list {
     min-width: 0;
 }
 
