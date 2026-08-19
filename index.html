@@ -2,66 +2,88 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>My Simple Health</title>
+    <title>My Simple Health</title>
+
     <link rel="stylesheet" href="style.css">
 
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
+
 <body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
 
 <header class="site-header">
 
     <a class="site-logo" href="index.html">
         My Simple Health
     </a>
-<button class="menu-button"
-        aria-label="Open menu"
-        onclick="toggleMenu()">
-    <i class="fa-solid fa-bars"></i>
-</button>
-<nav class="site-nav">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="topics.html">Topics</a>
-    <a href="recipes.html">Recipes</a>
-    <a href="blog.html">Blog</a>
-    <a href="contact.html">Contact</a>
-</nav>
 
- <div class="header-search">
-
-    <button class="search-button"
-            aria-label="Search"
-            onclick="toggleSearch()">
-        <i class="fa-solid fa-magnifying-glass"></i>
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
     </button>
 
-    <div class="search-box" id="searchBox">
-        <input type="search"
-               id="siteSearch"
-               placeholder="Search My Simple Health..."
-               aria-label="Search My Simple Health">
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+    </nav>
 
-        <button type="button" onclick="runSearch()">
-            Search
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
         </button>
-    </div>
 
-</div>
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
 
 </header>
 
-  <main>
+
+<main>
+
+
+<!-- =========================================
+     HOME HERO
+========================================== -->
 
 <section class="home-hero">
 
     <div class="hero-text">
-        <p>HEALTH EDUCATION • HEALTH PROMOTION</p>
+
+        <p>
+            HEALTH EDUCATION • HEALTH PROMOTION
+        </p>
 
         <h2>
             Practical knowledge.<br>
@@ -73,162 +95,467 @@
             understand sleep, nutrition, movement, behavior change, and public health.
         </p>
 
-        <a href="#">Explore Topics</a>
+        <a href="topics.html">
+            Explore Topics
+        </a>
+
     </div>
 
-    <img src="hero-home.png"
-         alt="Healthy lifestyle essentials including food, movement, and health education">
+    <img
+        src="hero-home.png"
+        alt="Healthy lifestyle essentials including food, movement, and health education"
+    >
 
 </section>
-    
 
-    <section class="topics-section">
 
-        <p class="section-label">EXPLORE HEALTH TOPICS</p>
 
-        <h2>Simple guidance for everyday health.</h2>
+<!-- =========================================
+     HEALTH TOPICS
+========================================== -->
 
-        <p class="section-intro">
-            Explore practical, research-informed resources for building
-            healthier habits and understanding your health.
-        </p>
-<div class="topic-grid">
+<section class="topics-section">
 
-   <article class="topic-card">
-    <span>01</span>
-    <h3>Nutrition</h3>
-    <p>Build a balanced, flexible approach to everyday eating.</p>
-    <a href="nutrition.html">Explore Nutrition →</a>
-</article>
+    <p class="section-label">
+        EXPLORE HEALTH TOPICS
+    </p>
 
-<article class="topic-card">
-    <span>02</span>
-    <h3>Movement</h3>
-    <p>Understand how everyday movement supports long-term health and wellbeing.</p>
-    <a href="movement.html">Explore Movement →</a>
-</article>
+    <h2>
+        Simple guidance for everyday health.
+    </h2>
 
-<article class="topic-card">
-    <span>03</span>
-    <h3>Sleep</h3>
-    <p>Learn how sleep habits, routines, and environments influence your health.</p>
-    <a href="sleep.html">Explore Sleep →</a>
-</article>
+    <p class="section-intro">
+        Explore practical, research-informed resources for building
+        healthier habits and understanding your health.
+    </p>
 
-<article class="topic-card">
-    <span>04</span>
-    <h3>Wellbeing</h3>
-    <p>Explore factors that support mental, emotional, and social wellbeing.</p>
-    <a href="wellbeing.html">Explore Wellbeing →</a>
-</article>
 
-<article class="topic-card">
-    <span>05</span>
-    <h3>Prevention</h3>
-    <p>Understand modifiable risk factors and everyday opportunities for prevention.</p>
-    <a href="preventive-health.html">Explore Prevention →</a>
-</article>
-</div>
-    </section>
-    <section class="articles-section">
+    <div class="topic-grid">
+
+        <article class="topic-card">
+
+            <span>01</span>
+
+            <h3>
+                Nutrition
+            </h3>
+
+            <p>
+                Build a balanced, flexible approach to everyday eating.
+            </p>
+
+            <a href="nutrition.html">
+                Explore Nutrition →
+            </a>
+
+        </article>
+
+
+        <article class="topic-card">
+
+            <span>02</span>
+
+            <h3>
+                Movement
+            </h3>
+
+            <p>
+                Understand how everyday movement supports long-term health
+                and wellbeing.
+            </p>
+
+            <a href="movement.html">
+                Explore Movement →
+            </a>
+
+        </article>
+
+
+        <article class="topic-card">
+
+            <span>03</span>
+
+            <h3>
+                Sleep
+            </h3>
+
+            <p>
+                Learn how sleep habits, routines, and environments
+                influence your health.
+            </p>
+
+            <a href="sleep.html">
+                Explore Sleep →
+            </a>
+
+        </article>
+
+
+        <article class="topic-card">
+
+            <span>04</span>
+
+            <h3>
+                Wellbeing
+            </h3>
+
+            <p>
+                Explore factors that support mental, emotional,
+                and social wellbeing.
+            </p>
+
+            <a href="wellbeing.html">
+                Explore Wellbeing →
+            </a>
+
+        </article>
+
+
+        <article class="topic-card">
+
+            <span>05</span>
+
+            <h3>
+                Prevention
+            </h3>
+
+            <p>
+                Understand modifiable risk factors and everyday
+                opportunities for prevention.
+            </p>
+
+            <a href="preventive-health.html">
+                Explore Prevention →
+            </a>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     LATEST ARTICLES
+========================================== -->
+
+<section class="articles-section">
 
     <div class="articles-heading">
-        <h2>Latest Articles</h2>
-        <a href="#">VIEW ALL ARTICLES →</a>
+
+        <h2>
+            Latest Articles
+        </h2>
+
+        <a href="blog.html">
+            VIEW ALL ARTICLES →
+        </a>
+
     </div>
+
 
     <div class="articles-grid">
 
-        <article class="article-card">
-            <img class="article-image" src="blood-pressure.png" alt="Blood pressure monitor">
-
-            <div class="article-content">
-                <p class="article-category">PREVENTION</p>
-                <h3>Know Your Numbers: Blood Pressure</h3>
-                <p>Why it matters, what the numbers mean, and how to take action.</p>
-                <a href="#">READ MORE →</a>
-            </div>
-        </article>
 
         <article class="article-card">
-            <img class="article-image" src="nutrition-bowl.png" alt="Salmon and vegetable nutrition bowl">
+
+            <img
+                class="article-image"
+                src="blood-pressure.png"
+                alt="Blood pressure monitor"
+            >
 
             <div class="article-content">
-                <p class="article-category">NUTRITION</p>
-                <h3>Fiber: The Unsung Nutrition Hero</h3>
-                <p>How fiber supports heart health, digestion, blood sugar, and more.</p>
-                <a href="#">READ MORE →</a>
+
+                <p class="article-category">
+                    PREVENTION
+                </p>
+
+                <h3>
+                    Know Your Numbers: Blood Pressure
+                </h3>
+
+                <p>
+                    Why it matters, what the numbers mean,
+                    and how to take action.
+                </p>
+
+                <a href="#">
+                    READ MORE →
+                </a>
+
             </div>
+
         </article>
+
+
 
         <article class="article-card">
-            <img class="article-image" src="movement-walking.png" alt="Person walking outdoors">
+
+            <img
+                class="article-image"
+                src="nutrition-bowl.png"
+                alt="Salmon and vegetable nutrition bowl"
+            >
 
             <div class="article-content">
-                <p class="article-category">MOVEMENT</p>
-                <h3>Small Steps, Big Impact</h3>
-                <p>Simple, realistic ways to add movement to your routine—no gym required.</p>
-                <a href="#">READ MORE →</a>
+
+                <p class="article-category">
+                    NUTRITION
+                </p>
+
+                <h3>
+                    Fiber: The Unsung Nutrition Hero
+                </h3>
+
+                <p>
+                    How fiber supports heart health, digestion,
+                    blood sugar, and more.
+                </p>
+
+                <a href="#">
+                    READ MORE →
+                </a>
+
             </div>
+
         </article>
 
-        <aside class="resource-card">
-            <div class="resource-icon">▤</div>
-            <h3>Free Resource Library</h3>
-            <p>Practical guides, checklists, and tools to support your health journey.</p>
-            <a href="#">EXPLORE RESOURCES</a>
-        </aside>
+
+
+        <article class="article-card">
+
+            <img
+                class="article-image"
+                src="movement-walking.png"
+                alt="Person walking outdoors"
+            >
+
+            <div class="article-content">
+
+                <p class="article-category">
+                    MOVEMENT
+                </p>
+
+                <h3>
+                    Small Steps, Big Impact
+                </h3>
+
+                <p>
+                    Simple, realistic ways to add movement
+                    to your routine, no gym required.
+                </p>
+
+                <a href="#">
+                    READ MORE →
+                </a>
+
+            </div>
+
+        </article>
+
 
     </div>
 
 </section>
+
+
+
+<!-- =========================================
+     FREE RESOURCE LIBRARY
+========================================== -->
+
+<section class="home-resources">
+
+    <div class="home-resources-inner">
+
+        <div class="resource-icon">
+            ▤
+        </div>
+
+        <p class="section-label">
+            FREE RESOURCE LIBRARY
+        </p>
+
+        <h2>
+            Practical tools for everyday health.
+        </h2>
+
+        <p>
+            Explore simple guides, checklists, and resources designed
+            to help you understand your health and put what you learn
+            into practice.
+        </p>
+
+        <a href="resources.html">
+            EXPLORE RESOURCES →
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     HEALTHY RECIPES
+========================================== -->
+
 <section class="recipes-section">
 
     <div class="recipes-heading">
-        <h2>Healthy Recipes for Real Life</h2>
-        <a href="#">VIEW ALL RECIPES →</a>
+
+        <h2>
+            Healthy Recipes for Real Life
+        </h2>
+
+        <a href="recipes.html">
+            VIEW ALL RECIPES →
+        </a>
+
     </div>
+
 
     <div class="recipes-grid">
 
-        <article class="recipe-card">
-            <img class="recipe-image" src="salmon-quinoa.png" alt="Lemon herb salmon and quinoa bowl">
-            <h3>Lemon Herb Salmon<br>& Quinoa Bowl</h3>
-        </article>
 
         <article class="recipe-card">
-            <img class="recipe-image" src="chicken-tacos.png" alt="Wholesome chicken tacos">
-            <h3>Wholesome<br>Chicken Tacos</h3>
+
+            <a href="mediterranean-chicken-vegetables.html">
+
+                <img
+                    class="recipe-image"
+                    src="mediterranean-chicken-vegetables.jpg"
+                    alt="Mediterranean Chicken and Vegetables"
+                >
+
+            </a>
+
+            <h3>
+                Mediterranean Chicken<br>
+                &amp; Vegetables
+            </h3>
+
         </article>
 
-        <article class="recipe-card">
-            <img class="recipe-image" src="green-smoothie.png" alt="Green protein smoothie">
-            <h3>Green Protein<br>Smoothie</h3>
-        </article>
+
 
         <article class="recipe-card">
-            <img class="recipe-image" src="lentil-soup.png" alt="Lentil and vegetable soup">
-            <h3>Lentil &<br>Vegetable Soup</h3>
+
+            <a href="harvest-salmon-bowl.html">
+
+                <img
+                    class="recipe-image"
+                    src="harvest-salmon-bowl.jpg"
+                    alt="Harvest Salmon Bowl"
+                >
+
+            </a>
+
+            <h3>
+                Harvest Salmon<br>
+                Bowl
+            </h3>
+
         </article>
 
+
+
         <article class="recipe-card">
-            <img class="recipe-image" src="energy-bites.png" alt="No-bake energy bites">
-            <h3>No-Bake Energy<br>Bites</h3>
+
+            <a href="apple-pecan-chicken-salad.html">
+
+                <img
+                    class="recipe-image"
+                    src="apple-pecan-chicken-salad.jpg"
+                    alt="Apple Pecan Chicken Salad"
+                >
+
+            </a>
+
+            <h3>
+                Apple Pecan<br>
+                Chicken Salad
+            </h3>
+
         </article>
+
+
+
+        <article class="recipe-card">
+
+            <a href="blackened-cod-tacos.html">
+
+                <img
+                    class="recipe-image"
+                    src="blackened-cod-tacos.jpg"
+                    alt="Blackened Cod Tacos"
+                >
+
+            </a>
+
+            <h3>
+                Blackened Cod<br>
+                Tacos
+            </h3>
+
+        </article>
+
+
+
+        <article class="recipe-card">
+
+            <a href="honey-lime-shrimp-tacos.html">
+
+                <img
+                    class="recipe-image"
+                    src="honey-lime-shrimp-tacos.jpg"
+                    alt="Honey Lime Shrimp Tacos"
+                >
+
+            </a>
+
+            <h3>
+                Honey Lime Shrimp<br>
+                Tacos
+            </h3>
+
+        </article>
+
 
     </div>
 
 </section>
-    <section class="mission-section">
 
-<div class="mission-photo">
-    <img class="mission-image" src="mission-photo.png" alt="Sieanna, founder of My Simple Health">
-</div>
+
+
+<!-- =========================================
+     MISSION
+========================================== -->
+
+<section class="mission-section">
+
+    <div class="mission-photo">
+
+        <img
+            class="mission-image"
+            src="mission-photo.png"
+            alt="Sieanna, founder of My Simple Health"
+        >
+
+    </div>
+
 
     <div class="mission-content">
-        <p class="section-label">HI, I'M SIEANNA.</p>
 
-        <h2>My mission</h2>
+        <p class="section-label">
+            HI, I'M SIEANNA.
+        </p>
+
+        <h2>
+            My mission
+        </h2>
 
         <p>
             I created My Simple Health to translate complex health evidence
@@ -237,14 +564,22 @@
 
         <p>
             My goal is to empower you with knowledge, realistic strategies,
-            and tools that support long-term health and prevention—one step at a time.
+            and tools that support long-term health and prevention,
+            one step at a time.
         </p>
 
-        <a href="#">LEARN MORE ABOUT MY MISSION →</a>
+        <a href="about.html#mission">
+            LEARN MORE ABOUT MY MISSION →
+        </a>
+
     </div>
 
+
     <aside class="mission-quote">
-        <span class="quote-mark">“</span>
+
+        <span class="quote-mark">
+            “
+        </span>
 
         <p>
             Health isn’t about perfection.<br>
@@ -253,13 +588,19 @@
             your future.
         </p>
 
-        <div class="quote-leaf">❧</div>
+        <div class="quote-leaf">
+            ❧
+        </div>
+
     </aside>
 
 </section>
-<!-- =========================
-     STAY INSPIRED
-========================= -->
+
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
 
 <section class="newsletter-section">
 
@@ -267,15 +608,23 @@
         ✉
     </div>
 
+
     <div class="newsletter-copy">
-        <h2>Stay inspired.</h2>
+
+        <h2>
+            Stay inspired.
+        </h2>
+
         <p>
-            Evidence-based health tips and practical resources
+            Evidence-informed health tips and practical resources
             delivered to your inbox.
         </p>
+
     </div>
 
+
     <form class="newsletter-form">
+
         <input
             type="text"
             placeholder="First name"
@@ -295,113 +644,252 @@
         <p class="newsletter-note">
             No spam, ever. Unsubscribe anytime.
         </p>
+
     </form>
 
 </section>
+
+
 </main>
-  <!-- =========================
+
+
+
+<!-- =========================================
      FOOTER
-========================= -->
+========================================== -->
 
 <footer class="site-footer">
 
     <div class="footer-main">
 
+
         <div class="footer-brand">
-            <h2>MY SIMPLE HEALTH</h2>
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
             <p>
                 Practical, evidence-informed<br>
                 health education for everyday life.
             </p>
 
-          <div class="footer-socials">
-   <a href="https://www.instagram.com/hellomysimplehealth/" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-<a href="https://www.linkedin.com/company/143299965/" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-<a href="https://www.pinterest.com/hellomysimplehealth/" aria-label="Pinterest"><i class="fa-brands fa-pinterest-p"></i></a>
-<a href="mailto:hello.mysimplehealth@gmail.com" aria-label="Email"><i class="fa-regular fa-envelope"></i></a>
-</div>
+
+            <div class="footer-socials">
+
+                <a
+                    href="https://www.instagram.com/hellomysimplehealth/"
+                    aria-label="Instagram"
+                >
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a
+                    href="https://www.linkedin.com/company/143299965/"
+                    aria-label="LinkedIn"
+                >
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a
+                    href="https://www.pinterest.com/hellomysimplehealth/"
+                    aria-label="Pinterest"
+                >
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a
+                    href="mailto:hello.mysimplehealth@gmail.com"
+                    aria-label="Email"
+                >
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
         </div>
 
-        <div class="footer-column">
-            <h3>EXPLORE</h3>
-            <a href="topics.html">Topics</a>
-            <a href="recipes.html">Recipes</a>
-            <a href="resources.html">Resources</a>
-            <a href="blog.html">Blog</a>
-        </div>
+
 
         <div class="footer-column">
-            <h3>ABOUT</h3>
-            <a href="about.html">About Me</a>
-            <a href="#">Mission &amp; Values</a>
-            <a href="#">Work With Me</a>
-            <a href="contact.html">Contact</a>
+
+            <h3>
+                EXPLORE
+            </h3>
+
+            <a href="topics.html">
+                Topics
+            </a>
+
+            <a href="recipes.html">
+                Recipes
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="blog.html">
+                Blog
+            </a>
+
         </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>
+                ABOUT
+            </h3>
+
+            <a href="about.html">
+                About Me
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </div>
+
+
 
         <div class="footer-connect">
-            <h3>LET'S STAY CONNECTED</h3>
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
 
             <p>
                 Join the community for new articles,<br>
                 healthy recipes, and free resources.
             </p>
 
+
             <form class="footer-email">
+
                 <input
                     type="email"
                     placeholder="Email address"
                     aria-label="Email address"
                 >
-                <button type="submit">→</button>
+
+                <button type="submit">
+                    →
+                </button>
+
             </form>
+
         </div>
 
     </div>
 
+
+
     <div class="footer-bottom">
-        <p>© 2026 My Simple Health. All rights reserved.</p>
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
 
         <div class="footer-legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Disclaimer</a>
+
+            <a href="#">
+                Privacy Policy
+            </a>
+
+            <a href="#">
+                Terms of Use
+            </a>
+
+            <a href="#">
+                Disclaimer
+            </a>
+
         </div>
+
     </div>
 
 </footer>
+
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================== -->
+
 <script>
+
+
     function toggleSearch() {
-        const searchBox = document.getElementById("searchBox");
-        const searchInput = document.getElementById("siteSearch");
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
 
         searchBox.classList.toggle("active");
 
         if (searchBox.classList.contains("active")) {
             searchInput.focus();
         }
+
     }
 
+
+
     function runSearch() {
-        const searchInput = document.getElementById("siteSearch");
-        const query = searchInput.value.trim();
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
 
         if (query) {
+
             window.location.href =
                 "https://www.google.com/search?q=site:mysimplehealth.org+" +
                 encodeURIComponent(query);
+
         }
+
     }
 
-  document.getElementById("siteSearch").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        runSearch();
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
     }
-});
-  function toggleMenu() {
-    const nav = document.querySelector(".site-nav");
-    nav.classList.toggle("active");
-}
+
+
 </script>
-  
+
+
 </body>
+
 </html>
