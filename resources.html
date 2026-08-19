@@ -10,7 +10,7 @@
     <title>Free Health Resources | My Simple Health</title>
 
     <meta name="description"
-          content="Explore free practical health guides, checklists, worksheets, and tools from My Simple Health.">
+          content="Explore free practical health guides, checklists, worksheets, planners, and tools from My Simple Health.">
 
     <link rel="stylesheet" href="style.css">
 
@@ -45,15 +45,10 @@
     <nav class="site-nav">
 
         <a href="index.html">Home</a>
-
         <a href="about.html">About</a>
-
         <a href="topics.html">Topics</a>
-
         <a href="recipes.html">Recipes</a>
-
         <a href="blog.html">Blog</a>
-
         <a href="contact.html">Contact</a>
 
     </nav>
@@ -96,14 +91,14 @@
 
 
 <!-- ========================================
-     RESOURCE HERO
+     HERO
 ======================================== -->
 
-<section class="resources-hero">
+<section class="resources-new-hero">
 
-    <div class="resources-hero-inner">
+    <div class="resources-new-hero-copy">
 
-        <p class="section-label">
+        <p class="resources-eyebrow">
             FREE RESOURCE LIBRARY
         </p>
 
@@ -112,14 +107,14 @@
             everyday health.
         </h1>
 
-        <p class="resources-hero-intro">
+        <p class="resources-new-hero-description">
             Simple guides, checklists, worksheets, and tools designed
             to help you understand your health and put what you learn
             into practice.
         </p>
 
-        <a class="resources-hero-button"
-           href="#resource-library">
+        <a href="#library"
+           class="resources-primary-button">
 
             EXPLORE THE LIBRARY ↓
 
@@ -127,140 +122,11 @@
 
     </div>
 
-</section>
 
+    <div class="resources-new-hero-image">
 
-
-<!-- ========================================
-     RESOURCE CATEGORIES
-======================================== -->
-
-<section class="resource-categories">
-
-    <div class="resource-section-heading">
-
-        <p class="section-label">
-            EXPLORE BY TOPIC
-        </p>
-
-        <h2>
-            Resources for real life.
-        </h2>
-
-        <p>
-            Find practical tools organized around the areas of health
-            you want to understand, strengthen, or support.
-        </p>
-
-    </div>
-
-
-    <div class="resource-category-grid">
-
-
-        <a class="resource-category"
-           href="#nutrition-resources">
-
-            <div class="resource-topic-icon nutrition-icon">
-    <i class="fa-solid fa-seedling"></i>
-</div>
-
-            <h3>Nutrition</h3>
-
-            <p>
-                Tools for building a balanced, flexible,
-                and sustainable approach to eating.
-            </p>
-
-            <strong>
-                EXPLORE →
-            </strong>
-
-        </a>
-
-
-        <a class="resource-category"
-           href="#movement-resources">
-
-            <div class="resource-topic-icon movement-icon">
-    <i class="fa-solid fa-person-walking"></i>
-</div>
-
-            <h3>Movement</h3>
-
-            <p>
-                Simple resources for supporting everyday
-                movement and physical activity.
-            </p>
-
-            <strong>
-                EXPLORE →
-            </strong>
-
-        </a>
-
-
-        <a class="resource-category"
-           href="#sleep-resources">
-
-            <div class="resource-topic-icon sleep-icon">
-    <i class="fa-solid fa-moon"></i>
-</div>
-
-            <h3>Sleep</h3>
-
-            <p>
-                Guides and checklists for understanding
-                and supporting healthy sleep habits.
-            </p>
-
-            <strong>
-                EXPLORE →
-            </strong>
-
-        </a>
-
-
-        <a class="resource-category"
-           href="#wellbeing-resources">
-
-            <div class="resource-topic-icon wellbeing-icon">
-    <i class="fa-solid fa-spa"></i>
-</div>
-
-            <h3>Wellbeing</h3>
-
-            <p>
-                Practical tools for habits, stress,
-                reflection, and everyday wellbeing.
-            </p>
-
-            <strong>
-                EXPLORE →
-            </strong>
-
-        </a>
-
-
-        <a class="resource-category"
-           href="#prevention-resources">
-
-            <div class="resource-topic-icon prevention-icon">
-    <i class="fa-solid fa-shield-heart"></i>
-</div>
-            <h3>Prevention</h3>
-
-            <p>
-                Resources that make preventive health
-                information easier to understand and use.
-            </p>
-
-            <strong>
-                EXPLORE →
-            </strong>
-
-        </a>
-
+        <img src="hero-home.png"
+             alt="Calm healthy lifestyle setting">
 
     </div>
 
@@ -269,337 +135,469 @@
 
 
 <!-- ========================================
-     RESOURCE LIBRARY
+     THE LIBRARY
 ======================================== -->
 
-<section class="resource-library"
-         id="resource-library">
+<section class="resources-library-new"
+         id="library">
 
 
-    <div class="resource-section-heading">
+    <div class="resources-library-heading">
 
-        <p class="section-label">
+        <p class="resources-eyebrow">
             THE LIBRARY
         </p>
 
         <h2>
-            Free health resources.
+            Practical resources for real life.
         </h2>
 
         <p>
-            Downloadable tools designed to turn health information
-            into something practical.
+            Browse guides, planners, checklists, worksheets,
+            and tools organized by health topic.
         </p>
 
     </div>
 
 
 
-    <!-- NUTRITION -->
+    <!-- FILTERS -->
 
-    <div class="resource-topic-section"
-         id="nutrition-resources">
-
-        <div class="resource-topic-heading">
-
-            <p class="section-label">
-                NUTRITION
-            </p>
-
-            <h2>
-                Eat well without making it complicated.
-            </h2>
-
-        </div>
+    <div class="resources-filter-bar"
+         aria-label="Filter resources by topic">
 
 
-        <div class="resource-download-grid">
+        <button class="resource-filter active"
+                type="button"
+                data-filter="all">
+
+            All Resources
+
+        </button>
 
 
-            <article class="resource-download-card">
+        <button class="resource-filter"
+                type="button"
+                data-filter="nutrition">
 
-                <div class="resource-card-icon">
+            <i class="fa-solid fa-seedling"></i>
+            Nutrition
+
+        </button>
+
+
+        <button class="resource-filter"
+                type="button"
+                data-filter="movement">
+
+            <i class="fa-solid fa-person-walking"></i>
+            Movement
+
+        </button>
+
+
+        <button class="resource-filter"
+                type="button"
+                data-filter="sleep">
+
+            <i class="fa-solid fa-moon"></i>
+            Sleep
+
+        </button>
+
+
+        <button class="resource-filter"
+                type="button"
+                data-filter="wellbeing">
+
+            <i class="fa-solid fa-spa"></i>
+            Wellbeing
+
+        </button>
+
+
+        <button class="resource-filter"
+                type="button"
+                data-filter="prevention">
+
+            <i class="fa-solid fa-shield-heart"></i>
+            Prevention
+
+        </button>
+
+
+    </div>
+
+
+
+    <!-- RESOURCE GRID -->
+
+    <div class="resources-card-grid">
+
+
+        <!-- NUTRITION 1 -->
+
+        <article class="library-resource-card"
+                 data-category="nutrition">
+
+            <div class="library-resource-card-top">
+
+                <div class="pillar-badge nutrition-badge">
+
+                    <i class="fa-solid fa-seedling"></i>
+
+                </div>
+
+
+                <div class="resource-card-category nutrition-text">
+
+                    NUTRITION
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
                     <i class="fa-regular fa-file-lines"></i>
+
                 </div>
 
-                <p class="resource-type">
+            </div>
+
+
+            <h3>
+                The Balanced<br>
+                Plate Guide
+            </h3>
+
+            <p>
+                A simple visual guide for building satisfying,
+                balanced everyday meals.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     GUIDE
-                </p>
+                </span>
 
-                <h3>
-                    The Balanced Plate Guide
-                </h3>
-
-                <p>
-                    A simple visual guide for building satisfying,
-                    balanced everyday meals.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
+
+        </article>
 
 
 
-            <article class="resource-download-card">
+        <!-- NUTRITION 2 -->
 
-                <div class="resource-card-icon">
+        <article class="library-resource-card"
+                 data-category="nutrition">
+
+            <div class="library-resource-card-top">
+
+                <div class="pillar-badge nutrition-badge">
+
+                    <i class="fa-solid fa-seedling"></i>
+
+                </div>
+
+
+                <div class="resource-card-category nutrition-text">
+
+                    NUTRITION
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
                     <i class="fa-solid fa-list-check"></i>
+
                 </div>
 
-                <p class="resource-type">
+            </div>
+
+
+            <h3>
+                Everyday<br>
+                Grocery Guide
+            </h3>
+
+            <p>
+                A practical framework for creating a flexible
+                grocery list that supports balanced meals.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     CHECKLIST
-                </p>
+                </span>
 
-                <h3>
-                    Everyday Grocery Guide
-                </h3>
-
-                <p>
-                    A practical framework for creating a flexible
-                    grocery list that supports balanced meals.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
 
-
-        </div>
-
-    </div>
+        </article>
 
 
 
-    <!-- MOVEMENT -->
+        <!-- MOVEMENT -->
 
-    <div class="resource-topic-section"
-         id="movement-resources">
+        <article class="library-resource-card"
+                 data-category="movement">
 
-        <div class="resource-topic-heading">
+            <div class="library-resource-card-top">
 
-            <p class="section-label">
-                MOVEMENT
-            </p>
+                <div class="pillar-badge movement-badge">
 
-            <h2>
-                Make movement fit your life.
-            </h2>
-
-        </div>
-
-
-        <div class="resource-download-grid">
-
-
-            <article class="resource-download-card">
-
-                <div class="resource-card-icon">
                     <i class="fa-solid fa-person-walking"></i>
+
                 </div>
 
-                <p class="resource-type">
+
+                <div class="resource-card-category movement-text">
+
+                    MOVEMENT
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
+                    <i class="fa-regular fa-calendar"></i>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Weekly Movement<br>
+                Planner
+            </h3>
+
+            <p>
+                Plan realistic opportunities for walking,
+                strength, mobility, and everyday movement.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     WORKSHEET
-                </p>
+                </span>
 
-                <h3>
-                    Weekly Movement Planner
-                </h3>
-
-                <p>
-                    Plan realistic opportunities for walking,
-                    strength, mobility, and everyday movement.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
 
-
-        </div>
-
-    </div>
+        </article>
 
 
 
-    <!-- SLEEP -->
+        <!-- SLEEP -->
 
-    <div class="resource-topic-section"
-         id="sleep-resources">
+        <article class="library-resource-card"
+                 data-category="sleep">
 
-        <div class="resource-topic-heading">
+            <div class="library-resource-card-top">
 
-            <p class="section-label">
-                SLEEP
-            </p>
+                <div class="pillar-badge sleep-badge">
 
-            <h2>
-                Build better sleep habits.
-            </h2>
+                    <i class="fa-solid fa-moon"></i>
 
-        </div>
-
-
-        <div class="resource-download-grid">
-
-
-            <article class="resource-download-card">
-
-                <div class="resource-card-icon">
-                    <i class="fa-regular fa-moon"></i>
                 </div>
 
-                <p class="resource-type">
+
+                <div class="resource-card-category sleep-text">
+
+                    SLEEP
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
+                    <i class="fa-solid fa-list-check"></i>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Sleep Routine<br>
+                Checklist
+            </h3>
+
+            <p>
+                A simple checklist to help you build a consistent,
+                relaxing bedtime routine.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     CHECKLIST
-                </p>
+                </span>
 
-                <h3>
-                    Better Sleep Checklist
-                </h3>
-
-                <p>
-                    A simple checklist for reviewing the habits
-                    and environment that can support healthy sleep.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
 
-
-        </div>
-
-    </div>
+        </article>
 
 
 
-    <!-- WELLBEING -->
+        <!-- WELLBEING -->
 
-    <div class="resource-topic-section"
-         id="wellbeing-resources">
+        <article class="library-resource-card"
+                 data-category="wellbeing">
 
-        <div class="resource-topic-heading">
+            <div class="library-resource-card-top">
 
-            <p class="section-label">
-                WELLBEING
-            </p>
+                <div class="pillar-badge wellbeing-badge">
 
-            <h2>
-                Support your everyday wellbeing.
-            </h2>
+                    <i class="fa-solid fa-spa"></i>
 
-        </div>
-
-
-        <div class="resource-download-grid">
-
-
-            <article class="resource-download-card">
-
-                <div class="resource-card-icon">
-                    <i class="fa-regular fa-pen-to-square"></i>
                 </div>
 
-                <p class="resource-type">
+
+                <div class="resource-card-category wellbeing-text">
+
+                    WELLBEING
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
+                    <i class="fa-regular fa-file-lines"></i>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Healthy Habits<br>
+                Reflection
+            </h3>
+
+            <p>
+                A guided worksheet for identifying what is working,
+                what feels difficult, and one realistic next step.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     WORKSHEET
-                </p>
+                </span>
 
-                <h3>
-                    Healthy Habits Reflection
-                </h3>
-
-                <p>
-                    A guided worksheet for identifying what is
-                    working, what feels difficult, and one realistic
-                    next step.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
 
-
-        </div>
-
-    </div>
+        </article>
 
 
 
-    <!-- PREVENTION -->
+        <!-- PREVENTION -->
 
-    <div class="resource-topic-section"
-         id="prevention-resources">
+        <article class="library-resource-card"
+                 data-category="prevention">
 
-        <div class="resource-topic-heading">
+            <div class="library-resource-card-top">
 
-            <p class="section-label">
-                PREVENTION
-            </p>
+                <div class="pillar-badge prevention-badge">
 
-            <h2>
-                Know your health.
-            </h2>
+                    <i class="fa-solid fa-shield-heart"></i>
 
-        </div>
-
-
-        <div class="resource-download-grid">
-
-
-            <article class="resource-download-card">
-
-                <div class="resource-card-icon">
-                    <i class="fa-solid fa-heart-pulse"></i>
                 </div>
 
-                <p class="resource-type">
+
+                <div class="resource-card-category prevention-text">
+
+                    PREVENTION
+
+                </div>
+
+
+                <div class="resource-card-symbol">
+
+                    <i class="fa-solid fa-heart-pulse"></i>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Know Your<br>
+                Numbers
+            </h3>
+
+            <p>
+                A simple place to record and understand important
+                preventive health measurements and screening information.
+            </p>
+
+
+            <div class="resource-card-footer">
+
+                <span>
                     TRACKER
-                </p>
+                </span>
 
-                <h3>
-                    Know Your Numbers
-                </h3>
-
-                <p>
-                    A simple place to record and understand important
-                    preventive health measurements and screening information.
-                </p>
-
-                <span class="resource-coming">
+                <span>
                     COMING SOON
                 </span>
 
-            </article>
+            </div>
 
+        </article>
 
-        </div>
 
     </div>
-
 
 </section>
 
 
 
 <!-- ========================================
-     RESOURCE NOTE
+     CLOSING MESSAGE
 ======================================== -->
 
-<section class="resource-note">
+<section class="resources-closing-new">
 
-    <div class="resource-note-inner">
+    <div class="resources-closing-decoration">
 
-        <p class="section-label">
+        <i class="fa-solid fa-seedling"></i>
+
+    </div>
+
+
+    <div class="resources-closing-copy">
+
+        <p class="resources-eyebrow">
             SIMPLE. PRACTICAL. INFORMED.
         </p>
 
@@ -810,7 +808,6 @@
 
         </div>
 
-
     </div>
 
 
@@ -896,6 +893,7 @@
         });
 
 
+
     /* MOBILE MENU */
 
     function toggleMenu() {
@@ -906,6 +904,60 @@
         nav.classList.toggle("active");
 
     }
+
+
+
+    /* RESOURCE FILTER */
+
+    const resourceFilters =
+        document.querySelectorAll(".resource-filter");
+
+    const resourceCards =
+        document.querySelectorAll(".library-resource-card");
+
+
+    resourceFilters.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            const selectedFilter =
+                button.dataset.filter;
+
+
+            resourceFilters.forEach(function(filterButton) {
+
+                filterButton.classList.remove("active");
+
+            });
+
+
+            button.classList.add("active");
+
+
+            resourceCards.forEach(function(card) {
+
+                const cardCategory =
+                    card.dataset.category;
+
+
+                if (
+                    selectedFilter === "all" ||
+                    selectedFilter === cardCategory
+                ) {
+
+                    card.classList.remove("resource-hidden");
+
+                } else {
+
+                    card.classList.add("resource-hidden");
+
+                }
+
+            });
+
+        });
+
+    });
 
 </script>
 
