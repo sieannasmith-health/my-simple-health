@@ -3939,3 +3939,381 @@ main > section.topics-page .topics-intro > p {
     }
 
 }
+/* ========================================
+   ABOUT PAGE - FINAL MATCHED STYLES
+======================================== */
+
+
+/* ----------------------------------------
+   NUMBERED ABOUT SECTIONS
+---------------------------------------- */
+
+.about-section {
+    width: min(90%, 1100px);
+    margin: 0 auto;
+    padding: 85px 0;
+
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 45px;
+    align-items: start;
+}
+
+.about-section + .about-section {
+    border-top: 1px solid var(--soft-line);
+}
+
+.about-section-label {
+    padding-top: 4px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.about-section-content {
+    width: 100%;
+    max-width: 900px;
+}
+
+.about-section-content .section-eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-section-content > h2 {
+    max-width: 780px;
+    margin: 0 0 24px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.12;
+    color: var(--forest);
+}
+
+.about-section-content > p {
+    max-width: 760px;
+    margin: 0 0 18px;
+
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--charcoal);
+}
+
+
+/* ----------------------------------------
+   WHAT YOU'LL FIND
+---------------------------------------- */
+
+.about-topic-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    margin-top: 42px;
+
+    border-top: 1px solid var(--soft-line);
+}
+
+.about-topic {
+    display: block;
+    min-width: 0;
+    padding: 30px 28px;
+
+    color: var(--charcoal) !important;
+    text-decoration: none !important;
+
+    border-bottom: 1px solid var(--soft-line);
+}
+
+.about-topic:nth-child(odd) {
+    border-right: 1px solid var(--soft-line);
+}
+
+.about-topic > span {
+    display: block;
+    margin-bottom: 14px;
+
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.about-topic h3 {
+    margin: 0 0 12px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.about-topic p {
+    margin: 0;
+
+    color: var(--charcoal);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.about-topic:hover {
+    background: var(--cream);
+}
+
+
+/* ----------------------------------------
+   THE APPROACH
+---------------------------------------- */
+
+.about-principles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    margin-top: 42px;
+
+    border-top: 1px solid var(--soft-line);
+}
+
+.about-principle {
+    padding: 32px 28px;
+
+    border-bottom: 1px solid var(--soft-line);
+}
+
+.about-principle:nth-child(odd) {
+    border-right: 1px solid var(--soft-line);
+}
+
+.about-principle h3 {
+    margin: 0 0 14px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.about-principle p {
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--charcoal);
+}
+
+
+/* ----------------------------------------
+   ABOUT THE FOUNDER
+---------------------------------------- */
+
+.about-founder {
+    width: 100%;
+    margin: 0;
+    padding: 90px 5%;
+
+    background: var(--cream);
+}
+
+.about-founder-content {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-founder .section-eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-founder h2 {
+    margin: 0 0 24px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(40px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.about-founder p {
+    margin: 0 0 18px;
+
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--charcoal);
+}
+
+
+/* ----------------------------------------
+   HEALTH INFORMATION NOTE
+---------------------------------------- */
+
+.about-note {
+    width: min(90%, 900px);
+    margin: 90px auto;
+    padding: 55px 60px;
+
+    background: var(--warm-white);
+    border-top: 1px solid var(--soft-line);
+    border-bottom: 1px solid var(--soft-line);
+
+    text-align: center;
+}
+
+.about-note .section-eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-note h2 {
+    max-width: 760px;
+    margin: 0 auto 20px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(34px, 4vw, 46px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--forest);
+}
+
+.about-note p {
+    max-width: 720px;
+    margin: 0 auto;
+
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--charcoal);
+}
+
+
+/* ========================================
+   ABOUT MOBILE
+======================================== */
+
+@media (max-width: 800px) {
+
+    .about-section {
+        width: 100%;
+        padding: 60px 24px;
+
+        display: block;
+    }
+
+    .about-section-label {
+        margin-bottom: 24px;
+    }
+
+    .about-section-content {
+        width: 100%;
+        max-width: none;
+    }
+
+    .about-section-content > h2 {
+        font-size: 36px;
+        line-height: 1.15;
+    }
+
+    .about-section-content > p {
+        font-size: 16px;
+        line-height: 1.75;
+    }
+
+
+    /* Topic cards */
+
+    .about-topic-grid {
+        grid-template-columns: 1fr;
+        margin-top: 34px;
+    }
+
+    .about-topic {
+        padding: 28px 0;
+        border-right: none !important;
+    }
+
+    .about-topic h3 {
+        font-size: 27px;
+    }
+
+
+    /* Approach */
+
+    .about-principles {
+        grid-template-columns: 1fr;
+        margin-top: 34px;
+    }
+
+    .about-principle {
+        padding: 28px 0;
+        border-right: none !important;
+    }
+
+    .about-principle h3 {
+        font-size: 26px;
+    }
+
+
+    /* Founder */
+
+    .about-founder {
+        padding: 65px 24px;
+    }
+
+    .about-founder-content {
+        width: 100%;
+        max-width: none;
+    }
+
+    .about-founder h2 {
+        font-size: 38px;
+    }
+
+
+    /* Disclaimer */
+
+    .about-note {
+        width: calc(100% - 48px);
+        margin: 60px auto;
+        padding: 42px 0;
+    }
+
+    .about-note h2 {
+        font-size: 34px;
+    }
+
+}
+
+
+/* SMALL MOBILE */
+
+@media (max-width: 480px) {
+
+    .about-section-content > h2 {
+        font-size: 34px;
+    }
+
+    .about-founder h2 {
+        font-size: 36px;
+    }
+
+    .about-note h2 {
+        font-size: 31px;
+    }
+
+}
