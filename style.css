@@ -2694,3 +2694,29 @@ main > section.topics-page .topics-grid {
         gap: 24px !important;
     }
 }
+/* TOPICS INTRO TRUE CENTER */
+
+main > section.topics-page .topics-intro {
+    position: relative !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+
+    width: 100% !important;
+    max-width: 700px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    text-align: center !important;
+}
+
+main > section.topics-page .topics-intro .eyebrow,
+main > section.topics-page .topics-intro h2,
+main > section.topics-page .topics-intro > p {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+}
