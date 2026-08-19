@@ -3467,3 +3467,475 @@ main > section.topics-page .topics-intro > p {
     }
 
 }
+/* ========================================
+   ABOUT PAGE
+======================================== */
+
+
+/* ABOUT HERO */
+
+.about-hero {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 90px 5% 80px !important;
+
+    background: var(--cream);
+
+    text-align: center !important;
+
+    grid-template-columns: none !important;
+    gap: 0 !important;
+}
+
+.about-hero-inner {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto !important;
+}
+
+.about-hero .section-eyebrow,
+.about-hero .eyebrow {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 0 14px !important;
+
+    text-align: center !important;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+}
+
+.about-hero h1 {
+    margin: 0 0 22px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(50px, 6vw, 76px);
+    font-weight: 400;
+    line-height: 1;
+    color: var(--forest);
+}
+
+.about-hero-description {
+    max-width: 680px !important;
+    margin: 0 auto !important;
+
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--charcoal);
+}
+
+
+/* ========================================
+   ABOUT INTRO
+======================================== */
+
+.about-intro {
+    width: min(90%, 1150px);
+    margin: 0 auto;
+    padding: 90px 0;
+
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 70px;
+    align-items: center;
+}
+
+.about-intro-image {
+    width: 100%;
+}
+
+.about-intro-image img {
+    width: 100%;
+    height: 560px;
+    object-fit: cover;
+    display: block;
+}
+
+.about-intro-content .section-eyebrow,
+.about-intro-content .eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-intro-content h2 {
+    margin: 0 0 22px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.about-intro-content p {
+    margin: 0 0 18px;
+
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+
+/* ========================================
+   ABOUT MISSION
+======================================== */
+
+.about-mission {
+    width: 100%;
+    padding: 90px 5%;
+
+    background: var(--cream);
+}
+
+.about-mission-inner {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+
+    text-align: center;
+}
+
+.about-mission .section-eyebrow,
+.about-mission .eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-mission h2 {
+    max-width: 760px;
+    margin: 0 auto 22px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--forest);
+}
+
+.about-mission p {
+    max-width: 720px;
+    margin: 0 auto 18px;
+
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+
+/* ========================================
+   ABOUT VALUES
+======================================== */
+
+.about-values {
+    width: min(90%, 1150px);
+    margin: 0 auto;
+    padding: 90px 0;
+}
+
+.about-values-header {
+    max-width: 700px;
+    margin: 0 auto 50px;
+
+    text-align: center;
+}
+
+.about-values-header .section-eyebrow,
+.about-values-header .eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-values-header h2 {
+    margin: 0 0 16px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.about-values-header p {
+    max-width: 620px;
+    margin: 0 auto;
+
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.about-values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.about-value-card {
+    padding: 36px 30px;
+
+    background: var(--cream);
+    border: 1px solid var(--soft-line);
+}
+
+.about-value-number {
+    display: block;
+    margin-bottom: 18px;
+
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.about-value-card h3 {
+    margin: 0 0 14px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--forest);
+}
+
+.about-value-card p {
+    margin: 0;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+/* ========================================
+   ABOUT PHILOSOPHY
+======================================== */
+
+.about-philosophy {
+    width: min(90%, 1100px);
+    margin: 0 auto;
+    padding: 20px 0 100px;
+}
+
+.about-philosophy-inner {
+    padding: 60px;
+
+    border-top: 1px solid var(--soft-line);
+    border-bottom: 1px solid var(--soft-line);
+
+    text-align: center;
+}
+
+.about-philosophy .section-eyebrow,
+.about-philosophy .eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-philosophy h2 {
+    max-width: 760px;
+    margin: 0 auto 22px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(36px, 4vw, 48px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--forest);
+}
+
+.about-philosophy p {
+    max-width: 720px;
+    margin: 0 auto 18px;
+
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+
+/* ========================================
+   WORK WITH ME
+======================================== */
+
+.about-work {
+    width: 100%;
+    padding: 90px 5%;
+
+    background: var(--cream);
+}
+
+.about-work-inner {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+
+    text-align: center;
+}
+
+.about-work .section-eyebrow,
+.about-work .eyebrow {
+    margin: 0 0 12px;
+
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+}
+
+.about-work h2 {
+    margin: 0 0 20px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--forest);
+}
+
+.about-work p {
+    max-width: 680px;
+    margin: 0 auto 28px;
+
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.about-work a {
+    display: inline-block;
+
+    padding: 14px 24px;
+
+    background: var(--forest);
+    color: white;
+
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+}
+
+.about-work a:hover {
+    background: var(--sage);
+}
+
+
+/* ========================================
+   ABOUT MOBILE
+======================================== */
+
+@media (max-width: 800px) {
+
+    .about-hero {
+        padding: 60px 24px 55px !important;
+    }
+
+    .about-hero h1 {
+        font-size: 48px;
+    }
+
+    .about-hero-description {
+        font-size: 16px;
+    }
+
+
+    .about-intro {
+        width: 100%;
+        padding: 60px 24px;
+
+        grid-template-columns: 1fr;
+        gap: 38px;
+    }
+
+    .about-intro-image img {
+        height: 430px;
+    }
+
+    .about-intro-content h2 {
+        font-size: 38px;
+    }
+
+
+    .about-mission {
+        padding: 65px 24px;
+    }
+
+    .about-mission h2 {
+        font-size: 36px;
+    }
+
+
+    .about-values {
+        width: 100%;
+        padding: 65px 24px;
+    }
+
+    .about-values-header {
+        margin-bottom: 36px;
+    }
+
+    .about-values-header h2 {
+        font-size: 36px;
+    }
+
+    .about-values-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .about-value-card {
+        padding: 30px 26px;
+    }
+
+
+    .about-philosophy {
+        width: 100%;
+        padding: 10px 24px 65px;
+    }
+
+    .about-philosophy-inner {
+        padding: 45px 0;
+    }
+
+    .about-philosophy h2 {
+        font-size: 34px;
+    }
+
+
+    .about-work {
+        padding: 65px 24px;
+    }
+
+    .about-work h2 {
+        font-size: 36px;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .about-hero h1 {
+        font-size: 42px;
+    }
+
+    .about-intro-image img {
+        height: 360px;
+    }
+
+}
