@@ -1413,3 +1413,261 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* ========================================
+   RESOURCE LIBRARY - MOBILE FIX
+======================================== */
+
+@media (max-width: 800px) {
+
+    /* Overall resource page */
+    .resources-page {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+
+    /* HERO */
+    .resources-hero {
+        padding: 55px 24px 50px;
+        text-align: left;
+    }
+
+    .resources-hero .section-label {
+        margin-bottom: 16px;
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--sage);
+    }
+
+    .resources-hero h1 {
+        margin: 0 0 22px;
+        font-size: 44px;
+        line-height: 1.08;
+        color: var(--forest);
+    }
+
+    .resources-hero p:not(.section-label) {
+        margin: 0 0 25px;
+        font-size: 17px;
+        line-height: 1.65;
+    }
+
+    .resources-hero a {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--forest);
+        text-decoration: none;
+    }
+
+
+    /* EXPLORE BY TOPIC */
+    .resource-topics {
+        padding: 50px 24px;
+    }
+
+    .resource-topics > .section-label {
+        margin-bottom: 12px;
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--sage);
+    }
+
+    .resource-topics > h2 {
+        margin: 0 0 15px;
+        font-size: 36px;
+        line-height: 1.15;
+        color: var(--forest);
+    }
+
+    .resource-topics > p {
+        margin: 0 0 35px;
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+
+    /* TOPIC CARDS */
+    .resource-topic-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .resource-topic-card {
+        padding: 28px 24px;
+        border: 1px solid var(--soft-line);
+        background: var(--warm-white);
+    }
+
+    .resource-topic-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 52px;
+        height: 52px;
+        margin-bottom: 20px;
+
+        border-radius: 50%;
+        background: var(--cream);
+        color: var(--forest);
+        font-size: 20px;
+    }
+
+    .resource-topic-card h3 {
+        margin: 0 0 10px;
+        font-size: 27px;
+        line-height: 1.2;
+        color: var(--forest);
+    }
+
+    .resource-topic-card p {
+        margin: 0 0 18px;
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--charcoal);
+    }
+
+    .resource-topic-card a {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--forest);
+        text-decoration: none;
+    }
+
+
+    /* ACTUAL RESOURCE LIBRARY */
+    .resource-library {
+        padding: 55px 24px;
+    }
+
+    .resource-library > .section-label {
+        margin-bottom: 12px;
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--sage);
+    }
+
+    .resource-library > h2 {
+        margin: 0 0 35px;
+        font-size: 36px;
+        line-height: 1.15;
+        color: var(--forest);
+    }
+
+
+    /* EACH CATEGORY */
+    .resource-category {
+        margin-bottom: 55px;
+    }
+
+    .resource-category > .section-label {
+        margin-bottom: 10px;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        color: var(--sage);
+    }
+
+    .resource-category > h2,
+    .resource-category > h3 {
+        margin: 0 0 24px;
+        font-size: 31px;
+        line-height: 1.2;
+        color: var(--forest);
+    }
+
+
+    /* DOWNLOADABLE RESOURCE CARDS */
+    .resource-items,
+    .resource-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .resource-item,
+    .resource-download-card {
+        padding: 26px 22px;
+        border: 1px solid var(--soft-line);
+        background: var(--warm-white);
+    }
+
+    .resource-item i,
+    .resource-download-card i {
+        margin-bottom: 18px;
+        color: var(--sage);
+        font-size: 21px;
+    }
+
+    .resource-item .resource-type,
+    .resource-download-card .resource-type {
+        margin: 0 0 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: var(--sage);
+    }
+
+    .resource-item h3,
+    .resource-download-card h3 {
+        margin: 0 0 13px;
+        font-size: 25px;
+        line-height: 1.25;
+        color: var(--forest);
+    }
+
+    .resource-item p,
+    .resource-download-card p {
+        margin: 0 0 18px;
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--charcoal);
+    }
+
+    .resource-item a,
+    .resource-download-card a {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--forest);
+        text-decoration: none;
+    }
+
+
+    /* FINAL RESOURCE MESSAGE */
+    .resource-closing,
+    .resources-closing {
+        margin: 0 24px 55px;
+        padding: 38px 24px;
+        background: var(--cream);
+        text-align: center;
+    }
+
+    .resource-closing h2,
+    .resources-closing h2 {
+        margin: 0 0 18px;
+        font-size: 31px;
+        line-height: 1.2;
+        color: var(--forest);
+    }
+
+    .resource-closing p,
+    .resources-closing p {
+        margin: 0 auto 22px;
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+    .resource-closing a,
+    .resources-closing a {
+        color: var(--forest);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-decoration: none;
+    }
+}
