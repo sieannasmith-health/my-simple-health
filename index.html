@@ -234,19 +234,15 @@
 
 </section>
 
-
-
 <!-- =========================================
-     LATEST ARTICLES
+     INTERACTIVE LATEST ARTICLES
 ========================================== -->
 
-<section class="articles-section">
+<section class="home-article-carousel">
 
-    <div class="articles-heading">
+    <div class="home-article-carousel-header">
 
-        <h2>
-            Latest Articles
-        </h2>
+        <h2>Latest Articles</h2>
 
         <a href="blog.html">
             VIEW ALL ARTICLES →
@@ -255,18 +251,26 @@
     </div>
 
 
-    <div class="articles-grid">
+    <div class="home-article-slider">
+
+        <button
+            class="home-article-arrow home-article-arrow-left"
+            type="button"
+            aria-label="Previous article"
+            onclick="changeHomeArticle(-1)"
+        >
+            ‹
+        </button>
 
 
-        <article class="article-card">
+        <div class="home-article-slide active">
 
             <img
-                class="article-image"
                 src="blood-pressure.png"
                 alt="Blood pressure monitor"
             >
 
-            <div class="article-content">
+            <div class="home-article-slide-content">
 
                 <p class="article-category">
                     PREVENTION
@@ -282,24 +286,22 @@
                 </p>
 
                 <a href="#">
-                    READ MORE →
+                    READ ARTICLE →
                 </a>
 
             </div>
 
-        </article>
+        </div>
 
 
-
-        <article class="article-card">
+        <div class="home-article-slide">
 
             <img
-                class="article-image"
                 src="nutrition-bowl.png"
                 alt="Salmon and vegetable nutrition bowl"
             >
 
-            <div class="article-content">
+            <div class="home-article-slide-content">
 
                 <p class="article-category">
                     NUTRITION
@@ -315,24 +317,22 @@
                 </p>
 
                 <a href="#">
-                    READ MORE →
+                    READ ARTICLE →
                 </a>
 
             </div>
 
-        </article>
+        </div>
 
 
-
-        <article class="article-card">
+        <div class="home-article-slide">
 
             <img
-                class="article-image"
                 src="movement-walking.png"
                 alt="Person walking outdoors"
             >
 
-            <div class="article-content">
+            <div class="home-article-slide-content">
 
                 <p class="article-category">
                     MOVEMENT
@@ -348,13 +348,48 @@
                 </p>
 
                 <a href="#">
-                    READ MORE →
+                    READ ARTICLE →
                 </a>
 
             </div>
 
-        </article>
+        </div>
 
+
+        <button
+            class="home-article-arrow home-article-arrow-right"
+            type="button"
+            aria-label="Next article"
+            onclick="changeHomeArticle(1)"
+        >
+            ›
+        </button>
+
+    </div>
+
+
+    <div class="home-article-dots">
+
+        <button
+            class="home-article-dot active"
+            type="button"
+            aria-label="Show article 1"
+            onclick="showHomeArticle(0)"
+        ></button>
+
+        <button
+            class="home-article-dot"
+            type="button"
+            aria-label="Show article 2"
+            onclick="showHomeArticle(1)"
+        ></button>
+
+        <button
+            class="home-article-dot"
+            type="button"
+            aria-label="Show article 3"
+            onclick="showHomeArticle(2)"
+        ></button>
 
     </div>
 
