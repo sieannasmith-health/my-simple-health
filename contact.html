@@ -1,1 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Contact | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+
+<body>
+
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main>
+
+
+<section class="contact-hero">
+
+    <div class="contact-hero-inner">
+
+        <p class="section-eyebrow">
+            CONTACT MY SIMPLE HEALTH
+        </p>
+
+        <h1>
+            Let’s connect.
+        </h1>
+
+        <p class="contact-hero-description">
+            Have a question, collaboration idea, media inquiry,
+            or something you’d like to share? Send a message below.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="contact-section">
+
+    <div class="contact-info">
+
+        <p class="section-eyebrow">
+            GET IN TOUCH
+        </p>
+
+        <h2>
+            I’d love to hear from you.
+        </h2>
+
+        <p>
+            My Simple Health welcomes thoughtful questions,
+            partnership inquiries, collaboration opportunities,
+            and feedback about the site.
+        </p>
+
+        <div class="contact-details">
+
+            <div class="contact-detail">
+                <span>EMAIL</span>
+                <a href="mailto:hello.mysimplehealth@gmail.com">
+                    hello.mysimplehealth@gmail.com
+                </a>
+            </div>
+
+            <div class="contact-detail">
+                <span>INSTAGRAM</span>
+                <a href="https://www.instagram.com/hellomysimplehealth/">
+                    @hellomysimplehealth
+                </a>
+            </div>
+
+            <div class="contact-detail">
+                <span>LINKEDIN</span>
+                <a href="https://www.linkedin.com/company/143299965/">
+                    My Simple Health
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="contact-form-wrap">
+
+        <form class="contact-form">
+
+            <div class="contact-form-row">
+
+                <div class="contact-field">
+                    <label for="firstName">
+                        First name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        autocomplete="given-name"
+                    >
+                </div>
+
+
+                <div class="contact-field">
+                    <label for="lastName">
+                        Last name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="lastName"
+                        autocomplete="family-name"
+                    >
+                </div>
+
+            </div>
+
+
+            <div class="contact-field">
+
+                <label for="email">
+                    Email address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="contact-field">
+
+                <label for="subject">
+                    Subject
+                </label>
+
+                <select id="subject"
+                        name="subject">
+
+                    <option value="">
+                        Select a topic
+                    </option>
+
+                    <option value="general">
+                        General question
+                    </option>
+
+                    <option value="collaboration">
+                        Collaboration
+                    </option>
+
+                    <option value="media">
+                        Media inquiry
+                    </option>
+
+                    <option value="feedback">
+                        Website feedback
+                    </option>
+
+                    <option value="other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="contact-field">
+
+                <label for="message">
+                    Message
+                </label>
+
+                <textarea
+                    id="message"
+                    name="message"
+                    rows="7"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <button type="submit"
+                    class="contact-submit">
+                SEND MESSAGE
+            </button>
+
+
+            <p class="contact-form-note">
+                Please do not submit personal medical information
+                through this form.
+            </p>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<section class="contact-note">
+
+    <p class="section-eyebrow">
+        HEALTH QUESTIONS
+    </p>
+
+    <h2>
+        A quick note before you reach out.
+    </h2>
+
+    <p>
+        My Simple Health provides general health education and
+        cannot provide individualized medical advice, diagnosis,
+        or treatment through email or website messages.
+    </p>
+
+</section>
+
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips and practical resources
+            delivered to your inbox.
+        </p>
+
+    </div>
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>MY SIMPLE HEALTH</h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="about.html">About Me</a>
+            <a href="about.html#mission">Mission &amp; Values</a>
+            <a href="about.html#work-with-me">Work With Me</a>
+            <a href="contact.html">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
