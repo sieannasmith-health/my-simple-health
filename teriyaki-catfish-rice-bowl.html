@@ -1,1 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Teriyaki Catfish, Brussels & Rice Bowl | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        .single-recipe {
+            background: var(--warm-white);
+        }
+
+        .recipe-page-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+        .recipe-breadcrumb {
+            padding: 32px 0 22px;
+            font-size: 12px;
+            color: var(--sage);
+        }
+
+        .recipe-breadcrumb a {
+            color: var(--sage);
+            text-decoration: none;
+        }
+
+        .recipe-detail-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 54px;
+            align-items: center;
+            padding: 28px 0 72px;
+        }
+
+        .recipe-detail-copy {
+            padding-right: 10px;
+        }
+
+        .recipe-detail-category {
+            margin: 0 0 14px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.8px;
+            color: var(--sage);
+        }
+
+        .recipe-detail-copy h1 {
+            margin: 0 0 24px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(48px, 5vw, 72px);
+            font-weight: 400;
+            line-height: 1.03;
+            color: var(--forest);
+        }
+
+        .recipe-detail-description {
+            margin: 0 0 30px;
+            font-size: 17px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+        .recipe-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--soft-line);
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .recipe-meta-item {
+            padding: 18px 12px 18px 0;
+        }
+
+        .recipe-meta-item span {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            color: var(--sage);
+        }
+
+        .recipe-meta-item strong {
+            font-size: 15px;
+            color: var(--forest);
+        }
+
+        .recipe-detail-image img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+        .recipe-body {
+            display: grid;
+            grid-template-columns: 0.82fr 1.18fr;
+            gap: 70px;
+            padding: 82px 0;
+            border-top: 1px solid var(--soft-line);
+        }
+
+        .recipe-section-title {
+            margin: 0 0 26px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .ingredients-panel {
+            align-self: start;
+            background: var(--cream);
+            padding: 34px;
+        }
+
+        .ingredient-group {
+            margin-bottom: 30px;
+        }
+
+        .ingredient-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .ingredient-group h3 {
+            margin: 0 0 14px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: var(--sage);
+        }
+
+        .ingredients-panel ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .ingredients-panel li {
+            position: relative;
+            padding: 0 0 14px 22px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(23, 61, 43, 0.12);
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--charcoal);
+        }
+
+        .ingredients-panel li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--sage);
+        }
+
+        .instructions-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: recipe-step;
+        }
+
+        .instructions-list li {
+            counter-increment: recipe-step;
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 18px;
+            padding: 0 0 30px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .instructions-list li::before {
+            content: counter(recipe-step);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--sage);
+            border-radius: 50%;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18px;
+            color: var(--forest);
+        }
+
+        .instructions-list p {
+            margin: 2px 0 0;
+            font-size: 16px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+        .recipe-notes {
+            padding: 64px 0;
+            background: var(--cream);
+        }
+
+        .recipe-notes-grid {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .recipe-notes h2 {
+            margin: 0 0 18px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 34px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .recipe-notes p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--charcoal);
+        }
+
+        .recipe-nutrition {
+            padding: 78px 0;
+        }
+
+        .recipe-nutrition-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+        .recipe-nutrition h2 {
+            margin: 0 0 14px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .recipe-nutrition-intro {
+            max-width: 720px;
+            margin: 0 0 34px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--charcoal);
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--soft-line);
+            border-left: 1px solid var(--soft-line);
+        }
+
+        .nutrition-item {
+            padding: 24px;
+            border-right: 1px solid var(--soft-line);
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        .nutrition-item span {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.3px;
+            color: var(--sage);
+        }
+
+        .nutrition-item strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .related-recipes {
+            padding: 76px 0 90px;
+            background: var(--cream);
+        }
+
+        .related-recipes-inner {
+            width: min(90%, 1180px);
+            margin: 0 auto;
+        }
+
+        .related-recipes-header {
+            margin-bottom: 34px;
+        }
+
+        .related-recipes-header p {
+            margin: 0 0 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.6px;
+            color: var(--sage);
+        }
+
+        .related-recipes-header h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 40px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .related-recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .related-recipe-card {
+            background: var(--warm-white);
+        }
+
+        .related-recipe-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .related-recipe-card div {
+            padding: 20px;
+        }
+
+        .related-recipe-card span {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: var(--sage);
+        }
+
+        .related-recipe-card h3 {
+            margin: 0 0 12px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 21px;
+            font-weight: 400;
+            line-height: 1.25;
+            color: var(--forest);
+        }
+
+        .related-recipe-card a {
+            color: var(--forest);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 800px) {
+
+            .recipe-breadcrumb {
+                padding-top: 24px;
+            }
+
+            .recipe-detail-hero {
+                grid-template-columns: 1fr;
+                gap: 34px;
+                padding-bottom: 56px;
+            }
+
+            .recipe-detail-copy h1 {
+                font-size: 50px;
+            }
+
+            .recipe-body {
+                grid-template-columns: 1fr;
+                gap: 48px;
+                padding: 60px 0;
+            }
+
+            .ingredients-panel {
+                padding: 42px 28px 28px;
+            }
+
+            .recipe-notes-grid {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .related-recipes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .recipe-page-inner {
+                width: calc(100% - 48px);
+            }
+
+            .recipe-detail-copy h1 {
+                font-size: 44px;
+            }
+
+            .recipe-detail-description {
+                font-size: 16px;
+            }
+
+            .recipe-meta-item strong {
+                font-size: 14px;
+            }
+
+            .recipe-section-title {
+                font-size: 34px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="single-recipe">
+
+    <div class="recipe-page-inner">
+
+
+        <div class="recipe-breadcrumb">
+            <a href="recipes.html">Recipes</a>
+            &nbsp;/&nbsp;
+            Bowls
+        </div>
+
+
+        <section class="recipe-detail-hero">
+
+            <div class="recipe-detail-copy">
+
+                <p class="recipe-detail-category">
+                    BOWLS
+                </p>
+
+                <h1>
+                    Teriyaki Catfish, Brussels &amp; Rice Bowl
+                </h1>
+
+                <p class="recipe-detail-description">
+                    Savory teriyaki-glazed catfish, caramelized Brussels
+                    sprouts, and fluffy jasmine rice come together in a
+                    cozy bowl with sweet, salty, and savory flavor in
+                    every bite.
+                </p>
+
+
+                <div class="recipe-meta">
+
+                    <div class="recipe-meta-item">
+                        <span>PREP</span>
+                        <strong>10 min</strong>
+                    </div>
+
+                    <div class="recipe-meta-item">
+                        <span>COOK</span>
+                        <strong>20 min</strong>
+                    </div>
+
+                    <div class="recipe-meta-item">
+                        <span>SERVES</span>
+                        <strong>2</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="recipe-detail-image">
+
+                <img
+                    src="teriyaki-catfish-rice-bowl.png"
+                    alt="Teriyaki catfish bowl with jasmine rice and roasted Brussels sprouts"
+                >
+
+            </div>
+
+        </section>
+
+
+        <section class="recipe-body">
+
+
+            <aside class="ingredients-panel">
+
+                <h2 class="recipe-section-title">
+                    Ingredients
+                </h2>
+
+
+                <div class="ingredient-group">
+
+                    <h3>CATFISH</h3>
+
+                    <ul>
+                        <li>2 catfish fillets, about 6 oz each</li>
+                        <li>1 tablespoon olive oil</li>
+                        <li>¼ teaspoon salt</li>
+                        <li>¼ teaspoon black pepper</li>
+                        <li>½ teaspoon garlic powder</li>
+                    </ul>
+
+                </div>
+
+
+                <div class="ingredient-group">
+
+                    <h3>TERIYAKI SAUCE</h3>
+
+                    <ul>
+                        <li>3 tablespoons low-sodium soy sauce</li>
+                        <li>1 tablespoon honey or maple syrup</li>
+                        <li>1 tablespoon rice vinegar</li>
+                        <li>1 teaspoon sesame oil</li>
+                        <li>1 garlic clove, minced</li>
+                        <li>1 teaspoon fresh ginger, grated</li>
+                    </ul>
+
+                </div>
+
+
+                <div class="ingredient-group">
+
+                    <h3>BOWL</h3>
+
+                    <ul>
+                        <li>1 cup cooked jasmine rice</li>
+                        <li>2 cups Brussels sprouts, halved</li>
+                        <li>1 tablespoon olive oil</li>
+                        <li>Salt and black pepper to taste</li>
+                        <li>1 teaspoon balsamic glaze, optional</li>
+                    </ul>
+
+                </div>
+
+
+                <div class="ingredient-group">
+
+                    <h3>TO FINISH</h3>
+
+                    <ul>
+                        <li>Green onions, sliced</li>
+                        <li>Sesame seeds, optional</li>
+                    </ul>
+
+                </div>
+
+            </aside>
+
+
+            <div class="instructions-panel">
+
+                <h2 class="recipe-section-title">
+                    Instructions
+                </h2>
+
+
+                <ol class="instructions-list">
+
+                    <li>
+                        <p>
+                            Preheat the oven to 425°F. Line a baking
+                            sheet with parchment paper.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            In a small bowl, whisk together the
+                            low-sodium soy sauce, honey or maple syrup,
+                            rice vinegar, sesame oil, garlic, and ginger.
+                            Set the teriyaki sauce aside.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Pat the catfish fillets dry with a paper towel.
+                            Season both sides with salt, black pepper,
+                            and garlic powder.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Heat the olive oil in a large skillet over
+                            medium-high heat. Add the catfish and cook
+                            for 3 to 4 minutes per side, until cooked
+                            through and lightly seared.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Reduce the heat to low and pour the teriyaki
+                            sauce over the catfish. Spoon the sauce over
+                            the fillets and let simmer for 1 to 2 minutes.
+                            Remove the catfish from the skillet and set aside.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Toss the Brussels sprouts with olive oil,
+                            salt, and black pepper on the prepared baking
+                            sheet. Spread them in a single layer and roast
+                            for 18 to 20 minutes, shaking the pan halfway
+                            through, until crisp and caramelized.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Divide the cooked jasmine rice between two bowls.
+                            Top each bowl with teriyaki catfish and roasted
+                            Brussels sprouts.
+                        </p>
+                    </li>
+
+
+                    <li>
+                        <p>
+                            Drizzle any extra teriyaki sauce from the pan
+                            over the bowls. Add balsamic glaze if using,
+                            then garnish with sliced green onions and
+                            sesame seeds.
+                        </p>
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <section class="recipe-notes">
+
+        <div class="recipe-notes-grid">
+
+            <div>
+
+                <h2>
+                    Simple tip.
+                </h2>
+
+                <p>
+                    Marinate the catfish in the teriyaki sauce for
+                    15 to 30 minutes before cooking if you want the
+                    flavor to penetrate the fish more deeply.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Make it your own.
+                </h2>
+
+                <p>
+                    Add shredded carrots, cucumber, edamame, or another
+                    crisp vegetable to the bowl. Brown rice also works
+                    in place of jasmine rice, and you can add a little
+                    extra ginger or red pepper flakes for more intensity.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="recipe-nutrition">
+
+        <div class="recipe-nutrition-inner">
+
+            <h2>
+                Nutrition
+            </h2>
+
+            <p class="recipe-nutrition-intro">
+                Approximate nutrition information per serving. Values can vary
+                depending on ingredient brands, portion sizes, and substitutions.
+            </p>
+
+
+            <div class="nutrition-grid">
+
+                <div class="nutrition-item">
+                    <span>CALORIES</span>
+                    <strong>560</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>PROTEIN</span>
+                    <strong>32 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>CARBOHYDRATES</span>
+                    <strong>60 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>FAT</span>
+                    <strong>22 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>FIBER</span>
+                    <strong>6 g</strong>
+                </div>
+
+                <div class="nutrition-item">
+                    <span>SERVING SIZE</span>
+                    <strong>½ recipe</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="related-recipes">
+
+        <div class="related-recipes-inner">
+
+            <div class="related-recipes-header">
+
+                <p>
+                    MORE BOWLS
+                </p>
+
+                <h2>
+                    Try these next.
+                </h2>
+
+            </div>
+
+
+            <div class="related-recipes-grid">
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="sesame-chicken-bowl.png"
+                        alt="Sesame Chicken Bowl"
+                    >
+
+                    <div>
+
+                        <span>BOWL</span>
+
+                        <h3>
+                            Sesame Chicken Bowl
+                        </h3>
+
+                        <a href="sesame-chicken-bowl.html">
+                            View Recipe →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="harvest-salmon-bowl.png"
+                        alt="Harvest Salmon Bowl"
+                    >
+
+                    <div>
+
+                        <span>BOWL</span>
+
+                        <h3>
+                            Harvest Salmon Bowl
+                        </h3>
+
+                        <a href="harvest-salmon-bowl.html">
+                            View Recipe →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <article class="related-recipe-card">
+
+                    <img
+                        src="mediterranean-chicken-grain-bowl.png"
+                        alt="Mediterranean Chicken Grain Bowl"
+                    >
+
+                    <div>
+
+                        <span>BOWL</span>
+
+                        <h3>
+                            Mediterranean Chicken Grain Bowl
+                        </h3>
+
+                        <a href="mediterranean-chicken-grain-bowl.html">
+                            View Recipe →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="newsletter-section">
+
+        <div class="newsletter-icon">
+            ✉
+        </div>
+
+        <div class="newsletter-copy">
+
+            <h2>
+                Stay inspired.
+            </h2>
+
+            <p>
+                Evidence-informed health tips, practical resources,
+                and new recipes delivered to your inbox.
+            </p>
+
+        </div>
+
+
+        <form class="newsletter-form">
+
+            <input
+                type="text"
+                placeholder="First name"
+                aria-label="First name"
+            >
+
+            <input
+                type="email"
+                placeholder="Email address"
+                aria-label="Email address"
+            >
+
+            <button type="submit">
+                SUBSCRIBE
+            </button>
+
+            <p class="newsletter-note">
+                No spam, ever. Unsubscribe anytime.
+            </p>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>MY SIMPLE HEALTH</h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="#">About Me</a>
+            <a href="#">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>LET'S STAY CONNECTED</h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
