@@ -3,7 +3,9 @@
 ======================================== */
 
 
-/* HERO */
+/* ========================================
+   ABOUT HERO
+======================================== */
 
 .about-hero {
     width: 100% !important;
@@ -14,22 +16,27 @@
     display: block !important;
 
     background: var(--cream);
-    text-align: center;
+    text-align: center !important;
+
+    grid-template-columns: none !important;
+    gap: 0 !important;
 }
 
 .about-hero-inner {
     width: 100%;
     max-width: 850px;
-    margin: 0 auto;
+    margin: 0 auto !important;
 }
 
 .about-hero .section-eyebrow {
+    width: 100%;
     margin: 0 0 14px;
 
     color: var(--sage);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.8px;
+    text-align: center;
 }
 
 .about-hero h1 {
@@ -49,11 +56,12 @@
 
     font-size: 17px;
     line-height: 1.7;
+    color: var(--charcoal);
 }
 
 
 /* ========================================
-   STANDARD ABOUT SECTIONS
+   NUMBERED ABOUT SECTIONS
 ======================================== */
 
 .about-section {
@@ -71,7 +79,9 @@
     border-top: 1px solid var(--soft-line);
 }
 
-.about-section-number {
+.about-section-label {
+    padding-top: 4px;
+
     color: var(--sage);
     font-size: 12px;
     font-weight: 600;
@@ -79,6 +89,7 @@
 }
 
 .about-section-content {
+    width: 100%;
     min-width: 0;
 }
 
@@ -91,7 +102,7 @@
     letter-spacing: 1.6px;
 }
 
-.about-section-content h2 {
+.about-section-content > h2 {
     max-width: 800px;
     margin: 0 0 24px;
 
@@ -108,6 +119,7 @@
 
     font-size: 16px;
     line-height: 1.75;
+    color: var(--charcoal);
 }
 
 
@@ -126,11 +138,12 @@
 
 .about-topic {
     display: block;
+    min-width: 0;
 
     padding: 30px 28px;
 
-    color: var(--charcoal);
-    text-decoration: none;
+    color: var(--charcoal) !important;
+    text-decoration: none !important;
 
     border-bottom: 1px solid var(--soft-line);
 
@@ -145,11 +158,19 @@
     background: var(--cream);
 }
 
-.about-topic-number {
+.about-topic > span {
     display: block;
-    margin-bottom: 14px;
+    width: auto;
+    height: auto;
+
+    margin: 0 0 14px;
+    padding: 0;
+
+    background: transparent;
+    border-radius: 0;
 
     color: var(--sage);
+    font-family: Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 1.5px;
@@ -166,6 +187,7 @@
 }
 
 .about-topic p {
+    max-width: none;
     margin: 0;
 
     color: var(--charcoal);
@@ -212,21 +234,23 @@
 
     font-size: 14px;
     line-height: 1.75;
+    color: var(--charcoal);
 }
 
 
 /* ========================================
-   FOUNDER
+   ABOUT THE FOUNDER
 ======================================== */
 
 .about-founder {
     width: 100%;
+    margin: 0;
     padding: 90px 24px;
 
     background: var(--cream);
 }
 
-.about-founder-inner {
+.about-founder-content {
     width: min(90%, 900px);
     margin: 0 auto;
 }
@@ -256,6 +280,7 @@
 
     font-size: 16px;
     line-height: 1.75;
+    color: var(--charcoal);
 }
 
 
@@ -268,6 +293,7 @@
     margin: 90px auto;
     padding: 55px 60px;
 
+    background: var(--warm-white);
     border-top: 1px solid var(--soft-line);
     border-bottom: 1px solid var(--soft-line);
 
@@ -300,6 +326,7 @@
 
     font-size: 15px;
     line-height: 1.75;
+    color: var(--charcoal);
 }
 
 
@@ -329,13 +356,25 @@
         display: block;
     }
 
-    .about-section-number {
+    .about-section-label {
         display: block;
         margin-bottom: 18px;
+        padding-top: 0;
     }
 
-    .about-section-content h2 {
+    .about-section-content {
+        width: 100%;
+        max-width: none;
+    }
+
+    .about-section-content > h2 {
         font-size: 36px;
+        line-height: 1.15;
+    }
+
+    .about-section-content > p {
+        font-size: 16px;
+        line-height: 1.75;
     }
 
 
@@ -346,8 +385,11 @@
 
     .about-topic {
         padding: 28px 0;
-
         border-right: none !important;
+    }
+
+    .about-topic h3 {
+        font-size: 27px;
     }
 
 
@@ -358,8 +400,11 @@
 
     .about-principle {
         padding: 28px 0;
-
         border-right: none !important;
+    }
+
+    .about-principle h3 {
+        font-size: 26px;
     }
 
 
@@ -367,8 +412,9 @@
         padding: 65px 24px;
     }
 
-    .about-founder-inner {
+    .about-founder-content {
         width: 100%;
+        max-width: none;
     }
 
     .about-founder h2 {
@@ -399,7 +445,7 @@
         font-size: 42px;
     }
 
-    .about-section-content h2 {
+    .about-section-content > h2 {
         font-size: 34px;
     }
 
