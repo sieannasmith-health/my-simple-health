@@ -1296,6 +1296,8 @@ body {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
+    text-align: center;
+    width: 100%;
 }
 
 .topics-intro h2 {
