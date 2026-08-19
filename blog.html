@@ -1,1 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blog | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- =========================================
+     BLOG HERO
+========================================== -->
+
+<section class="blog-hero">
+
+    <div class="blog-hero-inner">
+
+        <p class="section-eyebrow">
+            MY SIMPLE HEALTH JOURNAL
+        </p>
+
+        <h1>
+            Practical health guidance for everyday life.
+        </h1>
+
+        <p class="blog-hero-description">
+            Evidence-informed articles on nutrition, movement, sleep,
+            well-being, preventive health, and the everyday choices
+            that shape your health.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     FEATURED ARTICLE
+========================================== -->
+
+<section class="blog-featured">
+
+    <div class="blog-featured-image">
+        <img src="topic-sleep.png"
+             alt="Peaceful bedroom for healthy sleep">
+    </div>
+
+    <div class="blog-featured-content">
+
+        <p class="section-eyebrow">
+            FEATURED ARTICLE
+        </p>
+
+        <span class="blog-category">
+            SLEEP
+        </span>
+
+        <h2>
+            Sleep Hygiene: What It Is and Why It Matters
+        </h2>
+
+        <p>
+            Sleep hygiene describes the habits and environmental factors
+            that can support healthy, consistent sleep. Learn which
+            everyday practices matter and how to build a routine that
+            works in real life.
+        </p>
+
+        <a href="sleep-hygiene.html">
+            Read Article →
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     LATEST ARTICLES
+========================================== -->
+
+<section class="blog-latest">
+
+    <div class="blog-section-header">
+
+        <p class="section-eyebrow">
+            LATEST ARTICLES
+        </p>
+
+        <h2>
+            Explore the latest from My Simple Health.
+        </h2>
+
+    </div>
+
+
+    <div class="blog-grid">
+
+
+        <article class="blog-card">
+
+            <img src="topic-nutrition.png"
+                 alt="Balanced meal with salmon and vegetables">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    NUTRITION
+                </span>
+
+                <h3>
+                    Building a Balanced Approach to Everyday Eating
+                </h3>
+
+                <p>
+                    A practical look at building meals with flexibility,
+                    variety, and enough structure to support your health.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="blog-card">
+
+            <img src="topic-movement.png"
+                 alt="Woman walking outdoors">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    MOVEMENT
+                </span>
+
+                <h3>
+                    Why Walking Counts More Than You Think
+                </h3>
+
+                <p>
+                    Regular walking can support cardiovascular health,
+                    fitness, mobility, and everyday well-being.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="blog-card">
+
+            <img src="topic-sleep.png"
+                 alt="Restful bedroom environment">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    SLEEP
+                </span>
+
+                <h3>
+                    Sleep Hygiene: What It Is and Why It Matters
+                </h3>
+
+                <p>
+                    Learn the everyday behaviors and environmental
+                    factors that can support healthier sleep.
+                </p>
+
+                <a href="sleep-hygiene.html">
+                    Read Article →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="blog-card">
+
+            <img src="topic-wellbeing.png"
+                 alt="Woman relaxing outdoors">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    WELLBEING
+                </span>
+
+                <h3>
+                    Small Ways to Support Your Well-Being
+                </h3>
+
+                <p>
+                    Everyday practices can support stress management,
+                    resilience, recovery, and quality of life.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="blog-card">
+
+            <img src="topic-prevention.png"
+                 alt="Preventive health and routine care">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    PREVENTIVE HEALTH
+                </span>
+
+                <h3>
+                    Preventive Care: Where to Start
+                </h3>
+
+                <p>
+                    Understand the role of routine care, screenings,
+                    and health monitoring in long-term health.
+                </p>
+
+                <a href="#">
+                    Read Article →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="blog-card blog-card-text">
+
+            <div class="blog-card-content">
+
+                <span class="blog-category">
+                    MY SIMPLE HEALTH
+                </span>
+
+                <h3>
+                    More health education is coming.
+                </h3>
+
+                <p>
+                    New articles, recipes, resources, and data-informed
+                    health insights will continue to be added to the library.
+                </p>
+
+                <a href="topics.html">
+                    Explore Health Topics →
+                </a>
+
+            </div>
+
+        </article>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     BROWSE BY TOPIC
+========================================== -->
+
+<section class="blog-topics">
+
+    <div class="blog-section-header">
+
+        <p class="section-eyebrow">
+            BROWSE BY TOPIC
+        </p>
+
+        <h2>
+            Find what matters to you.
+        </h2>
+
+    </div>
+
+
+    <div class="blog-topic-links">
+
+        <a href="nutrition.html">
+            Nutrition
+            <span>→</span>
+        </a>
+
+        <a href="movement.html">
+            Movement
+            <span>→</span>
+        </a>
+
+        <a href="sleep.html">
+            Sleep
+            <span>→</span>
+        </a>
+
+        <a href="wellbeing.html">
+            Wellbeing
+            <span>→</span>
+        </a>
+
+        <a href="preventive-health.html">
+            Preventive Health
+            <span>→</span>
+        </a>
+
+        <a href="recipes.html">
+            Recipes
+            <span>→</span>
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips and practical resources
+            delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =========================================
+     FOOTER
+========================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="about.html">About Me</a>
+            <a href="about.html#mission">Mission &amp; Values</a>
+            <a href="about.html#work-with-me">Work With Me</a>
+            <a href="contact.html">Contact</a>
+
+        </div>
+
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
