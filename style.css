@@ -2328,3 +2328,61 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* ========================================
+   SOFTER ROUNDED UI
+======================================== */
+
+/* Article cards */
+.article-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Article images */
+.article-image {
+    border-radius: 16px 16px 0 0;
+}
+
+/* Recipe cards */
+.recipe-card {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Recipe images */
+.recipe-image {
+    border-radius: 14px 14px 0 0;
+}
+
+/* Resource cards */
+.resource-card,
+.library-card,
+.resource-item {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Topic cards */
+.topic-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Larger feature boxes */
+.mission-quote,
+.newsletter-section {
+    border-radius: 18px;
+}
+
+/* Buttons */
+.hero-text a,
+.resource-card a,
+.newsletter-form button {
+    border-radius: 8px;
+}
+
+/* Form fields */
+.newsletter-form input,
+.footer-email input {
+    border-radius: 8px;
+}
