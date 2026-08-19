@@ -1,1 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>About | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- =========================================
+     ABOUT HERO
+========================================== -->
+
+<section class="about-hero">
+
+    <div class="about-hero-inner">
+
+        <p class="section-eyebrow">
+            ABOUT MY SIMPLE HEALTH
+        </p>
+
+        <h1>
+            Health information for real life.
+        </h1>
+
+        <p class="about-hero-description">
+            My Simple Health makes health information easier to understand,
+            easier to use, and easier to fit into everyday life.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     MISSION
+========================================== -->
+
+<section class="about-section">
+
+    <div class="about-section-label">
+        01
+    </div>
+
+    <div class="about-section-content">
+
+        <p class="section-eyebrow">
+            THE MISSION
+        </p>
+
+        <h2>
+            Make healthy choices feel more understandable and realistic.
+        </h2>
+
+        <p>
+            Health information can be overwhelming. Recommendations change,
+            research can feel difficult to interpret, and everyday life rarely
+            looks as simple as a checklist.
+        </p>
+
+        <p>
+            My Simple Health exists to translate evidence-informed health
+            information into practical guidance people can actually use.
+            The goal is not perfection. It is helping people understand their
+            options, make informed choices, and build habits that support
+            long-term health.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     WHAT YOU'LL FIND
+========================================== -->
+
+<section class="about-section">
+
+    <div class="about-section-label">
+        02
+    </div>
+
+    <div class="about-section-content">
+
+        <p class="section-eyebrow">
+            WHAT YOU'LL FIND HERE
+        </p>
+
+        <h2>
+            Practical health education across everyday life.
+        </h2>
+
+        <div class="about-topic-grid">
+
+            <a href="nutrition.html" class="about-topic">
+                <span>01</span>
+                <h3>Nutrition</h3>
+                <p>
+                    Flexible, balanced approaches to eating and nourishing
+                    yourself without unnecessary complexity.
+                </p>
+            </a>
+
+
+            <a href="movement.html" class="about-topic">
+                <span>02</span>
+                <h3>Movement</h3>
+                <p>
+                    Practical ways to build activity, strength, mobility,
+                    and movement into everyday routines.
+                </p>
+            </a>
+
+
+            <a href="sleep.html" class="about-topic">
+                <span>03</span>
+                <h3>Sleep</h3>
+                <p>
+                    Evidence-informed guidance for sleep habits,
+                    routines, consistency, and restorative rest.
+                </p>
+            </a>
+
+
+            <a href="wellbeing.html" class="about-topic">
+                <span>04</span>
+                <h3>Wellbeing</h3>
+                <p>
+                    Resources for stress management, resilience,
+                    and supporting everyday well-being.
+                </p>
+            </a>
+
+
+            <a href="preventive-health.html" class="about-topic">
+                <span>05</span>
+                <h3>Preventive Health</h3>
+                <p>
+                    Understand screenings, routine care, health measurements,
+                    and other ways to stay informed about your health.
+                </p>
+            </a>
+
+
+            <a href="recipes.html" class="about-topic">
+                <span>06</span>
+                <h3>Recipes</h3>
+                <p>
+                    Simple, satisfying meals designed to make everyday
+                    eating practical, flexible, and enjoyable.
+                </p>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     APPROACH
+========================================== -->
+
+<section class="about-section">
+
+    <div class="about-section-label">
+        03
+    </div>
+
+    <div class="about-section-content">
+
+        <p class="section-eyebrow">
+            THE APPROACH
+        </p>
+
+        <h2>
+            Evidence-informed, practical, and grounded in everyday life.
+        </h2>
+
+        <div class="about-principles">
+
+            <div class="about-principle">
+
+                <h3>
+                    Understand the evidence.
+                </h3>
+
+                <p>
+                    Health guidance should be informed by credible research,
+                    public health recommendations, and the strength of the
+                    available evidence.
+                </p>
+
+            </div>
+
+
+            <div class="about-principle">
+
+                <h3>
+                    Translate it clearly.
+                </h3>
+
+                <p>
+                    Good information is not useful if people cannot understand
+                    what it means. My Simple Health focuses on clear explanations
+                    without unnecessary jargon.
+                </p>
+
+            </div>
+
+
+            <div class="about-principle">
+
+                <h3>
+                    Make it practical.
+                </h3>
+
+                <p>
+                    Health happens within real schedules, budgets, preferences,
+                    responsibilities, cultures, and circumstances.
+                </p>
+
+            </div>
+
+
+            <div class="about-principle">
+
+                <h3>
+                    Leave room for individuality.
+                </h3>
+
+                <p>
+                    There is rarely one perfect way to eat, move, sleep,
+                    or care for yourself. Health guidance should support
+                    informed choices rather than rigid rules.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     ABOUT THE FOUNDER
+========================================== -->
+
+<section class="about-founder">
+
+    <div class="about-founder-content">
+
+        <p class="section-eyebrow">
+            BEHIND MY SIMPLE HEALTH
+        </p>
+
+        <h2>
+            Hi, I'm Sieanna.
+        </h2>
+
+        <p>
+            I created My Simple Health from a long-standing interest in
+            health education, nutrition, physical activity, and public health.
+        </p>
+
+        <p>
+            My background in health science and epidemiology shapes the way
+            I approach health information: understand the evidence, look at
+            the larger population-health picture, and then translate what
+            matters into something useful for everyday life.
+        </p>
+
+        <p>
+            My Simple Health is where those interests come together through
+            health education, practical resources, recipes, and eventually
+            original health-data insights.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     DISCLAIMER / SCOPE
+========================================== -->
+
+<section class="about-note">
+
+    <p class="section-eyebrow">
+        A NOTE ABOUT HEALTH INFORMATION
+    </p>
+
+    <h2>
+        Education, not individual medical care.
+    </h2>
+
+    <p>
+        My Simple Health provides general health education and is not a
+        substitute for individualized medical advice, diagnosis, or treatment.
+        Health needs vary from person to person, so questions about your own
+        health should be discussed with an appropriate healthcare professional.
+    </p>
+
+</section>
+
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips and practical resources
+            delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =========================================
+     FOOTER
+========================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="about.html">About Me</a>
+            <a href="#mission">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<script>
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
