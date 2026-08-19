@@ -1,1 +1,2053 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Healthy Recipes | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- =========================================
+         RECIPES PAGE STYLES
+    ========================================== -->
+
+    <style>
+
+        /* =========================================
+           RECIPES HERO
+        ========================================== */
+
+        .recipes-hero {
+            background: var(--cream);
+            padding: 85px 5% 75px;
+            text-align: center;
+        }
+
+        .recipes-hero-inner {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .recipes-eyebrow {
+            margin-bottom: 14px;
+
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--sage);
+        }
+
+        .recipes-hero h1 {
+            margin: 0 0 20px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(46px, 6vw, 78px);
+            font-weight: 400;
+            line-height: 1;
+            color: var(--forest);
+        }
+
+        .recipes-hero-description {
+            max-width: 680px;
+            margin: 0 auto;
+
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--charcoal);
+        }
+
+
+        /* =========================================
+           RECIPE LIBRARY CONTROLS
+        ========================================== */
+
+        .recipe-library {
+            width: min(90%, 1250px);
+            margin: 0 auto;
+            padding: 75px 0 100px;
+        }
+
+        .recipe-library-heading {
+            text-align: center;
+            margin-bottom: 42px;
+        }
+
+        .recipe-library-heading p {
+            margin: 0 0 8px;
+
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.8px;
+            color: var(--sage);
+        }
+
+        .recipe-library-heading h2 {
+            margin: 0;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(38px, 4vw, 54px);
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+
+        /* Recipe Search */
+
+        .recipe-search-wrap {
+            max-width: 720px;
+            margin: 0 auto 36px;
+            position: relative;
+        }
+
+        .recipe-search-wrap i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            color: var(--sage);
+            font-size: 16px;
+        }
+
+        #recipeSearch {
+            width: 100%;
+            padding: 17px 20px 17px 50px;
+
+            border: 1px solid var(--soft-line);
+            background: var(--warm-white);
+
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            color: var(--charcoal);
+        }
+
+        #recipeSearch:focus {
+            outline: 1px solid var(--sage);
+        }
+
+
+        /* Category Filters */
+
+        .recipe-category-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            margin-bottom: 34px;
+        }
+
+        .recipe-filter-button {
+            padding: 10px 17px;
+
+            border: 1px solid var(--soft-line);
+            background: transparent;
+
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            color: var(--forest);
+
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .recipe-filter-button:hover,
+        .recipe-filter-button.active {
+            background: var(--forest);
+            border-color: var(--forest);
+            color: white;
+        }
+
+
+        /* Alphabetical Index */
+
+        .recipe-alphabet-wrap {
+            margin-bottom: 54px;
+            text-align: center;
+        }
+
+        .recipe-alphabet-label {
+            margin-bottom: 14px;
+
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.8px;
+            color: var(--sage);
+        }
+
+        .recipe-alphabet {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .alphabet-button {
+            width: 34px;
+            height: 34px;
+
+            border: 1px solid transparent;
+            background: transparent;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 15px;
+            color: var(--forest);
+
+            cursor: pointer;
+        }
+
+        .alphabet-button:hover,
+        .alphabet-button.active {
+            border-color: var(--forest);
+            background: var(--cream);
+        }
+
+        .alphabet-button.all-button {
+            width: auto;
+            padding: 0 12px;
+
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+
+        /* Results Bar */
+
+        .recipe-results-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 14px 0;
+            margin-bottom: 25px;
+
+            border-top: 1px solid var(--soft-line);
+            border-bottom: 1px solid var(--soft-line);
+        }
+
+        #recipeCount {
+            margin: 0;
+
+            font-size: 13px;
+            color: var(--charcoal);
+        }
+
+        #clearRecipeFilters {
+            border: none;
+            background: none;
+
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--forest);
+
+            cursor: pointer;
+        }
+
+
+        /* =========================================
+           RECIPE GRID
+        ========================================== */
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 34px 22px;
+        }
+
+        .recipe-card {
+            min-width: 0;
+        }
+
+        .recipe-card[hidden] {
+            display: none !important;
+        }
+
+        .recipe-image-wrap {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+
+            background: var(--cream);
+        }
+
+        .recipe-image-wrap img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+            display: block;
+
+            transition: transform 0.35s ease;
+        }
+
+        .recipe-card:hover .recipe-image-wrap img {
+            transform: scale(1.025);
+        }
+
+        .recipe-card-content {
+            padding: 17px 2px 0;
+        }
+
+        .recipe-card-category {
+            display: block;
+            margin-bottom: 7px;
+
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.3px;
+            color: var(--sage);
+        }
+
+        .recipe-card h3 {
+            margin: 0 0 8px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 21px;
+            font-weight: 400;
+            line-height: 1.25;
+            color: var(--forest);
+        }
+
+        .recipe-card a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .recipe-card-link {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--forest);
+        }
+
+
+        /* No Results */
+
+        .recipe-no-results {
+            display: none;
+
+            padding: 70px 20px;
+            text-align: center;
+        }
+
+        .recipe-no-results.active {
+            display: block;
+        }
+
+        .recipe-no-results h3 {
+            margin: 0 0 10px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 30px;
+            font-weight: 400;
+            color: var(--forest);
+        }
+
+        .recipe-no-results p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+
+        /* =========================================
+           MOBILE RECIPES
+        ========================================== */
+
+        @media (max-width: 1000px) {
+
+            .recipe-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+        }
+
+
+        @media (max-width: 800px) {
+
+            .recipes-hero {
+                padding: 60px 24px 52px;
+            }
+
+            .recipes-hero h1 {
+                font-size: 52px;
+            }
+
+            .recipe-library {
+                width: 100%;
+                padding: 55px 24px 75px;
+            }
+
+            .recipe-category-filters {
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 6px;
+            }
+
+            .recipe-filter-button {
+                white-space: nowrap;
+            }
+
+            .recipe-alphabet {
+                gap: 4px;
+            }
+
+            .alphabet-button {
+                width: 31px;
+                height: 31px;
+            }
+
+            .recipe-grid {
+                grid-template-columns: 1fr;
+                gap: 28px 14px;
+            }
+
+            .recipe-card h3 {
+                font-size: 18px;
+            }
+
+            .recipe-results-bar {
+                gap: 15px;
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .recipe-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+
+            .recipe-card-content {
+                padding-top: 12px;
+            }
+
+            .recipe-card h3 {
+                font-size: 17px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button type="button" onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main>
+
+
+<!-- =========================================
+     RECIPES HERO
+========================================== -->
+
+<section class="recipes-hero">
+
+    <div class="recipes-hero-inner">
+
+        <p class="recipes-eyebrow">
+            MY SIMPLE HEALTH RECIPES
+        </p>
+
+        <h1>
+            Everyday Recipes
+        </h1>
+
+        <p class="recipes-hero-description">
+            Simple, satisfying meals made for everyday life.
+            Explore colorful sheet pan meals, nourishing bowls,
+            fresh salads, tacos, and versatile homemade dressings.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     RECIPE LIBRARY
+========================================== -->
+
+<section class="recipe-library">
+
+    <div class="recipe-library-heading">
+
+        <p>
+            FIND YOUR NEXT MEAL
+        </p>
+
+        <h2>
+            Browse the recipe library.
+        </h2>
+
+    </div>
+
+
+    <!-- Recipe Search -->
+
+    <div class="recipe-search-wrap">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+            type="search"
+            id="recipeSearch"
+            placeholder="Search recipes, ingredients, or categories..."
+            aria-label="Search recipes"
+        >
+
+    </div>
+
+
+
+    <!-- Category Filters -->
+
+    <div class="recipe-category-filters">
+
+        <button
+            class="recipe-filter-button active"
+            data-category="all">
+            ALL RECIPES
+        </button>
+
+        <button
+            class="recipe-filter-button"
+            data-category="sheet-pan">
+            SHEET PAN
+        </button>
+
+        <button
+            class="recipe-filter-button"
+            data-category="bowls">
+            BOWLS
+        </button>
+
+        <button
+            class="recipe-filter-button"
+            data-category="salads">
+            SALADS
+        </button>
+
+        <button
+            class="recipe-filter-button"
+            data-category="tacos">
+            TACOS
+        </button>
+
+        <button
+            class="recipe-filter-button"
+            data-category="dressings">
+            DRESSINGS
+        </button>
+
+    </div>
+
+
+
+    <!-- Alphabetical Index -->
+
+    <div class="recipe-alphabet-wrap">
+
+        <p class="recipe-alphabet-label">
+            BROWSE A-Z
+        </p>
+
+        <div class="recipe-alphabet">
+
+            <button class="alphabet-button all-button active"
+                    data-letter="all">
+                ALL
+            </button>
+
+            <button class="alphabet-button" data-letter="A">A</button>
+            <button class="alphabet-button" data-letter="B">B</button>
+            <button class="alphabet-button" data-letter="C">C</button>
+            <button class="alphabet-button" data-letter="D">D</button>
+            <button class="alphabet-button" data-letter="E">E</button>
+            <button class="alphabet-button" data-letter="F">F</button>
+            <button class="alphabet-button" data-letter="G">G</button>
+            <button class="alphabet-button" data-letter="H">H</button>
+            <button class="alphabet-button" data-letter="I">I</button>
+            <button class="alphabet-button" data-letter="J">J</button>
+            <button class="alphabet-button" data-letter="K">K</button>
+            <button class="alphabet-button" data-letter="L">L</button>
+            <button class="alphabet-button" data-letter="M">M</button>
+            <button class="alphabet-button" data-letter="N">N</button>
+            <button class="alphabet-button" data-letter="O">O</button>
+            <button class="alphabet-button" data-letter="P">P</button>
+            <button class="alphabet-button" data-letter="Q">Q</button>
+            <button class="alphabet-button" data-letter="R">R</button>
+            <button class="alphabet-button" data-letter="S">S</button>
+            <button class="alphabet-button" data-letter="T">T</button>
+            <button class="alphabet-button" data-letter="U">U</button>
+            <button class="alphabet-button" data-letter="V">V</button>
+            <button class="alphabet-button" data-letter="W">W</button>
+            <button class="alphabet-button" data-letter="X">X</button>
+            <button class="alphabet-button" data-letter="Y">Y</button>
+            <button class="alphabet-button" data-letter="Z">Z</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Results -->
+
+    <div class="recipe-results-bar">
+
+        <p id="recipeCount">
+            38 recipes
+        </p>
+
+        <button id="clearRecipeFilters" type="button">
+            Clear filters
+        </button>
+
+    </div>
+
+
+
+    <!-- =========================================
+         ALL 38 RECIPES
+    ========================================== -->
+
+    <div class="recipe-grid" id="recipeGrid">
+
+
+        <!-- SHEET PAN MEALS -->
+
+
+        <article class="recipe-card"
+                 data-name="Mediterranean Chicken & Vegetables"
+                 data-category="sheet-pan"
+                 data-letter="M"
+                 data-search="mediterranean chicken vegetables sheet pan chicken vegetables">
+
+            <a href="mediterranean-chicken-vegetables.html">
+                <div class="recipe-image-wrap">
+                    <img src="mediterranean-chicken-vegetables.png"
+                         alt="Mediterranean Chicken and Vegetables">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="mediterranean-chicken-vegetables.html">Mediterranean Chicken &amp; Vegetables</a></h3>
+                <a href="mediterranean-chicken-vegetables.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Dijon Maple Steak & Brussels Sprouts"
+                 data-category="sheet-pan"
+                 data-letter="D"
+                 data-search="dijon maple steak brussels sprouts sheet pan beef">
+
+            <a href="dijon-maple-steak-brussels.html">
+                <div class="recipe-image-wrap">
+                    <img src="dijon-maple-steak-brussels.png"
+                         alt="Dijon Maple Steak and Brussels Sprouts">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="dijon-maple-steak-brussels.html">Dijon Maple Steak &amp; Brussels Sprouts</a></h3>
+                <a href="dijon-maple-steak-brussels.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Garlic Herb Chicken & Broccolini"
+                 data-category="sheet-pan"
+                 data-letter="G"
+                 data-search="garlic herb chicken broccolini sheet pan">
+
+            <a href="garlic-herb-chicken-broccolini.html">
+                <div class="recipe-image-wrap">
+                    <img src="garlic-herb-chicken-broccolini.png"
+                         alt="Garlic Herb Chicken and Broccolini">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="garlic-herb-chicken-broccolini.html">Garlic Herb Chicken &amp; Broccolini</a></h3>
+                <a href="garlic-herb-chicken-broccolini.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Lemon Herb Salmon & Vegetables"
+                 data-category="sheet-pan"
+                 data-letter="L"
+                 data-search="lemon herb salmon vegetables sheet pan fish">
+
+            <a href="lemon-herb-salmon-vegetables.html">
+                <div class="recipe-image-wrap">
+                    <img src="lemon-herb-salmon-vegetables.png"
+                         alt="Lemon Herb Salmon and Vegetables">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="lemon-herb-salmon-vegetables.html">Lemon Herb Salmon &amp; Vegetables</a></h3>
+                <a href="lemon-herb-salmon-vegetables.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Parmesan Herb Cod & Asparagus"
+                 data-category="sheet-pan"
+                 data-letter="P"
+                 data-search="parmesan herb cod asparagus sheet pan fish">
+
+            <a href="parmesan-herb-cod-asparagus.html">
+                <div class="recipe-image-wrap">
+                    <img src="parmesan-herb-cod-asparagus.png"
+                         alt="Parmesan Herb Cod and Asparagus">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="parmesan-herb-cod-asparagus.html">Parmesan Herb Cod &amp; Asparagus</a></h3>
+                <a href="parmesan-herb-cod-asparagus.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Mediterranean Sheet Pan Salmon"
+                 data-category="sheet-pan"
+                 data-letter="M"
+                 data-search="mediterranean sheet pan salmon vegetables fish">
+
+            <a href="mediterranean-sheet-pan-salmon.html">
+                <div class="recipe-image-wrap">
+                    <img src="mediterranean-sheet-pan-salmon.png"
+                         alt="Mediterranean Sheet Pan Salmon">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="mediterranean-sheet-pan-salmon.html">Mediterranean Sheet Pan Salmon</a></h3>
+                <a href="mediterranean-sheet-pan-salmon.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Turkey Meatballs & Roasted Vegetables"
+                 data-category="sheet-pan"
+                 data-letter="T"
+                 data-search="turkey meatballs roasted vegetables sheet pan">
+
+            <a href="turkey-meatballs-roasted-vegetables.html">
+                <div class="recipe-image-wrap">
+                    <img src="turkey-meatballs-roasted-vegetables.png"
+                         alt="Turkey Meatballs and Roasted Vegetables">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="turkey-meatballs-roasted-vegetables.html">Turkey Meatballs &amp; Roasted Vegetables</a></h3>
+                <a href="turkey-meatballs-roasted-vegetables.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Honey Garlic Shrimp & Green Beans"
+                 data-category="sheet-pan"
+                 data-letter="H"
+                 data-search="honey garlic shrimp green beans sheet pan seafood">
+
+            <a href="honey-garlic-shrimp-green-beans.html">
+                <div class="recipe-image-wrap">
+                    <img src="honey-garlic-shrimp-green-beans.png"
+                         alt="Honey Garlic Shrimp and Green Beans">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SHEET PAN</span>
+                <h3><a href="honey-garlic-shrimp-green-beans.html">Honey Garlic Shrimp &amp; Green Beans</a></h3>
+                <a href="honey-garlic-shrimp-green-beans.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <!-- BOWLS -->
+
+
+        <article class="recipe-card"
+                 data-name="Harvest Salmon Bowl"
+                 data-category="bowls"
+                 data-letter="H"
+                 data-search="harvest salmon bowl fish vegetables">
+
+            <a href="harvest-salmon-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="harvest-salmon-bowl.png"
+                         alt="Harvest Salmon Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="harvest-salmon-bowl.html">Harvest Salmon Bowl</a></h3>
+                <a href="harvest-salmon-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Sesame Chicken Bowl"
+                 data-category="bowls"
+                 data-letter="S"
+                 data-search="sesame chicken bowl rice">
+
+            <a href="sesame-chicken-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="sesame-chicken-bowl.png"
+                         alt="Sesame Chicken Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="sesame-chicken-bowl.html">Sesame Chicken Bowl</a></h3>
+                <a href="sesame-chicken-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Steak & Sweet Potato Bowl"
+                 data-category="bowls"
+                 data-letter="S"
+                 data-search="steak sweet potato bowl beef">
+
+            <a href="steak-sweet-potato-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="steak-sweet-potato-bowl.png"
+                         alt="Steak and Sweet Potato Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="steak-sweet-potato-bowl.html">Steak &amp; Sweet Potato Bowl</a></h3>
+                <a href="steak-sweet-potato-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Greek Chicken Bowl"
+                 data-category="bowls"
+                 data-letter="G"
+                 data-search="greek chicken bowl mediterranean">
+
+            <a href="greek-chicken-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="greek-chicken-bowl.png"
+                         alt="Greek Chicken Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="greek-chicken-bowl.html">Greek Chicken Bowl</a></h3>
+                <a href="greek-chicken-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Taco Burrito Bowl"
+                 data-category="bowls"
+                 data-letter="T"
+                 data-search="taco burrito bowl mexican">
+
+            <a href="taco-burrito-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="taco-burrito-bowl.png"
+                         alt="Taco Burrito Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="taco-burrito-bowl.html">Taco Burrito Bowl</a></h3>
+                <a href="taco-burrito-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Mediterranean Chicken Grain Bowl"
+                 data-category="bowls"
+                 data-letter="M"
+                 data-search="mediterranean chicken grain bowl">
+
+            <a href="mediterranean-chicken-grain-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="mediterranean-chicken-grain-bowl.png"
+                         alt="Mediterranean Chicken Grain Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="mediterranean-chicken-grain-bowl.html">Mediterranean Chicken Grain Bowl</a></h3>
+                <a href="mediterranean-chicken-grain-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Teriyaki Catfish, Brussels & Rice Bowl"
+                 data-category="bowls"
+                 data-letter="T"
+                 data-search="teriyaki catfish brussels rice bowl fish">
+
+            <a href="teriyaki-catfish-rice-bowl.html">
+                <div class="recipe-image-wrap">
+                    <img src="teriyaki-catfish-rice-bowl.png"
+                         alt="Teriyaki Catfish Brussels and Rice Bowl">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">BOWLS</span>
+                <h3><a href="teriyaki-catfish-rice-bowl.html">Teriyaki Catfish, Brussels &amp; Rice Bowl</a></h3>
+                <a href="teriyaki-catfish-rice-bowl.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <!-- SALADS -->
+
+
+        <article class="recipe-card"
+                 data-name="Bleu Cheese Steak Salad"
+                 data-category="salads"
+                 data-letter="B"
+                 data-search="bleu blue cheese steak salad beef">
+
+            <a href="bleu-cheese-steak-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="bleu-cheese-steak-salad.png"
+                         alt="Bleu Cheese Steak Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="bleu-cheese-steak-salad.html">Bleu Cheese Steak Salad</a></h3>
+                <a href="bleu-cheese-steak-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Mediterranean Chicken Salad"
+                 data-category="salads"
+                 data-letter="M"
+                 data-search="mediterranean chicken salad feta olives">
+
+            <a href="mediterranean-chicken-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="mediterranean-chicken-salad.png"
+                         alt="Mediterranean Chicken Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="mediterranean-chicken-salad.html">Mediterranean Chicken Salad</a></h3>
+                <a href="mediterranean-chicken-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Sesame Chicken Crunch Salad"
+                 data-category="salads"
+                 data-letter="S"
+                 data-search="sesame chicken crunch salad cabbage">
+
+            <a href="sesame-chicken-crunch-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="sesame-chicken-crunch-salad.png"
+                         alt="Sesame Chicken Crunch Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="sesame-chicken-crunch-salad.html">Sesame Chicken Crunch Salad</a></h3>
+                <a href="sesame-chicken-crunch-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Southwest Shrimp Salad"
+                 data-category="salads"
+                 data-letter="S"
+                 data-search="southwest shrimp salad corn black beans avocado">
+
+            <a href="southwest-shrimp-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="southwest-shrimp-salad.png"
+                         alt="Southwest Shrimp Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="southwest-shrimp-salad.html">Southwest Shrimp Salad</a></h3>
+                <a href="southwest-shrimp-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Apple Pecan Chicken Salad"
+                 data-category="salads"
+                 data-letter="A"
+                 data-search="apple pecan chicken salad">
+
+            <a href="apple-pecan-chicken-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="apple-pecan-chicken-salad.png"
+                         alt="Apple Pecan Chicken Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="apple-pecan-chicken-salad.html">Apple Pecan Chicken Salad</a></h3>
+                <a href="apple-pecan-chicken-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Kale Caesar Chicken Salad"
+                 data-category="salads"
+                 data-letter="K"
+                 data-search="kale caesar chicken salad parmesan">
+
+            <a href="kale-caesar-chicken-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="kale-caesar-chicken-salad.png"
+                         alt="Kale Caesar Chicken Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="kale-caesar-chicken-salad.html">Kale Caesar Chicken Salad</a></h3>
+                <a href="kale-caesar-chicken-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Strawberry Goat Cheese Salad"
+                 data-category="salads"
+                 data-letter="S"
+                 data-search="strawberry goat cheese salad">
+
+            <a href="strawberry-goat-cheese-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="strawberry-goat-cheese-salad.png"
+                         alt="Strawberry Goat Cheese Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="strawberry-goat-cheese-salad.html">Strawberry Goat Cheese Salad</a></h3>
+                <a href="strawberry-goat-cheese-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Citrus Avocado Salmon Salad"
+                 data-category="salads"
+                 data-letter="C"
+                 data-search="citrus avocado salmon salad fish">
+
+            <a href="citrus-avocado-salmon-salad.html">
+                <div class="recipe-image-wrap">
+                    <img src="citrus-avocado-salmon-salad.png"
+                         alt="Citrus Avocado Salmon Salad">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">SALADS</span>
+                <h3><a href="citrus-avocado-salmon-salad.html">Citrus Avocado Salmon Salad</a></h3>
+                <a href="citrus-avocado-salmon-salad.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <!-- TACOS -->
+
+
+        <article class="recipe-card"
+                 data-name="Blackened Cod Tacos"
+                 data-category="tacos"
+                 data-letter="B"
+                 data-search="blackened cod tacos fish">
+
+            <a href="blackened-cod-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="blackened-cod-tacos.png"
+                         alt="Blackened Cod Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="blackened-cod-tacos.html">Blackened Cod Tacos</a></h3>
+                <a href="blackened-cod-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Honey Lime Shrimp Tacos"
+                 data-category="tacos"
+                 data-letter="H"
+                 data-search="honey lime shrimp tacos seafood">
+
+            <a href="honey-lime-shrimp-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="honey-lime-shrimp-tacos.png"
+                         alt="Honey Lime Shrimp Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="honey-lime-shrimp-tacos.html">Honey Lime Shrimp Tacos</a></h3>
+                <a href="honey-lime-shrimp-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Crispy Carnitas Tacos"
+                 data-category="tacos"
+                 data-letter="C"
+                 data-search="crispy carnitas tacos pork">
+
+            <a href="crispy-carnitas-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="crispy-carnitas-tacos.png"
+                         alt="Crispy Carnitas Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="crispy-carnitas-tacos.html">Crispy Carnitas Tacos</a></h3>
+                <a href="crispy-carnitas-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Ground Turkey Street Tacos"
+                 data-category="tacos"
+                 data-letter="G"
+                 data-search="ground turkey street tacos">
+
+            <a href="ground-turkey-street-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="ground-turkey-street-tacos.png"
+                         alt="Ground Turkey Street Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="ground-turkey-street-tacos.html">Ground Turkey Street Tacos</a></h3>
+                <a href="ground-turkey-street-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Steak Fajita Tacos"
+                 data-category="tacos"
+                 data-letter="S"
+                 data-search="steak fajita tacos beef peppers">
+
+            <a href="steak-fajita-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="steak-fajita-tacos.png"
+                         alt="Steak Fajita Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="steak-fajita-tacos.html">Steak Fajita Tacos</a></h3>
+                <a href="steak-fajita-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Baja Fish Tacos"
+                 data-category="tacos"
+                 data-letter="B"
+                 data-search="baja fish tacos">
+
+            <a href="baja-fish-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="baja-fish-tacos.png"
+                         alt="Baja Fish Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="baja-fish-tacos.html">Baja Fish Tacos</a></h3>
+                <a href="baja-fish-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Chicken Tinga Tacos"
+                 data-category="tacos"
+                 data-letter="C"
+                 data-search="chicken tinga tacos">
+
+            <a href="chicken-tinga-tacos.html">
+                <div class="recipe-image-wrap">
+                    <img src="chicken-tinga-tacos.png"
+                         alt="Chicken Tinga Tacos">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">TACOS</span>
+                <h3><a href="chicken-tinga-tacos.html">Chicken Tinga Tacos</a></h3>
+                <a href="chicken-tinga-tacos.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <!-- DRESSINGS -->
+
+
+        <article class="recipe-card"
+                 data-name="Creamy Lemon Tahini Dressing"
+                 data-category="dressings"
+                 data-letter="C"
+                 data-search="creamy lemon tahini dressing sauce sesame tahini lemon garlic dijon salads bowls vegetables wraps tacos">
+
+            <a href="creamy-lemon-tahini-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="creamy-lemon-tahini-dressing.png"
+                         alt="Creamy Lemon Tahini Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="creamy-lemon-tahini-dressing.html">Creamy Lemon Tahini Dressing</a></h3>
+                <a href="creamy-lemon-tahini-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Creamy Avocado Lime Ranch Dressing"
+                 data-category="dressings"
+                 data-letter="C"
+                 data-search="creamy avocado lime ranch dressing avocado cilantro garlic cumin salads bowls tacos wraps">
+
+            <a href="creamy-avocado-lime-ranch-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="creamy-avocado-lime-ranch-dressing.png"
+                         alt="Creamy Avocado Lime Ranch Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="creamy-avocado-lime-ranch-dressing.html">Creamy Avocado Lime Ranch Dressing</a></h3>
+                <a href="creamy-avocado-lime-ranch-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Balsamic Vinaigrette Dressing"
+                 data-category="dressings"
+                 data-letter="B"
+                 data-search="balsamic vinaigrette dressing vinegar olive oil dijon honey garlic oregano salads vegetables bowls marinade">
+
+            <a href="balsamic-vinaigrette-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="balsamic-vinaigrette-dressing.png"
+                         alt="Balsamic Vinaigrette Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="balsamic-vinaigrette-dressing.html">Balsamic Vinaigrette Dressing</a></h3>
+                <a href="balsamic-vinaigrette-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Honey Mustard Dressing"
+                 data-category="dressings"
+                 data-letter="H"
+                 data-search="honey mustard dressing dijon honey apple cider vinegar garlic salads wraps vegetables bowls">
+
+            <a href="honey-mustard-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="honey-mustard-dressing.png"
+                         alt="Honey Mustard Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="honey-mustard-dressing.html">Honey Mustard Dressing</a></h3>
+                <a href="honey-mustard-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Creamy Garlic Parmesan Dressing"
+                 data-category="dressings"
+                 data-letter="C"
+                 data-search="creamy garlic parmesan dressing parmesan lemon dijon yogurt mayonnaise salads bowls vegetables wraps sandwiches">
+
+            <a href="creamy-garlic-parmesan-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="creamy-garlic-parmesan-dressing.png"
+                         alt="Creamy Garlic Parmesan Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="creamy-garlic-parmesan-dressing.html">Creamy Garlic Parmesan Dressing</a></h3>
+                <a href="creamy-garlic-parmesan-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Asian-Inspired Dressing"
+                 data-category="dressings"
+                 data-letter="A"
+                 data-search="asian inspired asian-inspired dressing sesame soy ginger garlic rice vinegar">
+
+            <a href="asian-inspired-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="asian-inspired-dressing.png"
+                         alt="Asian-Inspired Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="asian-inspired-dressing.html">Asian-Inspired Dressing</a></h3>
+                <a href="asian-inspired-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Bleu Cheese Dressing"
+                 data-category="dressings"
+                 data-letter="B"
+                 data-search="bleu blue cheese dressing sour cream buttermilk lemon dijon salads wedge wraps bowls dip">
+
+            <a href="bleu-cheese-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="bleu-cheese-dressing.png"
+                         alt="Bleu Cheese Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="bleu-cheese-dressing.html">Bleu Cheese Dressing</a></h3>
+                <a href="bleu-cheese-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+
+        <article class="recipe-card"
+                 data-name="Sriracha Honey Dressing"
+                 data-category="dressings"
+                 data-letter="S"
+                 data-search="sriracha honey dressing spicy rice vinegar soy ginger garlic sesame salads bowls noodles stir fries marinade">
+
+            <a href="sriracha-honey-dressing.html">
+                <div class="recipe-image-wrap">
+                    <img src="sriracha-honey-dressing.png"
+                         alt="Sriracha Honey Dressing">
+                </div>
+            </a>
+
+            <div class="recipe-card-content">
+                <span class="recipe-card-category">DRESSINGS</span>
+                <h3><a href="sriracha-honey-dressing.html">Sriracha Honey Dressing</a></h3>
+                <a href="sriracha-honey-dressing.html" class="recipe-card-link">View Recipe →</a>
+            </div>
+
+        </article>
+
+
+    </div>
+
+
+
+    <!-- No Results -->
+
+    <div class="recipe-no-results" id="recipeNoResults">
+
+        <h3>
+            No recipes found.
+        </h3>
+
+        <p>
+            Try another search, category, or letter.
+        </p>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips, practical resources,
+            and new recipes delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =========================================
+     FOOTER
+========================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="#">Resources</a>
+            <a href="#">Blog</a>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="#">About Me</a>
+            <a href="#">Mission &amp; Values</a>
+            <a href="#">Work With Me</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================== -->
+
+<script>
+
+
+    /* =========================================
+       HEADER SEARCH
+    ========================================== */
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+
+    /* =========================================
+       MOBILE MENU
+    ========================================== */
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+
+
+    /* =========================================
+       RECIPE LIBRARY FILTERING
+    ========================================== */
+
+    const recipeCards =
+        Array.from(document.querySelectorAll(".recipe-card"));
+
+    const recipeSearch =
+        document.getElementById("recipeSearch");
+
+    const categoryButtons =
+        document.querySelectorAll(".recipe-filter-button");
+
+    const alphabetButtons =
+        document.querySelectorAll(".alphabet-button");
+
+    const recipeCount =
+        document.getElementById("recipeCount");
+
+    const noResults =
+        document.getElementById("recipeNoResults");
+
+    const clearFiltersButton =
+        document.getElementById("clearRecipeFilters");
+
+
+    let activeCategory = "all";
+    let activeLetter = "all";
+
+
+
+    function filterRecipes() {
+
+        const searchTerm =
+            recipeSearch.value.trim().toLowerCase();
+
+        let visibleCount = 0;
+
+
+        recipeCards.forEach(function(card) {
+
+            const name =
+                card.dataset.name.toLowerCase();
+
+            const category =
+                card.dataset.category;
+
+            const letter =
+                card.dataset.letter;
+
+            const searchableText =
+                card.dataset.search.toLowerCase();
+
+
+            const matchesSearch =
+                searchTerm === "" ||
+                name.includes(searchTerm) ||
+                searchableText.includes(searchTerm);
+
+
+            const matchesCategory =
+                activeCategory === "all" ||
+                category === activeCategory;
+
+
+            const matchesLetter =
+                activeLetter === "all" ||
+                letter === activeLetter;
+
+
+            const showCard =
+                matchesSearch &&
+                matchesCategory &&
+                matchesLetter;
+
+
+            card.hidden = !showCard;
+
+
+            if (showCard) {
+                visibleCount++;
+            }
+
+        });
+
+
+
+        recipeCount.textContent =
+            visibleCount === 1
+                ? "1 recipe"
+                : visibleCount + " recipes";
+
+
+        if (visibleCount === 0) {
+            noResults.classList.add("active");
+        } else {
+            noResults.classList.remove("active");
+        }
+
+    }
+
+
+
+    /* Search as user types */
+
+    recipeSearch.addEventListener("input", filterRecipes);
+
+
+
+    /* Category filters */
+
+    categoryButtons.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            activeCategory =
+                button.dataset.category;
+
+
+            categoryButtons.forEach(function(item) {
+                item.classList.remove("active");
+            });
+
+
+            button.classList.add("active");
+
+            filterRecipes();
+
+        });
+
+    });
+
+
+
+    /* Alphabet filters */
+
+    alphabetButtons.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            activeLetter =
+                button.dataset.letter;
+
+
+            alphabetButtons.forEach(function(item) {
+                item.classList.remove("active");
+            });
+
+
+            button.classList.add("active");
+
+            filterRecipes();
+
+        });
+
+    });
+
+
+
+    /* Clear everything */
+
+    clearFiltersButton.addEventListener("click", function() {
+
+        activeCategory = "all";
+        activeLetter = "all";
+
+        recipeSearch.value = "";
+
+
+        categoryButtons.forEach(function(button) {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.category === "all"
+            );
+
+        });
+
+
+        alphabetButtons.forEach(function(button) {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.letter === "all"
+            );
+
+        });
+
+
+        filterRecipes();
+
+    });
+
+
+
+    /* Start page with all recipes visible */
+
+    filterRecipes();
+
+
+</script>
+
+
+</body>
+
+</html>
