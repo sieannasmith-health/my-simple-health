@@ -1471,11 +1471,13 @@ body {
    TOPICS PAGE - FINAL LAYOUT FIXES
 ======================================== */
 
-.topics-page {
+.topics-page .topics-intro .eyebrow {
     display: block !important;
-    grid-template-columns: none !important;
-    gap: 0 !important;
-    align-items: initial !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 14px 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
 }
 
 .topics-page .topics-intro {
