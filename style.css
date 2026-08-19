@@ -1470,7 +1470,10 @@ body {
 ======================================== */
 
 .topics-page {
-    display: block;
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    align-items: initial !important;
 }
 
 .topics-page .topics-intro {
