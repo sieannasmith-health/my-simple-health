@@ -1,1 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Free Health Resources | My Simple Health</title>
+
+    <meta name="description"
+          content="Explore free practical health guides, checklists, worksheets, and tools from My Simple Health.">
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+
+<body>
+
+
+<!-- ========================================
+     HEADER
+======================================== -->
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+
+        <i class="fa-solid fa-bars"></i>
+
+    </button>
+
+
+    <nav class="site-nav">
+
+        <a href="index.html">Home</a>
+
+        <a href="about.html">About</a>
+
+        <a href="topics.html">Topics</a>
+
+        <a href="recipes.html">Recipes</a>
+
+        <a href="blog.html">Blog</a>
+
+        <a href="contact.html">Contact</a>
+
+    </nav>
+
+
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+        </button>
+
+
+        <div class="search-box" id="searchBox">
+
+            <input type="search"
+                   id="siteSearch"
+                   placeholder="Search My Simple Health..."
+                   aria-label="Search My Simple Health">
+
+            <button type="button"
+                    onclick="runSearch()">
+
+                Search
+
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- ========================================
+     RESOURCE HERO
+======================================== -->
+
+<section class="resources-hero">
+
+    <div class="resources-hero-inner">
+
+        <p class="section-label">
+            FREE RESOURCE LIBRARY
+        </p>
+
+        <h1>
+            Practical tools for<br>
+            everyday health.
+        </h1>
+
+        <p class="resources-hero-intro">
+            Simple guides, checklists, worksheets, and tools designed
+            to help you understand your health and put what you learn
+            into practice.
+        </p>
+
+        <a class="resources-hero-button"
+           href="#resource-library">
+
+            EXPLORE THE LIBRARY ↓
+
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- ========================================
+     RESOURCE CATEGORIES
+======================================== -->
+
+<section class="resource-categories">
+
+    <div class="resource-section-heading">
+
+        <p class="section-label">
+            EXPLORE BY TOPIC
+        </p>
+
+        <h2>
+            Resources for real life.
+        </h2>
+
+        <p>
+            Find practical tools organized around the areas of health
+            you want to understand, strengthen, or support.
+        </p>
+
+    </div>
+
+
+    <div class="resource-category-grid">
+
+
+        <a class="resource-category"
+           href="#nutrition-resources">
+
+            <span>01</span>
+
+            <h3>Nutrition</h3>
+
+            <p>
+                Tools for building a balanced, flexible,
+                and sustainable approach to eating.
+            </p>
+
+            <strong>
+                EXPLORE →
+            </strong>
+
+        </a>
+
+
+        <a class="resource-category"
+           href="#movement-resources">
+
+            <span>02</span>
+
+            <h3>Movement</h3>
+
+            <p>
+                Simple resources for supporting everyday
+                movement and physical activity.
+            </p>
+
+            <strong>
+                EXPLORE →
+            </strong>
+
+        </a>
+
+
+        <a class="resource-category"
+           href="#sleep-resources">
+
+            <span>03</span>
+
+            <h3>Sleep</h3>
+
+            <p>
+                Guides and checklists for understanding
+                and supporting healthy sleep habits.
+            </p>
+
+            <strong>
+                EXPLORE →
+            </strong>
+
+        </a>
+
+
+        <a class="resource-category"
+           href="#wellbeing-resources">
+
+            <span>04</span>
+
+            <h3>Wellbeing</h3>
+
+            <p>
+                Practical tools for habits, stress,
+                reflection, and everyday wellbeing.
+            </p>
+
+            <strong>
+                EXPLORE →
+            </strong>
+
+        </a>
+
+
+        <a class="resource-category"
+           href="#prevention-resources">
+
+            <span>05</span>
+
+            <h3>Prevention</h3>
+
+            <p>
+                Resources that make preventive health
+                information easier to understand and use.
+            </p>
+
+            <strong>
+                EXPLORE →
+            </strong>
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ========================================
+     RESOURCE LIBRARY
+======================================== -->
+
+<section class="resource-library"
+         id="resource-library">
+
+
+    <div class="resource-section-heading">
+
+        <p class="section-label">
+            THE LIBRARY
+        </p>
+
+        <h2>
+            Free health resources.
+        </h2>
+
+        <p>
+            Downloadable tools designed to turn health information
+            into something practical.
+        </p>
+
+    </div>
+
+
+
+    <!-- NUTRITION -->
+
+    <div class="resource-topic-section"
+         id="nutrition-resources">
+
+        <div class="resource-topic-heading">
+
+            <p class="section-label">
+                NUTRITION
+            </p>
+
+            <h2>
+                Eat well without making it complicated.
+            </h2>
+
+        </div>
+
+
+        <div class="resource-download-grid">
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-regular fa-file-lines"></i>
+                </div>
+
+                <p class="resource-type">
+                    GUIDE
+                </p>
+
+                <h3>
+                    The Balanced Plate Guide
+                </h3>
+
+                <p>
+                    A simple visual guide for building satisfying,
+                    balanced everyday meals.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+
+                <p class="resource-type">
+                    CHECKLIST
+                </p>
+
+                <h3>
+                    Everyday Grocery Guide
+                </h3>
+
+                <p>
+                    A practical framework for creating a flexible
+                    grocery list that supports balanced meals.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- MOVEMENT -->
+
+    <div class="resource-topic-section"
+         id="movement-resources">
+
+        <div class="resource-topic-heading">
+
+            <p class="section-label">
+                MOVEMENT
+            </p>
+
+            <h2>
+                Make movement fit your life.
+            </h2>
+
+        </div>
+
+
+        <div class="resource-download-grid">
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-solid fa-person-walking"></i>
+                </div>
+
+                <p class="resource-type">
+                    WORKSHEET
+                </p>
+
+                <h3>
+                    Weekly Movement Planner
+                </h3>
+
+                <p>
+                    Plan realistic opportunities for walking,
+                    strength, mobility, and everyday movement.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SLEEP -->
+
+    <div class="resource-topic-section"
+         id="sleep-resources">
+
+        <div class="resource-topic-heading">
+
+            <p class="section-label">
+                SLEEP
+            </p>
+
+            <h2>
+                Build better sleep habits.
+            </h2>
+
+        </div>
+
+
+        <div class="resource-download-grid">
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-regular fa-moon"></i>
+                </div>
+
+                <p class="resource-type">
+                    CHECKLIST
+                </p>
+
+                <h3>
+                    Better Sleep Checklist
+                </h3>
+
+                <p>
+                    A simple checklist for reviewing the habits
+                    and environment that can support healthy sleep.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- WELLBEING -->
+
+    <div class="resource-topic-section"
+         id="wellbeing-resources">
+
+        <div class="resource-topic-heading">
+
+            <p class="section-label">
+                WELLBEING
+            </p>
+
+            <h2>
+                Support your everyday wellbeing.
+            </h2>
+
+        </div>
+
+
+        <div class="resource-download-grid">
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </div>
+
+                <p class="resource-type">
+                    WORKSHEET
+                </p>
+
+                <h3>
+                    Healthy Habits Reflection
+                </h3>
+
+                <p>
+                    A guided worksheet for identifying what is
+                    working, what feels difficult, and one realistic
+                    next step.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PREVENTION -->
+
+    <div class="resource-topic-section"
+         id="prevention-resources">
+
+        <div class="resource-topic-heading">
+
+            <p class="section-label">
+                PREVENTION
+            </p>
+
+            <h2>
+                Know your health.
+            </h2>
+
+        </div>
+
+
+        <div class="resource-download-grid">
+
+
+            <article class="resource-download-card">
+
+                <div class="resource-card-icon">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+
+                <p class="resource-type">
+                    TRACKER
+                </p>
+
+                <h3>
+                    Know Your Numbers
+                </h3>
+
+                <p>
+                    A simple place to record and understand important
+                    preventive health measurements and screening information.
+                </p>
+
+                <span class="resource-coming">
+                    COMING SOON
+                </span>
+
+            </article>
+
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- ========================================
+     RESOURCE NOTE
+======================================== -->
+
+<section class="resource-note">
+
+    <div class="resource-note-inner">
+
+        <p class="section-label">
+            SIMPLE. PRACTICAL. INFORMED.
+        </p>
+
+        <h2>
+            Health information should help you
+            make sense of your health.
+        </h2>
+
+        <p>
+            My Simple Health resources are designed to complement
+            evidence-informed health education with practical tools
+            you can use in everyday life.
+        </p>
+
+        <a href="topics.html">
+            EXPLORE HEALTH TOPICS →
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- ========================================
+     NEWSLETTER
+======================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips and practical resources
+            delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input type="text"
+               placeholder="First name"
+               aria-label="First name">
+
+        <input type="email"
+               placeholder="Email address"
+               aria-label="Email address">
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+
+<!-- ========================================
+     FOOTER
+======================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-main">
+
+
+        <div class="footer-brand">
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
+            <p>
+                Practical, evidence-informed<br>
+                health education for everyday life.
+            </p>
+
+
+            <div class="footer-socials">
+
+                <a href="https://www.instagram.com/hellomysimplehealth/"
+                   aria-label="Instagram">
+
+                    <i class="fa-brands fa-instagram"></i>
+
+                </a>
+
+
+                <a href="https://www.linkedin.com/company/143299965/"
+                   aria-label="LinkedIn">
+
+                    <i class="fa-brands fa-linkedin-in"></i>
+
+                </a>
+
+
+                <a href="https://www.pinterest.com/hellomysimplehealth/"
+                   aria-label="Pinterest">
+
+                    <i class="fa-brands fa-pinterest-p"></i>
+
+                </a>
+
+
+                <a href="mailto:hello.mysimplehealth@gmail.com"
+                   aria-label="Email">
+
+                    <i class="fa-regular fa-envelope"></i>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>
+                EXPLORE
+            </h3>
+
+            <a href="topics.html">
+                Topics
+            </a>
+
+            <a href="recipes.html">
+                Recipes
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="blog.html">
+                Blog
+            </a>
+
+        </div>
+
+
+
+        <div class="footer-column">
+
+            <h3>
+                ABOUT
+            </h3>
+
+            <a href="about.html">
+                About Me
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </div>
+
+
+
+        <div class="footer-connect">
+
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+
+            <form class="footer-email">
+
+                <input type="email"
+                       placeholder="Email address"
+                       aria-label="Email address">
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+
+        <div class="footer-legal">
+
+            <a href="#">
+                Privacy Policy
+            </a>
+
+            <a href="#">
+                Terms of Use
+            </a>
+
+            <a href="#">
+                Disclaimer
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<!-- ========================================
+     JAVASCRIPT
+======================================== -->
+
+<script>
+
+    /* SEARCH */
+
+    function toggleSearch() {
+
+        const searchBox =
+            document.getElementById("searchBox");
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        searchBox.classList.toggle("active");
+
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
+    }
+
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+    }
+
+
+    document.getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    /* MOBILE MENU */
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
