@@ -358,3 +358,55 @@ main > section.topics-page { display: block !important; width: 90% !important; m
   .about-founder h2 { font-size: 36px; }
   .about-note h2 { font-size: 31px; }
 }
+/* ========================================
+   NUTRITION HERO BUTTONS
+======================================== */
+
+.topic-hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.topic-hero-links a {
+    display: inline-block;
+
+    padding: 10px 16px;
+
+    background: var(--forest);
+    color: white !important;
+
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+
+    border: 1px solid var(--forest);
+    border-radius: 3px;
+
+    transition: 0.2s ease;
+}
+
+.topic-hero-links a:hover {
+    background: var(--sage);
+    border-color: var(--sage);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+    .topic-hero-links {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .topic-hero-links a {
+        width: 100%;
+        text-align: center;
+    }
+
+}
