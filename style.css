@@ -2638,3 +2638,59 @@ body {
         padding: 6px 0;
     }
 }
+/* ========================================
+   TOPICS PAGE - FINAL OVERRIDE
+======================================== */
+
+main > section.topics-page {
+    display: block !important;
+    width: 90% !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding: 90px 0 !important;
+
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    align-items: initial !important;
+}
+
+main > section.topics-page .topics-intro {
+    display: block !important;
+    width: 100% !important;
+    max-width: 700px !important;
+    margin: 0 auto 60px !important;
+    text-align: center !important;
+}
+
+main > section.topics-page .topics-intro .eyebrow {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 14px !important;
+    text-align: center !important;
+}
+
+main > section.topics-page .topics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    width: 100% !important;
+    max-width: 1050px !important;
+    margin: 0 auto !important;
+    gap: 32px !important;
+}
+
+@media (max-width: 800px) {
+
+    main > section.topics-page {
+        padding: 60px 0 !important;
+    }
+
+    main > section.topics-page .topics-intro {
+        margin-bottom: 40px !important;
+    }
+
+    main > section.topics-page .topics-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+}
