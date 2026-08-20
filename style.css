@@ -5169,18 +5169,18 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 .hello-nav-link {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
 
     color: #173D2B !important;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .hello-nav-link img {
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
 
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 7px;
     display: block;
 }
 
