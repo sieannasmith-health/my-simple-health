@@ -2908,3 +2908,769 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================================
+   MOVEMENT PAGE
+========================================================= */
+
+.movement-hero {
+    display: grid;
+    grid-template-columns: 46% 54%;
+    min-height: 620px;
+    background: #f5f1e7;
+    overflow: hidden;
+}
+
+.movement-hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px clamp(40px, 7vw, 110px);
+    position: relative;
+    z-index: 2;
+}
+
+.movement-eyebrow,
+.movement-section-label {
+    color: #7d9460;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin: 0 0 20px;
+}
+
+.movement-hero h1 {
+    color: #173d2b;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(52px, 5vw, 78px);
+    line-height: 1.02;
+    font-weight: 400;
+    margin: 0 0 30px;
+}
+
+.movement-hero-description {
+    color: #252822;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.75;
+    max-width: 570px;
+    margin: 0 0 35px;
+}
+
+.movement-primary-button {
+    display: inline-block;
+    align-self: flex-start;
+    background: #173d2b;
+    color: #fff;
+    padding: 17px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.movement-hero-image {
+    min-height: 620px;
+    position: relative;
+}
+
+.movement-hero-image::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 22%;
+    z-index: 1;
+    background: linear-gradient(
+        90deg,
+        #f5f1e7 0%,
+        rgba(245, 241, 231, 0.75) 35%,
+        rgba(245, 241, 231, 0) 100%
+    );
+}
+
+.movement-hero-image img {
+    width: 100%;
+    height: 100%;
+    min-height: 620px;
+    display: block;
+    object-fit: cover;
+}
+
+
+/* INTRO */
+
+.movement-intro {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 120px 40px;
+    text-align: center;
+}
+
+.movement-intro h2,
+.movement-benefits h2,
+.movement-explore h2,
+.movement-articles h2,
+.movement-resource h2,
+.movement-philosophy h2,
+.movement-related h2,
+.movement-newsletter h2 {
+    color: #173d2b;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+}
+
+.movement-intro h2 {
+    font-size: clamp(38px, 4vw, 58px);
+    line-height: 1.15;
+    margin: 0 auto 35px;
+}
+
+.movement-intro > p:not(.movement-section-label) {
+    max-width: 760px;
+    margin: 0 auto 20px;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #252822;
+}
+
+
+/* BENEFITS */
+
+.movement-benefits {
+    padding: 100px 6%;
+    background: #f5f1e7;
+}
+
+.movement-benefits-heading {
+    max-width: 720px;
+    margin-bottom: 55px;
+}
+
+.movement-benefits-heading h2 {
+    font-size: clamp(38px, 4vw, 58px);
+    line-height: 1.12;
+    margin: 0;
+}
+
+.movement-benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+.movement-benefit-card {
+    position: relative;
+    background: #fcfbf7;
+    padding: 45px 30px 40px;
+    border-radius: 24px;
+    border: 1px solid #e1ddd3;
+}
+
+.movement-benefit-number {
+    display: block;
+    color: #7d9460;
+    font-family: Georgia, serif;
+    margin-bottom: 30px;
+}
+
+.movement-benefit-card i {
+    color: #7d9460;
+    font-size: 28px;
+    margin-bottom: 24px;
+}
+
+.movement-benefit-card h3 {
+    color: #173d2b;
+    font-family: Georgia, serif;
+    font-size: 27px;
+    font-weight: 400;
+    margin: 0 0 16px;
+}
+
+.movement-benefit-card p {
+    font-family: Arial, sans-serif;
+    line-height: 1.65;
+    color: #252822;
+}
+
+
+/* EXPLORE */
+
+.movement-explore {
+    padding: 120px 6%;
+}
+
+.movement-explore-heading {
+    max-width: 720px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.movement-explore-heading h2 {
+    font-size: clamp(40px, 4vw, 60px);
+    margin: 0 0 20px;
+}
+
+.movement-explore-heading > p:last-child {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.movement-topic-grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.movement-topic-card {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    padding: 40px;
+    background: #f7f2ec;
+    border-radius: 26px;
+    text-decoration: none;
+    color: #252822;
+    transition: transform .25s ease;
+}
+
+.movement-topic-card:hover {
+    transform: translateY(-4px);
+}
+
+.movement-topic-icon {
+    flex: 0 0 68px;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #d8845d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.movement-topic-icon i {
+    color: #fff;
+    font-size: 23px;
+}
+
+.movement-topic-card h3 {
+    font-family: Georgia, serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #173d2b;
+    margin: 0 0 12px;
+}
+
+.movement-topic-card p {
+    font-family: Arial, sans-serif;
+    line-height: 1.65;
+    margin: 0 0 18px;
+}
+
+.movement-topic-card span {
+    color: #173d2b;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #173d2b;
+}
+
+
+/* FEATURE */
+
+.movement-feature {
+    max-width: 1180px;
+    margin: 20px auto 120px;
+    display: grid;
+    grid-template-columns: 55% 45%;
+    overflow: hidden;
+    border-radius: 30px;
+    background: #f5f1e7;
+}
+
+.movement-feature-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    object-fit: cover;
+}
+
+.movement-feature-content {
+    padding: 70px 55px;
+    align-self: center;
+}
+
+.movement-feature-content h2 {
+    font-family: Georgia, serif;
+    color: #173d2b;
+    font-size: clamp(38px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.12;
+    margin: 0 0 25px;
+}
+
+.movement-feature-content > p:not(.movement-section-label) {
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.75;
+    margin-bottom: 30px;
+}
+
+.movement-feature-content a {
+    color: #173d2b;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+
+/* ARTICLES */
+
+.movement-articles {
+    padding: 110px 6%;
+    background: #fcfbf7;
+}
+
+.movement-section-header {
+    max-width: 1180px;
+    margin: 0 auto 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    border-bottom: 1px solid #d8d3c7;
+    padding-bottom: 30px;
+}
+
+.movement-section-header h2 {
+    font-size: clamp(40px, 4vw, 58px);
+    margin: 0;
+}
+
+.movement-section-header > a {
+    color: #173d2b;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.movement-article-grid {
+    max-width: 1180px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.movement-article-card {
+    overflow: hidden;
+    border-radius: 22px;
+    background: #f5f1e7;
+    border: 1px solid #e1ddd3;
+}
+
+.movement-article-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    display: block;
+}
+
+.movement-article-content {
+    padding: 30px;
+}
+
+.movement-article-category {
+    color: #7d9460;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.movement-article-card h3 {
+    color: #173d2b;
+    font-family: Georgia, serif;
+    font-size: 27px;
+    line-height: 1.25;
+    font-weight: 400;
+}
+
+.movement-article-card p {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+.movement-article-card a {
+    color: #173d2b;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+}
+
+
+/* RESOURCE */
+
+.movement-resource {
+    max-width: 900px;
+    margin: 120px auto;
+    padding: 80px 60px;
+    text-align: center;
+    background: #f5f1e7;
+    border: 1px solid #d8d3c7;
+    border-radius: 28px;
+}
+
+.movement-resource-icon {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 30px;
+    border-radius: 50%;
+    background: #173d2b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movement-resource-icon i {
+    color: #fff;
+    font-size: 27px;
+}
+
+.movement-resource h2 {
+    font-size: clamp(38px, 4vw, 54px);
+    margin: 0 0 20px;
+}
+
+.movement-resource > p:not(.movement-section-label) {
+    max-width: 620px;
+    margin: 0 auto 30px;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.movement-resource a {
+    color: #173d2b;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+
+/* PHILOSOPHY */
+
+.movement-philosophy {
+    max-width: 1180px;
+    margin: 0 auto 120px;
+    padding: 100px 80px;
+    text-align: center;
+    border-radius: 30px;
+    background: #f5f1e7;
+}
+
+.movement-quote {
+    color: #7d9460;
+    font-family: Georgia, serif;
+    font-size: 70px;
+    line-height: 1;
+}
+
+.movement-philosophy h2 {
+    max-width: 800px;
+    margin: 10px auto 25px;
+    font-size: clamp(38px, 4vw, 58px);
+    line-height: 1.2;
+}
+
+.movement-philosophy p {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+
+/* RELATED */
+
+.movement-related {
+    padding: 100px 6%;
+}
+
+.movement-related > h2,
+.movement-related > .movement-section-label {
+    text-align: center;
+}
+
+.movement-related > h2 {
+    font-size: clamp(40px, 4vw, 58px);
+    margin: 0 0 55px;
+}
+
+.movement-related-grid {
+    max-width: 1180px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.movement-related-grid a {
+    padding: 35px 28px;
+    border-radius: 22px;
+    background: #f7f2ec;
+    text-decoration: none;
+    color: #252822;
+}
+
+.movement-related-grid span {
+    color: #7d9460;
+    font-family: Georgia, serif;
+}
+
+.movement-related-grid h3 {
+    color: #173d2b;
+    font-family: Georgia, serif;
+    font-size: 27px;
+    font-weight: 400;
+    margin: 20px 0 12px;
+}
+
+.movement-related-grid p {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+
+/* NEWSLETTER */
+
+.movement-newsletter {
+    max-width: 900px;
+    margin: 100px auto 130px;
+    padding: 75px 60px;
+    text-align: center;
+    background: #f5f1e7;
+    border-radius: 30px;
+}
+
+.movement-newsletter-icon {
+    width: 75px;
+    height: 75px;
+    margin: 0 auto 28px;
+    background: #173d2b;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.movement-newsletter h2 {
+    max-width: 650px;
+    margin: 0 auto 20px;
+    font-size: clamp(38px, 4vw, 52px);
+}
+
+.movement-newsletter > p:not(.movement-section-label) {
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.movement-newsletter form {
+    max-width: 600px;
+    margin: 35px auto 0;
+    display: grid;
+    gap: 14px;
+}
+
+.movement-newsletter input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border: 1px solid #d8d3c7;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.movement-newsletter button {
+    padding: 19px;
+    border: 0;
+    border-radius: 10px;
+    background: #173d2b;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   MOVEMENT MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .movement-hero {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .movement-hero-content {
+        padding: 70px 40px 60px;
+    }
+
+    .movement-hero h1 {
+        font-size: clamp(52px, 13vw, 72px);
+        line-height: 1.03;
+    }
+
+    .movement-hero-description {
+        font-size: 17px;
+        line-height: 1.7;
+    }
+
+    .movement-hero-image,
+    .movement-hero-image img {
+        min-height: 430px;
+        height: 430px;
+    }
+
+    .movement-hero-image::before {
+        width: 100%;
+        height: 18%;
+        inset: 0 0 auto;
+        background: linear-gradient(
+            180deg,
+            #f5f1e7 0%,
+            rgba(245, 241, 231, .5) 40%,
+            rgba(245, 241, 231, 0) 100%
+        );
+    }
+
+    .movement-intro {
+        padding: 90px 35px;
+    }
+
+    .movement-intro h2 {
+        font-size: 42px;
+    }
+
+    .movement-benefits,
+    .movement-explore,
+    .movement-articles,
+    .movement-related {
+        padding: 85px 35px;
+    }
+
+    .movement-benefit-grid,
+    .movement-topic-grid,
+    .movement-article-grid,
+    .movement-related-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .movement-benefit-card {
+        border-radius: 22px;
+    }
+
+    .movement-topic-card {
+        padding: 30px 25px;
+        border-radius: 24px;
+    }
+
+    .movement-topic-icon {
+        flex-basis: 60px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .movement-feature {
+        margin: 20px 35px 90px;
+        grid-template-columns: 1fr;
+        border-radius: 26px;
+    }
+
+    .movement-feature-image img {
+        min-height: 360px;
+        height: 360px;
+    }
+
+    .movement-feature-content {
+        padding: 45px 30px 50px;
+    }
+
+    .movement-section-header {
+        display: block;
+    }
+
+    .movement-section-header > a {
+        display: inline-block;
+        margin-top: 20px;
+    }
+
+    .movement-article-card img {
+        height: 300px;
+    }
+
+    .movement-resource {
+        margin: 90px 35px;
+        padding: 65px 30px;
+        border-radius: 26px;
+    }
+
+    .movement-philosophy {
+        margin: 90px 35px;
+        padding: 75px 30px;
+        border-radius: 26px;
+    }
+
+    .movement-newsletter {
+        margin: 90px 35px 110px;
+        padding: 65px 30px;
+        border-radius: 26px;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .movement-hero-content {
+        padding-left: 28px;
+        padding-right: 28px;
+    }
+
+    .movement-benefits,
+    .movement-explore,
+    .movement-articles,
+    .movement-related {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+
+    .movement-topic-card {
+        gap: 18px;
+    }
+
+    .movement-topic-card h3 {
+        font-size: 27px;
+    }
+
+    .movement-feature,
+    .movement-resource,
+    .movement-philosophy,
+    .movement-newsletter {
+        margin-left: 25px;
+        margin-right: 25px;
+    }
+
+}
