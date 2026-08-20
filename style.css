@@ -4467,3 +4467,310 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================================
+   MY SIMPLE HEALTH — ARTICLE PAGES
+========================================================= */
+
+.msh-article {
+    background: #FCFBF7;
+    color: #252822;
+}
+
+
+/* ---------- HERO ---------- */
+
+.article-hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 90px 24px 55px;
+    text-align: center;
+}
+
+.article-breadcrumb {
+    margin: 0 0 28px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.article-breadcrumb a {
+    color: #7D9460;
+    text-decoration: none;
+}
+
+.article-hero h1 {
+    margin: 0;
+    color: #173D2B;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(42px, 6vw, 68px);
+    font-weight: 400;
+    line-height: 1.08;
+}
+
+.article-deck {
+    max-width: 680px;
+    margin: 28px auto 0;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    color: #55594F;
+}
+
+.article-meta {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 25px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #77796F;
+}
+
+
+/* ---------- FEATURE IMAGE ---------- */
+
+.article-feature-image {
+    width: min(1120px, calc(100% - 48px));
+    margin: 0 auto 75px;
+}
+
+.article-feature-image img {
+    display: block;
+    width: 100%;
+    height: 560px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+
+/* ---------- ARTICLE BODY ---------- */
+
+.article-content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 110px;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.85;
+    color: #353832;
+}
+
+.article-content p {
+    margin: 0 0 25px;
+}
+
+.article-content h2 {
+    margin: 65px 0 22px;
+    color: #173D2B;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+.article-content h3 {
+    margin: 42px 0 18px;
+    color: #173D2B;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+.article-content strong {
+    color: #252822;
+}
+
+.article-content ul,
+.article-content ol {
+    margin: 0 0 30px;
+    padding-left: 26px;
+}
+
+.article-content li {
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.article-content li::marker {
+    color: #7D9460;
+}
+
+
+/* ---------- BLOCKQUOTES ---------- */
+
+.article-content blockquote {
+    margin: 38px 0;
+    padding: 5px 0 5px 28px;
+    border-left: 3px solid #7D9460;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    line-height: 1.55;
+    color: #173D2B;
+}
+
+
+/* ---------- CALLOUT ---------- */
+
+.article-callout {
+    margin: 42px 0;
+    padding: 34px 38px;
+    background: #F5F1E7;
+    border-radius: 4px;
+}
+
+.article-callout p {
+    margin-bottom: 14px;
+}
+
+.article-callout p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ---------- SIMPLE TAKEAWAY ---------- */
+
+.article-takeaway {
+    margin: 80px 0 30px;
+    padding: 45px;
+    background: #173D2B;
+    color: #FCFBF7;
+}
+
+.article-takeaway-label {
+    margin-bottom: 12px !important;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.2px;
+    color: #D8D3C7;
+}
+
+.article-takeaway h2 {
+    margin: 0 0 24px;
+    color: #FCFBF7;
+    font-size: 34px;
+}
+
+.article-takeaway p {
+    color: #FCFBF7;
+}
+
+.article-takeaway strong {
+    color: #FCFBF7;
+}
+
+
+/* ---------- SOURCES ---------- */
+
+.article-sources {
+    margin-top: 80px;
+    padding-top: 50px;
+    border-top: 1px solid #D8D3C7;
+}
+
+.article-sources > h2 {
+    margin-top: 0;
+}
+
+.article-source {
+    padding: 25px 0;
+    border-bottom: 1px solid #E5E1D8;
+}
+
+.article-source h3 {
+    margin: 0 0 8px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #252822;
+}
+
+.article-source p {
+    margin-bottom: 10px;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #65685F;
+}
+
+.article-source a {
+    font-size: 14px;
+    font-weight: 700;
+    color: #173D2B;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.article-disclaimer {
+    margin-top: 35px !important;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #77796F;
+}
+
+
+/* =========================================================
+   ARTICLE — MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .article-hero {
+        padding: 60px 20px 40px;
+    }
+
+    .article-hero h1 {
+        font-size: 42px;
+    }
+
+    .article-deck {
+        font-size: 17px;
+    }
+
+    .article-feature-image {
+        width: calc(100% - 32px);
+        margin-bottom: 50px;
+    }
+
+    .article-feature-image img {
+        height: 360px;
+    }
+
+    .article-content {
+        padding: 0 20px 80px;
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .article-content h2 {
+        margin-top: 52px;
+        font-size: 29px;
+    }
+
+    .article-content h3 {
+        font-size: 22px;
+    }
+
+    .article-callout {
+        padding: 28px 24px;
+    }
+
+    .article-content blockquote {
+        font-size: 21px;
+        padding-left: 20px;
+    }
+
+    .article-takeaway {
+        margin-left: -4px;
+        margin-right: -4px;
+        padding: 34px 28px;
+    }
+
+    .article-takeaway h2 {
+        font-size: 29px;
+    }
+}
