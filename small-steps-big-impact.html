@@ -166,14 +166,19 @@
 <!-- =========================================================
      HEADER
 ========================================================= -->
-
 <header class="site-header">
+    
+</main>
+    
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
 
-    <div class="nav-container">
-
-        <a href="index.html" class="site-logo">
-            MY SIMPLE HEALTH
-        </a>
+    <button class="menu-button"
+            aria-label="Open menu"
+            onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
 
 <nav class="site-nav">
 
@@ -192,9 +197,32 @@
 
 </nav>
 
+    <div class="header-search">
+
+        <button class="search-button"
+                aria-label="Search"
+                onclick="toggleSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        <div class="search-box" id="searchBox">
+
+            <input type="search"
+                   id="siteSearch"
+                   placeholder="Search My Simple Health..."
+                   aria-label="Search My Simple Health">
+
+            <button type="button"
+                    onclick="runSearch()">
+                Search
+            </button>
+
+        </div>
+
     </div>
 
 </header>
+
 
 <!-- =========================================================
      ARTICLE
