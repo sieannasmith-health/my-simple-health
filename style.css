@@ -3725,3 +3725,745 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================================
+   MY SIMPLE HEALTH
+   ARTICLE PAGE TEMPLATE
+   Used for: sleep-hygiene.html and future articles
+========================================================= */
+
+
+/* =========================================
+   ARTICLE CONTAINER
+========================================= */
+
+.msh-article {
+    background: #fcfbf7;
+    color: #252822;
+}
+
+
+/* =========================================
+   ARTICLE HERO
+========================================= */
+
+.article-hero {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 100px 40px 65px;
+    text-align: center;
+}
+
+.article-breadcrumb {
+    margin: 0 0 25px;
+}
+
+.article-breadcrumb a {
+    color: #7d9460;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+
+.article-hero h1 {
+    max-width: 900px;
+    margin: 0 auto 28px;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(48px, 6vw, 76px);
+    font-weight: 400;
+    line-height: 1.05;
+}
+
+.article-deck {
+    max-width: 720px;
+    margin: 0 auto 28px;
+
+    color: #4d514b;
+
+    font-family: Arial, sans-serif;
+    font-size: 19px;
+    line-height: 1.7;
+}
+
+.article-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    color: #6d716b;
+
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: .4px;
+}
+
+
+/* =========================================
+   FEATURE IMAGE
+========================================= */
+
+.article-feature-image {
+    max-width: 1180px;
+    height: 580px;
+
+    margin: 0 auto 90px;
+
+    overflow: hidden;
+    border-radius: 28px;
+}
+
+.article-feature-image img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+    object-fit: cover;
+}
+
+
+/* =========================================
+   ARTICLE LAYOUT
+========================================= */
+
+.article-layout {
+    max-width: 1120px;
+    margin: 0 auto;
+
+    padding: 0 40px 110px;
+
+    display: grid;
+    grid-template-columns:
+        minmax(0, 720px)
+        minmax(220px, 280px);
+
+    gap: 90px;
+
+    align-items: start;
+}
+
+
+/* =========================================
+   ARTICLE BODY
+========================================= */
+
+.article-body {
+    min-width: 0;
+}
+
+.article-body p {
+    margin: 0 0 26px;
+
+    color: #33372f;
+
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.85;
+}
+
+.article-body .article-intro {
+    margin-bottom: 45px;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    line-height: 1.65;
+}
+
+.article-body h2 {
+    margin: 60px 0 22px;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.article-body h3 {
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+
+/* =========================================
+   ARTICLE LISTS
+========================================= */
+
+.article-body ul,
+.article-body ol {
+    margin: 0 0 30px;
+    padding-left: 24px;
+
+    color: #33372f;
+
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.article-body li {
+    margin-bottom: 10px;
+}
+
+
+/* =========================================
+   SIMPLE TAKEAWAY CALLOUT
+========================================= */
+
+.article-callout {
+    margin: 50px 0;
+
+    padding: 38px 42px;
+
+    background: #f5f1e7;
+
+    border-left: 4px solid #7d9460;
+    border-radius: 0 18px 18px 0;
+}
+
+.article-callout .article-callout-label {
+    margin: 0 0 14px;
+
+    color: #7d9460;
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.article-callout p:last-child {
+    margin: 0;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 23px;
+    line-height: 1.55;
+}
+
+
+/* =========================================
+   ARTICLE CHECKLIST
+========================================= */
+
+.article-checklist {
+    margin: 45px 0;
+
+    padding: 38px 42px;
+
+    background: #f7f2ec;
+
+    border: 1px solid #ded9cd;
+    border-radius: 22px;
+}
+
+.article-checklist h3 {
+    margin: 0 0 22px;
+}
+
+.article-checklist ul {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.article-checklist li {
+    position: relative;
+
+    margin-bottom: 14px;
+    padding-left: 32px;
+}
+
+.article-checklist li::before {
+    content: "✓";
+
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    color: #7d9460;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   ACTION PLAN
+========================================= */
+
+.article-action-plan {
+    margin: 70px 0;
+
+    padding: 55px 48px;
+
+    background: #173d2b;
+
+    border-radius: 26px;
+}
+
+.article-action-plan .article-callout-label {
+    margin: 0 0 15px;
+
+    color: #c6d3a8;
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.article-action-plan h2 {
+    margin: 0 0 18px;
+
+    color: #ffffff;
+}
+
+.article-action-plan > p:not(.article-callout-label) {
+    color: #eef1ea;
+}
+
+.article-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 16px;
+
+    margin-top: 35px;
+}
+
+.article-action-grid > div {
+    padding: 25px;
+
+    background: rgba(255, 255, 255, .08);
+
+    border: 1px solid rgba(255, 255, 255, .15);
+    border-radius: 16px;
+}
+
+.article-action-grid span {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: #c6d3a8;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+}
+
+.article-action-grid p {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   SOURCES
+========================================= */
+
+.article-sources {
+    margin-top: 70px;
+
+    padding-top: 40px;
+
+    border-top: 1px solid #d8d3c7;
+}
+
+.article-sources h2 {
+    margin-top: 0;
+}
+
+.article-sources ol {
+    padding-left: 22px;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.article-sources li {
+    margin-bottom: 16px;
+}
+
+.article-sources a {
+    color: #173d2b;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   DISCLAIMER
+========================================= */
+
+.article-disclaimer {
+    margin-top: 45px;
+
+    padding: 25px 28px;
+
+    background: #f5f1e7;
+
+    border-radius: 14px;
+}
+
+.article-disclaimer p {
+    margin: 0;
+
+    color: #555950;
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   ARTICLE SIDEBAR
+========================================= */
+
+.article-sidebar {
+    position: sticky;
+    top: 120px;
+}
+
+.article-sidebar-card {
+    margin-bottom: 24px;
+
+    padding: 30px;
+
+    background: #f5f1e7;
+
+    border: 1px solid #ded9cd;
+    border-radius: 20px;
+}
+
+.article-sidebar-label {
+    margin: 0 0 22px;
+
+    color: #7d9460;
+
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.article-sidebar-card > a {
+    display: block;
+
+    padding: 11px 0;
+
+    color: #173d2b;
+
+    border-bottom: 1px solid #d8d3c7;
+
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.article-sidebar-card > a:last-child {
+    border-bottom: 0;
+}
+
+.article-sidebar-card > a:hover {
+    color: #7d9460;
+}
+
+
+/* =========================================
+   SIDEBAR RESOURCE
+========================================= */
+
+.article-sidebar-resource {
+    background: #173d2b;
+    border-color: #173d2b;
+}
+
+.article-sidebar-resource .article-sidebar-label {
+    color: #c6d3a8;
+}
+
+.article-sidebar-resource h3 {
+    margin: 0 0 15px;
+
+    color: #ffffff;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.article-sidebar-resource p:not(.article-sidebar-label) {
+    color: #e7e9e3;
+
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.article-sidebar-resource > a {
+    margin-top: 18px;
+    padding: 0;
+
+    color: #ffffff;
+
+    border: 0;
+
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================
+   RELATED ARTICLES
+========================================= */
+
+.article-related {
+    padding: 100px 6%;
+
+    background: #f5f1e7;
+}
+
+.article-related > .section-label,
+.article-related > h2 {
+    text-align: center;
+}
+
+.article-related > h2 {
+    margin: 0 0 50px;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(40px, 4vw, 56px);
+    font-weight: 400;
+}
+
+.article-related-grid {
+    max-width: 1120px;
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 22px;
+}
+
+.article-related-grid article {
+    padding: 35px;
+
+    background: #fcfbf7;
+
+    border: 1px solid #ded9cd;
+    border-radius: 20px;
+}
+
+.article-related-grid h3 {
+    margin: 0 0 16px;
+
+    color: #173d2b;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+.article-related-grid p {
+    color: #4d514b;
+
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.article-related-grid a {
+    display: inline-block;
+
+    margin-top: 15px;
+
+    color: #173d2b;
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   ARTICLE TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .article-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 50px;
+    }
+
+    .article-sidebar {
+        position: static;
+
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 20px;
+    }
+
+}
+
+
+/* =========================================================
+   ARTICLE MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .article-hero {
+        padding: 70px 25px 45px;
+        text-align: left;
+    }
+
+    .article-breadcrumb {
+        margin-bottom: 20px;
+    }
+
+    .article-hero h1 {
+        margin-left: 0;
+
+        font-size: 46px;
+        line-height: 1.07;
+    }
+
+    .article-deck {
+        margin-left: 0;
+
+        font-size: 17px;
+    }
+
+    .article-meta {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    /* IMAGE */
+
+    .article-feature-image {
+        width: calc(100% - 40px);
+        height: 360px;
+
+        margin: 0 20px 65px;
+
+        border-radius: 22px;
+    }
+
+
+    /* BODY */
+
+    .article-layout {
+        padding: 0 25px 80px;
+    }
+
+    .article-body p {
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .article-body .article-intro {
+        font-size: 21px;
+        line-height: 1.6;
+    }
+
+    .article-body h2 {
+        margin-top: 50px;
+
+        font-size: 32px;
+    }
+
+
+    /* CALLOUT */
+
+    .article-callout {
+        margin: 40px 0;
+        padding: 30px 25px;
+    }
+
+    .article-callout p:last-child {
+        font-size: 21px;
+    }
+
+
+    /* CHECKLIST */
+
+    .article-checklist {
+        padding: 30px 25px;
+    }
+
+
+    /* ACTION PLAN */
+
+    .article-action-plan {
+        padding: 40px 25px;
+        border-radius: 22px;
+    }
+
+    .article-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    /* SIDEBAR */
+
+    .article-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+
+    /* RELATED */
+
+    .article-related {
+        padding: 80px 25px;
+    }
+
+    .article-related-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .article-hero h1 {
+        font-size: 40px;
+    }
+
+    .article-feature-image {
+        height: 300px;
+    }
+
+}
