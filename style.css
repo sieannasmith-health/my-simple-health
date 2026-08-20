@@ -5179,8 +5179,7 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     width: 30px;
     height: 30px;
 
-    object-fit: cover;
-    border-radius: 7px;
+    object-fit: contain;
     display: block;
 }
 
