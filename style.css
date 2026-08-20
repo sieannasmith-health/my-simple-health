@@ -5170,15 +5170,13 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     display: inline-flex;
     align-items: center;
     gap: 8px;
-
     color: #173D2B !important;
     font-weight: 700;
 }
 
 .hello-nav-link img {
-    width: 30px;
-    height: 30px;
-
+    width: 34px;
+    height: 34px;
     object-fit: contain;
     display: block;
 }
