@@ -5228,3 +5228,16 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 .hello-nav-link span {
     display: inline-block;
 }
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 38px;
+}
+
+.site-nav a {
+    text-decoration: none;
+    color: #252822;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
