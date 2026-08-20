@@ -2894,3 +2894,17 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================
+   MOBILE MISSION LINK SAFETY
+========================================= */
+
+@media (max-width: 600px) {
+
+    .mission-content a {
+        display: inline-block;
+        max-width: 100%;
+        white-space: normal;
+        line-height: 1.4;
+    }
+
+}
