@@ -5049,3 +5049,116 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     </section>
 
 </div>
+/* =========================================================
+   MY SIMPLE HEALTH — FINAL NAV FIX
+========================================================= */
+
+.site-header {
+    width: 100%;
+    background: #FCFBF7;
+    border-bottom: 1px solid #E7E2D8;
+}
+
+.nav-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+}
+
+
+/* BRAND */
+
+.logo {
+    flex-shrink: 0;
+
+    color: #173D2B;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 19px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+
+/* NAVIGATION */
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 32px;
+    margin-left: auto;
+}
+
+.main-nav a {
+    color: #353832;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: color 0.2s ease;
+}
+
+.main-nav a:hover {
+    color: #7D9460;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .nav-container {
+        padding: 22px 28px;
+    }
+
+    .main-nav {
+        gap: 20px;
+    }
+
+    .main-nav a {
+        font-size: 13px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .nav-container {
+        flex-direction: column;
+        align-items: flex-start;
+
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .main-nav {
+        width: 100%;
+        margin-left: 0;
+
+        justify-content: flex-start;
+        flex-wrap: wrap;
+
+        gap: 12px 20px;
+    }
+
+}
