@@ -3,104 +3,93 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <meta name="description"
-          content="Practical, research-informed guidance for building movement into everyday life. Explore physical activity, walking, strength, mobility, and sustainable movement habits.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Movement | My Simple Health</title>
 
+    <meta
+        name="description"
+        content="Practical, research-informed guidance for walking, strength, mobility, and everyday movement."
+    >
+
     <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 </head>
 
 
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================
      HEADER
-===================================================== -->
+========================================== -->
 
 <header class="site-header">
 
-    <a href="index.html" class="site-logo">
+    <a class="site-logo" href="index.html">
         My Simple Health
     </a>
 
-    <nav class="desktop-nav">
+    <button
+        class="menu-button"
+        aria-label="Open menu"
+        onclick="toggleMenu()"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
 
+    <nav class="site-nav">
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
         <a href="topics.html">Topics</a>
         <a href="recipes.html">Recipes</a>
-        <a href="resources.html">Resources</a>
         <a href="blog.html">Blog</a>
         <a href="contact.html">Contact</a>
-
     </nav>
 
-    <div class="header-actions">
+    <div class="header-search">
 
-        <button class="search-button"
-                aria-label="Search"
-                onclick="toggleSearch()">
+        <button
+            class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()"
+        >
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
-        <button class="mobile-menu-button"
-                aria-label="Open menu"
-                onclick="toggleMobileMenu()">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        <div class="search-box" id="searchBox">
+
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button
+                type="button"
+                onclick="runSearch()"
+            >
+                Search
+            </button>
+
+        </div>
 
     </div>
 
 </header>
 
 
-<!-- =====================================================
-     MOBILE MENU
-===================================================== -->
-
-<div class="mobile-menu" id="mobileMenu">
-
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="topics.html">Topics</a>
-    <a href="recipes.html">Recipes</a>
-    <a href="resources.html">Resources</a>
-    <a href="blog.html">Blog</a>
-    <a href="contact.html">Contact</a>
-
-</div>
-
-
-<!-- =====================================================
-     SEARCH
-===================================================== -->
-
-<div class="search-box" id="searchBox">
-
-    <input type="search"
-           id="siteSearch"
-           placeholder="Search My Simple Health..."
-           aria-label="Search My Simple Health">
-
-</div>
-
-
-
 <main>
 
 
-<!-- =====================================================
+<!-- =========================================
      MOVEMENT HERO
-===================================================== -->
+========================================== -->
 
 <section class="movement-hero">
 
@@ -122,8 +111,10 @@
             health throughout life.
         </p>
 
-        <a href="#movement-explore"
-           class="movement-primary-button">
+        <a
+            href="#movement-explore"
+            class="movement-primary-button"
+        >
             EXPLORE MOVEMENT ↓
         </a>
 
@@ -132,8 +123,10 @@
 
     <div class="movement-hero-image">
 
-        <img src="movement-hero.jpg"
-             alt="Woman enjoying everyday movement outdoors">
+        <img
+            src="movement-mobility.jpg"
+            alt="Asian woman stretching at home"
+        >
 
     </div>
 
@@ -141,9 +134,9 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      INTRODUCTION
-===================================================== -->
+========================================== -->
 
 <section class="movement-intro">
 
@@ -173,9 +166,9 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      WHY MOVEMENT MATTERS
-===================================================== -->
+========================================== -->
 
 <section class="movement-benefits">
 
@@ -198,11 +191,15 @@
 
         <article class="movement-benefit-card">
 
-            <span class="movement-benefit-number">01</span>
+            <span class="movement-benefit-number">
+                01
+            </span>
 
             <i class="fa-solid fa-heart-pulse"></i>
 
-            <h3>Heart Health</h3>
+            <h3>
+                Heart Health
+            </h3>
 
             <p>
                 Regular physical activity supports
@@ -213,13 +210,18 @@
         </article>
 
 
+
         <article class="movement-benefit-card">
 
-            <span class="movement-benefit-number">02</span>
+            <span class="movement-benefit-number">
+                02
+            </span>
 
             <i class="fa-solid fa-dumbbell"></i>
 
-            <h3>Strength</h3>
+            <h3>
+                Strength
+            </h3>
 
             <p>
                 Strength-building activity helps support
@@ -230,13 +232,18 @@
         </article>
 
 
+
         <article class="movement-benefit-card">
 
-            <span class="movement-benefit-number">03</span>
+            <span class="movement-benefit-number">
+                03
+            </span>
 
             <i class="fa-solid fa-person-walking"></i>
 
-            <h3>Daily Function</h3>
+            <h3>
+                Daily Function
+            </h3>
 
             <p>
                 Everyday movement helps maintain the
@@ -246,13 +253,18 @@
         </article>
 
 
+
         <article class="movement-benefit-card">
 
-            <span class="movement-benefit-number">04</span>
+            <span class="movement-benefit-number">
+                04
+            </span>
 
             <i class="fa-solid fa-brain"></i>
 
-            <h3>Wellbeing</h3>
+            <h3>
+                Wellbeing
+            </h3>
 
             <p>
                 Physical activity can also support mood,
@@ -269,12 +281,14 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      EXPLORE MOVEMENT
-===================================================== -->
+========================================== -->
 
-<section class="movement-explore"
-         id="movement-explore">
+<section
+    class="movement-explore"
+    id="movement-explore"
+>
 
     <div class="movement-explore-heading">
 
@@ -287,7 +301,7 @@
         </h2>
 
         <p>
-            Explore the different ways movement can fit
+            Explore different ways movement can fit
             into everyday life.
         </p>
 
@@ -297,15 +311,20 @@
     <div class="movement-topic-grid">
 
 
-        <a href="walking.html"
-           class="movement-topic-card">
+        <a
+            href="#"
+            class="movement-topic-card"
+        >
 
             <div class="movement-topic-icon">
                 <i class="fa-solid fa-person-walking"></i>
             </div>
 
             <div>
-                <h3>Walking</h3>
+
+                <h3>
+                    Walking
+                </h3>
 
                 <p>
                     Build more movement into your day
@@ -313,21 +332,30 @@
                     of physical activity.
                 </p>
 
-                <span>EXPLORE WALKING →</span>
+                <span>
+                    EXPLORE WALKING →
+                </span>
+
             </div>
 
         </a>
 
 
-        <a href="strength.html"
-           class="movement-topic-card">
+
+        <a
+            href="#"
+            class="movement-topic-card"
+        >
 
             <div class="movement-topic-icon">
                 <i class="fa-solid fa-dumbbell"></i>
             </div>
 
             <div>
-                <h3>Strength</h3>
+
+                <h3>
+                    Strength
+                </h3>
 
                 <p>
                     Understand how resistance training
@@ -335,21 +363,30 @@
                     and long-term health.
                 </p>
 
-                <span>EXPLORE STRENGTH →</span>
+                <span>
+                    EXPLORE STRENGTH →
+                </span>
+
             </div>
 
         </a>
 
 
-        <a href="mobility.html"
-           class="movement-topic-card">
+
+        <a
+            href="#"
+            class="movement-topic-card"
+        >
 
             <div class="movement-topic-icon">
                 <i class="fa-solid fa-person"></i>
             </div>
 
             <div>
-                <h3>Mobility</h3>
+
+                <h3>
+                    Mobility
+                </h3>
 
                 <p>
                     Support comfortable movement,
@@ -357,29 +394,41 @@
                     physical function.
                 </p>
 
-                <span>EXPLORE MOBILITY →</span>
+                <span>
+                    EXPLORE MOBILITY →
+                </span>
+
             </div>
 
         </a>
 
 
-        <a href="everyday-movement.html"
-           class="movement-topic-card">
+
+        <a
+            href="#"
+            class="movement-topic-card"
+        >
 
             <div class="movement-topic-icon">
                 <i class="fa-solid fa-shoe-prints"></i>
             </div>
 
             <div>
-                <h3>Everyday Movement</h3>
+
+                <h3>
+                    Everyday Movement
+                </h3>
 
                 <p>
                     Discover realistic opportunities
-                    to move more outside of structured
+                    to move more outside structured
                     exercise.
                 </p>
 
-                <span>EXPLORE EVERYDAY MOVEMENT →</span>
+                <span>
+                    EXPLORE EVERYDAY MOVEMENT →
+                </span>
+
             </div>
 
         </a>
@@ -391,16 +440,18 @@
 
 
 
-<!-- =====================================================
-     FEATURED MOVEMENT ARTICLE
-===================================================== -->
+<!-- =========================================
+     FEATURED MOVEMENT
+========================================== -->
 
 <section class="movement-feature">
 
     <div class="movement-feature-image">
 
-        <img src="movement-feature.jpg"
-             alt="Walking as part of an active everyday lifestyle">
+        <img
+            src="movement-family-walking.jpg"
+            alt="Interracial family walking together outdoors"
+        >
 
     </div>
 
@@ -418,12 +469,13 @@
 
         <p>
             An active lifestyle is built through more
-            than formal workouts. Learn how everyday
-            opportunities for movement can add up
-            throughout your day.
+            than formal workouts. Walking with family,
+            playing, doing chores, taking the stairs,
+            and other everyday activities can all
+            contribute to how much you move.
         </p>
 
-        <a href="everyday-movement.html">
+        <a href="small-steps-big-impact.html">
             READ ARTICLE →
         </a>
 
@@ -433,9 +485,9 @@
 
 
 
-<!-- =====================================================
-     LATEST MOVEMENT ARTICLES
-===================================================== -->
+<!-- =========================================
+     LATEST IN MOVEMENT
+========================================== -->
 
 <section class="movement-articles">
 
@@ -466,8 +518,10 @@
 
         <article class="movement-article-card">
 
-            <img src="movement-walking.jpg"
-                 alt="Person walking outdoors">
+            <img
+                src="movement-everyday-walking.jpg"
+                alt="Woman walking her dog through a residential neighborhood"
+            >
 
             <div class="movement-article-content">
 
@@ -486,7 +540,7 @@
                     your routine.
                 </p>
 
-                <a href="move-more.html">
+                <a href="small-steps-big-impact.html">
                     READ ARTICLE →
                 </a>
 
@@ -498,8 +552,10 @@
 
         <article class="movement-article-card">
 
-            <img src="movement-strength.jpg"
-                 alt="Strength training equipment">
+            <img
+                src="movement-strength.jpg"
+                alt="Indian woman strength training with dumbbells"
+            >
 
             <div class="movement-article-content">
 
@@ -514,11 +570,11 @@
 
                 <p>
                     Explore how resistance training
-                    supports function, health,
+                    supports strength, function,
                     and healthy aging.
                 </p>
 
-                <a href="strength-training.html">
+                <a href="#">
                     READ ARTICLE →
                 </a>
 
@@ -530,8 +586,10 @@
 
         <article class="movement-article-card">
 
-            <img src="movement-routine.jpg"
-                 alt="Walking shoes ready for movement">
+            <img
+                src="movement-active-lifestyle.jpg"
+                alt="Adult enjoying movement as part of everyday life"
+            >
 
             <div class="movement-article-content">
 
@@ -549,7 +607,7 @@
                     movement habits that fit your life.
                 </p>
 
-                <a href="movement-routine.html">
+                <a href="#">
                     READ ARTICLE →
                 </a>
 
@@ -564,9 +622,9 @@
 
 
 
-<!-- =====================================================
-     MOVEMENT RESOURCE
-===================================================== -->
+<!-- =========================================
+     FREE RESOURCE
+========================================== -->
 
 <section class="movement-resource">
 
@@ -599,9 +657,9 @@
 
 
 
-<!-- =====================================================
-     PHILOSOPHY
-===================================================== -->
+<!-- =========================================
+     MOVEMENT PHILOSOPHY
+========================================== -->
 
 <section class="movement-philosophy">
 
@@ -624,9 +682,9 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      RELATED TOPICS
-===================================================== -->
+========================================== -->
 
 <section class="movement-related">
 
@@ -641,32 +699,79 @@
 
     <div class="movement-related-grid">
 
+
         <a href="nutrition.html">
-            <span>01</span>
-            <h3>Nutrition</h3>
-            <p>Support your body with balanced eating.</p>
+
+            <span>
+                01
+            </span>
+
+            <h3>
+                Nutrition
+            </h3>
+
+            <p>
+                Support your body with balanced eating.
+            </p>
+
         </a>
+
 
 
         <a href="sleep.html">
-            <span>03</span>
-            <h3>Sleep</h3>
-            <p>Explore habits that support healthy sleep.</p>
+
+            <span>
+                03
+            </span>
+
+            <h3>
+                Sleep
+            </h3>
+
+            <p>
+                Explore habits that support healthy sleep.
+            </p>
+
         </a>
+
 
 
         <a href="wellbeing.html">
-            <span>04</span>
-            <h3>Wellbeing</h3>
-            <p>Support mental, emotional, and social wellbeing.</p>
+
+            <span>
+                04
+            </span>
+
+            <h3>
+                Wellbeing
+            </h3>
+
+            <p>
+                Support mental, emotional,
+                and social wellbeing.
+            </p>
+
         </a>
 
 
-        <a href="prevention.html">
-            <span>05</span>
-            <h3>Prevention</h3>
-            <p>Understand everyday opportunities for prevention.</p>
+
+        <a href="preventive-health.html">
+
+            <span>
+                05
+            </span>
+
+            <h3>
+                Prevention
+            </h3>
+
+            <p>
+                Understand everyday opportunities
+                for prevention.
+            </p>
+
         </a>
+
 
     </div>
 
@@ -674,45 +779,52 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      NEWSLETTER
-===================================================== -->
+========================================== -->
 
-<section class="movement-newsletter">
+<section class="newsletter-section">
 
-    <div class="movement-newsletter-icon">
+    <div class="newsletter-icon">
         ✉
     </div>
 
-    <p class="movement-section-label">
-        STAY INFORMED
-    </p>
 
-    <h2>
-        Simple health guidance,
-        delivered to your inbox.
-    </h2>
+    <div class="newsletter-copy">
 
-    <p>
-        Evidence-informed health education,
-        practical resources, and healthy
-        living inspiration.
-    </p>
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Evidence-informed health tips and practical
+            resources delivered to your inbox.
+        </p>
+
+    </div>
 
 
-    <form>
+    <form class="newsletter-form">
 
-        <input type="text"
-               placeholder="First name"
-               aria-label="First name">
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
 
-        <input type="email"
-               placeholder="Email address"
-               aria-label="Email address">
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
 
         <button type="submit">
             SUBSCRIBE
         </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
 
     </form>
 
@@ -723,13 +835,13 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      FOOTER
-===================================================== -->
+========================================== -->
 
 <footer class="site-footer">
 
-    <div class="footer-grid">
+    <div class="footer-main">
 
 
         <div class="footer-brand">
@@ -739,27 +851,38 @@
             </h2>
 
             <p>
-                Practical, evidence-informed
+                Practical, evidence-informed<br>
                 health education for everyday life.
             </p>
 
 
-            <div class="footer-social">
+            <div class="footer-socials">
 
-                <a href="#" aria-label="Instagram">
+                <a
+                    href="https://www.instagram.com/hellomysimplehealth/"
+                    aria-label="Instagram"
+                >
                     <i class="fa-brands fa-instagram"></i>
                 </a>
 
-                <a href="#" aria-label="LinkedIn">
+                <a
+                    href="https://www.linkedin.com/company/143299965/"
+                    aria-label="LinkedIn"
+                >
                     <i class="fa-brands fa-linkedin-in"></i>
                 </a>
 
-                <a href="#" aria-label="Pinterest">
+                <a
+                    href="https://www.pinterest.com/hellomysimplehealth/"
+                    aria-label="Pinterest"
+                >
                     <i class="fa-brands fa-pinterest-p"></i>
                 </a>
 
-                <a href="mailto:hello@mysimplehealth.org"
-                   aria-label="Email">
+                <a
+                    href="mailto:hello.mysimplehealth@gmail.com"
+                    aria-label="Email"
+                >
                     <i class="fa-regular fa-envelope"></i>
                 </a>
 
@@ -771,13 +894,25 @@
 
         <div class="footer-column">
 
-            <h3>EXPLORE</h3>
+            <h3>
+                EXPLORE
+            </h3>
 
-            <a href="topics.html">Topics</a>
-            <a href="recipes.html">Recipes</a>
-            <a href="resources.html">Resources</a>
-            <a href="blog.html">Blog</a>
-            <a href="assessment.html">Assessments</a>
+            <a href="topics.html">
+                Topics
+            </a>
+
+            <a href="recipes.html">
+                Recipes
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="blog.html">
+                Blog
+            </a>
 
         </div>
 
@@ -785,34 +920,47 @@
 
         <div class="footer-column">
 
-            <h3>ABOUT</h3>
+            <h3>
+                ABOUT
+            </h3>
 
-            <a href="about.html">About Me</a>
-            <a href="about.html#mission">Mission & Values</a>
-            <a href="contact.html">Contact</a>
+            <a href="about.html">
+                About Me
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
 
         </div>
 
 
 
-        <div class="footer-column footer-connect">
+        <div class="footer-connect">
 
-            <h3>LET'S STAY CONNECTED</h3>
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
 
             <p>
-                Join the community for new articles,
+                Join the community for new articles,<br>
                 healthy recipes, and free resources.
             </p>
 
 
             <form class="footer-email">
 
-                <input type="email"
-                       placeholder="Email address"
-                       aria-label="Email address">
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
 
-                <button type="submit"
-                        aria-label="Subscribe">
+                <button type="submit">
                     →
                 </button>
 
@@ -820,29 +968,28 @@
 
         </div>
 
-
     </div>
+
 
 
     <div class="footer-bottom">
 
         <p>
-            © 2026 My Simple Health.
-            All rights reserved.
+            © 2026 My Simple Health. All rights reserved.
         </p>
 
 
-        <div>
+        <div class="footer-legal">
 
-            <a href="privacy.html">
+            <a href="#">
                 Privacy Policy
             </a>
 
-            <a href="terms.html">
+            <a href="#">
                 Terms of Use
             </a>
 
-            <a href="disclaimer.html">
+            <a href="#">
                 Disclaimer
             </a>
 
@@ -854,37 +1001,67 @@
 
 
 
-<!-- =====================================================
+<!-- =========================================
      JAVASCRIPT
-===================================================== -->
+========================================== -->
 
 <script>
 
-function toggleMobileMenu() {
+    function toggleSearch() {
 
-    const menu =
-        document.getElementById("mobileMenu");
+        const searchBox =
+            document.getElementById("searchBox");
 
-    menu.classList.toggle("active");
+        const searchInput =
+            document.getElementById("siteSearch");
 
-}
+        searchBox.classList.toggle("active");
 
+        if (searchBox.classList.contains("active")) {
+            searchInput.focus();
+        }
 
-function toggleSearch() {
-
-    const searchBox =
-        document.getElementById("searchBox");
-
-    const searchInput =
-        document.getElementById("siteSearch");
-
-    searchBox.classList.toggle("active");
-
-    if (searchBox.classList.contains("active")) {
-        searchInput.focus();
     }
 
-}
+
+    function runSearch() {
+
+        const searchInput =
+            document.getElementById("siteSearch");
+
+        const query =
+            searchInput.value.trim();
+
+        if (query) {
+
+            window.location.href =
+                "https://www.google.com/search?q=site:mysimplehealth.org+" +
+                encodeURIComponent(query);
+
+        }
+
+    }
+
+
+    document
+        .getElementById("siteSearch")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                runSearch();
+            }
+
+        });
+
+
+    function toggleMenu() {
+
+        const nav =
+            document.querySelector(".site-nav");
+
+        nav.classList.toggle("active");
+
+    }
 
 </script>
 
