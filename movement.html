@@ -3,7 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Practical, research-informed guidance for building movement into everyday life. Explore physical activity, walking, strength, mobility, and sustainable movement habits.">
 
     <title>Movement | My Simple Health</title>
 
@@ -13,28 +18,33 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
+
 <body>
 
- <header class="site-header">
 
-    <a class="site-logo" href="index.html">
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="site-header">
+
+    <a href="index.html" class="site-logo">
         My Simple Health
     </a>
-<button class="menu-button"
-        aria-label="Open menu"
-        onclick="toggleMenu()">
-    <i class="fa-solid fa-bars"></i>
-</button>
-    <nav class="site-nav">
+
+    <nav class="desktop-nav">
+
         <a href="index.html">Home</a>
-        <a href="#">About</a>
+        <a href="about.html">About</a>
         <a href="topics.html">Topics</a>
-        <a href="#">Recipes</a>
-        <a href="#">Blog</a>
-        <a href="#">Contact</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="resources.html">Resources</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+
     </nav>
 
-    <div class="header-search">
+    <div class="header-actions">
 
         <button class="search-button"
                 aria-label="Search"
@@ -42,328 +52,843 @@
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
-        <div class="search-box" id="searchBox">
-            <input type="search"
-                   id="siteSearch"
-                   placeholder="Search My Simple Health..."
-                   aria-label="Search My Simple Health">
-
-            <button type="button" onclick="runSearch()">
-                Search
-            </button>
-        </div>
+        <button class="mobile-menu-button"
+                aria-label="Open menu"
+                onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
 
     </div>
 
 </header>
 
-    <main>
+
+<!-- =====================================================
+     MOBILE MENU
+===================================================== -->
+
+<div class="mobile-menu" id="mobileMenu">
+
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="topics.html">Topics</a>
+    <a href="recipes.html">Recipes</a>
+    <a href="resources.html">Resources</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+
+</div>
+
+
+<!-- =====================================================
+     SEARCH
+===================================================== -->
+
+<div class="search-box" id="searchBox">
+
+    <input type="search"
+           id="siteSearch"
+           placeholder="Search My Simple Health..."
+           aria-label="Search My Simple Health">
+
+</div>
+
+
+
+<main>
+
+
+<!-- =====================================================
+     MOVEMENT HERO
+===================================================== -->
+
 <section class="movement-hero">
 
-    <div class="movement-hero-text">
+    <div class="movement-hero-content">
 
-        <p class="topic-eyebrow">MOVEMENT</p>
-
-        <h2>Move More.<br>Feel Better.</h2>
-
-        <p class="topic-hero-description">
-            Movement supports your physical health, mental well-being,
-            energy, strength, and independence. Small amounts of activity
-            throughout your day can make a meaningful difference.
+        <p class="movement-eyebrow">
+            MOVEMENT
         </p>
 
-        <div class="topic-hero-links">
-            <a href="#">Walking</a>
-            <a href="#">Strength</a>
-            <a href="#">Mobility</a>
-            <a href="#">Everyday Movement</a>
-        </div>
+        <h1>
+            Move your body.<br>
+            Support your health.
+        </h1>
+
+        <p class="movement-hero-description">
+            Movement does not have to be complicated.
+            Learn how walking, strength, mobility, and
+            everyday physical activity can support your
+            health throughout life.
+        </p>
+
+        <a href="#movement-explore"
+           class="movement-primary-button">
+            EXPLORE MOVEMENT ↓
+        </a>
 
     </div>
+
 
     <div class="movement-hero-image">
-        <img src="movement-walking.png"
-             alt="Woman enjoying a walk outdoors">
+
+        <img src="movement-hero.jpg"
+             alt="Woman enjoying everyday movement outdoors">
+
     </div>
 
 </section>
-        <section class="movement-featured">
 
-    <p class="section-eyebrow">FEATURED IN MOVEMENT</p>
 
-    <h2>Movement that fits real life.</h2>
 
-    <p class="section-intro">
-        Explore practical ways to build strength, move more,
-        and support your health through everyday activity.
+<!-- =====================================================
+     INTRODUCTION
+===================================================== -->
+
+<section class="movement-intro">
+
+    <p class="movement-section-label">
+        MOVEMENT FOR REAL LIFE
     </p>
 
-    <div class="movement-featured-grid">
+    <h2>
+        You don't have to live at the gym
+        to live an active life.
+    </h2>
 
-        <article class="movement-featured-card">
-            <h3>Walking for Health</h3>
-            <p>
-                Why one of the simplest forms of movement can
-                have meaningful benefits for your health.
-            </p>
-            <a href="#">Read Article →</a>
-        </article>
+    <p>
+        Physical activity can happen throughout your day.
+        Walking, strength training, stretching, household
+        activities, recreation, and intentional exercise
+        can all contribute to an active lifestyle.
+    </p>
 
-        <article class="movement-featured-card">
-            <h3>Strength for Everyday Life</h3>
-            <p>
-                Build strength that supports daily movement,
-                independence, and long-term health.
-            </p>
-            <a href="#">Read Article →</a>
-        </article>
-
-        <article class="movement-featured-card">
-            <h3>How Much Movement Do You Need?</h3>
-            <p>
-                Understand physical activity recommendations
-                and how to make them work in real life.
-            </p>
-            <a href="#">Read Article →</a>
-        </article>
-
-    </div>
+    <p>
+        The goal is not perfection. It is finding realistic
+        ways to move that fit your body, preferences,
+        schedule, and life.
+    </p>
 
 </section>
 
-<section class="movement-latest">
 
-    <div class="movement-latest-header">
-        <p class="section-eyebrow">LATEST MOVEMENT ARTICLES</p>
-        <h2>More ways to move well.</h2>
-    </div>
 
-    <div class="movement-latest-grid">
+<!-- =====================================================
+     WHY MOVEMENT MATTERS
+===================================================== -->
 
-        <article class="movement-article-card">
-            <div class="movement-article-content">
-                <span class="article-category">WALKING</span>
-                <h3>Why Walking Counts More Than You Think</h3>
-                <p>
-                    Discover how regular walking can support your health,
-                    fitness, and everyday well-being.
-                </p>
-                <a href="#">Read Article →</a>
-            </div>
-        </article>
+<section class="movement-benefits">
 
-        <article class="movement-article-card">
-            <div class="movement-article-content">
-                <span class="article-category">STRENGTH</span>
-                <h3>Getting Started With Strength Training</h3>
-                <p>
-                    A practical introduction to building strength without
-                    making exercise complicated.
-                </p>
-                <a href="#">Read Article →</a>
-            </div>
-        </article>
+    <div class="movement-benefits-heading">
 
-        <article class="movement-article-card">
-            <div class="movement-article-content">
-                <span class="article-category">EVERYDAY MOVEMENT</span>
-                <h3>Small Ways to Move More Throughout Your Day</h3>
-                <p>
-                    Simple opportunities to add more movement to everyday
-                    routines without needing a formal workout.
-                </p>
-                <a href="#">Read Article →</a>
-            </div>
-        </article>
+        <p class="movement-section-label">
+            WHY MOVEMENT MATTERS
+        </p>
+
+        <h2>
+            Movement supports more
+            than physical fitness.
+        </h2>
 
     </div>
 
-</section>
-<section class="movement-topics">
 
-    <div class="movement-topics-header">
-        <p class="section-eyebrow">POPULAR MOVEMENT TOPICS</p>
-        <h2>Explore movement by topic.</h2>
-    </div>
+    <div class="movement-benefit-grid">
 
-    <div class="movement-topics-grid">
 
-        <a href="#" class="movement-topic-card">
-            <span class="movement-topic-number">01</span>
-            <h3>Walking</h3>
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">01</span>
+
+            <i class="fa-solid fa-heart-pulse"></i>
+
+            <h3>Heart Health</h3>
+
             <p>
-                Simple ways to make walking part of everyday life.
+                Regular physical activity supports
+                cardiovascular health and overall
+                physical function.
             </p>
-            <span class="movement-topic-link">Explore Walking →</span>
-        </a>
 
-        <a href="#" class="movement-topic-card">
-            <span class="movement-topic-number">02</span>
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">02</span>
+
+            <i class="fa-solid fa-dumbbell"></i>
+
             <h3>Strength</h3>
+
             <p>
-                Build strength for health, function, and independence.
+                Strength-building activity helps support
+                muscles, bones, mobility, and everyday
+                independence.
             </p>
-            <span class="movement-topic-link">Explore Strength →</span>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">03</span>
+
+            <i class="fa-solid fa-person-walking"></i>
+
+            <h3>Daily Function</h3>
+
+            <p>
+                Everyday movement helps maintain the
+                physical capacity needed for daily life.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">04</span>
+
+            <i class="fa-solid fa-brain"></i>
+
+            <h3>Wellbeing</h3>
+
+            <p>
+                Physical activity can also support mood,
+                sleep, stress management, and overall
+                wellbeing.
+            </p>
+
+        </article>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     EXPLORE MOVEMENT
+===================================================== -->
+
+<section class="movement-explore"
+         id="movement-explore">
+
+    <div class="movement-explore-heading">
+
+        <p class="movement-section-label">
+            EXPLORE MOVEMENT
+        </p>
+
+        <h2>
+            Find movement that works for you.
+        </h2>
+
+        <p>
+            Explore the different ways movement can fit
+            into everyday life.
+        </p>
+
+    </div>
+
+
+    <div class="movement-topic-grid">
+
+
+        <a href="walking.html"
+           class="movement-topic-card">
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-person-walking"></i>
+            </div>
+
+            <div>
+                <h3>Walking</h3>
+
+                <p>
+                    Build more movement into your day
+                    through one of the simplest forms
+                    of physical activity.
+                </p>
+
+                <span>EXPLORE WALKING →</span>
+            </div>
+
         </a>
 
-        <a href="#" class="movement-topic-card">
-            <span class="movement-topic-number">03</span>
-            <h3>Mobility &amp; Flexibility</h3>
-            <p>
-                Support comfortable movement through everyday activities.
-            </p>
-            <span class="movement-topic-link">Explore Mobility →</span>
+
+        <a href="strength.html"
+           class="movement-topic-card">
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+
+            <div>
+                <h3>Strength</h3>
+
+                <p>
+                    Understand how resistance training
+                    supports strength, function,
+                    and long-term health.
+                </p>
+
+                <span>EXPLORE STRENGTH →</span>
+            </div>
+
         </a>
 
-        <a href="#" class="movement-topic-card">
-            <span class="movement-topic-number">04</span>
-            <h3>Physical Activity Basics</h3>
-            <p>
-                Understand recommendations, intensity, and how much movement you need.
-            </p>
-            <span class="movement-topic-link">Explore the Basics →</span>
+
+        <a href="mobility.html"
+           class="movement-topic-card">
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-person"></i>
+            </div>
+
+            <div>
+                <h3>Mobility</h3>
+
+                <p>
+                    Support comfortable movement,
+                    flexibility, and everyday
+                    physical function.
+                </p>
+
+                <span>EXPLORE MOBILITY →</span>
+            </div>
+
+        </a>
+
+
+        <a href="everyday-movement.html"
+           class="movement-topic-card">
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-shoe-prints"></i>
+            </div>
+
+            <div>
+                <h3>Everyday Movement</h3>
+
+                <p>
+                    Discover realistic opportunities
+                    to move more outside of structured
+                    exercise.
+                </p>
+
+                <span>EXPLORE EVERYDAY MOVEMENT →</span>
+            </div>
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FEATURED MOVEMENT ARTICLE
+===================================================== -->
+
+<section class="movement-feature">
+
+    <div class="movement-feature-image">
+
+        <img src="movement-feature.jpg"
+             alt="Walking as part of an active everyday lifestyle">
+
+    </div>
+
+
+    <div class="movement-feature-content">
+
+        <p class="movement-section-label">
+            FEATURED IN MOVEMENT
+        </p>
+
+        <h2>
+            Small amounts of movement
+            still matter.
+        </h2>
+
+        <p>
+            An active lifestyle is built through more
+            than formal workouts. Learn how everyday
+            opportunities for movement can add up
+            throughout your day.
+        </p>
+
+        <a href="everyday-movement.html">
+            READ ARTICLE →
         </a>
 
     </div>
 
 </section>
-        <section class="newsletter-section">
 
-    <div class="newsletter-icon">
+
+
+<!-- =====================================================
+     LATEST MOVEMENT ARTICLES
+===================================================== -->
+
+<section class="movement-articles">
+
+    <div class="movement-section-header">
+
+        <div>
+
+            <p class="movement-section-label">
+                LEARN
+            </p>
+
+            <h2>
+                Latest in Movement
+            </h2>
+
+        </div>
+
+
+        <a href="blog.html">
+            VIEW ALL ARTICLES →
+        </a>
+
+    </div>
+
+
+    <div class="movement-article-grid">
+
+
+        <article class="movement-article-card">
+
+            <img src="movement-walking.jpg"
+                 alt="Person walking outdoors">
+
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    MOVEMENT
+                </p>
+
+                <h3>
+                    Simple Ways to Move More
+                    Throughout Your Day
+                </h3>
+
+                <p>
+                    Practical ways to increase everyday
+                    movement without completely changing
+                    your routine.
+                </p>
+
+                <a href="move-more.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="movement-article-card">
+
+            <img src="movement-strength.jpg"
+                 alt="Strength training equipment">
+
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    STRENGTH
+                </p>
+
+                <h3>
+                    Why Strength Training Matters
+                    Beyond Muscle
+                </h3>
+
+                <p>
+                    Explore how resistance training
+                    supports function, health,
+                    and healthy aging.
+                </p>
+
+                <a href="strength-training.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="movement-article-card">
+
+            <img src="movement-routine.jpg"
+                 alt="Walking shoes ready for movement">
+
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    HABITS
+                </p>
+
+                <h3>
+                    Building a Movement Routine
+                    You Can Actually Maintain
+                </h3>
+
+                <p>
+                    A realistic approach to creating
+                    movement habits that fit your life.
+                </p>
+
+                <a href="movement-routine.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MOVEMENT RESOURCE
+===================================================== -->
+
+<section class="movement-resource">
+
+    <div class="movement-resource-icon">
+
+        <i class="fa-solid fa-clipboard-list"></i>
+
+    </div>
+
+
+    <p class="movement-section-label">
+        FREE RESOURCE
+    </p>
+
+    <h2>
+        Weekly Movement Planner
+    </h2>
+
+    <p>
+        Plan realistic opportunities for walking,
+        strength, mobility, and everyday movement
+        throughout your week.
+    </p>
+
+    <a href="resources.html">
+        EXPLORE THE RESOURCE →
+    </a>
+
+</section>
+
+
+
+<!-- =====================================================
+     PHILOSOPHY
+===================================================== -->
+
+<section class="movement-philosophy">
+
+    <span class="movement-quote">
+        “
+    </span>
+
+    <h2>
+        The best movement routine
+        is one that can become part
+        of your real life.
+    </h2>
+
+    <p>
+        Start where you are. Build gradually.
+        Let consistency matter more than perfection.
+    </p>
+
+</section>
+
+
+
+<!-- =====================================================
+     RELATED TOPICS
+===================================================== -->
+
+<section class="movement-related">
+
+    <p class="movement-section-label">
+        KEEP EXPLORING
+    </p>
+
+    <h2>
+        Health works together.
+    </h2>
+
+
+    <div class="movement-related-grid">
+
+        <a href="nutrition.html">
+            <span>01</span>
+            <h3>Nutrition</h3>
+            <p>Support your body with balanced eating.</p>
+        </a>
+
+
+        <a href="sleep.html">
+            <span>03</span>
+            <h3>Sleep</h3>
+            <p>Explore habits that support healthy sleep.</p>
+        </a>
+
+
+        <a href="wellbeing.html">
+            <span>04</span>
+            <h3>Wellbeing</h3>
+            <p>Support mental, emotional, and social wellbeing.</p>
+        </a>
+
+
+        <a href="prevention.html">
+            <span>05</span>
+            <h3>Prevention</h3>
+            <p>Understand everyday opportunities for prevention.</p>
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     NEWSLETTER
+===================================================== -->
+
+<section class="movement-newsletter">
+
+    <div class="movement-newsletter-icon">
         ✉
     </div>
 
-    <div class="newsletter-copy">
-        <h2>Stay inspired.</h2>
-        <p>
-            Evidence-informed health tips and practical resources
-            delivered to your inbox.
-        </p>
-    </div>
+    <p class="movement-section-label">
+        STAY INFORMED
+    </p>
 
-    <form class="newsletter-form">
-        <input
-            type="text"
-            placeholder="First name"
-            aria-label="First name"
-        >
+    <h2>
+        Simple health guidance,
+        delivered to your inbox.
+    </h2>
 
-        <input
-            type="email"
-            placeholder="Email address"
-            aria-label="Email address"
-        >
+    <p>
+        Evidence-informed health education,
+        practical resources, and healthy
+        living inspiration.
+    </p>
+
+
+    <form>
+
+        <input type="text"
+               placeholder="First name"
+               aria-label="First name">
+
+        <input type="email"
+               placeholder="Email address"
+               aria-label="Email address">
 
         <button type="submit">
             SUBSCRIBE
         </button>
 
-        <p class="newsletter-note">
-            No spam, ever. Unsubscribe anytime.
-        </p>
     </form>
 
 </section>
-    </main>
-    <footer class="site-footer">
 
-    <div class="footer-main">
+
+</main>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="site-footer">
+
+    <div class="footer-grid">
+
 
         <div class="footer-brand">
-            <h2>MY SIMPLE HEALTH</h2>
+
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
+
             <p>
-                Practical, evidence-informed<br>
+                Practical, evidence-informed
                 health education for everyday life.
             </p>
 
-          <div class="footer-socials">
-   <a href="https://www.instagram.com/hellomysimplehealth/" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-<a href="https://www.linkedin.com/company/143299965/" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-<a href="https://www.pinterest.com/hellomysimplehealth/" aria-label="Pinterest"><i class="fa-brands fa-pinterest-p"></i></a>
-<a href="mailto:hello.mysimplehealth@gmail.com" aria-label="Email"><i class="fa-regular fa-envelope"></i></a>
-</div>
+
+            <div class="footer-social">
+
+                <a href="#" aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#" aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a href="#" aria-label="Pinterest">
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a href="mailto:hello@mysimplehealth.org"
+                   aria-label="Email">
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
         </div>
 
+
+
         <div class="footer-column">
+
             <h3>EXPLORE</h3>
-            <a href="#">Topics</a>
-            <a href="#">Recipes</a>
-            <a href="#">Resources</a>
-            <a href="#">Blog</a>
+
+            <a href="topics.html">Topics</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
+            <a href="assessment.html">Assessments</a>
+
         </div>
+
+
 
         <div class="footer-column">
+
             <h3>ABOUT</h3>
-            <a href="#">About Me</a>
-            <a href="#">Mission &amp; Values</a>
-            <a href="#">Work With Me</a>
-            <a href="#">Contact</a>
+
+            <a href="about.html">About Me</a>
+            <a href="about.html#mission">Mission & Values</a>
+            <a href="contact.html">Contact</a>
+
         </div>
 
-        <div class="footer-connect">
+
+
+        <div class="footer-column footer-connect">
+
             <h3>LET'S STAY CONNECTED</h3>
 
             <p>
-                Join the community for new articles,<br>
+                Join the community for new articles,
                 healthy recipes, and free resources.
             </p>
 
+
             <form class="footer-email">
-                <input
-                    type="email"
-                    placeholder="Email address"
-                    aria-label="Email address"
-                >
-                <button type="submit">→</button>
+
+                <input type="email"
+                       placeholder="Email address"
+                       aria-label="Email address">
+
+                <button type="submit"
+                        aria-label="Subscribe">
+                    →
+                </button>
+
             </form>
+
         </div>
+
 
     </div>
 
-    <div class="footer-bottom">
-        <p>© 2026 My Simple Health. All rights reserved.</p>
 
-        <div class="footer-legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Disclaimer</a>
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health.
+            All rights reserved.
+        </p>
+
+
+        <div>
+
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms of Use
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
+
         </div>
+
     </div>
 
 </footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
 <script>
-    function toggleSearch() {
-        const searchBox = document.getElementById("searchBox");
-        const searchInput = document.getElementById("siteSearch");
 
-        searchBox.classList.toggle("active");
+function toggleMobileMenu() {
 
-        if (searchBox.classList.contains("active")) {
-            searchInput.focus();
-        }
-    }
+    const menu =
+        document.getElementById("mobileMenu");
 
-    function runSearch() {
-        const searchInput = document.getElementById("siteSearch");
-        const query = searchInput.value.trim();
+    menu.classList.toggle("active");
 
-        if (query) {
-            window.location.href =
-                "https://www.google.com/search?q=site:mysimplehealth.org+" +
-                encodeURIComponent(query);
-        }
-    }
-
-    document.getElementById("siteSearch").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            runSearch();
-        }
-    });
-    function toggleMenu() {
-    const nav = document.querySelector(".site-nav");
-    nav.classList.toggle("active");
 }
+
+
+function toggleSearch() {
+
+    const searchBox =
+        document.getElementById("searchBox");
+
+    const searchInput =
+        document.getElementById("siteSearch");
+
+    searchBox.classList.toggle("active");
+
+    if (searchBox.classList.contains("active")) {
+        searchInput.focus();
+    }
+
+}
+
 </script>
+
+
 </body>
 
 </html>
