@@ -52,14 +52,13 @@
 
         <div class="search-box" id="searchBox">
 
-            <input
-                type="search"
-                id="siteSearch"
-                placeholder="Search My Simple Health..."
-                aria-label="Search My Simple Health"
-            >
+            <input type="search"
+                   id="siteSearch"
+                   placeholder="Search My Simple Health..."
+                   aria-label="Search My Simple Health">
 
-            <button type="button" onclick="runSearch()">
+            <button type="button"
+                    onclick="runSearch()">
                 Search
             </button>
 
@@ -68,9 +67,6 @@
     </div>
 
 </header>
-
-
-<main>
 
 
 <!-- =========================================
@@ -860,10 +856,6 @@
 
 <script>
 
-    /* =========================
-       SEARCH
-    ========================= */
-
     function toggleSearch() {
         const searchBox = document.getElementById("searchBox");
         const searchInput = document.getElementById("siteSearch");
@@ -874,7 +866,6 @@
             searchInput.focus();
         }
     }
-
 
     function runSearch() {
         const searchInput = document.getElementById("siteSearch");
@@ -887,26 +878,19 @@
         }
     }
 
-
     document.getElementById("siteSearch")
         .addEventListener("keydown", function(event) {
-
             if (event.key === "Enter") {
                 runSearch();
             }
-
         });
-
-
-    /* =========================
-       MOBILE MENU
-    ========================= */
 
     function toggleMenu() {
         const nav = document.querySelector(".site-nav");
         nav.classList.toggle("active");
     }
 
+</script>
 
     /* =========================
        HOME ARTICLE CAROUSEL
