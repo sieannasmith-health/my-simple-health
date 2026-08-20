@@ -5191,3 +5191,21 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 .hello-nav-link:hover {
     color: #7D9460 !important;
 }
+/* =========================================================
+   NAVIGATION — STRONGER TEXT
+========================================================= */
+
+.site-nav a {
+    color: #252822;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+}
+
+.site-nav a:hover {
+    color: #7D9460;
+}
+
+.hello-nav-link {
+    color: #173D2B !important;
+    font-weight: 700 !important;
+}
