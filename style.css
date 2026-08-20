@@ -2869,3 +2869,28 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* ========================================
+   HOMEPAGE LATEST ARTICLES - ROUNDED
+======================================== */
+
+.home-article-slider {
+    border-radius: 18px !important;
+    overflow: hidden !important;
+}
+
+.home-article-slide {
+    border-radius: 18px !important;
+    overflow: hidden !important;
+}
+
+.home-article-slide > img {
+    border-radius: 18px 0 0 18px !important;
+}
+
+@media (max-width: 800px) {
+
+    .home-article-slide > img {
+        border-radius: 18px 18px 0 0 !important;
+    }
+
+}
