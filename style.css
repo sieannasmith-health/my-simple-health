@@ -4774,3 +4774,133 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         font-size: 29px;
     }
 }
+/* =========================================================
+   MY SIMPLE HEALTH — SITE HEADER / NAVIGATION
+========================================================= */
+
+.site-header {
+    width: 100%;
+    background: #FCFBF7;
+    border-bottom: 1px solid #E7E2D8;
+}
+
+.nav-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px 32px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+
+/* ---------- LOGO ---------- */
+
+.logo {
+    color: #173D2B;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 1.4px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+
+/* ---------- DESKTOP NAV ---------- */
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.main-nav a {
+    position: relative;
+
+    color: #353832;
+
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.main-nav a:hover {
+    color: #7D9460;
+}
+
+
+/* subtle underline on hover */
+
+.main-nav a::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+
+    width: 0;
+    height: 1px;
+
+    background: #7D9460;
+
+    transition: width 0.2s ease;
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+}
+
+
+/* =========================================================
+   HEADER — TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .nav-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+
+        padding: 20px 24px;
+    }
+
+    .main-nav {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 14px 22px;
+    }
+
+}
+
+
+/* =========================================================
+   HEADER — MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .nav-container {
+        padding: 18px 20px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .main-nav {
+        gap: 12px 18px;
+    }
+
+    .main-nav a {
+        font-size: 13px;
+    }
+
+}
