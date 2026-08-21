@@ -6082,3 +6082,13 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 
     box-shadow: 0 4px 14px rgba(23, 61, 43, 0.14);
 }
+/* =========================================================
+   FULL-WIDTH GREEN HEADER
+========================================================= */
+
+.site-header {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
