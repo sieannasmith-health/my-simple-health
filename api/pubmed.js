@@ -7,32 +7,25 @@ export async function searchPubMed(
     maxResults = 5
 ) {
 
+    /* =====================================================
+       SEARCH PUBMED
+    ====================================================== */
+
     const searchParams =
         new URLSearchParams({
 
             db: "pubmed",
-
             term: query,
-
             retmode: "json",
-
-            retmax:
-                String(maxResults),
-
+            retmax: String(maxResults),
             sort: "relevance",
-
-            tool:
-                "my-simple-health",
-
-            email:
-                process.env.NCBI_EMAIL || ""
+            tool: "my-simple-health",
+            email: process.env.NCBI_EMAIL || ""
 
         });
 
 
-    if (
-        process.env.NCBI_API_KEY
-    ) {
+    if (process.env.NCBI_API_KEY) {
 
         searchParams.set(
             "api_key",
@@ -65,36 +58,30 @@ export async function searchPubMed(
         searchData?.esearchresult?.idlist || [];
 
 
-    if (
-        ids.length === 0
-    ) {
+    if (ids.length === 0) {
 
         return [];
 
     }
 
 
+    /* =====================================================
+       GET METADATA
+    ====================================================== */
+
     const summaryParams =
         new URLSearchParams({
 
             db: "pubmed",
-
             id: ids.join(","),
-
             retmode: "json",
-
-            tool:
-                "my-simple-health",
-
-            email:
-                process.env.NCBI_EMAIL || ""
+            tool: "my-simple-health",
+            email: process.env.NCBI_EMAIL || ""
 
         });
 
 
-    if (
-        process.env.NCBI_API_KEY
-    ) {
+    if (process.env.NCBI_API_KEY) {
 
         summaryParams.set(
             "api_key",
@@ -122,6 +109,63 @@ export async function searchPubMed(
     const summaryData =
         await summaryResponse.json();
 
+
+    /* =====================================================
+       GET ABSTRACTS
+    ====================================================== */
+
+    const fetchParams =
+        new URLSearchParams({
+
+            db: "pubmed",
+            id: ids.join(","),
+            rettype: "abstract",
+            retmode: "xml",
+            tool: "my-simple-health",
+            email: process.env.NCBI_EMAIL || ""
+
+        });
+
+
+    if (process.env.NCBI_API_KEY) {
+
+        fetchParams.set(
+            "api_key",
+            process.env.NCBI_API_KEY
+        );
+
+    }
+
+
+    const abstractResponse =
+        await fetch(
+            `${BASE}/efetch.fcgi?${fetchParams}`
+        );
+
+
+    if (!abstractResponse.ok) {
+
+        throw new Error(
+            "PubMed abstract retrieval failed."
+        );
+
+    }
+
+
+    const abstractXML =
+        await abstractResponse.text();
+
+
+    const abstracts =
+        extractAbstracts(
+            abstractXML,
+            ids
+        );
+
+
+    /* =====================================================
+       COMBINE EVERYTHING
+    ====================================================== */
 
     return ids
         .map(
@@ -166,6 +210,9 @@ export async function searchPubMed(
                     publicationTypes:
                         item.pubtype || [],
 
+                    abstract:
+                        abstracts[id] || "",
+
                     url:
                         `https://pubmed.ncbi.nlm.nih.gov/${id}/`
 
@@ -174,5 +221,163 @@ export async function searchPubMed(
             }
         )
         .filter(Boolean);
+
+}
+
+
+/* =========================================================
+   EXTRACT ABSTRACTS FROM PUBMED XML
+========================================================= */
+
+function extractAbstracts(
+    xml,
+    ids
+) {
+
+    const results = {};
+
+
+    for (const id of ids) {
+
+        results[id] = "";
+
+    }
+
+
+    const articleMatches =
+        xml.match(
+            /<PubmedArticle[\s\S]*?<\/PubmedArticle>/g
+        ) || [];
+
+
+    for (const articleXML of articleMatches) {
+
+        const pmidMatch =
+            articleXML.match(
+                /<PMID[^>]*>([\s\S]*?)<\/PMID>/
+            );
+
+
+        if (!pmidMatch) {
+            continue;
+        }
+
+
+        const pmid =
+            stripXML(
+                pmidMatch[1]
+            );
+
+
+        const abstractMatches =
+            [
+                ...articleXML.matchAll(
+                    /<AbstractText\b([^>]*)>([\s\S]*?)<\/AbstractText>/g
+                )
+            ];
+
+
+        if (abstractMatches.length === 0) {
+            continue;
+        }
+
+
+        const pieces =
+            abstractMatches
+                .map(
+                    match => {
+
+                        const attributes =
+                            match[1] || "";
+
+                        const body =
+                            match[2] || "";
+
+
+                        const labelMatch =
+                            attributes.match(
+                                /Label="([^"]+)"/
+                            );
+
+
+                        const label =
+                            labelMatch
+                                ? decodeXML(
+                                    labelMatch[1]
+                                )
+                                : "";
+
+
+                        const text =
+                            stripXML(body);
+
+
+                        if (!text) {
+                            return "";
+                        }
+
+
+                        return label
+                            ? `${label}: ${text}`
+                            : text;
+
+                    }
+                )
+                .filter(Boolean);
+
+
+        results[pmid] =
+            pieces
+                .join("\n")
+                .trim();
+
+    }
+
+
+    return results;
+
+}
+
+
+/* =========================================================
+   XML HELPERS
+========================================================= */
+
+function stripXML(value) {
+
+    return decodeXML(
+
+        String(value || "")
+
+            .replace(
+                /<[^>]+>/g,
+                " "
+            )
+
+            .replace(
+                /\s+/g,
+                " "
+            )
+
+            .trim()
+
+    );
+
+}
+
+
+function decodeXML(value) {
+
+    return String(value || "")
+
+        .replace(/&lt;/g, "<")
+
+        .replace(/&gt;/g, ">")
+
+        .replace(/&amp;/g, "&")
+
+        .replace(/&quot;/g, '"')
+
+        .replace(/&#39;/g, "'");
 
 }
