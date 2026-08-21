@@ -2091,8 +2091,10 @@ async function handleAskHello(value) {
             data.response,
             "assistant",
             getDisplayRoute(data.route)
+            
         );
-
+        addEvidenceDetails(data);
+        
         if (
             data.route === "YELLOW"
         ) {
