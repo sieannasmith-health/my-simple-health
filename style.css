@@ -5656,7 +5656,6 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     white-space: nowrap;
 }
 
-
 /* HELLO */
 
 .hello-nav-link {
@@ -5994,7 +5993,6 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     --site-gutter: 48px;
 }
 
-.site-header,
 .home-hero,
 .topics-section,
 .latest-articles,
@@ -6008,4 +6006,88 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 
     margin-left: auto;
     margin-right: auto;
+}
+/* =========================================================
+   FINAL MOBILE HEADER
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .site-header {
+        width: 100% !important;
+        max-width: none !important;
+
+        display: grid !important;
+        grid-template-columns: 1fr auto auto !important;
+        align-items: center !important;
+
+        min-height: 76px;
+        padding: 0 22px !important;
+
+        margin: 0 !important;
+
+        background: #173D2B !important;
+    }
+
+    .site-logo {
+        grid-column: 1;
+        justify-self: start;
+
+        margin: 0 !important;
+    }
+
+    .menu-button {
+        grid-column: 2;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 42px;
+        height: 42px;
+
+        margin: 0 !important;
+        padding: 0;
+
+        background: transparent;
+        border: 0;
+
+        color: #FCFBF7 !important;
+        font-size: 21px;
+    }
+
+    .header-search {
+        grid-column: 3;
+
+        display: flex !important;
+        justify-self: end;
+
+        margin: 0 0 0 8px !important;
+    }
+
+    .search-button {
+        color: #FCFBF7 !important;
+    }
+
+    .site-nav {
+        display: none !important;
+
+        grid-column: 1 / -1;
+
+        width: 100%;
+        max-width: none;
+
+        margin: 0 !important;
+        padding: 20px 0 !important;
+
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 18px !important;
+    }
+
+    .site-nav.active,
+    .site-nav.nav-open {
+        display: flex !important;
+    }
 }
