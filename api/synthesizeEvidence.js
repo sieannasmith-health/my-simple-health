@@ -130,13 +130,27 @@ Return only valid JSON.
 Use this exact structure:
 
 {
-  "evidenceStrength": "SUPPORTED",
-  "agreement": "CONSISTENT",
-  "summary": "Plain-language synthesis here.",
-  "limitations": "Important limitations or uncertainty here."
+    "evidenceStrength": "SUPPORTED",
+    "agreement": "CONSISTENT",
+    "summary": "Technical plain-language synthesis for the evidence engine.",
+    "limitations": "Important limitations or uncertainty.",
+    "plainLanguageAnswer": "Short user-facing answer in everyday language.",
+    "whatWeKnow": "What the evidence supports with reasonable confidence.",
+    "whatWeDontKnowYet": "What remains uncertain, limited, or not established."
 }
 `,
+For plainLanguageAnswer:
+- Keep it to about 2–4 sentences.
+- Use everyday language.
+- Do not exaggerate certainty.
+- Do not add claims beyond the supplied studies.
 
+For whatWeKnow:
+- State the clearest supported takeaway.
+
+For whatWeDontKnowYet:
+- State the most important uncertainty or limitation.
+- Do not imply that uncertainty means the evidence is useless.
                     input: `
 USER QUESTION:
 ${question}
@@ -235,6 +249,18 @@ Determine the final evidence-strength label based on what the abstracts actually
         limitations:
             parsed.limitations ||
             "",
+       
+        plainLanguageAnswer:
+    parsed.plainLanguageAnswer ||
+    "",
+
+whatWeKnow:
+    parsed.whatWeKnow ||
+    "",
+
+whatWeDontKnowYet:
+    parsed.whatWeDontKnowYet ||
+    "",
 
         sources:
             usableStudies.map(
