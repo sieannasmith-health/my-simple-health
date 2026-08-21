@@ -1724,7 +1724,7 @@ function handleAskHello(
 
         );
 
-
+        addVisitPrepButton();
         return;
 
     }
@@ -2109,19 +2109,25 @@ function handleSend() {
             "helloInput"
         );
 
-
     const value =
         input.value.trim();
-
 
     if (!value) {
         return;
     }
 
+    input.value = "";
 
-    input.value =
-        "";
+    if (
+        visitPrepState.active
+    ) {
 
+        handleVisitPrepResponse(
+            value
+        );
+
+        return;
+    }
 
     if (
         currentMode === "guided"
@@ -2142,9 +2148,7 @@ function handleSend() {
     }
 
 }
-
-
-
+    
 /* =========================================================
    ENTER TO SEND
 ========================================================= */
