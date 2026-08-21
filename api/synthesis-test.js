@@ -102,7 +102,15 @@ export default async function handler(
 
             limitations:
                 synthesis.limitations,
+            
+plainLanguageAnswer:
+    synthesis.plainLanguageAnswer,
 
+whatWeKnow:
+    synthesis.whatWeKnow,
+
+whatWeDontKnowYet:
+    synthesis.whatWeDontKnowYet,
             sources:
                 synthesis.sources
 
