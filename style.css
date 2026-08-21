@@ -5892,3 +5892,39 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 .search-box input {
     color: #252822;
 }
+/* =========================================================
+   FINAL HEADER SPACING
+========================================================= */
+
+.site-header {
+    display: grid !important;
+    grid-template-columns: 260px 1fr 60px !important;
+    align-items: center !important;
+
+    width: 100%;
+    padding: 0 42px !important;
+    box-sizing: border-box;
+}
+
+.site-logo {
+    justify-self: start;
+    margin: 0 !important;
+}
+
+.site-nav {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-evenly !important;
+
+    width: 100%;
+    max-width: 720px;
+    justify-self: center;
+
+    gap: 24px !important;
+    margin: 0 !important;
+}
+
+.header-search {
+    justify-self: end;
+    margin: 0 !important;
+}
