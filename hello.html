@@ -1097,7 +1097,77 @@ function addMessage(
         chat.scrollHeight;
 
 }
+function showLoadingMessage() {
 
+    const chat =
+        document.getElementById(
+            "helloChat"
+        );
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "hello-message-row assistant";
+
+    row.id =
+        "helloLoadingMessage";
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+    bubble.className =
+        "hello-bubble assistant hello-loading-bubble";
+
+    bubble.innerHTML = `
+        <span class="hello-label">Hello</span>
+        <span class="hello-loading-text">
+            Reviewing the evidence
+            <span class="hello-loading-dots">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+            </span>
+        </span>
+    `;
+
+
+    row.appendChild(
+        bubble
+    );
+
+    chat.appendChild(
+        row
+    );
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+function removeLoadingMessage() {
+
+    const loadingMessage =
+        document.getElementById(
+            "helloLoadingMessage"
+        );
+
+    if (
+        loadingMessage
+    ) {
+
+        loadingMessage.remove();
+
+    }
+
+}
+    
 function addEvidenceDetails(data) {
 
     if (
@@ -2054,6 +2124,7 @@ async function handleAskHello(value) {
     );
 
     try {
+        showLoadingMessage();
 
         const response =
             await fetch(
@@ -2073,6 +2144,7 @@ async function handleAskHello(value) {
 
         const data =
             await response.json();
+        removeLoadingMessage();
 
         if (!response.ok) {
 
@@ -2104,7 +2176,7 @@ async function handleAskHello(value) {
     }
 
     catch (error) {
-
+removeLoadingMessage();
         addMessage(
             "Hello is having trouble connecting right now. Please try again.",
             "assistant"
