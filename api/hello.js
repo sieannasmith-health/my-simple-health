@@ -7,9 +7,20 @@ export default function handler(req, res) {
         });
     }
 
+    const { message } = req.body || {};
+
+    if (!message || typeof message !== "string") {
+        return res.status(400).json({
+            success: false,
+            message: "A message is required."
+        });
+    }
+
     return res.status(200).json({
         success: true,
-        message: "Hello backend is connected."
+        receivedMessage: message,
+        route: "TEST",
+        response: "Hello backend received your message."
     });
 
 }
