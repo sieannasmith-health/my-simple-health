@@ -7,13 +7,25 @@
 
     <title>Sleep | My Simple Health</title>
 
+    <meta
+        name="description"
+        content="Practical, science-based guidance for healthy sleep habits, routines, sleep consistency, and restorative rest."
+    >
+
     <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 </head>
 
 <body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
 
 <header class="site-header">
 
@@ -21,26 +33,31 @@
         My Simple Health
     </a>
 
-    <button class="menu-button"
-            aria-label="Open menu"
-            onclick="toggleMenu()">
+    <button
+        class="menu-button"
+        aria-label="Open menu"
+        onclick="toggleMenu()"
+    >
         <i class="fa-solid fa-bars"></i>
     </button>
 
     <nav class="site-nav">
         <a href="index.html">Home</a>
-        <a href="#">About</a>
+        <a href="about.html">About</a>
         <a href="topics.html">Topics</a>
         <a href="recipes.html">Recipes</a>
-        <a href="#">Blog</a>
-        <a href="#">Contact</a>
+        <a href="assessments.html">Assessments</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
     </nav>
 
     <div class="header-search">
 
-        <button class="search-button"
-                aria-label="Search"
-                onclick="toggleSearch()">
+        <button
+            class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()"
+        >
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
@@ -53,7 +70,10 @@
                 aria-label="Search My Simple Health"
             >
 
-            <button type="button" onclick="runSearch()">
+            <button
+                type="button"
+                onclick="runSearch()"
+            >
                 Search
             </button>
 
@@ -66,395 +86,696 @@
 
 <main>
 
-    <!-- =========================================
-         SLEEP HERO
-    ========================================== -->
 
-    <section class="movement-hero sleep-hero">
+<!-- =========================================
+     SLEEP HERO
+========================================== -->
 
-        <div class="movement-hero-text">
+<section class="movement-hero">
 
-            <p class="topic-eyebrow">SLEEP</p>
+    <div class="movement-hero-content">
 
-            <h2>
-                Sleep Better.<br>
-                Feel Better.
-            </h2>
+        <p class="movement-eyebrow">
+            SLEEP
+        </p>
 
-            <p class="topic-hero-description">
-                Sleep supports your energy, mood, concentration,
-                recovery, and long-term health. Small changes to
-                your sleep habits and environment can make a
-                meaningful difference over time.
-            </p>
+        <h1>
+            Rest better.<br>
+            Support your health.
+        </h1>
 
-            <div class="topic-hero-links">
-                <a href="#">Sleep Habits</a>
-                <a href="#">Sleep Environment</a>
-                <a href="#">Sleep Schedule</a>
-                <a href="#">Sleep Basics</a>
-            </div>
+        <p class="movement-hero-description">
+            Sleep supports physical health, mental wellbeing,
+            daily function, and recovery. Explore practical ways
+            to build healthier sleep habits that work in real life.
+        </p>
 
-        </div>
+        <a
+            href="#sleep-explore"
+            class="movement-primary-button"
+        >
+            EXPLORE SLEEP ↓
+        </a>
 
-        <div class="movement-hero-image">
-            <img
-                src="topic-sleep.png"
-                alt="Peaceful bedroom designed for restful sleep"
-            >
-        </div>
-
-    </section>
+    </div>
 
 
-    <!-- =========================================
-         FEATURED IN SLEEP
-    ========================================== -->
+    <div class="movement-hero-image">
 
-    <section class="movement-featured">
+        <img
+            src="topic-sleep.png"
+            alt="Calm bedroom prepared for restful sleep"
+        >
 
-        <p class="section-eyebrow">
-            FEATURED IN SLEEP
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     INTRODUCTION
+========================================== -->
+
+<section class="movement-intro">
+
+    <p class="movement-section-label">
+        SLEEP FOR REAL LIFE
+    </p>
+
+    <h2>
+        Better sleep doesn't require
+        a perfect bedtime routine.
+    </h2>
+
+    <p>
+        Healthy sleep is influenced by more than what happens
+        during the final few minutes before bed.
+    </p>
+
+    <p>
+        Your schedule, light exposure, physical activity,
+        caffeine timing, bedroom environment, and opportunities
+        for rest can all influence the conditions surrounding sleep.
+    </p>
+
+</section>
+
+
+<!-- =========================================
+     WHY SLEEP MATTERS
+========================================== -->
+
+<section class="movement-benefits">
+
+    <div class="movement-benefits-heading">
+
+        <p class="movement-section-label">
+            WHY SLEEP MATTERS
         </p>
 
         <h2>
-            Better sleep starts with the basics.
+            Sleep supports your whole body.
         </h2>
 
-        <p class="section-intro">
-            Understand the habits, routines, and environments
-            that support more consistent and restorative sleep.
+    </div>
+
+
+    <div class="movement-benefit-grid">
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                01
+            </span>
+
+            <i class="fa-solid fa-heart-pulse"></i>
+
+            <h3>
+                Physical Health
+            </h3>
+
+            <p>
+                Healthy sleep supports cardiovascular,
+                metabolic, immune, and overall physical health.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                02
+            </span>
+
+            <i class="fa-solid fa-brain"></i>
+
+            <h3>
+                Brain Function
+            </h3>
+
+            <p>
+                Sleep supports attention, learning,
+                memory, decision-making, and daily functioning.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                03
+            </span>
+
+            <i class="fa-solid fa-battery-full"></i>
+
+            <h3>
+                Recovery
+            </h3>
+
+            <p>
+                Sleep gives your body regular opportunities
+                for physical and mental recovery.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                04
+            </span>
+
+            <i class="fa-solid fa-face-smile"></i>
+
+            <h3>
+                Wellbeing
+            </h3>
+
+            <p>
+                Healthy sleep can support mood,
+                emotional regulation, energy,
+                and quality of life.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     EXPLORE SLEEP
+========================================== -->
+
+<section
+    class="movement-explore"
+    id="sleep-explore"
+>
+
+    <div class="movement-explore-heading">
+
+        <p class="movement-section-label">
+            EXPLORE SLEEP
         </p>
 
-        <div class="movement-featured-grid">
+        <h2>
+            Build a stronger foundation for rest.
+        </h2>
 
-            <article class="movement-featured-card">
+        <p>
+            Explore the everyday habits and conditions
+            that can support healthier sleep.
+        </p>
+
+    </div>
+
+
+    <div class="movement-topic-grid">
+
+        <a
+            href="sleep-duration.html"
+            class="movement-topic-card"
+        >
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div>
 
                 <h3>
-                    Build a Better Sleep Routine
+                    Sleep Duration
                 </h3>
 
                 <p>
-                    Simple habits can help prepare your body and
-                    mind for sleep and make your evenings feel
-                    more predictable.
+                    Understand how giving yourself enough
+                    opportunity for sleep supports health.
                 </p>
 
-                <a href="sleep-hygiene.html">
-                    Read Article →
-                </a>
-
-            </article>
-
-
-            <article class="movement-featured-card">
-
-                <h3>
-                    Create a Sleep-Friendly Bedroom
-                </h3>
-
-                <p>
-                    Light, temperature, noise, and comfort can
-                    all influence how easily you settle into
-                    restful sleep.
-                </p>
-
-                <a href="#">
-                    Read Article →
-                </a>
-
-            </article>
-
-
-            <article class="movement-featured-card">
-
-                <h3>
-                    Why Sleep Consistency Matters
-                </h3>
-
-                <p>
-                    A more regular sleep and wake schedule can
-                    support your body's natural rhythms and
-                    improve sleep quality.
-                </p>
-
-                <a href="#">
-                    Read Article →
-                </a>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================================
-         LATEST SLEEP ARTICLES
-    ========================================== -->
-
-    <section class="movement-latest">
-
-        <div class="movement-latest-header">
-
-            <p class="section-eyebrow">
-                LATEST SLEEP ARTICLES
-            </p>
-
-            <h2>
-                Understand your sleep.
-            </h2>
-
-        </div>
-
-
-        <div class="movement-latest-grid">
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        SLEEP HABITS
-                    </span>
-
-                    <h3>
-                        Sleep Hygiene: What It Is and Why It Matters
-                    </h3>
-
-                    <p>
-                        Learn the everyday behaviors that can
-                        support healthier and more consistent sleep.
-                    </p>
-
-                   <a href="sleep-hygiene.html">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        SLEEP SCHEDULE
-                    </span>
-
-                    <h3>
-                        How Much Sleep Do You Really Need?
-                    </h3>
-
-                    <p>
-                        Understand general sleep recommendations
-                        and why individual sleep needs can vary.
-                    </p>
-
-                    <a href="#">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        SLEEP ENVIRONMENT
-                    </span>
-
-                    <h3>
-                        Small Bedroom Changes That Support Better Sleep
-                    </h3>
-
-                    <p>
-                        Explore practical ways to make your sleep
-                        environment darker, quieter, cooler, and
-                        more comfortable.
-                    </p>
-
-                    <a href="#">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================================
-         POPULAR SLEEP TOPICS
-    ========================================== -->
-
-    <section class="movement-topics">
-
-        <div class="movement-topics-header">
-
-            <p class="section-eyebrow">
-                POPULAR SLEEP TOPICS
-            </p>
-
-            <h2>
-                Explore sleep by topic.
-            </h2>
-
-        </div>
-
-
-        <div class="movement-topics-grid">
-
-            <a href="#" class="movement-topic-card">
-
-                <span class="movement-topic-number">
-                    01
+                <span>
+                    EXPLORE SLEEP DURATION →
                 </span>
 
+            </div>
+
+        </a>
+
+
+        <a
+            href="sleep-consistency.html"
+            class="movement-topic-card"
+        >
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+
+            <div>
+
                 <h3>
-                    Sleep Habits
+                    Sleep Consistency
                 </h3>
 
                 <p>
-                    Build routines that make restful sleep
-                    easier to support consistently.
+                    Learn why regular sleep and wake times
+                    can support your body's sleep-wake rhythm.
                 </p>
 
-                <span class="movement-topic-link">
-                    Explore Sleep Habits →
+                <span>
+                    EXPLORE CONSISTENCY →
                 </span>
 
-            </a>
+            </div>
+
+        </a>
 
 
-            <a href="#" class="movement-topic-card">
+        <a
+            href="sleep-environment.html"
+            class="movement-topic-card"
+        >
 
-                <span class="movement-topic-number">
-                    02
-                </span>
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-bed"></i>
+            </div>
+
+            <div>
 
                 <h3>
                     Sleep Environment
                 </h3>
 
                 <p>
-                    Create surroundings that support comfort,
-                    relaxation, and healthy sleep.
+                    Create a bedroom that is quieter,
+                    darker, cooler, and more supportive of rest.
                 </p>
 
-                <span class="movement-topic-link">
-                    Explore Sleep Environment →
+                <span>
+                    EXPLORE YOUR ENVIRONMENT →
                 </span>
 
-            </a>
+            </div>
+
+        </a>
 
 
-            <a href="#" class="movement-topic-card">
+        <a
+            href="evening-routine.html"
+            class="movement-topic-card"
+        >
 
-                <span class="movement-topic-number">
-                    03
-                </span>
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-moon"></i>
+            </div>
+
+            <div>
 
                 <h3>
-                    Sleep Schedule
+                    Evening Routine
                 </h3>
 
                 <p>
-                    Understand sleep timing, consistency,
-                    and your body's natural rhythms.
+                    Build a realistic transition from
+                    a busy day toward bedtime.
                 </p>
 
-                <span class="movement-topic-link">
-                    Explore Sleep Schedule →
+                <span>
+                    EXPLORE EVENING ROUTINES →
                 </span>
 
-            </a>
+            </div>
+
+        </a>
+
+    </div>
+
+</section>
 
 
-            <a href="#" class="movement-topic-card">
+<!-- =========================================
+     FEATURED SLEEP
+========================================== -->
 
-                <span class="movement-topic-number">
-                    04
-                </span>
+<section class="movement-feature">
 
-                <h3>
-                    Sleep Basics
-                </h3>
+    <div class="movement-feature-image">
 
-                <p>
-                    Learn how sleep works and why it matters
-                    for everyday health and well-being.
-                </p>
+        <img
+            src="sleep-hygiene.jpg"
+            alt="Peaceful bedroom prepared for sleep"
+        >
 
-                <span class="movement-topic-link">
-                    Explore Sleep Basics →
-                </span>
-
-            </a>
-
-        </div>
-
-    </section>
+    </div>
 
 
-    <!-- =========================================
-         NEWSLETTER
-    ========================================== -->
+    <div class="movement-feature-content">
 
-    <section class="newsletter-section">
+        <p class="movement-section-label">
+            FEATURED IN SLEEP
+        </p>
 
-        <div class="newsletter-icon">
-            ✉
-        </div>
+        <h2>
+            Small habits can create
+            better conditions for sleep.
+        </h2>
 
-        <div class="newsletter-copy">
+        <p>
+            Sleep hygiene focuses on everyday habits
+            and environmental conditions that can support
+            healthy sleep without requiring a complicated
+            nighttime routine.
+        </p>
+
+        <a href="sleep-hygiene.html">
+            READ ARTICLE →
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     LATEST IN SLEEP
+========================================== -->
+
+<section class="movement-articles">
+
+    <div class="movement-section-header">
+
+        <div>
+
+            <p class="movement-section-label">
+                LEARN
+            </p>
 
             <h2>
-                Stay inspired.
+                Latest in Sleep
             </h2>
-
-            <p>
-                Evidence-informed health tips and practical
-                resources delivered to your inbox.
-            </p>
 
         </div>
 
 
-        <form class="newsletter-form">
+        <a href="blog.html">
+            VIEW ALL ARTICLES →
+        </a>
 
-            <input
-                type="text"
-                placeholder="First name"
-                aria-label="First name"
+    </div>
+
+
+    <div class="movement-article-grid">
+
+        <article class="movement-article-card">
+
+            <img
+                src="sleep-hygiene.jpg"
+                alt="Peaceful bedroom environment"
             >
 
-            <input
-                type="email"
-                placeholder="Email address"
-                aria-label="Email address"
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    SLEEP
+                </p>
+
+                <h3>
+                    Sleep Hygiene:
+                    Simple Habits for Better Sleep
+                </h3>
+
+                <p>
+                    Learn practical habits that can support
+                    sleep quality, consistency, and restorative rest.
+                </p>
+
+                <a href="sleep-hygiene.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <article class="movement-article-card">
+
+            <img
+                src="topic-sleep.png"
+                alt="Restful bedroom representing a consistent sleep routine"
             >
 
-            <button type="submit">
-                SUBSCRIBE
-            </button>
+            <div class="movement-article-content">
 
-            <p class="newsletter-note">
-                No spam, ever. Unsubscribe anytime.
+                <p class="movement-article-category">
+                    SLEEP ROUTINE
+                </p>
+
+                <h3>
+                    Why Sleep Consistency Matters
+                </h3>
+
+                <p>
+                    Learn how regular sleep and wake times
+                    can help support your body's daily rhythm.
+                </p>
+
+                <a href="sleep-consistency.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <article class="movement-article-card">
+
+            <img
+                src="topic-sleep.png"
+                alt="Calm evening bedroom environment"
+            >
+
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    EVENING HABITS
+                </p>
+
+                <h3>
+                    Building an Evening Routine
+                    You Can Actually Maintain
+                </h3>
+
+                <p>
+                    Create a simple transition from
+                    your active day toward rest.
+                </p>
+
+                <a href="evening-routine.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     FREE RESOURCE
+========================================== -->
+
+<section class="movement-resource">
+
+    <div class="movement-resource-icon">
+        <i class="fa-solid fa-clipboard-check"></i>
+    </div>
+
+    <p class="movement-section-label">
+        FREE RESOURCE
+    </p>
+
+    <h2>
+        Sleep Routine Checklist
+    </h2>
+
+    <p>
+        Build a simple evening routine and identify
+        practical changes that may support better sleep.
+    </p>
+
+    <a href="resources.html">
+        EXPLORE THE RESOURCE →
+    </a>
+
+</section>
+
+
+<!-- =========================================
+     SLEEP PHILOSOPHY
+========================================== -->
+
+<section class="movement-philosophy">
+
+    <span class="movement-quote">
+        “
+    </span>
+
+    <h2>
+        Better sleep is built
+        through realistic habits,
+        not perfect nights.
+    </h2>
+
+    <p>
+        Protect enough time for rest.
+        Build consistency where you can.
+        Adjust what isn't working.
+    </p>
+
+</section>
+
+
+<!-- =========================================
+     RELATED TOPICS
+========================================== -->
+
+<section class="movement-related">
+
+    <p class="movement-section-label">
+        KEEP EXPLORING
+    </p>
+
+    <h2>
+        Health works together.
+    </h2>
+
+
+    <div class="movement-related-grid">
+
+        <a href="nutrition.html">
+
+            <span>01</span>
+
+            <h3>
+                Nutrition
+            </h3>
+
+            <p>
+                Build a balanced approach to everyday eating.
             </p>
 
-        </form>
+        </a>
 
-    </section>
+
+        <a href="movement.html">
+
+            <span>02</span>
+
+            <h3>
+                Movement
+            </h3>
+
+            <p>
+                Find realistic ways to move more.
+            </p>
+
+        </a>
+
+
+        <a href="wellbeing.html">
+
+            <span>04</span>
+
+            <h3>
+                Wellbeing
+            </h3>
+
+            <p>
+                Support stress management,
+                recovery, and everyday wellbeing.
+            </p>
+
+        </a>
+
+
+        <a href="preventive-health.html">
+
+            <span>05</span>
+
+            <h3>
+                Prevention
+            </h3>
+
+            <p>
+                Stay informed about preventive care
+                and long-term health.
+            </p>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Science-based health tips and practical
+            resources delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
 
 </main>
 
@@ -474,8 +795,8 @@
             </h2>
 
             <p>
-                Practical, evidence-informed<br>
-                health education for everyday life.
+                Practical, science-based<br>
+                health information for everyday life.
             </p>
 
             <div class="footer-socials">
@@ -515,28 +836,31 @@
 
         <div class="footer-column">
 
-            <h3>
-                EXPLORE
-            </h3>
+            <h3>EXPLORE</h3>
 
             <a href="topics.html">Topics</a>
             <a href="recipes.html">Recipes</a>
-            <a href="#">Resources</a>
-            <a href="#">Blog</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
 
         </div>
 
 
         <div class="footer-column">
 
-            <h3>
-                ABOUT
-            </h3>
+            <h3>ABOUT</h3>
 
-            <a href="#">About Me</a>
-            <a href="#">Mission &amp; Values</a>
-            <a href="#">Work With Me</a>
-            <a href="#">Contact</a>
+            <a href="about.html">
+                About My Simple Health
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
 
         </div>
 
@@ -579,9 +903,17 @@
 
         <div class="footer-legal">
 
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Disclaimer</a>
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms of Use
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
 
         </div>
 
@@ -589,6 +921,10 @@
 
 </footer>
 
+
+<!-- =========================================
+     JAVASCRIPT
+========================================== -->
 
 <script>
 
@@ -651,5 +987,4 @@
 </script>
 
 </body>
-
 </html>
