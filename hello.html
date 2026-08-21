@@ -11,6 +11,11 @@
 
     <title>Hello | My Simple Health</title>
 
+    <meta
+        name="description"
+        content="Hello is the interactive health education and wellness guide from My Simple Health."
+    >
+
     <link rel="stylesheet" href="style.css">
 
     <link
@@ -18,148 +23,446 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+
     <style>
+
+        /* =========================================
+           HELLO PAGE
+        ========================================== */
 
         body {
             margin: 0;
-            background: #F7F3EA;
+        }
+
+        .hello-page {
+            min-height: 100vh;
+            padding: 60px 20px 100px;
+
+            background: #f7f5ef;
             color: #242824;
         }
 
-        .hello-page-wrap {
-            width: min(92%, 900px);
+        .hello-shell {
+            width: min(94%, 780px);
             margin: 0 auto;
-            padding: 60px 0 100px;
         }
 
-        .hello-header {
+
+        /* =========================================
+           HEADER AREA
+        ========================================== */
+
+        .hello-heading {
+            margin-bottom: 30px;
             text-align: center;
-            margin-bottom: 35px;
         }
 
-        .hello-header h1 {
+        .hello-eyebrow {
             margin: 0 0 12px;
 
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(44px, 6vw, 68px);
-            font-weight: 400;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
 
-            color: #173D2B;
+            color: #7d9460;
         }
 
-        .hello-header p {
-            max-width: 650px;
+        .hello-heading h1 {
+            margin: 0 0 14px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(46px, 7vw, 70px);
+            font-weight: 400;
+            line-height: 1;
+
+            color: #173d2b;
+        }
+
+        .hello-heading > p:last-child {
+            max-width: 620px;
             margin: 0 auto;
 
-            line-height: 1.7;
+            font-size: 17px;
+            line-height: 1.65;
         }
 
-        .hello-context {
-            margin-bottom: 18px;
-            padding: 16px 18px;
 
-            border: 1px solid #D8D5CB;
-            background: #EEF0E8;
+        /* =========================================
+           MODE SWITCHER
+        ========================================== */
+
+        .hello-mode-switcher {
+            display: flex;
+            gap: 8px;
+
+            width: fit-content;
+            margin: 0 auto 22px;
+            padding: 5px;
+
+            border: 1px solid #d7d5cc;
+            border-radius: 999px;
+
+            background: #ffffff;
+        }
+
+        .hello-mode-button {
+            padding: 11px 18px;
+
+            border: none;
+            border-radius: 999px;
+
+            background: transparent;
+            color: #526052;
+
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+
+            cursor: pointer;
+        }
+
+        .hello-mode-button.active {
+            background: #173d2b;
+            color: #ffffff;
+        }
+
+
+        /* =========================================
+           WELLNESS CONTEXT
+        ========================================== */
+
+        .hello-context-bar {
+            display: none;
+
+            margin-bottom: 16px;
+            padding: 14px 18px;
+
+            border: 1px solid #ddd8cb;
+            border-radius: 18px;
+
+            background: #f1f3eb;
 
             font-size: 14px;
+            line-height: 1.5;
         }
 
-        .hello-chat {
-            min-height: 420px;
-
-            padding: 28px;
-
-            border: 1px solid #D8D5CB;
-            background: #FFFFFF;
-
-            box-sizing: border-box;
+        .hello-context-bar.active {
+            display: block;
         }
 
-        .hello-message {
-            max-width: 75%;
-            margin-bottom: 18px;
+        .hello-context-bar strong {
+            color: #173d2b;
+        }
+
+
+        /* =========================================
+           CHAT CARD
+        ========================================== */
+
+        .hello-chat-wrap {
+            overflow: hidden;
+
+            border: 1px solid #dedbd2;
+            border-radius: 30px;
+
+            background: #fcfbf7;
+
+            box-shadow:
+                0 12px 35px rgba(22, 48, 34, 0.05);
+        }
+
+        .hello-chat-thread {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+
+            min-height: 460px;
+            max-height: 610px;
+
+            padding: 26px 24px;
+
+            overflow-y: auto;
+
+            scroll-behavior: smooth;
+        }
+
+
+        /* =========================================
+           MESSAGE ROWS
+        ========================================== */
+
+        .hello-message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .hello-message-row.assistant {
+            justify-content: flex-start;
+        }
+
+        .hello-message-row.user {
+            justify-content: flex-end;
+        }
+
+
+        /* =========================================
+           MESSAGE BUBBLES
+        ========================================== */
+
+        .hello-bubble {
+            max-width: 70%;
+
             padding: 15px 18px;
 
+            border-radius: 24px;
+
+            font-size: 16px;
             line-height: 1.6;
+
+            word-break: break-word;
         }
 
-        .hello-message.hello {
-            background: #EEF0E8;
-            color: #173D2B;
+        .hello-bubble.assistant {
+            border-top-left-radius: 8px;
+
+            background: #edf1e5;
+            color: #263127;
         }
 
-        .hello-message.user {
-            margin-left: auto;
+        .hello-bubble.user {
+            border-top-right-radius: 8px;
 
-            background: #173D2B;
-            color: white;
+            background: #07543d;
+            color: #ffffff;
         }
+
+        .hello-label {
+            display: block;
+
+            margin-bottom: 5px;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+
+            color: #536653;
+        }
+
+
+        /* =========================================
+           ROUTING BADGES — TESTING ONLY
+        ========================================== */
+
+        .hello-routing-badge {
+            display: inline-flex;
+            align-items: center;
+
+            margin: 2px 0 4px;
+            padding: 5px 9px;
+
+            border-radius: 999px;
+
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+
+            text-transform: uppercase;
+        }
+
+        .hello-routing-badge.green {
+            background: #edf3e6;
+            color: #466041;
+        }
+
+        .hello-routing-badge.yellow {
+            background: #f8f1da;
+            color: #786524;
+        }
+
+        .hello-routing-badge.red {
+            background: #f7e7e3;
+            color: #7c382f;
+        }
+
+        .hello-routing-badge.safety {
+            background: #f4dddd;
+            color: #762d2d;
+        }
+
+
+        /* =========================================
+           INPUT
+        ========================================== */
 
         .hello-input-wrap {
             display: flex;
+            align-items: flex-end;
             gap: 10px;
 
-            padding: 18px;
+            padding: 14px;
 
-            border: 1px solid #D8D5CB;
-            border-top: none;
+            border-top: 1px solid #e5e1d8;
 
-            background: #FFFFFF;
+            background: #fcfbf7;
         }
 
         #helloInput {
             flex: 1;
 
-            min-height: 52px;
+            min-height: 58px;
+            max-height: 150px;
 
-            padding: 14px;
+            padding: 16px 18px;
 
-            border: 1px solid #CFCBC1;
+            border: 1px solid #d3d0c6;
+            border-radius: 22px;
 
+            background: #ffffff;
+
+            color: #262a26;
+
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 15px;
+            line-height: 1.5;
+
+            resize: vertical;
 
             box-sizing: border-box;
         }
 
-        .hello-send {
-            padding: 0 24px;
+        #helloInput:focus {
+            outline: none;
 
-            border: 1px solid #173D2B;
-            background: #173D2B;
-            color: white;
+            border-color: #8da175;
+
+            box-shadow:
+                0 0 0 3px rgba(125, 148, 96, 0.12);
+        }
+
+        .hello-send-btn {
+            min-width: 104px;
+            min-height: 58px;
+
+            padding: 0 18px;
+
+            border: none;
+            border-radius: 20px;
+
+            background: #07543d;
+            color: #ffffff;
 
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: 0.6px;
 
             cursor: pointer;
         }
 
-        .hello-note {
-            margin-top: 22px;
-            padding: 16px;
+        .hello-send-btn:hover {
+            background: #0b654b;
+        }
 
-            background: #EEF0E8;
+
+        /* =========================================
+           ACTIONS
+        ========================================== */
+
+        .hello-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+
+            margin-top: 18px;
+        }
+
+        .hello-secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 50px;
+            padding: 0 18px;
+
+            border: 1px solid #bfc5bb;
+            border-radius: 18px;
+
+            background: transparent;
+            color: #173d2b;
+
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            box-sizing: border-box;
+        }
+
+
+        /* =========================================
+           NOTE
+        ========================================== */
+
+        .hello-note {
+            margin-top: 18px;
+            padding: 15px 18px;
+
+            border-radius: 16px;
+
+            background: #edf1e5;
+
+            color: #596159;
 
             font-size: 12px;
             line-height: 1.6;
         }
 
+
+        /* =========================================
+           MOBILE
+        ========================================== */
+
         @media (max-width: 768px) {
 
-            .hello-page-wrap {
-                width: calc(100% - 40px);
+            .hello-page {
+                padding: 40px 12px 75px;
             }
 
-            .hello-message {
-                max-width: 92%;
+            .hello-shell {
+                width: 100%;
+            }
+
+            .hello-chat-thread {
+                min-height: 400px;
+                max-height: 540px;
+
+                padding: 20px 14px;
+            }
+
+            .hello-bubble {
+                max-width: 85%;
+
+                padding: 14px 15px;
+
+                font-size: 15px;
             }
 
             .hello-input-wrap {
+                align-items: stretch;
+            }
+
+            .hello-send-btn {
+                min-width: 86px;
+            }
+
+            .hello-actions {
                 flex-direction: column;
             }
 
-            .hello-send {
-                min-height: 50px;
+            .hello-secondary-btn {
+                width: 100%;
             }
 
         }
@@ -172,9 +475,16 @@
 <body>
 
 
+<!-- =========================================
+     SITE HEADER
+========================================== -->
+
 <header class="site-header">
 
-    <a class="site-logo" href="index.html">
+    <a
+        class="site-logo"
+        href="index.html"
+    >
         My Simple Health
     </a>
 
@@ -187,25 +497,53 @@
     </button>
 
     <nav class="site-nav">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="topics.html">Topics</a>
-        <a href="assessments.html">Assessments</a>
-        <a href="recipes.html">Recipes</a>
-        <a href="blog.html">Blog</a>
-        <a href="contact.html">Contact</a>
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="about.html">
+            About
+        </a>
+
+        <a href="topics.html">
+            Topics
+        </a>
+
+        <a href="assessments.html">
+            Assessments
+        </a>
+
+        <a href="recipes.html">
+            Recipes
+        </a>
+
+        <a href="blog.html">
+            Blog
+        </a>
+
+        <a href="contact.html">
+            Contact
+        </a>
+
     </nav>
 
 </header>
+
 
 
 <main class="hello-page">
 
     <div class="hello-shell">
 
-        <div class="hello-header">
 
-            <p class="eyebrow">
+        <!-- =========================================
+             PAGE INTRO
+        ========================================== -->
+
+        <div class="hello-heading">
+
+            <p class="hello-eyebrow">
                 MY SIMPLE HEALTH
             </p>
 
@@ -214,20 +552,56 @@
             </h1>
 
             <p>
-                A guided space to reflect on your wellbeing,
-                clarify what matters, and identify realistic next steps.
+                Explore your wellbeing, understand health information,
+                and identify realistic next steps.
             </p>
 
         </div>
 
 
+
+        <!-- =========================================
+             MODE SWITCHER
+        ========================================== -->
+
+        <div class="hello-mode-switcher">
+
+            <button
+                type="button"
+                class="hello-mode-button active"
+                id="guidedModeButton"
+                onclick="switchMode('guided')"
+            >
+                Guided Reflection
+            </button>
+
+            <button
+                type="button"
+                class="hello-mode-button"
+                id="askModeButton"
+                onclick="switchMode('ask')"
+            >
+                Ask Hello
+            </button>
+
+        </div>
+
+
+
+        <!-- =========================================
+             WELLNESS CONTEXT
+        ========================================== -->
+
         <div
             class="hello-context-bar"
             id="helloContext"
-        >
-            Loading your Wellness Wheel reflection...
-        </div>
+        ></div>
 
+
+
+        <!-- =========================================
+             CHAT
+        ========================================== -->
 
         <div class="hello-chat-wrap">
 
@@ -250,9 +624,9 @@
                 ></textarea>
 
                 <button
-                    class="hello-send-btn"
                     type="button"
-                    onclick="sendResponse()"
+                    class="hello-send-btn"
+                    onclick="handleSend()"
                 >
                     SEND →
                 </button>
@@ -261,6 +635,11 @@
 
         </div>
 
+
+
+        <!-- =========================================
+             ACTIONS
+        ========================================== -->
 
         <div class="hello-actions">
 
@@ -272,8 +651,8 @@
             </a>
 
             <button
-                class="hello-secondary-btn"
                 type="button"
+                class="hello-secondary-btn"
                 onclick="restartReflection()"
             >
                 RESTART REFLECTION
@@ -282,12 +661,17 @@
         </div>
 
 
+
+        <!-- =========================================
+             NOTE
+        ========================================== -->
+
         <div class="hello-note">
 
-            Hello is currently a guided prototype.
-            It is not yet connected to an AI service and does not
-            diagnose, prescribe, or provide individualized medical care.
-            Responses in this prototype remain within your browser session.
+            Hello is currently a local prototype and is not connected
+            to an AI service. The safety routing shown here is for
+            development testing and is not a substitute for production
+            clinical-safety review.
 
         </div>
 
@@ -296,89 +680,102 @@
 </main>
 
 
+
 <script>
 
 /* =========================================================
-   HELLO GUIDED REFLECTION STEPS
+   GLOBAL STATE
 ========================================================= */
 
-const steps = [
+let currentMode = "guided";
+
+let state = null;
+
+let lastAssistantSender = null;
+
+
+
+/* =========================================================
+   GUIDED REFLECTION STEPS
+========================================================= */
+
+const reflectionSteps = [
 
     {
         key: "workingWell",
-        question: "What is already going well in this area?"
+
+        question:
+            "What is already going well in this area?"
     },
 
     {
         key: "desiredChange",
-        question: "What would you like to be different?"
+
+        question:
+            "What would you like to be different?"
     },
 
     {
         key: "whyMatters",
-        question: "Why would that change matter to you?"
+
+        question:
+            "Why would that change matter to you?"
     },
 
     {
         key: "strengths",
-        question: "What strengths, resources, people, or support could help you?"
+
+        question:
+            "What strengths, resources, people, or support could help you?"
     },
 
     {
         key: "barriers",
-        question: "What might get in the way?"
+
+        question:
+            "What might get in the way?"
     },
 
     {
         key: "goal",
-        question: "What is one goal you would like to work toward?"
+
+        question:
+            "What is one goal you would like to work toward?"
     },
 
     {
         key: "actionStep",
-        question: "What is one small, realistic action you could take next?"
+
+        question:
+            "What is one small, realistic action you could take next?"
     },
 
     {
         key: "confidence",
-        question: "On a scale from 1 to 10, how confident are you that you could take that step?"
+
+        question:
+            "On a scale from 1 to 10, how confident are you that you could take that step?"
     }
 
 ];
 
 
-let state = null;
-
 
 /* =========================================================
-   LOAD SESSION STATE
+   LOAD WELLNESS STATE
 ========================================================= */
 
 function loadState() {
 
     const saved =
-        sessionStorage.getItem("helloWellnessState");
+        sessionStorage.getItem(
+            "helloWellnessState"
+        );
 
 
     if (!saved) {
 
-        document
-            .getElementById("helloContext")
-            .textContent =
-            "No Wellness Wheel reflection was found in this browser session.";
-
-
-        addMessage(
-            "Start with the Wellness Wheel, choose an area to explore, and then continue with Hello.",
-            "assistant"
-        );
-
-
-        document
-            .getElementById("helloInputWrap")
-            .style.display =
-            "none";
-
+        state = null;
 
         return;
 
@@ -394,48 +791,74 @@ function loadState() {
 
     catch (error) {
 
-        addMessage(
-            "I couldn't load your Wellness Wheel reflection. Return to the Wellness Wheel and try again.",
-            "assistant"
-        );
-
-        return;
+        state =
+            null;
 
     }
-
-
-    document
-        .getElementById("helloContext")
-        .innerHTML = `
-            <strong>${escapeHTML(state.selectedDimension)}</strong>
-            &nbsp;•&nbsp;
-            ${escapeHTML(String(state.selectedScore))}/10
-        `;
-
-
-    addMessage(
-        `You chose ${state.selectedDimension}. Let's explore that area one step at a time.`,
-        "assistant"
-    );
-
-
-    askQuestion();
 
 }
 
 
+
 /* =========================================================
-   ADD CHAT MESSAGE
+   SAVE WELLNESS STATE
 ========================================================= */
 
-function addMessage(text, sender) {
+function saveState() {
+
+    if (!state) {
+        return;
+    }
+
+
+    sessionStorage.setItem(
+        "helloWellnessState",
+        JSON.stringify(state)
+    );
+
+}
+
+
+
+/* =========================================================
+   CLEAR CHAT
+========================================================= */
+
+function clearChat() {
+
+    document
+        .getElementById("helloChat")
+        .innerHTML =
+        "";
+
+
+    lastAssistantSender =
+        null;
+
+}
+
+
+
+/* =========================================================
+   MESSAGE BUBBLES
+========================================================= */
+
+function addMessage(
+    text,
+    sender,
+    route = null
+) {
 
     const chat =
-        document.getElementById("helloChat");
+        document.getElementById(
+            "helloChat"
+        );
 
 
     const row =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     row.className =
@@ -444,7 +867,9 @@ function addMessage(text, sender) {
 
 
     const bubble =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     bubble.className =
@@ -452,53 +877,227 @@ function addMessage(text, sender) {
         sender;
 
 
-    if (sender === "assistant") {
+    /*
+        Only show HELLO label when the
+        previous message was not from Hello.
+    */
 
-        bubble.innerHTML = `
-            <span class="hello-label">
-                Hello
-            </span>
+    if (
+        sender === "assistant" &&
+        lastAssistantSender !== "assistant"
+    ) {
 
-            ${escapeHTML(text)}
-        `;
+        const label =
+            document.createElement(
+                "span"
+            );
+
+
+        label.className =
+            "hello-label";
+
+
+        label.textContent =
+            "HELLO";
+
+
+        bubble.appendChild(
+            label
+        );
+
+    }
+
+
+    if (route) {
+
+        const badge =
+            document.createElement(
+                "div"
+            );
+
+
+        badge.className =
+            "hello-routing-badge " +
+            route.toLowerCase();
+
+
+        badge.textContent =
+            route;
+
+
+        bubble.appendChild(
+            badge
+        );
+
+    }
+
+
+    const textElement =
+        document.createElement(
+            "div"
+        );
+
+
+    textElement.textContent =
+        text;
+
+
+    bubble.appendChild(
+        textElement
+    );
+
+
+    row.appendChild(
+        bubble
+    );
+
+
+    chat.appendChild(
+        row
+    );
+
+
+    lastAssistantSender =
+        sender;
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+
+/* =========================================================
+   SWITCH MODES
+========================================================= */
+
+function switchMode(mode) {
+
+    currentMode =
+        mode;
+
+
+    document
+        .getElementById(
+            "guidedModeButton"
+        )
+        .classList
+        .toggle(
+            "active",
+            mode === "guided"
+        );
+
+
+    document
+        .getElementById(
+            "askModeButton"
+        )
+        .classList
+        .toggle(
+            "active",
+            mode === "ask"
+        );
+
+
+    clearChat();
+
+
+    document
+        .getElementById(
+            "helloInputWrap"
+        )
+        .style.display =
+        "flex";
+
+
+    if (
+        mode === "guided"
+    ) {
+
+        startGuidedReflection();
 
     }
 
     else {
 
-        bubble.textContent =
-            text;
+        startAskMode();
 
     }
-
-
-    row.appendChild(bubble);
-
-    chat.appendChild(row);
-
-
-    row.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-    });
 
 }
 
 
+
 /* =========================================================
-   ASK CURRENT QUESTION
+   GUIDED MODE
 ========================================================= */
 
-function askQuestion() {
+function startGuidedReflection() {
+
+    const context =
+        document.getElementById(
+            "helloContext"
+        );
+
 
     if (!state) {
+
+        context.classList.remove(
+            "active"
+        );
+
+
+        addMessage(
+
+            "Complete the Wellness Wheel first, choose an area you would like to explore, and then return here for a guided reflection.",
+
+            "assistant"
+
+        );
+
+
         return;
+
     }
+
+
+    context.innerHTML = `
+
+        <strong>
+            ${escapeHTML(
+                state.selectedDimension
+            )}
+        </strong>
+
+        &nbsp;•&nbsp;
+
+        ${escapeHTML(
+            String(
+                state.selectedScore
+            )
+        )}/10
+
+    `;
+
+
+    context.classList.add(
+        "active"
+    );
+
+
+    addMessage(
+
+        `You chose ${state.selectedDimension}. Let's explore that area one step at a time.`,
+
+        "assistant"
+
+    );
 
 
     if (
         state.currentStep >=
-        steps.length
+        reflectionSteps.length
     ) {
 
         showSummary();
@@ -508,8 +1107,36 @@ function askQuestion() {
     }
 
 
+    askGuidedQuestion();
+
+}
+
+
+
+/* =========================================================
+   ASK GUIDED QUESTION
+========================================================= */
+
+function askGuidedQuestion() {
+
+    if (!state) {
+        return;
+    }
+
+
     const step =
-        steps[state.currentStep];
+        reflectionSteps[
+            state.currentStep
+        ];
+
+
+    if (!step) {
+
+        showSummary();
+
+        return;
+
+    }
 
 
     addMessage(
@@ -520,32 +1147,29 @@ function askQuestion() {
 }
 
 
+
 /* =========================================================
-   SEND RESPONSE
+   GUIDED RESPONSE
 ========================================================= */
 
-function sendResponse() {
+function handleGuidedResponse(
+    value
+) {
 
     if (!state) {
         return;
     }
 
 
-    const input =
-        document.getElementById("helloInput");
+    const step =
+        reflectionSteps[
+            state.currentStep
+        ];
 
 
-    const value =
-        input.value.trim();
-
-
-    if (!value) {
+    if (!step) {
         return;
     }
-
-
-    const step =
-        steps[state.currentStep];
 
 
     if (
@@ -563,9 +1187,13 @@ function sendResponse() {
         ) {
 
             addMessage(
-                "Please enter a whole number from 1 to 10.",
+
+                "Enter a whole number from 1 to 10 for this confidence reflection.",
+
                 "assistant"
+
             );
+
 
             return;
 
@@ -589,64 +1217,90 @@ function sendResponse() {
     state.currentStep++;
 
 
-    sessionStorage.setItem(
-        "helloWellnessState",
-        JSON.stringify(state)
-    );
+    saveState();
 
 
-    input.value =
-        "";
+    if (
+        state.currentStep >=
+        reflectionSteps.length
+    ) {
 
+        setTimeout(
+            showSummary,
+            250
+        );
 
-    setTimeout(
-        function() {
+    }
 
-            askQuestion();
+    else {
 
-        },
-        250
-    );
+        setTimeout(
+            askGuidedQuestion,
+            250
+        );
+
+    }
 
 }
 
 
+
 /* =========================================================
-   FINAL SUMMARY
+   SUMMARY
 ========================================================= */
 
 function showSummary() {
 
+    if (!state) {
+        return;
+    }
+
+
     document
-        .getElementById("helloInputWrap")
+        .getElementById(
+            "helloInputWrap"
+        )
         .style.display =
         "none";
 
 
     addMessage(
+
         `Your goal: ${state.answers.goal}`,
+
         "assistant"
+
     );
 
 
     addMessage(
+
         `Your next step: ${state.answers.actionStep}`,
+
         "assistant"
+
     );
 
 
     addMessage(
+
         `Confidence: ${state.answers.confidence}/10`,
+
         "assistant"
+
     );
 
 
     addMessage(
+
         "You chose this goal and next step based on what matters to you. You can revisit and adjust it as your circumstances change.",
+
         "assistant"
+
     );
 
 }
+
 
 
 /* =========================================================
@@ -663,6 +1317,10 @@ function restartReflection() {
         return;
 
     }
+
+
+    currentMode =
+        "guided";
 
 
     state.currentStep =
@@ -690,52 +1348,415 @@ function restartReflection() {
     };
 
 
-    sessionStorage.setItem(
-        "helloWellnessState",
-        JSON.stringify(state)
+    saveState();
+
+
+    switchMode(
+        "guided"
     );
-
-
-    document
-        .getElementById("helloChat")
-        .innerHTML =
-        "";
-
-
-    document
-        .getElementById("helloInputWrap")
-        .style.display =
-        "flex";
-
-
-    addMessage(
-        `Let's restart your ${state.selectedDimension} reflection.`,
-        "assistant"
-    );
-
-
-    askQuestion();
 
 }
+
 
 
 /* =========================================================
-   SAFE TEXT OUTPUT
+   ASK HELLO MODE
 ========================================================= */
 
-function escapeHTML(text) {
+function startAskMode() {
 
-    const div =
-        document.createElement("div");
+    document
+        .getElementById(
+            "helloContext"
+        )
+        .classList
+        .remove(
+            "active"
+        );
 
 
-    div.textContent =
-        text;
+    addMessage(
+
+        "Ask me a general health or wellness question. This prototype will classify the request before responding.",
+
+        "assistant"
+
+    );
 
 
-    return div.innerHTML;
+    addMessage(
+
+        "Try something like: “What does fiber do?”, “I have diabetes, what is fiber?”, or “Interpret my lab results and tell me what disease I have.”",
+
+        "assistant"
+
+    );
 
 }
+
+
+
+/* =========================================================
+   LOCAL SAFETY / SCOPE ROUTER
+========================================================= */
+
+function classifyRequest(
+    message
+) {
+
+    const text =
+        message
+            .toLowerCase()
+            .trim();
+
+
+    /*
+        SAFETY
+
+        Very obvious immediate-danger language.
+        Production will need substantially more
+        sophisticated detection.
+    */
+
+    const safetyPatterns = [
+
+        "severe chest pain",
+
+        "crushing chest pain",
+
+        "can't breathe",
+
+        "cannot breathe",
+
+        "difficulty breathing right now",
+
+        "signs of stroke",
+
+        "face drooping",
+
+        "passed out",
+
+        "unconscious",
+
+        "severe allergic reaction",
+
+        "i want to kill myself",
+
+        "i'm going to kill myself",
+
+        "i am going to kill myself",
+
+        "hurt myself right now",
+
+        "harm myself right now"
+
+    ];
+
+
+    if (
+        safetyPatterns.some(
+            pattern =>
+                text.includes(
+                    pattern
+                )
+        )
+    ) {
+
+        return "SAFETY";
+
+    }
+
+
+    /*
+        RED
+
+        Individual diagnosis, prescribing,
+        medication change, clinical interpretation,
+        medical clearance.
+    */
+
+    const redPatterns = [
+
+        "diagnose me",
+
+        "what disease do i have",
+
+        "tell me what disease i have",
+
+        "do i have cancer",
+
+        "do i have diabetes",
+
+        "do i have depression",
+
+        "interpret my labs",
+
+        "interpret these labs",
+
+        "interpret my bloodwork",
+
+        "change my medication",
+
+        "change my dose",
+
+        "stop my medication",
+
+        "should i stop taking",
+
+        "should i stop my medication",
+
+        "prescribe me",
+
+        "prescribe medication",
+
+        "what dose should i take",
+
+        "am i medically cleared",
+
+        "clear me for exercise",
+
+        "tell me if it is safe for me to exercise"
+
+    ];
+
+
+    if (
+        redPatterns.some(
+            pattern =>
+                text.includes(
+                    pattern
+                )
+        )
+    ) {
+
+        return "RED";
+
+    }
+
+
+    /*
+        YELLOW
+
+        Medical context without necessarily
+        requesting prohibited clinical care.
+    */
+
+    const yellowPatterns = [
+
+        "i have diabetes",
+
+        "i have hypertension",
+
+        "i have high blood pressure",
+
+        "i have heart disease",
+
+        "i have kidney disease",
+
+        "i have cancer",
+
+        "i am pregnant",
+
+        "i'm pregnant",
+
+        "my medication",
+
+        "my prescription",
+
+        "my lab",
+
+        "my bloodwork",
+
+        "my cholesterol",
+
+        "my glucose",
+
+        "my blood pressure",
+
+        "my doctor said",
+
+        "i was diagnosed",
+
+        "i have anxiety",
+
+        "i have depression",
+
+        "i have an eating disorder"
+
+    ];
+
+
+    if (
+        yellowPatterns.some(
+            pattern =>
+                text.includes(
+                    pattern
+                )
+        )
+    ) {
+
+        return "YELLOW";
+
+    }
+
+
+    return "GREEN";
+
+}
+
+
+
+/* =========================================================
+   LOCAL ROUTER RESPONSE
+========================================================= */
+
+function handleAskHello(
+    value
+) {
+
+    addMessage(
+        value,
+        "user"
+    );
+
+
+    const route =
+        classifyRequest(
+            value
+        );
+
+
+    /*
+        These are intentionally simple development
+        responses. The real AI response comes later.
+    */
+
+
+    if (
+        route === "GREEN"
+    ) {
+
+        addMessage(
+
+            "This falls within Hello's general education and wellness lane. When the AI knowledge system is connected, Hello could answer using approved evidence-based sources.",
+
+            "assistant",
+
+            "GREEN"
+
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        route === "YELLOW"
+    ) {
+
+        addMessage(
+
+            "This includes individual medical context. Hello can still provide useful general education, but it should avoid making an individualized diagnosis or treatment decision. It can also help you prepare questions for an appropriate healthcare professional.",
+
+            "assistant",
+
+            "YELLOW"
+
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        route === "RED"
+    ) {
+
+        addMessage(
+
+            "That request crosses into individualized clinical diagnosis, prescribing, treatment, medical-data interpretation, or medical clearance. Hello should not perform that action. It can still explain the general health concept involved or help you prepare questions for an appropriate healthcare professional.",
+
+            "assistant",
+
+            "RED"
+
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        route === "SAFETY"
+    ) {
+
+        addMessage(
+
+            "This may involve an immediate safety concern. Hello should stop the normal educational or coaching flow and direct the person toward immediate emergency or crisis support appropriate to their situation and location.",
+
+            "assistant",
+
+            "SAFETY"
+
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   MAIN SEND HANDLER
+========================================================= */
+
+function handleSend() {
+
+    const input =
+        document.getElementById(
+            "helloInput"
+        );
+
+
+    const value =
+        input.value.trim();
+
+
+    if (!value) {
+        return;
+    }
+
+
+    input.value =
+        "";
+
+
+    if (
+        currentMode === "guided"
+    ) {
+
+        handleGuidedResponse(
+            value
+        );
+
+    }
+
+    else {
+
+        handleAskHello(
+            value
+        );
+
+    }
+
+}
+
 
 
 /* =========================================================
@@ -743,7 +1764,9 @@ function escapeHTML(text) {
 ========================================================= */
 
 document
-    .getElementById("helloInput")
+    .getElementById(
+        "helloInput"
+    )
     .addEventListener(
         "keydown",
         function(event) {
@@ -755,12 +1778,37 @@ document
 
                 event.preventDefault();
 
-                sendResponse();
+                handleSend();
 
             }
 
         }
     );
+
+
+
+/* =========================================================
+   SAFE OUTPUT
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value;
+
+
+    return div.innerHTML;
+
+}
+
 
 
 /* =========================================================
@@ -770,19 +1818,67 @@ document
 function toggleMenu() {
 
     const nav =
-        document.querySelector(".site-nav");
+        document.querySelector(
+            ".site-nav"
+        );
 
 
-    nav.classList.toggle("active");
+    nav.classList.toggle(
+        "active"
+    );
 
 }
 
 
+
 /* =========================================================
-   START HELLO
+   INITIALIZE
 ========================================================= */
 
 loadState();
+
+
+if (
+    state
+) {
+
+    currentMode =
+        "guided";
+
+
+    startGuidedReflection();
+
+}
+
+else {
+
+    currentMode =
+        "ask";
+
+
+    document
+        .getElementById(
+            "guidedModeButton"
+        )
+        .classList
+        .remove(
+            "active"
+        );
+
+
+    document
+        .getElementById(
+            "askModeButton"
+        )
+        .classList
+        .add(
+            "active"
+        );
+
+
+    startAskMode();
+
+}
 
 </script>
 
