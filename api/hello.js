@@ -182,8 +182,8 @@ if (
            LIVE SCHOLARLY RETRIEVAL
         ============================================== */
 
-   const researchQuery =
-    buildResearchQuery(
+   cconst researchQuery =
+    await buildResearchQuery(
         cleanMessage
     );
 
