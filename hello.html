@@ -199,21 +199,13 @@
 </header>
 
 
-<main>
+<main class="hello-page">
 
-    <section class="hello-page-wrap">
+    <div class="hello-shell">
 
         <div class="hello-header">
 
-            <p
-                style="
-                    margin-bottom: 12px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    letter-spacing: 1.6px;
-                    color: #7E9861;
-                "
-            >
+            <p class="eyebrow">
                 MY SIMPLE HEALTH
             </p>
 
@@ -230,47 +222,76 @@
 
 
         <div
-            class="hello-context"
+            class="hello-context-bar"
             id="helloContext"
         >
             Loading your Wellness Wheel reflection...
         </div>
 
 
-        <div
-            class="hello-chat"
-            id="helloChat"
-        ></div>
+        <div class="hello-chat-wrap">
+
+            <div
+                class="hello-chat-thread"
+                id="helloChat"
+                aria-live="polite"
+            ></div>
 
 
-        <div
-            class="hello-input-wrap"
-            id="helloInputWrap"
-        >
+            <div
+                class="hello-input-wrap"
+                id="helloInputWrap"
+            >
 
-            <textarea
-                id="helloInput"
-                placeholder="Type your response..."
-            ></textarea>
+                <textarea
+                    id="helloInput"
+                    placeholder="Type your response..."
+                    aria-label="Type your response"
+                ></textarea>
+
+                <button
+                    class="hello-send-btn"
+                    type="button"
+                    onclick="sendResponse()"
+                >
+                    SEND →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="hello-actions">
+
+            <a
+                href="wellness-wheel.html"
+                class="hello-secondary-btn"
+            >
+                ← RETURN TO WELLNESS WHEEL
+            </a>
 
             <button
+                class="hello-secondary-btn"
                 type="button"
-                class="hello-send"
-                onclick="sendResponse()"
+                onclick="restartReflection()"
             >
-                SEND →
+                RESTART REFLECTION
             </button>
 
         </div>
 
 
         <div class="hello-note">
-            This is currently a guided prototype.
-            It is not connected to an AI service and does not diagnose,
-            prescribe, or provide individualized medical care.
+
+            Hello is currently a guided prototype.
+            It is not yet connected to an AI service and does not
+            diagnose, prescribe, or provide individualized medical care.
+            Responses in this prototype remain within your browser session.
+
         </div>
 
-    </section>
+    </div>
 
 </main>
 
