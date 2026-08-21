@@ -211,26 +211,31 @@ Determine the final evidence-strength label based on what the abstracts actually
 
     try {
 
-        parsed =
-            JSON.parse(
-                outputText
-            );
+    const cleanedOutput =
+        outputText
+            .replace(/```json/gi, "")
+            .replace(/```/g, "")
+            .trim();
 
-    }
-
-    catch (error) {
-
-        console.error(
-            "Could not parse synthesis JSON:",
-            outputText
+    parsed =
+        JSON.parse(
+            cleanedOutput
         );
 
+}
 
-        throw new Error(
-            "Invalid synthesis output."
-        );
+catch (error) {
 
-    }
+    console.error(
+        "Could not parse synthesis JSON:",
+        outputText
+    );
+
+    throw new Error(
+        "Invalid synthesis output."
+    );
+
+}
 
 
     return {
