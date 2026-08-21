@@ -93,7 +93,7 @@ ${study.abstract}
                     },
 
                     max_output_tokens:
-                        500,
+                        1000,
 
                     instructions: `
 You are the evidence-synthesis layer for My Simple Health.
