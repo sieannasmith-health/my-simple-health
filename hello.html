@@ -1768,7 +1768,335 @@ function handleAskHello(
 
 }
 
+/* =========================================================
+   HEALTHCARE VISIT PREP
+========================================================= */
 
+const visitPrepSteps = [
+
+    {
+        key: "understand",
+        question:
+            "What do you want to understand better before your healthcare visit?"
+    },
+
+    {
+        key: "questions",
+        question:
+            "What questions would you like to ask your healthcare professional?"
+    },
+
+    {
+        key: "bring",
+        question:
+            "Is there any information you want to remember to bring or mention?"
+    },
+
+    {
+        key: "followUp",
+        question:
+            "What follow-up would you like to clarify before you leave the appointment?"
+    }
+
+];
+
+
+let visitPrepState = {
+
+    active: false,
+
+    currentStep: 0,
+
+    answers: {
+
+        understand: "",
+
+        questions: "",
+
+        bring: "",
+
+        followUp: ""
+
+    }
+
+};
+
+
+/* =========================================
+   ADD VISIT PREP BUTTON
+========================================== */
+
+function addVisitPrepButton() {
+
+    const chat =
+        document.getElementById("helloChat");
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "hello-message-row assistant";
+
+
+    const button =
+        document.createElement("button");
+
+
+    button.type =
+        "button";
+
+
+    button.className =
+        "hello-visit-btn";
+
+
+    button.textContent =
+        "PREPARE FOR MY HEALTHCARE VISIT →";
+
+
+    button.onclick =
+        startVisitPrep;
+
+
+    row.appendChild(button);
+
+    chat.appendChild(row);
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+/* =========================================
+   START VISIT PREP
+========================================== */
+
+function startVisitPrep() {
+
+    visitPrepState.active =
+        true;
+
+
+    visitPrepState.currentStep =
+        0;
+
+
+    visitPrepState.answers = {
+
+        understand: "",
+
+        questions: "",
+
+        bring: "",
+
+        followUp: ""
+
+    };
+
+
+    addMessage(
+
+        "Absolutely. I can help you organize what you want to understand and the questions you want to bring to your healthcare visit.",
+
+        "assistant"
+
+    );
+
+
+    askVisitPrepQuestion();
+
+}
+
+
+/* =========================================
+   ASK VISIT PREP QUESTION
+========================================== */
+
+function askVisitPrepQuestion() {
+
+    const step =
+        visitPrepSteps[
+            visitPrepState.currentStep
+        ];
+
+
+    if (!step) {
+
+        showVisitPrepSummary();
+
+        return;
+
+    }
+
+
+    addMessage(
+        step.question,
+        "assistant"
+    );
+
+}
+
+
+/* =========================================
+   HANDLE VISIT PREP RESPONSE
+========================================== */
+
+function handleVisitPrepResponse(value) {
+
+    const step =
+        visitPrepSteps[
+            visitPrepState.currentStep
+        ];
+
+
+    if (!step) {
+        return;
+    }
+
+
+    addMessage(
+        value,
+        "user"
+    );
+
+
+    visitPrepState.answers[
+        step.key
+    ] =
+        value;
+
+
+    visitPrepState.currentStep++;
+
+
+    if (
+        visitPrepState.currentStep >=
+        visitPrepSteps.length
+    ) {
+
+        setTimeout(
+            showVisitPrepSummary,
+            250
+        );
+
+    }
+
+    else {
+
+        setTimeout(
+            askVisitPrepQuestion,
+            250
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   SHOW VISIT PREP SUMMARY
+========================================== */
+
+function showVisitPrepSummary() {
+
+    visitPrepState.active =
+        false;
+
+
+    const chat =
+        document.getElementById("helloChat");
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "hello-message-row assistant";
+
+
+    const summary =
+        document.createElement("div");
+
+
+    summary.className =
+        "hello-visit-summary";
+
+
+    summary.innerHTML = `
+
+        <h3>
+            My Healthcare Visit Prep
+        </h3>
+
+        <strong>
+            WHAT I WANT TO UNDERSTAND
+        </strong>
+
+        <div>
+            ${escapeHTML(
+                visitPrepState.answers.understand
+            )}
+        </div>
+
+
+        <strong>
+            QUESTIONS I WANT TO ASK
+        </strong>
+
+        <div>
+            ${escapeHTML(
+                visitPrepState.answers.questions
+            )}
+        </div>
+
+
+        <strong>
+            INFORMATION I WANT TO BRING OR MENTION
+        </strong>
+
+        <div>
+            ${escapeHTML(
+                visitPrepState.answers.bring
+            )}
+        </div>
+
+
+        <strong>
+            FOLLOW-UP I WANT TO CLARIFY
+        </strong>
+
+        <div>
+            ${escapeHTML(
+                visitPrepState.answers.followUp
+            )}
+        </div>
+
+    `;
+
+
+    row.appendChild(summary);
+
+    chat.appendChild(row);
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+
+    addMessage(
+
+        "You can use this as a starting point for your appointment. Your healthcare professional can help you make decisions based on your individual health needs.",
+
+        "assistant"
+
+    );
+
+}
 
 /* =========================================================
    MAIN SEND HANDLER
