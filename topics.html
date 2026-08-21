@@ -7,51 +7,76 @@
 
     <title>Health Topics | My Simple Health</title>
 
+    <meta
+        name="description"
+        content="Explore practical, science-based health information across nutrition, movement, sleep, wellbeing, and preventive health."
+    >
+
     <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 </head>
 
 <body>
 
-   <header class="site-header">
+
+<!-- =========================================
+     HEADER
+========================================== -->
+
+<header class="site-header">
 
     <a class="site-logo" href="index.html">
         My Simple Health
     </a>
-<button class="menu-button"
+
+    <button
+        class="menu-button"
         aria-label="Open menu"
-        onclick="toggleMenu()">
-    <i class="fa-solid fa-bars"></i>
-</button>
-<nav class="site-nav">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="topics.html">Topics</a>
-    <a href="assessments.html">Assessments</a>
-    <a href="recipes.html">Recipes</a>
-    <a href="blog.html">Blog</a>
-    <a href="contact.html">Contact</a>
-</nav>
+        onclick="toggleMenu()"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="assessments.html">Assessments</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+    </nav>
 
     <div class="header-search">
 
-        <button class="search-button"
-                aria-label="Search"
-                onclick="toggleSearch()">
+        <button
+            class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()"
+        >
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
         <div class="search-box" id="searchBox">
-            <input type="search"
-                   id="siteSearch"
-                   placeholder="Search My Simple Health..."
-                   aria-label="Search My Simple Health">
 
-            <button type="button" onclick="runSearch()">
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
+
+            <button
+                type="button"
+                onclick="runSearch()"
+            >
                 Search
             </button>
+
         </div>
 
     </div>
@@ -59,77 +84,215 @@
 </header>
 
 
-    <main>
+<main>
 
-        <section class="topics-page">
 
-            <div class="topics-intro">
-                <p class="eyebrow">EXPLORE YOUR HEALTH</p>
+<!-- =========================================
+     HEALTH TOPICS
+========================================== -->
 
-                <h2>Health Topics</h2>
+<section class="topics-page">
+
+    <div class="topics-intro">
+
+        <p class="eyebrow">
+            EXPLORE YOUR HEALTH
+        </p>
+
+        <h2>
+            Health Topics
+        </h2>
+
+        <p>
+            Practical, science-based
+            health information for everyday life.
+        </p>
+
+    </div>
+
+
+    <div class="topics-grid">
+
+
+        <!-- NUTRITION -->
+
+        <a
+            href="nutrition.html"
+            class="topic-card"
+        >
+
+            <img
+                src="topic-nutrition.png"
+                alt="Nutrition and balanced eating"
+            >
+
+            <div class="topic-card-content">
+
+                <span>01</span>
+
+                <h3>
+                    Nutrition
+                </h3>
 
                 <p>
-                    Practical, science-based<br>
-                    health information for everyday life.
+                    Build a balanced, flexible approach
+                    to everyday eating.
                 </p>
-            </div>
-<div class="topics-grid">
 
-<a href="nutrition.html" class="topic-card">
-    <img src="topic-nutrition.png" alt="Nutrition and balanced eating">
-    <div class="topic-card-content">
-        <span>01</span>
-        <h3>Nutrition</h3>
-        <p>Build a balanced, flexible approach to everyday eating.</p>
-        <span class="topic-link">Explore Nutrition →</span>
-    </div>
-</a>
+                <span class="topic-link">
+                    Explore Nutrition →
+                </span>
 
-<a href="movement.html" class="topic-card">
-    <img src="topic-movement.png" alt="Movement and physical activity">
-    <div class="topic-card-content">
-        <span>02</span>
-        <h3>Movement</h3>
-        <p>Make physical activity a realistic part of everyday life.</p>
-        <span class="topic-link">Explore Movement →</span>
-    </div>
-</a>
-
-<a href="sleep.html" class="topic-card">
-    <img src="topic-sleep.png" alt="Sleep and restorative rest">
-    <div class="topic-card-content">
-        <span>03</span>
-        <h3>Sleep</h3>
-        <p>Understand the habits and routines that support restorative sleep.</p>
-        <span class="topic-link">Explore Sleep →</span>
-    </div>
-</a>
-
-<a href="wellbeing.html" class="topic-card">
-    <img src="topic-wellbeing.png" alt="Wellbeing and stress management">
-    <div class="topic-card-content">
-        <span>04</span>
-        <h3>Wellbeing</h3>
-        <p>Support stress management, resilience, and everyday wellbeing.</p>
-        <span class="topic-link">Explore Wellbeing →</span>
-    </div>
-</a>
-
-<a href="preventive-health.html" class="topic-card">
-    <img src="topic-prevention.png" alt="Preventive health and healthy habits">
-    <div class="topic-card-content">
-        <span>05</span>
-        <h3>Prevention</h3>
-        <p>Learn about modifiable behaviors that support long-term health.</p>
-        <span class="topic-link">Explore Prevention →</span>
-    </div>
-</a>
             </div>
 
-        </section>
+        </a>
 
-    </main>
-    <!-- =========================================
+
+        <!-- MOVEMENT -->
+
+        <a
+            href="movement.html"
+            class="topic-card"
+        >
+
+            <img
+                src="topic-movement.png"
+                alt="Movement and physical activity"
+            >
+
+            <div class="topic-card-content">
+
+                <span>02</span>
+
+                <h3>
+                    Movement
+                </h3>
+
+                <p>
+                    Make physical activity a realistic
+                    part of everyday life.
+                </p>
+
+                <span class="topic-link">
+                    Explore Movement →
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <!-- SLEEP -->
+
+        <a
+            href="sleep.html"
+            class="topic-card"
+        >
+
+            <img
+                src="topic-sleep.png"
+                alt="Sleep and restorative rest"
+            >
+
+            <div class="topic-card-content">
+
+                <span>03</span>
+
+                <h3>
+                    Sleep
+                </h3>
+
+                <p>
+                    Understand the habits and routines
+                    that support restorative sleep.
+                </p>
+
+                <span class="topic-link">
+                    Explore Sleep →
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <!-- WELLBEING -->
+
+        <a
+            href="wellbeing.html"
+            class="topic-card"
+        >
+
+            <img
+                src="topic-wellbeing.png"
+                alt="Wellbeing and stress management"
+            >
+
+            <div class="topic-card-content">
+
+                <span>04</span>
+
+                <h3>
+                    Wellbeing
+                </h3>
+
+                <p>
+                    Support stress management, resilience,
+                    and everyday wellbeing.
+                </p>
+
+                <span class="topic-link">
+                    Explore Wellbeing →
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <!-- PREVENTION -->
+
+        <a
+            href="preventive-health.html"
+            class="topic-card"
+        >
+
+            <img
+                src="topic-prevention.png"
+                alt="Preventive health and healthy habits"
+            >
+
+            <div class="topic-card-content">
+
+                <span>05</span>
+
+                <h3>
+                    Prevention
+                </h3>
+
+                <p>
+                    Learn about modifiable behaviors
+                    that support long-term health.
+                </p>
+
+                <span class="topic-link">
+                    Explore Prevention →
+                </span>
+
+            </div>
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =========================================
      FOOTER
 ========================================== -->
 
@@ -139,32 +302,42 @@
 
         <div class="footer-brand">
 
-            <h2>MY SIMPLE HEALTH</h2>
+            <h2>
+                MY SIMPLE HEALTH
+            </h2>
 
             <p>
-                Practical, evidence-informed<br>
-                health education for everyday life.
+                Practical, science-based<br>
+                health information for everyday life.
             </p>
 
             <div class="footer-socials">
 
-                <a href="https://www.instagram.com/hellomysimplehealth/"
-                   aria-label="Instagram">
+                <a
+                    href="https://www.instagram.com/hellomysimplehealth/"
+                    aria-label="Instagram"
+                >
                     <i class="fa-brands fa-instagram"></i>
                 </a>
 
-                <a href="https://www.linkedin.com/company/143299965/"
-                   aria-label="LinkedIn">
+                <a
+                    href="https://www.linkedin.com/company/143299965/"
+                    aria-label="LinkedIn"
+                >
                     <i class="fa-brands fa-linkedin-in"></i>
                 </a>
 
-                <a href="https://www.pinterest.com/hellomysimplehealth/"
-                   aria-label="Pinterest">
+                <a
+                    href="https://www.pinterest.com/hellomysimplehealth/"
+                    aria-label="Pinterest"
+                >
                     <i class="fa-brands fa-pinterest-p"></i>
                 </a>
 
-                <a href="mailto:hello.mysimplehealth@gmail.com"
-                   aria-label="Email">
+                <a
+                    href="mailto:hello.mysimplehealth@gmail.com"
+                    aria-label="Email"
+                >
                     <i class="fa-regular fa-envelope"></i>
                 </a>
 
@@ -175,29 +348,55 @@
 
         <div class="footer-column">
 
-            <h3>EXPLORE</h3>
+            <h3>
+                EXPLORE
+            </h3>
 
-            <a href="topics.html">Topics</a>
-            <a href="recipes.html">Recipes</a>
-            <a href="resources.html">Resources</a>
-            <a href="blog.html">Blog</a>
+            <a href="topics.html">
+                Topics
+            </a>
+
+            <a href="recipes.html">
+                Recipes
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="blog.html">
+                Blog
+            </a>
 
         </div>
 
 
         <div class="footer-column">
 
-            <h3>ABOUT</h3>
-<a href="about.html">About My Simple Health</a>
-<a href="about.html#mission">Mission &amp; Values</a>
-<a href="contact.html">Contact</a>
+            <h3>
+                ABOUT
+            </h3>
+
+            <a href="about.html">
+                About My Simple Health
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
 
         </div>
 
 
         <div class="footer-connect">
 
-            <h3>LET'S STAY CONNECTED</h3>
+            <h3>
+                LET'S STAY CONNECTED
+            </h3>
 
             <p>
                 Join the community for new articles,<br>
@@ -231,47 +430,90 @@
 
         <div class="footer-legal">
 
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Disclaimer</a>
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms of Use
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
 
         </div>
 
     </div>
 
 </footer>
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================== -->
+
 <script>
-    function toggleSearch() {
-        const searchBox = document.getElementById("searchBox");
-        const searchInput = document.getElementById("siteSearch");
 
-        searchBox.classList.toggle("active");
+function toggleSearch() {
 
-        if (searchBox.classList.contains("active")) {
-            searchInput.focus();
-        }
+    const searchBox =
+        document.getElementById("searchBox");
+
+    const searchInput =
+        document.getElementById("siteSearch");
+
+    searchBox.classList.toggle("active");
+
+    if (searchBox.classList.contains("active")) {
+        searchInput.focus();
     }
 
-    function runSearch() {
-        const searchInput = document.getElementById("siteSearch");
-        const query = searchInput.value.trim();
+}
 
-        if (query) {
-            window.location.href =
-                "https://www.google.com/search?q=site:mysimplehealth.org+" +
-                encodeURIComponent(query);
-        }
+
+function runSearch() {
+
+    const searchInput =
+        document.getElementById("siteSearch");
+
+    const query =
+        searchInput.value.trim();
+
+    if (query) {
+
+        window.location.href =
+            "https://www.google.com/search?q=site:mysimplehealth.org+" +
+            encodeURIComponent(query);
+
     }
 
-    document.getElementById("siteSearch").addEventListener("keydown", function(event) {
+}
+
+
+document
+    .getElementById("siteSearch")
+    .addEventListener("keydown", function(event) {
+
         if (event.key === "Enter") {
             runSearch();
         }
+
     });
-    function toggleMenu() {
-    const nav = document.querySelector(".site-nav");
+
+
+function toggleMenu() {
+
+    const nav =
+        document.querySelector(".site-nav");
+
     nav.classList.toggle("active");
+
 }
+
 </script>
+
+
 </body>
+
 </html>
