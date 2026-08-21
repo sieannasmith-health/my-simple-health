@@ -74,40 +74,45 @@
     color: #7d9460;
 }
 
-
 /* =========================================
    HELLO PAGE
 ========================================== */
 
+html,
 body {
     margin: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-        /* =========================================
-           HELLO PAGE
-        ========================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-        }
+.hello-page {
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+    padding: 60px 20px 100px;
 
-        .hello-page {
-            min-height: 100vh;
-            padding: 60px 20px 100px;
+    background: #f7f5ef;
+    color: #242824;
 
-            background: #f7f5ef;
-            color: #242824;
-        }
+    overflow-x: hidden;
+}
 
-        .hello-shell {
-            width: min(94%, 780px);
-            margin: 0 auto;
-        }
+.hello-shell {
+    width: min(94%, 780px);
+    max-width: 100%;
+    margin: 0 auto;
+}
 
-
-        /* =========================================
+/* =========================================
            HEADER AREA
-        ========================================== */
+========================================== */
 
         .hello-heading {
             margin-bottom: 30px;
@@ -648,52 +653,149 @@ body {
         transform: translateY(-2px);
     }
 }
-        /* =========================================
-           MOBILE
-        ========================================== */
+/* =========================================
+   MOBILE
+========================================== */
 
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
 
-            .hello-page {
-                padding: 40px 12px 75px;
-            }
+    .hello-page {
+        padding: 40px 12px 75px;
+        overflow-x: hidden;
+    }
 
-            .hello-shell {
-                width: 100%;
-            }
+    .hello-shell {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
 
-            .hello-chat-thread {
-                min-height: 400px;
-                max-height: 540px;
+    .hello-mode-switcher {
+        max-width: 100%;
+    }
 
-                padding: 20px 14px;
-            }
+    .hello-chat-wrap {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
 
-            .hello-bubble {
-                max-width: 85%;
+    .hello-chat-thread {
+        width: 100%;
+        min-width: 0;
 
-                padding: 14px 15px;
+        min-height: 400px;
+        max-height: 540px;
 
-                font-size: 15px;
-            }
+        padding: 20px 14px;
 
-            .hello-input-wrap {
-                align-items: stretch;
-            }
+        overflow-x: hidden;
+        overflow-y: auto;
 
-            .hello-send-btn {
-                min-width: 86px;
-            }
+        overscroll-behavior-x: none;
+        touch-action: pan-y;
+    }
 
-            .hello-actions {
-                flex-direction: column;
-            }
+    .hello-message-row {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
 
-            .hello-secondary-btn {
-                width: 100%;
-            }
+    .hello-bubble {
+        max-width: 85%;
+        min-width: 0;
 
-        }
+        padding: 14px 15px;
+
+        font-size: 15px;
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .hello-loading-group {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .hello-loading-caption {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .hello-evidence-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .hello-source-item {
+        max-width: 100%;
+        min-width: 0;
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .hello-source-item a {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .hello-visit-summary {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .hello-visit-btn {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .hello-input-wrap {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        align-items: center;
+    }
+
+    #helloInput {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .hello-send-btn {
+        min-width: 86px;
+        flex-shrink: 0;
+    }
+
+    .hello-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .hello-secondary-btn {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .hello-note {
+        width: 100%;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+}
 
     </style>
 
@@ -2257,7 +2359,7 @@ async function handleAskHello(value) {
 
         addMessage(
             data.response,
-            "assistant",
+            "assistant"
          );
         
         addEvidenceDetails(data);
