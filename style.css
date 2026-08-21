@@ -6071,3 +6071,14 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         display: flex !important;
     }
 }
+/* =========================================================
+   STICKY SITE HEADER
+========================================================= */
+
+.site-header {
+    position: sticky !important;
+    top: 0;
+    z-index: 9999;
+
+    box-shadow: 0 4px 14px rgba(23, 61, 43, 0.14);
+}
