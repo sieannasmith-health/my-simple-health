@@ -293,8 +293,19 @@ For most questions:
 Do not invent citations or claim that you consulted a source unless source information was actually provided to you.
                         `,
 
-                        input:
-                            cleanMessage
+                        input: `
+USER QUESTION:
+${cleanMessage}
+
+APPROVED MY SIMPLE HEALTH EVIDENCE:
+${evidenceContext}
+
+Answer the user's question using only the approved evidence above.
+
+Do not introduce specific health claims, numerical recommendations, treatment recommendations, or clinical conclusions that are not supported by the approved evidence.
+
+If the evidence does not support part of the question, clearly say that the approved My Simple Health evidence available to you does not address that part.
+`
 
                     })
 
