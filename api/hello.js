@@ -1,3 +1,4 @@
+import { retrieveEvidence } from "./retrieveEvidence.js";
 // My Simple Health AI backend
 
 export default async function handler(req, res) {
@@ -153,7 +154,80 @@ export default async function handler(req, res) {
        GREEN + YELLOW
        AI EDUCATION FLOW
     ====================================================== */
+/* =========================================================
+   GREEN + YELLOW
+   APPROVED EVIDENCE RETRIEVAL
+========================================================= */
 
+const evidence =
+    retrieveEvidence(
+        cleanMessage
+    );
+
+
+if (
+    evidence.length === 0
+) {
+
+    return res.status(200).json({
+
+        success: true,
+
+        route: route,
+
+        response:
+            "I don't have an approved My Simple Health source for that topic yet. As the evidence library grows, I'll be able to provide evidence-grounded education here.",
+
+        sources: [],
+
+        offerVisitPrep:
+            route === "YELLOW"
+
+    });
+
+}
+
+
+/* =========================================================
+   BUILD EVIDENCE CONTEXT
+========================================================= */
+
+const evidenceContext =
+    evidence
+        .map(
+            source => {
+
+                const claims =
+                    source.approvedClaims
+                        .map(
+                            claim =>
+                                `- ${claim}`
+                        )
+                        .join("\n");
+
+
+                return `
+SOURCE:
+${source.organization} — ${source.title}
+
+EVIDENCE LEVEL:
+${source.evidenceLevel}
+
+APPROVED CLAIMS:
+${claims}
+`;
+
+            }
+        )
+        .join("\n");
+
+
+/* =========================================================
+   GREEN + YELLOW
+   AI EDUCATION FLOW
+========================================================= */
+
+try {
     try {
 
         const aiResponse =
