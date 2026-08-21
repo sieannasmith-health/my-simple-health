@@ -2,6 +2,11 @@ import {
     searchPubMed
 } from "./pubmed.js";
 
+import {
+    rankEvidence,
+    getEvidenceStrength
+} from "./rankEvidence.js";
+
 
 export default async function handler(
     req,
@@ -24,7 +29,19 @@ export default async function handler(
         const results =
             await searchPubMed(
                 query,
-                5
+                10
+            );
+
+
+        const rankedResults =
+            rankEvidence(
+                results
+            );
+
+
+        const evidenceStrength =
+            getEvidenceStrength(
+                rankedResults
             );
 
 
@@ -34,10 +51,13 @@ export default async function handler(
 
             query,
 
-            count:
-                results.length,
+            evidenceStrength,
 
-            results
+            count:
+                rankedResults.length,
+
+            results:
+                rankedResults
 
         });
 
@@ -57,7 +77,7 @@ export default async function handler(
             success: false,
 
             message:
-                "PubMed retrieval failed."
+                "PubMed retrieval or ranking failed."
 
         });
 
