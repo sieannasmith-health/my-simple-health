@@ -5986,29 +5986,7 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         object-fit: cover;
     }
 }
-/* =========================================================
-   MY SIMPLE HEALTH — MASTER PAGE WIDTH
-========================================================= */
 
-:root {
-    --site-width: 1280px;
-    --site-gutter: 48px;
-}
-
-.home-hero,
-.topics-section,
-.latest-articles,
-.recipes-section,
-.resources-section,
-.newsletter-section {
-    width: min(
-        var(--site-width),
-        calc(100% - (var(--site-gutter) * 2))
-    );
-
-    margin-left: auto;
-    margin-right: auto;
-}
 /* =========================================================
    FINAL MOBILE HEADER
 ========================================================= */
