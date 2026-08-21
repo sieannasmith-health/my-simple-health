@@ -1,4 +1,16 @@
 import { retrieveEvidence } from "./retrieveEvidence.js";
+import {
+    searchPubMed
+} from "./pubmed.js";
+
+import {
+    rankEvidence,
+    getEvidenceStrength
+} from "./rankEvidence.js";
+
+import {
+    synthesizeEvidence
+} from "./synthesizeEvidence.js";
 
 // My Simple Health AI backend
 
@@ -155,10 +167,79 @@ export default async function handler(req, res) {
             cleanMessage
         );
 
+if (
+    evidence.length === 0
+) {
 
-    if (
-        evidence.length === 0
-    ) {
+    try {
+
+        /* =============================================
+           LIVE SCHOLARLY RETRIEVAL
+        ============================================== */
+
+        const studies =
+            await searchPubMed(
+                cleanMessage,
+                10
+            );
+
+
+        const rankedStudies =
+            rankEvidence(
+                studies
+            )
+            .filter(
+                study =>
+                    study.abstract &&
+                    study.abstract.trim()
+            );
+
+
+        if (
+            rankedStudies.length === 0
+        ) {
+
+            return res.status(200).json({
+
+                success: true,
+
+                route,
+
+                response:
+                    "I couldn't find enough usable scholarly evidence to answer that responsibly.",
+
+                evidenceStrength:
+                    "INSUFFICIENT",
+
+                sources: [],
+
+                offerVisitPrep:
+                    route === "YELLOW"
+
+            });
+
+        }
+
+
+        const preliminaryStrength =
+            getEvidenceStrength(
+                rankedStudies
+            );
+
+
+        const synthesis =
+            await synthesizeEvidence({
+
+                question:
+                    cleanMessage,
+
+                studies:
+                    rankedStudies,
+
+                preliminaryStrength
+
+            });
+
 
         return res.status(200).json({
 
@@ -167,7 +248,56 @@ export default async function handler(req, res) {
             route,
 
             response:
-                "I don't have an approved My Simple Health source for that topic yet. As the evidence library grows, I'll be able to provide evidence-grounded education here.",
+                synthesis.plainLanguageAnswer ||
+                synthesis.summary,
+
+            evidenceStrength:
+                synthesis.evidenceStrength,
+
+            agreement:
+                synthesis.agreement,
+
+            whatWeKnow:
+                synthesis.whatWeKnow,
+
+            whatWeDontKnowYet:
+                synthesis.whatWeDontKnowYet,
+
+            limitations:
+                synthesis.limitations,
+
+            sources:
+                synthesis.sources,
+
+            evidenceSource:
+                "LIVE_SCHOLARLY_RETRIEVAL",
+
+            offerVisitPrep:
+                route === "YELLOW"
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Live evidence retrieval error:",
+            error
+        );
+
+
+        return res.status(200).json({
+
+            success: true,
+
+            route,
+
+            response:
+                "I wasn't able to retrieve enough scholarly evidence for that question right now. Please try again.",
+
+            evidenceStrength:
+                "INSUFFICIENT",
 
             sources: [],
 
@@ -177,6 +307,8 @@ export default async function handler(req, res) {
         });
 
     }
+
+}
 
 
     /* =====================================================
