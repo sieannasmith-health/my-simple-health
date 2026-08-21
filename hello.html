@@ -555,12 +555,32 @@ body {
     text-decoration: underline;
 }
     .hello-loading-bubble {
-    min-width: 220px;
+    background: transparent !important;
+    box-shadow: none;
+    border: none;
+
+    max-width: none;
+    min-width: 0;
+
+    padding: 8px 4px;
+}
+
+.hello-loading-bubble .hello-label {
+    display: none;
 }
 
 .hello-loading-text {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
+    gap: 4px;
+
+    color: #5f675f;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.hello-loading-dots {
+    display: inline-flex;
     gap: 2px;
 }
 
@@ -582,7 +602,7 @@ body {
     0%,
     60%,
     100% {
-        opacity: .25;
+        opacity: .2;
         transform: translateY(0);
     }
 
@@ -590,7 +610,7 @@ body {
         opacity: 1;
         transform: translateY(-2px);
     }
-
+}
         /* =========================================
            MOBILE
         ========================================== */
