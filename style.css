@@ -5912,18 +5912,20 @@ main > section.topics-page { display: block !important; width: 90% !important; m
 }
 
 .site-nav {
+    grid-column: 2;
+
     display: flex !important;
     align-items: center;
-    justify-content: space-evenly !important;
+    justify-content: space-between !important;
 
     width: 100%;
-    max-width: 720px;
-    justify-self: center;
+    max-width: 700px;
 
-    gap: 24px !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    gap: 0 !important;
 }
-
 .header-search {
     justify-self: end;
     margin: 0 !important;
