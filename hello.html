@@ -1620,134 +1620,87 @@ function classifyRequest(message) {
    LOCAL ROUTER RESPONSE
 ========================================================= */
 
-function handleAskHello(
-    value
-) {
+async function handleAskHello(value) {
 
     addMessage(
         value,
         "user"
     );
 
+    try {
 
-    const route =
-        classifyRequest(
-            value
-        );
+        const response =
+            await fetch(
+                "/api/hello",
+                {
+                    method: "POST",
 
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-    /*
-        These are intentionally simple development
-        responses. The real AI response comes later.
-    */
+                    body: JSON.stringify({
+                        message: value
+                    })
+                }
+            );
 
+        const data =
+            await response.json();
 
-    if (
-        route === "GREEN"
-    ) {
+        if (!response.ok) {
+
+            addMessage(
+                data.message ||
+                "Hello could not process that request.",
+                "assistant"
+            );
+
+            return;
+        }
 
         addMessage(
-
-            "This falls within Hello's general education and wellness lane. When the AI knowledge system is connected, Hello could answer using approved evidence-based sources.",
-
+            data.response,
             "assistant",
-
-            "GREEN"
-
+            getDisplayRoute(data.route)
         );
 
+        if (
+            data.route === "YELLOW"
+        ) {
 
-        return;
+            addVisitPrepButton();
+
+        }
 
     }
 
-
-    if (
-        route === "YELLOW"
-    ) {
+    catch (error) {
 
         addMessage(
-
-            "This includes individual medical context. Hello can still provide useful general education, but it should avoid making an individualized diagnosis or treatment decision. It can also help you prepare questions for an appropriate healthcare professional.",
-
-            "assistant",
-
-            "YELLOW"
-
+            "Hello is having trouble connecting right now. Please try again.",
+            "assistant"
         );
 
-        addVisitPrepButton();
-        return;
-
     }
-
-
-    if (
-        route === "RED"
-    ) {
-
-        addMessage(
-
-            "That request crosses into individualized clinical diagnosis, prescribing, treatment, medical-data interpretation, or medical clearance. Hello should not perform that action. It can still explain the general health concept involved or help you prepare questions for an appropriate healthcare professional.",
-
-            "assistant",
-
-            "RED"
-
-        );
-
-
-        return;
-
-    }
-
-
-/* =========================================
-   SAFETY — MEDICAL EMERGENCY RESPONSE
-========================================== */
-
-if (
-    route === "SAFETY_MEDICAL"
-) {
-
-    addMessage(
-
-        "This may be a medical emergency. Please call 911 or your local emergency number now, or go to the nearest emergency department. Hello should not continue the normal health education or coaching conversation during a possible emergency.",
-
-        "assistant",
-
-        "SAFETY"
-
-    );
-
-    return;
 
 }
 
 
-/* =========================================
-   SAFETY — CRISIS RESPONSE
-========================================== */
+function getDisplayRoute(route) {
 
-if (
-    route === "SAFETY_CRISIS"
-) {
+    if (
+        route === "SAFETY_MEDICAL" ||
+        route === "SAFETY_CRISIS"
+    ) {
 
-    addMessage(
+        return "SAFETY";
 
-        "This may be an immediate emotional or suicide crisis. In the United States, call or text 988 for the Suicide & Crisis Lifeline. If you may act on these thoughts, someone is in immediate danger, or you cannot stay safe, call 911 or go to the nearest emergency department.",
+    }
 
-        "assistant",
-
-        "SAFETY"
-
-    );
-
-    return;
+    return route;
 
 }
-}
-
 /* =========================================================
    HEALTHCARE VISIT PREP
 ========================================================= */
