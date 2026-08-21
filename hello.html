@@ -298,6 +298,10 @@
 
 <script>
 
+/* =========================================================
+   HELLO GUIDED REFLECTION STEPS
+========================================================= */
+
 const steps = [
 
     {
@@ -346,34 +350,32 @@ const steps = [
 let state = null;
 
 
+/* =========================================================
+   LOAD SESSION STATE
+========================================================= */
+
 function loadState() {
 
     const saved =
-        sessionStorage.getItem(
-            "helloWellnessState"
-        );
+        sessionStorage.getItem("helloWellnessState");
 
 
     if (!saved) {
 
         document
-            .getElementById(
-                "helloContext"
-            )
+            .getElementById("helloContext")
             .textContent =
             "No Wellness Wheel reflection was found in this browser session.";
 
 
         addMessage(
             "Start with the Wellness Wheel, choose an area to explore, and then continue with Hello.",
-            "hello"
+            "assistant"
         );
 
 
         document
-            .getElementById(
-                "helloInputWrap"
-            )
+            .getElementById("helloInputWrap")
             .style.display =
             "none";
 
@@ -383,21 +385,37 @@ function loadState() {
     }
 
 
-    state =
-        JSON.parse(saved);
+    try {
+
+        state =
+            JSON.parse(saved);
+
+    }
+
+    catch (error) {
+
+        addMessage(
+            "I couldn't load your Wellness Wheel reflection. Return to the Wellness Wheel and try again.",
+            "assistant"
+        );
+
+        return;
+
+    }
 
 
     document
-        .getElementById(
-            "helloContext"
-        )
-        .textContent =
-        `${state.selectedDimension} • ${state.selectedScore}/10`;
+        .getElementById("helloContext")
+        .innerHTML = `
+            <strong>${escapeHTML(state.selectedDimension)}</strong>
+            &nbsp;•&nbsp;
+            ${escapeHTML(String(state.selectedScore))}/10
+        `;
 
 
     addMessage(
         `You chose ${state.selectedDimension}. Let's explore that area one step at a time.`,
-        "hello"
+        "assistant"
     );
 
 
@@ -406,40 +424,77 @@ function loadState() {
 }
 
 
-function addMessage(
-    text,
-    sender
-) {
+/* =========================================================
+   ADD CHAT MESSAGE
+========================================================= */
+
+function addMessage(text, sender) {
 
     const chat =
-        document.getElementById(
-            "helloChat"
-        );
+        document.getElementById("helloChat");
 
 
-    const message =
-        document.createElement(
-            "div"
-        );
+    const row =
+        document.createElement("div");
 
 
-    message.className =
-        "hello-message " +
+    row.className =
+        "hello-message-row " +
         sender;
 
 
-    message.textContent =
-        text;
+    const bubble =
+        document.createElement("div");
 
 
-    chat.appendChild(
-        message
-    );
+    bubble.className =
+        "hello-bubble " +
+        sender;
+
+
+    if (sender === "assistant") {
+
+        bubble.innerHTML = `
+            <span class="hello-label">
+                Hello
+            </span>
+
+            ${escapeHTML(text)}
+        `;
+
+    }
+
+    else {
+
+        bubble.textContent =
+            text;
+
+    }
+
+
+    row.appendChild(bubble);
+
+    chat.appendChild(row);
+
+
+    row.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
 
 }
 
 
+/* =========================================================
+   ASK CURRENT QUESTION
+========================================================= */
+
 function askQuestion() {
+
+    if (!state) {
+        return;
+    }
+
 
     if (
         state.currentStep >=
@@ -453,13 +508,21 @@ function askQuestion() {
     }
 
 
+    const step =
+        steps[state.currentStep];
+
+
     addMessage(
-        steps[state.currentStep].question,
-        "hello"
+        step.question,
+        "assistant"
     );
 
 }
 
+
+/* =========================================================
+   SEND RESPONSE
+========================================================= */
 
 function sendResponse() {
 
@@ -469,9 +532,7 @@ function sendResponse() {
 
 
     const input =
-        document.getElementById(
-            "helloInput"
-        );
+        document.getElementById("helloInput");
 
 
     const value =
@@ -503,7 +564,7 @@ function sendResponse() {
 
             addMessage(
                 "Please enter a whole number from 1 to 10.",
-                "hello"
+                "assistant"
             );
 
             return;
@@ -538,51 +599,151 @@ function sendResponse() {
         "";
 
 
-    askQuestion();
+    setTimeout(
+        function() {
+
+            askQuestion();
+
+        },
+        250
+    );
 
 }
 
 
+/* =========================================================
+   FINAL SUMMARY
+========================================================= */
+
 function showSummary() {
 
     document
-        .getElementById(
-            "helloInputWrap"
-        )
+        .getElementById("helloInputWrap")
         .style.display =
         "none";
 
 
     addMessage(
         `Your goal: ${state.answers.goal}`,
-        "hello"
+        "assistant"
     );
 
 
     addMessage(
         `Your next step: ${state.answers.actionStep}`,
-        "hello"
+        "assistant"
     );
 
 
     addMessage(
         `Confidence: ${state.answers.confidence}/10`,
-        "hello"
+        "assistant"
     );
 
 
     addMessage(
         "You chose this goal and next step based on what matters to you. You can revisit and adjust it as your circumstances change.",
-        "hello"
+        "assistant"
     );
 
 }
 
 
+/* =========================================================
+   RESTART REFLECTION
+========================================================= */
+
+function restartReflection() {
+
+    if (!state) {
+
+        window.location.href =
+            "wellness-wheel.html";
+
+        return;
+
+    }
+
+
+    state.currentStep =
+        0;
+
+
+    state.answers = {
+
+        workingWell: "",
+
+        desiredChange: "",
+
+        whyMatters: "",
+
+        strengths: "",
+
+        barriers: "",
+
+        goal: "",
+
+        actionStep: "",
+
+        confidence: ""
+
+    };
+
+
+    sessionStorage.setItem(
+        "helloWellnessState",
+        JSON.stringify(state)
+    );
+
+
+    document
+        .getElementById("helloChat")
+        .innerHTML =
+        "";
+
+
+    document
+        .getElementById("helloInputWrap")
+        .style.display =
+        "flex";
+
+
+    addMessage(
+        `Let's restart your ${state.selectedDimension} reflection.`,
+        "assistant"
+    );
+
+
+    askQuestion();
+
+}
+
+
+/* =========================================================
+   SAFE TEXT OUTPUT
+========================================================= */
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+
+    div.textContent =
+        text;
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   ENTER TO SEND
+========================================================= */
+
 document
-    .getElementById(
-        "helloInput"
-    )
+    .getElementById("helloInput")
     .addEventListener(
         "keydown",
         function(event) {
@@ -602,20 +763,24 @@ document
     );
 
 
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
 function toggleMenu() {
 
     const nav =
-        document.querySelector(
-            ".site-nav"
-        );
+        document.querySelector(".site-nav");
 
 
-    nav.classList.toggle(
-        "active"
-    );
+    nav.classList.toggle("active");
 
 }
 
+
+/* =========================================================
+   START HELLO
+========================================================= */
 
 loadState();
 
