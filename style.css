@@ -5808,3 +5808,35 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         height: 42px !important;
     }
 }
+.site-nav {
+    grid-column: 2;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    gap: 42px !important;
+
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.site-nav a {
+    display: inline-flex;
+    align-items: center;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #252822 !important;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
