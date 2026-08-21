@@ -6171,3 +6171,121 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     border-radius: 0 !important;
     margin: 0 !important;
 }
+/* =========================================================
+   FINAL MOBILE NAV DROPDOWN
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .site-nav {
+        display: none !important;
+
+        grid-column: 1 / -1 !important;
+
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 18px 0 24px !important;
+
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+
+        gap: 0 !important;
+
+        background: #173D2B !important;
+    }
+
+    .site-nav.active,
+    .site-nav.nav-open {
+        display: flex !important;
+    }
+
+    .site-nav a {
+        display: block !important;
+
+        width: 100% !important;
+
+        padding: 14px 22px !important;
+        margin: 0 !important;
+
+        color: #FCFBF7 !important;
+
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        line-height: 1.2 !important;
+
+        box-sizing: border-box;
+    }
+
+    .site-nav a:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+/* =========================================================
+   PREVENTIVE HEALTH TOPIC CARDS — MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .movement-topics {
+        padding: 55px 24px !important;
+        overflow: hidden !important;
+    }
+
+    .movement-topics-header h2 {
+        font-size: 42px !important;
+        line-height: 1.05 !important;
+    }
+
+    .movement-topics-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        gap: 16px !important;
+    }
+
+    .movement-topic-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        padding: 28px 24px !important;
+        gap: 10px !important;
+
+        box-sizing: border-box !important;
+    }
+
+    .movement-topic-number {
+        margin: 0 0 4px !important;
+        font-size: 14px !important;
+    }
+
+    .movement-topic-card h3 {
+        width: 100% !important;
+        margin: 0 0 8px !important;
+
+        font-size: 30px !important;
+        line-height: 1.1 !important;
+    }
+
+    .movement-topic-card p {
+        width: 100% !important;
+        margin: 0 0 8px !important;
+
+        font-size: 16px !important;
+        line-height: 1.55 !important;
+    }
+
+    .movement-topic-link {
+        width: auto !important;
+        margin-top: 2px !important;
+
+        font-size: 14px !important;
+    }
+}
