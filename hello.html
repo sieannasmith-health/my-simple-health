@@ -1,1 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Hello | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <style>
+
+        body {
+            margin: 0;
+            background: #F7F3EA;
+            color: #242824;
+        }
+
+        .hello-page-wrap {
+            width: min(92%, 900px);
+            margin: 0 auto;
+            padding: 60px 0 100px;
+        }
+
+        .hello-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hello-header h1 {
+            margin: 0 0 12px;
+
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(44px, 6vw, 68px);
+            font-weight: 400;
+
+            color: #173D2B;
+        }
+
+        .hello-header p {
+            max-width: 650px;
+            margin: 0 auto;
+
+            line-height: 1.7;
+        }
+
+        .hello-context {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+
+            border: 1px solid #D8D5CB;
+            background: #EEF0E8;
+
+            font-size: 14px;
+        }
+
+        .hello-chat {
+            min-height: 420px;
+
+            padding: 28px;
+
+            border: 1px solid #D8D5CB;
+            background: #FFFFFF;
+
+            box-sizing: border-box;
+        }
+
+        .hello-message {
+            max-width: 75%;
+            margin-bottom: 18px;
+            padding: 15px 18px;
+
+            line-height: 1.6;
+        }
+
+        .hello-message.hello {
+            background: #EEF0E8;
+            color: #173D2B;
+        }
+
+        .hello-message.user {
+            margin-left: auto;
+
+            background: #173D2B;
+            color: white;
+        }
+
+        .hello-input-wrap {
+            display: flex;
+            gap: 10px;
+
+            padding: 18px;
+
+            border: 1px solid #D8D5CB;
+            border-top: none;
+
+            background: #FFFFFF;
+        }
+
+        #helloInput {
+            flex: 1;
+
+            min-height: 52px;
+
+            padding: 14px;
+
+            border: 1px solid #CFCBC1;
+
+            font-size: 15px;
+
+            box-sizing: border-box;
+        }
+
+        .hello-send {
+            padding: 0 24px;
+
+            border: 1px solid #173D2B;
+            background: #173D2B;
+            color: white;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .hello-note {
+            margin-top: 22px;
+            padding: 16px;
+
+            background: #EEF0E8;
+
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+
+            .hello-page-wrap {
+                width: calc(100% - 40px);
+            }
+
+            .hello-message {
+                max-width: 92%;
+            }
+
+            .hello-input-wrap {
+                flex-direction: column;
+            }
+
+            .hello-send {
+                min-height: 50px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="site-header">
+
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
+
+    <button
+        class="menu-button"
+        aria-label="Open menu"
+        onclick="toggleMenu()"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="assessments.html">Assessments</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+</header>
+
+
+<main>
+
+    <section class="hello-page-wrap">
+
+        <div class="hello-header">
+
+            <p
+                style="
+                    margin-bottom: 12px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 1.6px;
+                    color: #7E9861;
+                "
+            >
+                MY SIMPLE HEALTH
+            </p>
+
+            <h1>
+                Hello.
+            </h1>
+
+            <p>
+                A guided space to reflect on your wellbeing,
+                clarify what matters, and identify realistic next steps.
+            </p>
+
+        </div>
+
+
+        <div
+            class="hello-context"
+            id="helloContext"
+        >
+            Loading your Wellness Wheel reflection...
+        </div>
+
+
+        <div
+            class="hello-chat"
+            id="helloChat"
+        ></div>
+
+
+        <div
+            class="hello-input-wrap"
+            id="helloInputWrap"
+        >
+
+            <textarea
+                id="helloInput"
+                placeholder="Type your response..."
+            ></textarea>
+
+            <button
+                type="button"
+                class="hello-send"
+                onclick="sendResponse()"
+            >
+                SEND →
+            </button>
+
+        </div>
+
+
+        <div class="hello-note">
+            This is currently a guided prototype.
+            It is not connected to an AI service and does not diagnose,
+            prescribe, or provide individualized medical care.
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const steps = [
+
+    {
+        key: "workingWell",
+        question: "What is already going well in this area?"
+    },
+
+    {
+        key: "desiredChange",
+        question: "What would you like to be different?"
+    },
+
+    {
+        key: "whyMatters",
+        question: "Why would that change matter to you?"
+    },
+
+    {
+        key: "strengths",
+        question: "What strengths, resources, people, or support could help you?"
+    },
+
+    {
+        key: "barriers",
+        question: "What might get in the way?"
+    },
+
+    {
+        key: "goal",
+        question: "What is one goal you would like to work toward?"
+    },
+
+    {
+        key: "actionStep",
+        question: "What is one small, realistic action you could take next?"
+    },
+
+    {
+        key: "confidence",
+        question: "On a scale from 1 to 10, how confident are you that you could take that step?"
+    }
+
+];
+
+
+let state = null;
+
+
+function loadState() {
+
+    const saved =
+        sessionStorage.getItem(
+            "helloWellnessState"
+        );
+
+
+    if (!saved) {
+
+        document
+            .getElementById(
+                "helloContext"
+            )
+            .textContent =
+            "No Wellness Wheel reflection was found in this browser session.";
+
+
+        addMessage(
+            "Start with the Wellness Wheel, choose an area to explore, and then continue with Hello.",
+            "hello"
+        );
+
+
+        document
+            .getElementById(
+                "helloInputWrap"
+            )
+            .style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    state =
+        JSON.parse(saved);
+
+
+    document
+        .getElementById(
+            "helloContext"
+        )
+        .textContent =
+        `${state.selectedDimension} • ${state.selectedScore}/10`;
+
+
+    addMessage(
+        `You chose ${state.selectedDimension}. Let's explore that area one step at a time.`,
+        "hello"
+    );
+
+
+    askQuestion();
+
+}
+
+
+function addMessage(
+    text,
+    sender
+) {
+
+    const chat =
+        document.getElementById(
+            "helloChat"
+        );
+
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+
+    message.className =
+        "hello-message " +
+        sender;
+
+
+    message.textContent =
+        text;
+
+
+    chat.appendChild(
+        message
+    );
+
+}
+
+
+function askQuestion() {
+
+    if (
+        state.currentStep >=
+        steps.length
+    ) {
+
+        showSummary();
+
+        return;
+
+    }
+
+
+    addMessage(
+        steps[state.currentStep].question,
+        "hello"
+    );
+
+}
+
+
+function sendResponse() {
+
+    if (!state) {
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "helloInput"
+        );
+
+
+    const value =
+        input.value.trim();
+
+
+    if (!value) {
+        return;
+    }
+
+
+    const step =
+        steps[state.currentStep];
+
+
+    if (
+        step.key === "confidence"
+    ) {
+
+        const number =
+            Number(value);
+
+
+        if (
+            !Number.isInteger(number) ||
+            number < 1 ||
+            number > 10
+        ) {
+
+            addMessage(
+                "Please enter a whole number from 1 to 10.",
+                "hello"
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    addMessage(
+        value,
+        "user"
+    );
+
+
+    state.answers[
+        step.key
+    ] =
+        value;
+
+
+    state.currentStep++;
+
+
+    sessionStorage.setItem(
+        "helloWellnessState",
+        JSON.stringify(state)
+    );
+
+
+    input.value =
+        "";
+
+
+    askQuestion();
+
+}
+
+
+function showSummary() {
+
+    document
+        .getElementById(
+            "helloInputWrap"
+        )
+        .style.display =
+        "none";
+
+
+    addMessage(
+        `Your goal: ${state.answers.goal}`,
+        "hello"
+    );
+
+
+    addMessage(
+        `Your next step: ${state.answers.actionStep}`,
+        "hello"
+    );
+
+
+    addMessage(
+        `Confidence: ${state.answers.confidence}/10`,
+        "hello"
+    );
+
+
+    addMessage(
+        "You chose this goal and next step based on what matters to you. You can revisit and adjust it as your circumstances change.",
+        "hello"
+    );
+
+}
+
+
+document
+    .getElementById(
+        "helloInput"
+    )
+    .addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                sendResponse();
+
+            }
+
+        }
+    );
+
+
+function toggleMenu() {
+
+    const nav =
+        document.querySelector(
+            ".site-nav"
+        );
+
+
+    nav.classList.toggle(
+        "active"
+    );
+
+}
+
+
+loadState();
+
+</script>
+
+
+</body>
+
+</html>
