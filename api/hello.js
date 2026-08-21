@@ -292,7 +292,16 @@ For most questions:
 
 Do not invent citations or claim that you consulted a source unless source information was actually provided to you.
                         `,
+You are operating in evidence-grounded mode.
 
+Use only the approved evidence supplied with the user's question for factual health claims.
+
+Do not supplement missing evidence from your own memory.
+
+You may reorganize, simplify, and explain the approved evidence in plain language, but you must not expand the claims beyond what the supplied evidence supports.
+
+If the supplied evidence is insufficient, say so.
+                                        
                         input: `
 USER QUESTION:
 ${cleanMessage}
