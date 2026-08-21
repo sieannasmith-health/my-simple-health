@@ -46,7 +46,149 @@
     background: #173d2b;
     color: #ffffff;
 }
+    
+/* =========================================================
+   CARE NAVIGATION
+========================================================= */
 
+function addCareOptions() {
+
+    const chat =
+        document.getElementById("helloChat");
+
+
+    /*
+        Keep this conversational instead of
+        treating professional care like a hard stop.
+    */
+
+    addMessage(
+        "If you'd like, I can also help you think through what kind of health professional might be useful, or help you organize questions for a visit.",
+        "assistant"
+    );
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "hello-message-row assistant";
+
+
+    const options =
+        document.createElement("div");
+
+
+    options.className =
+        "hello-care-options";
+
+
+    /* =====================================
+       WHO COULD HELP
+    ====================================== */
+
+    const professionalButton =
+        document.createElement("button");
+
+
+    professionalButton.type =
+        "button";
+
+
+    professionalButton.className =
+        "hello-care-option";
+
+
+    professionalButton.textContent =
+        "Who could help with this?";
+
+
+    professionalButton.onclick =
+        function() {
+
+            row.remove();
+
+            explainCareNavigation();
+
+        };
+
+
+    /* =====================================
+       VISIT QUESTIONS
+    ====================================== */
+
+    const visitButton =
+        document.createElement("button");
+
+
+    visitButton.type =
+        "button";
+
+
+    visitButton.className =
+        "hello-care-option";
+
+
+    visitButton.textContent =
+        "Help me plan what to ask";
+
+
+    visitButton.onclick =
+        function() {
+
+            row.remove();
+
+            startVisitPrep();
+
+        };
+
+
+    options.appendChild(
+        professionalButton
+    );
+
+
+    options.appendChild(
+        visitButton
+    );
+
+
+    row.appendChild(
+        options
+    );
+
+
+    chat.appendChild(
+        row
+    );
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+
+/* =========================================================
+   CARE NAVIGATION INTRO
+========================================================= */
+
+function explainCareNavigation() {
+
+    addMessage(
+        "Different health professionals can help with different parts of your health. Depending on the question, that might include a primary care professional, pharmacist, registered dietitian, physical therapist, mental health professional, or another specialist.",
+        "assistant"
+    );
+
+
+    addMessage(
+        "I can help you understand what these professionals do and which types of services may be worth exploring. We can also eventually look at nearby care or telehealth options.",
+        "assistant"
+    );
+
+}
 .hello-visit-summary {
     margin-top: 8px;
     padding: 20px;
@@ -2368,7 +2510,7 @@ async function handleAskHello(value) {
             data.route === "YELLOW"
         ) {
 
-            addVisitPrepButton();
+            addCareOptions();
 
         }
 
@@ -2400,6 +2542,126 @@ function getDisplayRoute(route) {
     return route;
 
 }
+
+/* =========================================================
+   CARE NAVIGATION
+========================================================= */
+
+function addCareOptions() {
+
+    const chat =
+        document.getElementById("helloChat");
+
+
+    addMessage(
+        "If you'd like, I can also help you figure out what kind of health professional might be useful, or help you organize questions for a visit.",
+        "assistant"
+    );
+
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "hello-message-row assistant";
+
+
+    const options =
+        document.createElement("div");
+
+    options.className =
+        "hello-care-options";
+
+
+    /* WHO COULD HELP */
+
+    const professionalButton =
+        document.createElement("button");
+
+    professionalButton.type =
+        "button";
+
+    professionalButton.className =
+        "hello-care-option";
+
+    professionalButton.textContent =
+        "Who could help with this?";
+
+    professionalButton.onclick =
+        function() {
+
+            row.remove();
+
+            explainCareNavigation();
+
+        };
+
+
+    /* PLAN QUESTIONS */
+
+    const visitButton =
+        document.createElement("button");
+
+    visitButton.type =
+        "button";
+
+    visitButton.className =
+        "hello-care-option";
+
+    visitButton.textContent =
+        "Help me plan what to ask";
+
+    visitButton.onclick =
+        function() {
+
+            row.remove();
+
+            startVisitPrep();
+
+        };
+
+
+    options.appendChild(
+        professionalButton
+    );
+
+    options.appendChild(
+        visitButton
+    );
+
+    row.appendChild(
+        options
+    );
+
+    chat.appendChild(
+        row
+    );
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+/* =========================================================
+   CARE NAVIGATION INTRO
+========================================================= */
+
+function explainCareNavigation() {
+
+    addMessage(
+        "Different health professionals can help with different parts of your health. Depending on what you're trying to understand or work on, that might include a primary care professional, pharmacist, registered dietitian, physical therapist, mental health professional, or another specialist.",
+        "assistant"
+    );
+
+
+    addMessage(
+        "I can help you understand what different health professionals do and what kinds of services you might want to explore.",
+        "assistant"
+    );
+
+}
+    
 /* =========================================================
    HEALTHCARE VISIT PREP
 ========================================================= */
