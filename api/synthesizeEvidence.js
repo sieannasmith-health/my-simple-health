@@ -138,7 +138,7 @@ Use this exact structure:
     "whatWeKnow": "What the evidence supports with reasonable confidence.",
     "whatWeDontKnowYet": "What remains uncertain, limited, or not established."
 }
-`,
+
 For plainLanguageAnswer:
 - Keep it to about 2–4 sentences.
 - Use everyday language.
@@ -151,7 +151,9 @@ For whatWeKnow:
 For whatWeDontKnowYet:
 - State the most important uncertainty or limitation.
 - Do not imply that uncertainty means the evidence is useless.
-                    input: `
+`,
+
+input: `
 USER QUESTION:
 ${question}
 
