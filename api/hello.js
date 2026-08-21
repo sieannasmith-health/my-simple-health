@@ -182,11 +182,10 @@ if (
            LIVE SCHOLARLY RETRIEVAL
         ============================================== */
 
-   cconst researchQuery =
+   const researchQuery =
     await buildResearchQuery(
         cleanMessage
     );
-
 
 const studies =
     await searchPubMed(
