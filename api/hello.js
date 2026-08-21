@@ -1,4 +1,5 @@
 import { retrieveEvidence } from "./retrieveEvidence.js";
+
 // My Simple Health AI backend
 
 export default async function handler(req, res) {
@@ -66,7 +67,7 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       SCOPE / SAFETY ROUTING
+       SAFETY / SCOPE ROUTING
     ====================================================== */
 
     const route =
@@ -76,8 +77,7 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       SAFETY — MEDICAL
-       Do NOT send to normal AI flow
+       MEDICAL EMERGENCY
     ====================================================== */
 
     if (
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
 
             success: true,
 
-            route: route,
+            route,
 
             stopNormalFlow: true,
 
@@ -101,8 +101,7 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       SAFETY — CRISIS
-       Do NOT send to normal AI flow
+       CRISIS
     ====================================================== */
 
     if (
@@ -113,7 +112,7 @@ export default async function handler(req, res) {
 
             success: true,
 
-            route: route,
+            route,
 
             stopNormalFlow: true,
 
@@ -127,7 +126,6 @@ export default async function handler(req, res) {
 
     /* =====================================================
        RED
-       Do NOT allow prohibited clinical request
     ====================================================== */
 
     if (
@@ -138,9 +136,7 @@ export default async function handler(req, res) {
 
             success: true,
 
-            route: route,
-
-            stopNormalFlow: false,
+            route,
 
             response:
                 "I can help explain the general health concepts involved, but I can't diagnose a condition, interpret clinical data as your clinician, prescribe or change treatment, or medically clear you. I can also help you prepare questions for an appropriate healthcare professional."
@@ -151,62 +147,57 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       GREEN + YELLOW
-       AI EDUCATION FLOW
+       APPROVED EVIDENCE RETRIEVAL
     ====================================================== */
-/* =========================================================
-   GREEN + YELLOW
-   APPROVED EVIDENCE RETRIEVAL
-========================================================= */
 
-const evidence =
-    retrieveEvidence(
-        cleanMessage
-    );
+    const evidence =
+        retrieveEvidence(
+            cleanMessage
+        );
 
 
-if (
-    evidence.length === 0
-) {
+    if (
+        evidence.length === 0
+    ) {
 
-    return res.status(200).json({
+        return res.status(200).json({
 
-        success: true,
+            success: true,
 
-        route: route,
+            route,
 
-        response:
-            "I don't have an approved My Simple Health source for that topic yet. As the evidence library grows, I'll be able to provide evidence-grounded education here.",
+            response:
+                "I don't have an approved My Simple Health source for that topic yet. As the evidence library grows, I'll be able to provide evidence-grounded education here.",
 
-        sources: [],
+            sources: [],
 
-        offerVisitPrep:
-            route === "YELLOW"
+            offerVisitPrep:
+                route === "YELLOW"
 
-    });
+        });
 
-}
-
-
-/* =========================================================
-   BUILD EVIDENCE CONTEXT
-========================================================= */
-
-const evidenceContext =
-    evidence
-        .map(
-            source => {
-
-                const claims =
-                    source.approvedClaims
-                        .map(
-                            claim =>
-                                `- ${claim}`
-                        )
-                        .join("\n");
+    }
 
 
-                return `
+    /* =====================================================
+       BUILD EVIDENCE CONTEXT
+    ====================================================== */
+
+    const evidenceContext =
+        evidence
+            .map(
+                source => {
+
+                    const claims =
+                        source.approvedClaims
+                            .map(
+                                claim =>
+                                    `- ${claim}`
+                            )
+                            .join("\n");
+
+
+                    return `
 SOURCE:
 ${source.organization} — ${source.title}
 
@@ -217,17 +208,15 @@ APPROVED CLAIMS:
 ${claims}
 `;
 
-            }
-        )
-        .join("\n");
+                }
+            )
+            .join("\n");
 
 
-/* =========================================================
-   GREEN + YELLOW
-   AI EDUCATION FLOW
-========================================================= */
+    /* =====================================================
+       AI EDUCATION FLOW
+    ====================================================== */
 
-try {
     try {
 
         const aiResponse =
@@ -287,11 +276,11 @@ For most questions:
 - Begin with a direct 1–2 sentence answer.
 - Use short paragraphs.
 - Use the bullet character • when a short list would improve clarity.
-- Do not use Markdown formatting such as **bold**, headings with #, tables, or code formatting.
+- Do not use Markdown formatting such as bold, headings, tables, or code formatting.
 - Avoid unnecessarily long explanations unless the user asks for more detail.
 
 Do not invent citations or claim that you consulted a source unless source information was actually provided to you.
-                        `,
+
 You are operating in evidence-grounded mode.
 
 Use only the approved evidence supplied with the user's question for factual health claims.
@@ -301,7 +290,8 @@ Do not supplement missing evidence from your own memory.
 You may reorganize, simplify, and explain the approved evidence in plain language, but you must not expand the claims beyond what the supplied evidence supports.
 
 If the supplied evidence is insufficient, say so.
-                                        
+`,
+
                         input: `
 USER QUESTION:
 ${cleanMessage}
@@ -370,10 +360,25 @@ If the evidence does not support part of the question, clearly say that the appr
 
             success: true,
 
-            route: route,
+            route,
 
             response:
                 outputText,
+
+            sources:
+                evidence.map(
+                    source => ({
+                        id: source.id,
+                        organization:
+                            source.organization,
+                        title:
+                            source.title,
+                        url:
+                            source.url,
+                        evidenceLevel:
+                            source.evidenceLevel
+                    })
+                ),
 
             offerVisitPrep:
                 route === "YELLOW"
@@ -406,7 +411,7 @@ If the evidence does not support part of the question, clearly say that the appr
 
 
 /* =========================================================
-   EXTRACT RESPONSE TEXT
+   EXTRACT OPENAI RESPONSE TEXT
 ========================================================= */
 
 function extractOutputText(data) {
@@ -488,10 +493,6 @@ function classifyRequest(message) {
             .trim();
 
 
-    /* =========================================
-       SAFETY — MEDICAL EMERGENCY
-    ========================================== */
-
     const medicalEmergencyPatterns = [
 
         "severe chest pain",
@@ -522,10 +523,6 @@ function classifyRequest(message) {
     }
 
 
-    /* =========================================
-       SAFETY — CRISIS
-    ========================================== */
-
     const crisisPatterns = [
 
         "i want to kill myself",
@@ -550,10 +547,6 @@ function classifyRequest(message) {
 
     }
 
-
-    /* =========================================
-       RED
-    ========================================== */
 
     const redPatterns = [
 
@@ -592,10 +585,6 @@ function classifyRequest(message) {
 
     }
 
-
-    /* =========================================
-       YELLOW
-    ========================================== */
 
     const yellowPatterns = [
 
