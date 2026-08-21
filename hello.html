@@ -1100,7 +1100,358 @@ function addMessage(
 
 }
 
+function addEvidenceDetails(data) {
 
+    if (
+        !data.evidenceStrength &&
+        !data.whatWeKnow &&
+        !data.whatWeDontKnowYet &&
+        (!data.sources || data.sources.length === 0)
+    ) {
+
+        return;
+
+    }
+
+
+    const chat =
+        document.getElementById(
+            "helloChat"
+        );
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "hello-message-row assistant";
+
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "hello-evidence-card";
+
+
+    /* =====================================
+       EVIDENCE STRENGTH
+    ====================================== */
+
+    if (
+        data.evidenceStrength
+    ) {
+
+        const strength =
+            document.createElement(
+                "div"
+            );
+
+
+        strength.className =
+            "hello-evidence-strength";
+
+
+        strength.textContent =
+            `${data.evidenceStrength} EVIDENCE`;
+
+
+        card.appendChild(
+            strength
+        );
+
+    }
+
+
+    /* =====================================
+       WHAT WE KNOW
+    ====================================== */
+
+    if (
+        data.whatWeKnow
+    ) {
+
+        const section =
+            document.createElement(
+                "div"
+            );
+
+
+        section.className =
+            "hello-evidence-section";
+
+
+        const heading =
+            document.createElement(
+                "strong"
+            );
+
+
+        heading.textContent =
+            "What we know";
+
+
+        const text =
+            document.createElement(
+                "div"
+            );
+
+
+        text.textContent =
+            data.whatWeKnow;
+
+
+        section.appendChild(
+            heading
+        );
+
+
+        section.appendChild(
+            text
+        );
+
+
+        card.appendChild(
+            section
+        );
+
+    }
+
+
+    /* =====================================
+       WHAT WE DON'T KNOW YET
+    ====================================== */
+
+    if (
+        data.whatWeDontKnowYet
+    ) {
+
+        const section =
+            document.createElement(
+                "div"
+            );
+
+
+        section.className =
+            "hello-evidence-section";
+
+
+        const heading =
+            document.createElement(
+                "strong"
+            );
+
+
+        heading.textContent =
+            "What we don't know yet";
+
+
+        const text =
+            document.createElement(
+                "div"
+            );
+
+
+        text.textContent =
+            data.whatWeDontKnowYet;
+
+
+        section.appendChild(
+            heading
+        );
+
+
+        section.appendChild(
+            text
+        );
+
+
+        card.appendChild(
+            section
+        );
+
+    }
+
+
+    /* =====================================
+       SOURCES
+    ====================================== */
+
+    if (
+        Array.isArray(data.sources) &&
+        data.sources.length > 0
+    ) {
+
+        const details =
+            document.createElement(
+                "details"
+            );
+
+
+        details.className =
+            "hello-sources-details";
+
+
+        const summary =
+            document.createElement(
+                "summary"
+            );
+
+
+        summary.textContent =
+            `View sources (${data.sources.length})`;
+
+
+        details.appendChild(
+            summary
+        );
+
+
+        data.sources.forEach(
+            source => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "hello-source-item";
+
+
+                const title =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                title.textContent =
+                    source.title ||
+                    "Research source";
+
+
+                item.appendChild(
+                    title
+                );
+
+
+                if (
+                    source.journal
+                ) {
+
+                    const journal =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    journal.textContent =
+                        source.publicationDate
+                            ? `${source.journal} • ${source.publicationDate}`
+                            : source.journal;
+
+
+                    item.appendChild(
+                        journal
+                    );
+
+                }
+
+
+                if (
+                    source.evidenceDesign
+                ) {
+
+                    const design =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    design.textContent =
+                        source.evidenceDesign
+                            .replaceAll(
+                                "_",
+                                " "
+                            );
+
+
+                    item.appendChild(
+                        design
+                    );
+
+                }
+
+
+                if (
+                    source.url
+                ) {
+
+                    const link =
+                        document.createElement(
+                            "a"
+                        );
+
+
+                    link.href =
+                        source.url;
+
+
+                    link.target =
+                        "_blank";
+
+
+                    link.rel =
+                        "noopener noreferrer";
+
+
+                    link.textContent =
+                        "View source";
+
+
+                    item.appendChild(
+                        link
+                    );
+
+                }
+
+
+                details.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+        card.appendChild(
+            details
+        );
+
+    }
+
+
+    row.appendChild(
+        card
+    );
+
+
+    chat.appendChild(
+        row
+    );
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
 
 /* =========================================================
    SWITCH MODES
