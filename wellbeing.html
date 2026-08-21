@@ -7,13 +7,25 @@
 
     <title>Wellbeing | My Simple Health</title>
 
+    <meta
+        name="description"
+        content="Practical, science-based guidance for stress management, recovery, social connection, and everyday wellbeing."
+    >
+
     <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 </head>
 
 <body>
+
+
+<!-- =========================================
+     HEADER
+========================================== -->
 
 <header class="site-header">
 
@@ -21,26 +33,31 @@
         My Simple Health
     </a>
 
-    <button class="menu-button"
-            aria-label="Open menu"
-            onclick="toggleMenu()">
+    <button
+        class="menu-button"
+        aria-label="Open menu"
+        onclick="toggleMenu()"
+    >
         <i class="fa-solid fa-bars"></i>
     </button>
 
     <nav class="site-nav">
         <a href="index.html">Home</a>
-        <a href="#">About</a>
+        <a href="about.html">About</a>
         <a href="topics.html">Topics</a>
         <a href="recipes.html">Recipes</a>
-        <a href="#">Blog</a>
-        <a href="#">Contact</a>
+        <a href="assessments.html">Assessments</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
     </nav>
 
     <div class="header-search">
 
-        <button class="search-button"
-                aria-label="Search"
-                onclick="toggleSearch()">
+        <button
+            class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()"
+        >
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
@@ -53,7 +70,10 @@
                 aria-label="Search My Simple Health"
             >
 
-            <button type="button" onclick="runSearch()">
+            <button
+                type="button"
+                onclick="runSearch()"
+            >
                 Search
             </button>
 
@@ -66,393 +86,698 @@
 
 <main>
 
-    <!-- =========================================
-         WELLBEING HERO
-    ========================================== -->
 
-    <section class="movement-hero wellbeing-hero">
+<!-- =========================================
+     WELLBEING HERO
+========================================== -->
 
-        <div class="movement-hero-text">
+<section class="movement-hero">
 
-            <p class="topic-eyebrow">WELLBEING</p>
+    <div class="movement-hero-content">
 
-            <h2>
-                Feel Well.<br>
-                Live Well.
-            </h2>
+        <p class="movement-eyebrow">
+            WELLBEING
+        </p>
 
-            <p class="topic-hero-description">
-                Wellbeing is about more than one healthy habit.
-                It is shaped by how you manage stress, make time
-                for rest, care for yourself, and create routines
-                that support your everyday life.
-            </p>
+        <h1>
+            Feel supported.<br>
+            Live more fully.
+        </h1>
 
-            <div class="topic-hero-links">
-                <a href="#">Stress</a>
-                <a href="#">Self-Care</a>
-                <a href="#">Rest &amp; Recovery</a>
-                <a href="#">Healthy Habits</a>
-            </div>
+        <p class="movement-hero-description">
+            Wellbeing includes more than feeling happy.
+            Explore practical ways to support stress management,
+            recovery, connection, and everyday quality of life.
+        </p>
 
-        </div>
+        <a
+            href="#wellbeing-explore"
+            class="movement-primary-button"
+        >
+            EXPLORE WELLBEING ↓
+        </a>
 
-        <div class="movement-hero-image">
-            <img
-                src="topic-wellbeing.png"
-                alt="Everyday wellbeing and self-care"
-            >
-        </div>
-
-    </section>
+    </div>
 
 
-    <!-- =========================================
-         FEATURED IN WELLBEING
-    ========================================== -->
+    <div class="movement-hero-image">
 
-    <section class="movement-featured">
+        <img
+            src="topic-wellbeing.png"
+            alt="Peaceful outdoor setting representing everyday wellbeing"
+        >
 
-        <p class="section-eyebrow">
-            FEATURED IN WELLBEING
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     INTRODUCTION
+========================================== -->
+
+<section class="movement-intro">
+
+    <p class="movement-section-label">
+        WELLBEING FOR REAL LIFE
+    </p>
+
+    <h2>
+        Taking care of yourself
+        doesn't need to become another job.
+    </h2>
+
+    <p>
+        Wellbeing can be supported through small choices
+        that help you manage demands, recover from stress,
+        stay connected to others, and make room for activities
+        that matter to you.
+    </p>
+
+    <p>
+        The goal is not to feel positive all the time.
+        It is to build realistic habits and environments
+        that help you function, recover, and feel supported.
+    </p>
+
+</section>
+
+
+<!-- =========================================
+     WHY WELLBEING MATTERS
+========================================== -->
+
+<section class="movement-benefits">
+
+    <div class="movement-benefits-heading">
+
+        <p class="movement-section-label">
+            WHY WELLBEING MATTERS
         </p>
 
         <h2>
-            Make space for feeling well.
+            Wellbeing supports
+            everyday life.
         </h2>
 
-        <p class="section-intro">
-            Explore practical ways to manage stress, support recovery,
-            care for yourself, and build routines that make everyday
-            life feel more sustainable.
+    </div>
+
+
+    <div class="movement-benefit-grid">
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                01
+            </span>
+
+            <i class="fa-solid fa-brain"></i>
+
+            <h3>
+                Stress Management
+            </h3>
+
+            <p>
+                Recognizing stress and creating opportunities
+                for recovery can support everyday functioning.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                02
+            </span>
+
+            <i class="fa-solid fa-heart"></i>
+
+            <h3>
+                Connection
+            </h3>
+
+            <p>
+                Supportive relationships and social connection
+                can contribute to health and quality of life.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                03
+            </span>
+
+            <i class="fa-solid fa-battery-half"></i>
+
+            <h3>
+                Recovery
+            </h3>
+
+            <p>
+                Rest and recovery help create space between
+                the demands of everyday life.
+            </p>
+
+        </article>
+
+
+        <article class="movement-benefit-card">
+
+            <span class="movement-benefit-number">
+                04
+            </span>
+
+            <i class="fa-solid fa-sun"></i>
+
+            <h3>
+                Quality of Life
+            </h3>
+
+            <p>
+                Enjoyable activities, meaningful routines,
+                and supportive environments can all matter.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     EXPLORE WELLBEING
+========================================== -->
+
+<section
+    class="movement-explore"
+    id="wellbeing-explore"
+>
+
+    <div class="movement-explore-heading">
+
+        <p class="movement-section-label">
+            EXPLORE WELLBEING
         </p>
 
+        <h2>
+            Support yourself in realistic ways.
+        </h2>
 
-        <div class="movement-featured-grid">
+        <p>
+            Explore practical areas that can influence
+            how you feel, function, and recover.
+        </p>
 
-            <article class="movement-featured-card">
+    </div>
+
+
+    <div class="movement-topic-grid">
+
+        <a
+            href="stress-management.html"
+            class="movement-topic-card"
+        >
+
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+
+            <div>
 
                 <h3>
-                    Understanding Everyday Stress
+                    Stress Management
                 </h3>
 
                 <p>
-                    Learn how stress affects your body and mind,
-                    what can contribute to it, and why recovery matters.
+                    Understand everyday stress and build
+                    practical ways to respond and recover.
                 </p>
 
-                <a href="#">
-                    Read Article →
-                </a>
-
-            </article>
-
-
-            <article class="movement-featured-card">
-
-                <h3>
-                    Self-Care That Actually Supports You
-                </h3>
-
-                <p>
-                    Move beyond the buzzword and explore realistic
-                    ways to care for your physical and emotional well-being.
-                </p>
-
-                <a href="#">
-                    Read Article →
-                </a>
-
-            </article>
-
-
-            <article class="movement-featured-card">
-
-                <h3>
-                    Why Rest Is Productive Too
-                </h3>
-
-                <p>
-                    Rest and recovery are important parts of a healthy
-                    life, not something you have to earn after doing more.
-                </p>
-
-                <a href="#">
-                    Read Article →
-                </a>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================================
-         LATEST WELLBEING ARTICLES
-    ========================================== -->
-
-    <section class="movement-latest">
-
-        <div class="movement-latest-header">
-
-            <p class="section-eyebrow">
-                LATEST WELLBEING ARTICLES
-            </p>
-
-            <h2>
-                Support your everyday well-being.
-            </h2>
-
-        </div>
-
-
-        <div class="movement-latest-grid">
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        STRESS
-                    </span>
-
-                    <h3>
-                        Simple Ways to Manage Everyday Stress
-                    </h3>
-
-                    <p>
-                        Small practices can help you create moments
-                        of calm and make everyday stress feel more manageable.
-                    </p>
-
-                    <a href="#">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        REST &amp; RECOVERY
-                    </span>
-
-                    <h3>
-                        Why Your Body Needs Time to Recover
-                    </h3>
-
-                    <p>
-                        Recovery gives your body and mind opportunities
-                        to restore energy, adapt, and prepare for what comes next.
-                    </p>
-
-                    <a href="#">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-
-            <article class="movement-article-card">
-
-                <div class="movement-article-content">
-
-                    <span class="article-category">
-                        HEALTHY HABITS
-                    </span>
-
-                    <h3>
-                        Building Routines That Support Your Wellbeing
-                    </h3>
-
-                    <p>
-                        Create realistic routines that support your health
-                        without making everyday life feel like another project.
-                    </p>
-
-                    <a href="#">
-                        Read Article →
-                    </a>
-
-                </div>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================================
-         POPULAR WELLBEING TOPICS
-    ========================================== -->
-
-    <section class="movement-topics">
-
-        <div class="movement-topics-header">
-
-            <p class="section-eyebrow">
-                POPULAR WELLBEING TOPICS
-            </p>
-
-            <h2>
-                Explore wellbeing by topic.
-            </h2>
-
-        </div>
-
-
-        <div class="movement-topics-grid">
-
-            <a href="#" class="movement-topic-card">
-
-                <span class="movement-topic-number">
-                    01
+                <span>
+                    EXPLORE STRESS MANAGEMENT →
                 </span>
 
-                <h3>
-                    Stress
-                </h3>
+            </div>
 
-                <p>
-                    Understand everyday stress and explore practical
-                    strategies for managing it.
-                </p>
-
-                <span class="movement-topic-link">
-                    Explore Stress →
-                </span>
-
-            </a>
+        </a>
 
 
-            <a href="#" class="movement-topic-card">
+        <a
+            href="recovery.html"
+            class="movement-topic-card"
+        >
 
-                <span class="movement-topic-number">
-                    02
-                </span>
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-battery-half"></i>
+            </div>
 
-                <h3>
-                    Self-Care
-                </h3>
-
-                <p>
-                    Build realistic practices that support your
-                    physical and emotional well-being.
-                </p>
-
-                <span class="movement-topic-link">
-                    Explore Self-Care →
-                </span>
-
-            </a>
-
-
-            <a href="#" class="movement-topic-card">
-
-                <span class="movement-topic-number">
-                    03
-                </span>
+            <div>
 
                 <h3>
                     Rest &amp; Recovery
                 </h3>
 
                 <p>
-                    Learn why slowing down and recovering are
-                    meaningful parts of supporting your health.
+                    Create space for mental and physical
+                    recovery throughout everyday life.
                 </p>
 
-                <span class="movement-topic-link">
-                    Explore Recovery →
+                <span>
+                    EXPLORE RECOVERY →
                 </span>
 
-            </a>
+            </div>
+
+        </a>
 
 
-            <a href="#" class="movement-topic-card">
+        <a
+            href="social-connection.html"
+            class="movement-topic-card"
+        >
 
-                <span class="movement-topic-number">
-                    04
-                </span>
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-people-group"></i>
+            </div>
+
+            <div>
 
                 <h3>
-                    Healthy Habits
+                    Social Connection
                 </h3>
 
                 <p>
-                    Create everyday routines that support your
-                    health, energy, and quality of life.
+                    Explore how relationships and connection
+                    can support health and quality of life.
                 </p>
 
-                <span class="movement-topic-link">
-                    Explore Healthy Habits →
+                <span>
+                    EXPLORE CONNECTION →
                 </span>
 
-            </a>
+            </div>
 
-        </div>
-
-    </section>
+        </a>
 
 
-    <!-- =========================================
-         NEWSLETTER
-    ========================================== -->
+        <a
+            href="everyday-wellbeing.html"
+            class="movement-topic-card"
+        >
 
-    <section class="newsletter-section">
+            <div class="movement-topic-icon">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
 
-        <div class="newsletter-icon">
-            ✉
-        </div>
+            <div>
 
-        <div class="newsletter-copy">
+                <h3>
+                    Everyday Wellbeing
+                </h3>
+
+                <p>
+                    Build realistic routines that support
+                    enjoyment, balance, and everyday functioning.
+                </p>
+
+                <span>
+                    EXPLORE EVERYDAY WELLBEING →
+                </span>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     FEATURED WELLBEING
+========================================== -->
+
+<section class="movement-feature">
+
+    <div class="movement-feature-image">
+
+        <img
+            src="topic-wellbeing.png"
+            alt="Relaxing outdoor setting representing wellbeing and recovery"
+        >
+
+    </div>
+
+
+    <div class="movement-feature-content">
+
+        <p class="movement-section-label">
+            FEATURED IN WELLBEING
+        </p>
+
+        <h2>
+            Small choices can support
+            how you feel and function.
+        </h2>
+
+        <p>
+            Wellbeing does not require an elaborate routine.
+            Moments of rest, connection, movement, enjoyment,
+            and recovery can all play a role.
+        </p>
+
+        <a href="small-ways-to-support-wellbeing.html">
+            READ ARTICLE →
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     LATEST IN WELLBEING
+========================================== -->
+
+<section class="movement-articles">
+
+    <div class="movement-section-header">
+
+        <div>
+
+            <p class="movement-section-label">
+                LEARN
+            </p>
 
             <h2>
-                Stay inspired.
+                Latest in Wellbeing
             </h2>
-
-            <p>
-                Evidence-informed health tips and practical resources
-                delivered to your inbox.
-            </p>
 
         </div>
 
 
-        <form class="newsletter-form">
+        <a href="blog.html">
+            VIEW ALL ARTICLES →
+        </a>
 
-            <input
-                type="text"
-                placeholder="First name"
-                aria-label="First name"
+    </div>
+
+
+    <div class="movement-article-grid">
+
+        <article class="movement-article-card">
+
+            <img
+                src="topic-wellbeing.png"
+                alt="Relaxing setting representing everyday wellbeing"
             >
 
-            <input
-                type="email"
-                placeholder="Email address"
-                aria-label="Email address"
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    WELLBEING
+                </p>
+
+                <h3>
+                    Small Ways to Support
+                    Your Wellbeing
+                </h3>
+
+                <p>
+                    Practical ways to support stress management,
+                    recovery, movement, connection,
+                    and enjoyment in everyday life.
+                </p>
+
+                <a href="small-ways-to-support-wellbeing.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <article class="movement-article-card">
+
+            <img
+                src="topic-wellbeing.png"
+                alt="Peaceful environment representing stress management"
             >
 
-            <button type="submit">
-                SUBSCRIBE
-            </button>
+            <div class="movement-article-content">
 
-            <p class="newsletter-note">
-                No spam, ever. Unsubscribe anytime.
+                <p class="movement-article-category">
+                    STRESS
+                </p>
+
+                <h3>
+                    Stress Management
+                    for Real Life
+                </h3>
+
+                <p>
+                    Explore practical ways to recognize stress,
+                    reduce unnecessary demands,
+                    and make room for recovery.
+                </p>
+
+                <a href="stress-management.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <article class="movement-article-card">
+
+            <img
+                src="topic-wellbeing.png"
+                alt="People connecting and spending time together"
+            >
+
+            <div class="movement-article-content">
+
+                <p class="movement-article-category">
+                    CONNECTION
+                </p>
+
+                <h3>
+                    Why Social Connection Matters
+                </h3>
+
+                <p>
+                    Learn how supportive relationships
+                    and connection can contribute to health
+                    and quality of life.
+                </p>
+
+                <a href="social-connection.html">
+                    READ ARTICLE →
+                </a>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     FREE RESOURCE
+========================================== -->
+
+<section class="movement-resource">
+
+    <div class="movement-resource-icon">
+        <i class="fa-solid fa-clipboard-list"></i>
+    </div>
+
+    <p class="movement-section-label">
+        FREE RESOURCE
+    </p>
+
+    <h2>
+        Weekly Wellbeing Check-In
+    </h2>
+
+    <p>
+        Reflect on stress, recovery, connection,
+        movement, and what you need this week.
+    </p>
+
+    <a href="resources.html">
+        EXPLORE THE RESOURCE →
+    </a>
+
+</section>
+
+
+<!-- =========================================
+     WELLBEING PHILOSOPHY
+========================================== -->
+
+<section class="movement-philosophy">
+
+    <span class="movement-quote">
+        “
+    </span>
+
+    <h2>
+        Wellbeing doesn't require
+        getting everything right.
+    </h2>
+
+    <p>
+        Notice what you need.
+        Make room for recovery.
+        Build from what is realistic.
+    </p>
+
+</section>
+
+
+<!-- =========================================
+     RELATED TOPICS
+========================================== -->
+
+<section class="movement-related">
+
+    <p class="movement-section-label">
+        KEEP EXPLORING
+    </p>
+
+    <h2>
+        Health works together.
+    </h2>
+
+
+    <div class="movement-related-grid">
+
+        <a href="nutrition.html">
+
+            <span>01</span>
+
+            <h3>
+                Nutrition
+            </h3>
+
+            <p>
+                Build a balanced approach to everyday eating.
             </p>
 
-        </form>
+        </a>
 
-    </section>
+
+        <a href="movement.html">
+
+            <span>02</span>
+
+            <h3>
+                Movement
+            </h3>
+
+            <p>
+                Find realistic ways to move more.
+            </p>
+
+        </a>
+
+
+        <a href="sleep.html">
+
+            <span>03</span>
+
+            <h3>
+                Sleep
+            </h3>
+
+            <p>
+                Build habits that support restorative rest.
+            </p>
+
+        </a>
+
+
+        <a href="preventive-health.html">
+
+            <span>05</span>
+
+            <h3>
+                Prevention
+            </h3>
+
+            <p>
+                Stay informed about preventive care
+                and long-term health.
+            </p>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     NEWSLETTER
+========================================== -->
+
+<section class="newsletter-section">
+
+    <div class="newsletter-icon">
+        ✉
+    </div>
+
+    <div class="newsletter-copy">
+
+        <h2>
+            Stay inspired.
+        </h2>
+
+        <p>
+            Science-based health tips and practical
+            resources delivered to your inbox.
+        </p>
+
+    </div>
+
+
+    <form class="newsletter-form">
+
+        <input
+            type="text"
+            placeholder="First name"
+            aria-label="First name"
+        >
+
+        <input
+            type="email"
+            placeholder="Email address"
+            aria-label="Email address"
+        >
+
+        <button type="submit">
+            SUBSCRIBE
+        </button>
+
+        <p class="newsletter-note">
+            No spam, ever. Unsubscribe anytime.
+        </p>
+
+    </form>
+
+</section>
+
 
 </main>
 
@@ -472,8 +797,8 @@
             </h2>
 
             <p>
-                Practical, evidence-informed<br>
-                health education for everyday life.
+                Practical, science-based<br>
+                health information for everyday life.
             </p>
 
             <div class="footer-socials">
@@ -513,28 +838,31 @@
 
         <div class="footer-column">
 
-            <h3>
-                EXPLORE
-            </h3>
+            <h3>EXPLORE</h3>
 
             <a href="topics.html">Topics</a>
             <a href="recipes.html">Recipes</a>
-            <a href="#">Resources</a>
-            <a href="#">Blog</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
 
         </div>
 
 
         <div class="footer-column">
 
-            <h3>
-                ABOUT
-            </h3>
+            <h3>ABOUT</h3>
 
-            <a href="#">About Me</a>
-            <a href="#">Mission &amp; Values</a>
-            <a href="#">Work With Me</a>
-            <a href="#">Contact</a>
+            <a href="about.html">
+                About My Simple Health
+            </a>
+
+            <a href="about.html#mission">
+                Mission &amp; Values
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
 
         </div>
 
@@ -577,9 +905,17 @@
 
         <div class="footer-legal">
 
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Disclaimer</a>
+            <a href="privacy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms of Use
+            </a>
+
+            <a href="disclaimer.html">
+                Disclaimer
+            </a>
 
         </div>
 
@@ -587,6 +923,10 @@
 
 </footer>
 
+
+<!-- =========================================
+     JAVASCRIPT
+========================================== -->
 
 <script>
 
