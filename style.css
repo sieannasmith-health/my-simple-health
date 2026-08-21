@@ -6155,3 +6155,19 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         margin-top: 2px !important;
     }
 }
+/* Footer email field — connected input + button */
+
+.footer-email {
+    display: flex;
+    align-items: stretch;
+}
+
+.footer-email input {
+    border-radius: 14px 0 0 14px !important;
+    margin: 0 !important;
+}
+
+.footer-email button {
+    border-radius: 0 !important;
+    margin: 0 !important;
+}
