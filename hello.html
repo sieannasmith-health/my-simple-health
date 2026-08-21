@@ -1188,16 +1188,16 @@ function showLoadingMessage() {
         "hello-bubble assistant hello-loading-bubble";
 
     bubble.innerHTML = `
-        <span class="hello-label">Hello</span>
-        <span class="hello-loading-text">
-            Reviewing the evidence
-            <span class="hello-loading-dots">
-                <span>.</span>
-                <span>.</span>
-                <span>.</span>
-            </span>
-        </span>
-    `;
+    <div class="hello-loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="hello-loading-caption">
+        Reviewing the evidence
+    </div>
+`;
 
 
     row.appendChild(
