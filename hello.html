@@ -32,17 +32,13 @@
 .hello-visit-btn {
     margin-top: 14px;
     padding: 13px 18px;
-
     border: 1px solid #173d2b;
     border-radius: 18px;
-
     background: #ffffff;
     color: #173d2b;
-
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.5px;
-
     cursor: pointer;
 }
 
@@ -54,23 +50,18 @@
 .hello-visit-summary {
     margin-top: 8px;
     padding: 20px;
-
     border: 1px solid #d8d5cb;
     border-radius: 20px;
-
     background: #f7f3ea;
-
     color: #263127;
     line-height: 1.6;
 }
 
 .hello-visit-summary h3 {
     margin: 0 0 18px;
-
     font-family: Georgia, "Times New Roman", serif;
     font-size: 24px;
     font-weight: 400;
-
     color: #173d2b;
 }
 
@@ -78,14 +69,19 @@
     display: block;
     margin-top: 14px;
     margin-bottom: 4px;
-
     font-size: 11px;
     letter-spacing: 0.8px;
-
     color: #7d9460;
 }
 
-</style>
+
+/* =========================================
+   HELLO PAGE
+========================================== */
+
+body {
+    margin: 0;
+}
 
         /* =========================================
            HELLO PAGE
@@ -1461,9 +1457,7 @@ function startAskMode() {
    LOCAL SAFETY / SCOPE ROUTER
 ========================================================= */
 
-function classifyRequest(
-    message
-) {
+function classifyRequest(message) {
 
     const text =
         message
@@ -1471,139 +1465,94 @@ function classifyRequest(
             .trim();
 
 
-  /* =========================================
-   SAFETY — MEDICAL EMERGENCY
-========================================== */
+    /* =========================================
+       SAFETY — MEDICAL EMERGENCY
+    ========================================== */
 
-const medicalEmergencyPatterns = [
+    const medicalEmergencyPatterns = [
 
-    "severe chest pain",
+        "severe chest pain",
+        "crushing chest pain",
+        "can't breathe",
+        "cannot breathe",
+        "difficulty breathing right now",
+        "signs of stroke",
+        "face drooping",
+        "passed out",
+        "unconscious",
+        "severe allergic reaction",
+        "heavy bleeding",
+        "severe bleeding"
 
-    "crushing chest pain",
-
-    "can't breathe",
-
-    "cannot breathe",
-
-    "difficulty breathing right now",
-
-    "signs of stroke",
-
-    "face drooping",
-
-    "passed out",
-
-    "unconscious",
-
-    "severe allergic reaction",
-
-    "heavy bleeding",
-
-    "severe bleeding"
-
-];
+    ];
 
 
-if (
-    medicalEmergencyPatterns.some(
-        pattern =>
-            text.includes(
-                pattern
-            )
-    )
-) {
+    if (
+        medicalEmergencyPatterns.some(
+            pattern =>
+                text.includes(pattern)
+        )
+    ) {
 
-    return "SAFETY_MEDICAL";
+        return "SAFETY_MEDICAL";
 
-}
-
-
-/* =========================================
-   SAFETY — CRISIS
-========================================== */
-
-const crisisPatterns = [
-
-    "i want to kill myself",
-
-    "i'm going to kill myself",
-
-    "i am going to kill myself",
-
-    "i want to die",
-
-    "hurt myself right now",
-
-    "harm myself right now",
-
-    "suicidal"
-
-];
-
-
-if (
-    crisisPatterns.some(
-        pattern =>
-            text.includes(
-                pattern
-            )
-    )
-) {
-
-    return "SAFETY_CRISIS";
-
-}
     }
 
 
-    /*
-        RED
+    /* =========================================
+       SAFETY — CRISIS
+    ========================================== */
 
-        Individual diagnosis, prescribing,
-        medication change, clinical interpretation,
-        medical clearance.
-    */
+    const crisisPatterns = [
+
+        "i want to kill myself",
+        "i'm going to kill myself",
+        "i am going to kill myself",
+        "i want to die",
+        "hurt myself right now",
+        "harm myself right now",
+        "suicidal"
+
+    ];
+
+
+    if (
+        crisisPatterns.some(
+            pattern =>
+                text.includes(pattern)
+        )
+    ) {
+
+        return "SAFETY_CRISIS";
+
+    }
+
+
+    /* =========================================
+       RED
+    ========================================== */
 
     const redPatterns = [
 
         "diagnose me",
-
         "what disease do i have",
-
         "tell me what disease i have",
-
         "do i have cancer",
-
         "do i have diabetes",
-
         "do i have depression",
-
         "interpret my labs",
-
         "interpret these labs",
-
         "interpret my bloodwork",
-
         "change my medication",
-
         "change my dose",
-
         "stop my medication",
-
         "should i stop taking",
-
         "should i stop my medication",
-
         "prescribe me",
-
         "prescribe medication",
-
         "what dose should i take",
-
         "am i medically cleared",
-
         "clear me for exercise",
-
         "tell me if it is safe for me to exercise"
 
     ];
@@ -1612,9 +1561,7 @@ if (
     if (
         redPatterns.some(
             pattern =>
-                text.includes(
-                    pattern
-                )
+                text.includes(pattern)
         )
     ) {
 
@@ -1623,53 +1570,31 @@ if (
     }
 
 
- /*
-        YELLOW
-
-        Medical context without necessarily
-        requesting prohibited clinical care.
-    */
+    /* =========================================
+       YELLOW
+    ========================================== */
 
     const yellowPatterns = [
 
         "i have diabetes",
-
         "i have hypertension",
-
         "i have high blood pressure",
-
         "i have heart disease",
-
         "i have kidney disease",
-
         "i have cancer",
-
         "i am pregnant",
-
         "i'm pregnant",
-
         "my medication",
-
         "my prescription",
-
         "my lab",
-
         "my bloodwork",
-
         "my cholesterol",
-
         "my glucose",
-
         "my blood pressure",
-
         "my doctor said",
-
         "i was diagnosed",
-
         "i have anxiety",
-
         "i have depression",
-
         "i have an eating disorder"
 
     ];
@@ -1678,9 +1603,7 @@ if (
     if (
         yellowPatterns.some(
             pattern =>
-                text.includes(
-                    pattern
-                )
+                text.includes(pattern)
         )
     ) {
 
@@ -1688,14 +1611,10 @@ if (
 
     }
 
-    }
-
 
     return "GREEN";
 
 }
-
-
 
 /* =========================================================
    LOCAL ROUTER RESPONSE
@@ -1826,6 +1745,7 @@ if (
 
     return;
 
+}
 }
 
 /* =========================================================
