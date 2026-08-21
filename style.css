@@ -5840,3 +5840,55 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     text-decoration: none !important;
     white-space: nowrap;
 }
+/* =========================================================
+   MY SIMPLE HEALTH — FOREST GREEN SITE HEADER
+========================================================= */
+
+.site-header {
+    background: #173D2B !important;
+    border-bottom: none !important;
+}
+
+
+/* LOGO */
+
+.site-logo {
+    color: #FCFBF7 !important;
+}
+
+
+/* NAVIGATION */
+
+.site-nav a {
+    color: #FCFBF7 !important;
+}
+
+.site-nav a:hover {
+    color: #D8D3C7 !important;
+}
+
+
+/* SEARCH ICON */
+
+.search-button {
+    color: #FCFBF7 !important;
+}
+
+
+/* MOBILE MENU ICON */
+
+.menu-button {
+    color: #FCFBF7 !important;
+}
+
+
+/* Keep dropdown readable */
+
+.search-box {
+    background: #FCFBF7 !important;
+    border: 1px solid #D8D3C7 !important;
+}
+
+.search-box input {
+    color: #252822;
+}
