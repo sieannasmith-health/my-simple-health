@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,11 +10,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Wellness Wheel | My Simple Health</title>
+    <title>Hello | My Simple Health</title>
 
     <meta
         name="description"
-        content="Reflect on eight dimensions of wellness with the My Simple Health Wellness Wheel."
+        content="Hello is the interactive health education and wellness guide from My Simple Health."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -23,492 +24,232 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
     <style>
 
-        /* =========================================================
-           MY SIMPLE HEALTH WELLNESS WHEEL
-        ========================================================= */
-
-        .wellness-wheel-page {
-            background: #FCFBF7;
-            color: #242824;
-        }
-
-
-        /* =========================================================
-           HERO
-        ========================================================= */
-
-        .wheel-hero {
-            padding: 85px 5% 75px;
+        .hello-page {
             background: #F7F3EA;
-            text-align: center;
         }
 
-        .wheel-hero-inner {
-            max-width: 850px;
+
+        .hello-shell {
+            width: min(92%, 900px);
             margin: 0 auto;
+
+            padding: 60px 0 100px;
         }
 
-        .wheel-hero h1 {
-            margin: 0 0 22px;
 
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(46px, 6vw, 76px);
-            font-weight: 400;
-            line-height: 1.05;
+        .hello-heading {
+            text-align: center;
 
-            color: #173D2B;
+            margin-bottom: 35px;
         }
 
-        .wheel-hero-description {
-            max-width: 690px;
+
+        .hello-heading .hello-mark {
+            width: 58px;
+            height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             margin: 0 auto 18px;
 
-            font-size: 18px;
-            line-height: 1.7;
-        }
+            border-radius: 50%;
 
-        .wheel-hero-note {
-            max-width: 670px;
-            margin: 0 auto;
-
-            font-size: 13px;
-            line-height: 1.6;
-            color: #667067;
-        }
-
-
-        /* =========================================================
-           INTRO
-        ========================================================= */
-
-        .wheel-intro {
-            width: min(90%, 900px);
-            margin: 0 auto;
-            padding: 70px 0 38px;
-
-            text-align: center;
-        }
-
-        .wheel-intro h2 {
-            margin: 0 0 18px;
-
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(34px, 4vw, 52px);
-            font-weight: 400;
-            line-height: 1.1;
-
-            color: #173D2B;
-        }
-
-        .wheel-intro p {
-            max-width: 720px;
-            margin: 0 auto;
-
-            font-size: 16px;
-            line-height: 1.75;
-        }
-
-        .wheel-eyebrow {
-            margin: 0 0 16px;
-
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.7px;
-
-            color: #7E9861;
-        }
-
-
-        /* =========================================================
-           PROGRESS
-        ========================================================= */
-
-        .wheel-progress-wrap {
-            width: min(90%, 760px);
-            margin: 0 auto 35px;
-        }
-
-        .wheel-progress-text {
-            display: flex;
-            justify-content: space-between;
-
-            margin-bottom: 10px;
-
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.6px;
-
-            color: #7E9861;
-        }
-
-        .wheel-progress {
-            width: 100%;
-            height: 7px;
-
-            overflow: hidden;
-
-            border-radius: 999px;
-            background: #E6E8E2;
-        }
-
-        .wheel-progress-bar {
-            width: 12.5%;
-            height: 100%;
-
-            border-radius: 999px;
             background: #173D2B;
-
-            transition: width 0.3s ease;
-        }
-
-
-        /* =========================================================
-           ASSESSMENT
-        ========================================================= */
-
-        .wheel-assessment {
-            width: min(90%, 760px);
-            margin: 0 auto;
-            padding-bottom: 95px;
-        }
-
-        .wheel-question {
-            display: none;
-
-            padding: 40px;
-
-            border: 1px solid #D8D5CB;
-            background: #FFFFFF;
-
-            box-sizing: border-box;
-        }
-
-        .wheel-question.active {
-            display: block;
-        }
-
-        .wheel-dimension {
-            display: inline-block;
-
-            margin-bottom: 15px;
-
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.6px;
-
-            color: #7E9861;
-        }
-
-        .wheel-question h2 {
-            margin: 0 0 16px;
-
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(30px, 4vw, 44px);
-            font-weight: 400;
-            line-height: 1.15;
-
-            color: #173D2B;
-        }
-
-        .wheel-question-copy {
-            margin: 0 0 36px;
-
-            font-size: 16px;
-            line-height: 1.7;
-        }
-
-
-        /* =========================================================
-           SCORE SCALE
-        ========================================================= */
-
-        .wheel-scale {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 7px;
-
-            margin-bottom: 12px;
-        }
-
-        .wheel-score-button {
-            height: 52px;
-            min-width: 0;
-
-            border: 1px solid #D8D5CB;
-            background: transparent;
-
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 17px;
-
-            color: #173D2B;
-
-            cursor: pointer;
-
-            transition:
-                background 0.2s ease,
-                color 0.2s ease,
-                border-color 0.2s ease;
-        }
-
-        .wheel-score-button:hover,
-        .wheel-score-button.selected {
-            border-color: #173D2B;
-            background: #173D2B;
-            color: #FFFFFF;
-        }
-
-        .wheel-score-button:focus-visible,
-        .wheel-button:focus-visible,
-        .wheel-priority-button:focus-visible {
-            outline: 3px solid #A8BD85;
-            outline-offset: 3px;
-        }
-
-        .wheel-scale-labels {
-            display: flex;
-            justify-content: space-between;
-
-            margin-bottom: 36px;
-
-            font-size: 11px;
-            color: #707570;
-        }
-
-
-        /* =========================================================
-           BUTTONS
-        ========================================================= */
-
-        .wheel-question-nav {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .wheel-button {
-            padding: 15px 23px;
-
-            border: 1px solid #173D2B;
-            background: #173D2B;
-            color: #FFFFFF;
-
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-
-            cursor: pointer;
-        }
-
-        .wheel-button.secondary {
-            background: transparent;
-            color: #173D2B;
-        }
-
-        .wheel-button:hover {
-            opacity: 0.9;
-        }
-
-        .wheel-button:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-
-        /* =========================================================
-           RESULTS
-        ========================================================= */
-
-        .wheel-results {
-            display: none;
-
-            width: min(90%, 1100px);
-            margin: 0 auto;
-            padding: 75px 0 105px;
-        }
-
-        .wheel-results.active {
-            display: block;
-        }
-
-        .wheel-results-header {
-            max-width: 760px;
-            margin: 0 auto 50px;
-
-            text-align: center;
-        }
-
-        .wheel-results-header h2 {
-            margin: 0 0 18px;
-
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(40px, 5vw, 60px);
-            font-weight: 400;
-
-            color: #173D2B;
-        }
-
-        .wheel-results-header p {
-            margin: 0;
-
-            font-size: 16px;
-            line-height: 1.7;
-        }
-
-
-        /* =========================================================
-           RADAR CHART
-        ========================================================= */
-
-        .wellness-chart-wrap {
-            position: relative;
-
-            width: min(100%, 600px);
-            height: 560px;
-
-            margin: 0 auto 55px;
-            padding: 28px;
-
-            border: 1px solid #D8D5CB;
-            background: #FFFFFF;
-
-            box-sizing: border-box;
-        }
-
-        #wellnessChart {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-
-        /* =========================================================
-           RESULT GRID
-        ========================================================= */
-
-        .wheel-results-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-
-            max-width: 850px;
-            margin: 0 auto 60px;
-        }
-
-        .wheel-result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            padding: 18px 20px;
-
-            border: 1px solid #D8D5CB;
-            background: #FFFFFF;
-
-            box-sizing: border-box;
-        }
-
-        .wheel-result-name {
-            font-weight: 600;
-            color: #173D2B;
-        }
-
-        .wheel-result-score {
-            margin-left: 15px;
+            color: white;
 
             font-family: Georgia, "Times New Roman", serif;
             font-size: 25px;
-
-            color: #7E9861;
         }
 
 
-        /* =========================================================
-           PRIORITY
-        ========================================================= */
-
-        .wheel-priority {
-            max-width: 850px;
-            margin: 0 auto;
-
-            padding: 46px;
-
-            background: #F7F3EA;
-
-            box-sizing: border-box;
-        }
-
-        .wheel-priority h2 {
-            margin: 0 0 16px;
+        .hello-heading h1 {
+            margin: 0 0 12px;
 
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(32px, 4vw, 42px);
+            font-size: clamp(42px, 6vw, 68px);
             font-weight: 400;
 
             color: #173D2B;
         }
 
-        .wheel-priority > p {
-            margin: 0 0 30px;
+
+        .hello-heading p {
+            max-width: 650px;
+            margin: 0 auto;
 
             line-height: 1.7;
         }
 
-        .wheel-priority-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
 
-            margin-bottom: 32px;
+        .hello-context {
+            display: none;
+
+            margin-bottom: 18px;
+            padding: 15px 18px;
+
+            background: #EEF0E8;
+            border: 1px solid #D4D8CC;
+
+            font-size: 13px;
+            line-height: 1.5;
         }
 
-        .wheel-priority-button {
-            padding: 17px;
+
+        .hello-context.active {
+            display: block;
+        }
+
+
+        .hello-chat {
+            min-height: 450px;
+
+            padding: 30px;
 
             border: 1px solid #D8D5CB;
-            background: #FFFFFF;
+            background: white;
 
-            text-align: left;
+            box-sizing: border-box;
+        }
 
-            font-size: 14px;
-            font-weight: 600;
 
+        .hello-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+
+        .hello-message {
+            max-width: 78%;
+
+            padding: 15px 18px;
+
+            line-height: 1.6;
+
+            box-sizing: border-box;
+        }
+
+
+        .hello-message.hello {
+            align-self: flex-start;
+
+            background: #EEF0E8;
             color: #173D2B;
+        }
+
+
+        .hello-message.user {
+            align-self: flex-end;
+
+            background: #173D2B;
+            color: white;
+        }
+
+
+        .hello-message strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+
+        .hello-input-wrap {
+            display: flex;
+            align-items: flex-end;
+
+            gap: 10px;
+
+            padding: 18px;
+
+            border: 1px solid #D8D5CB;
+            border-top: none;
+
+            background: #FFFFFF;
+        }
+
+
+        #helloInput {
+            flex: 1;
+
+            min-height: 52px;
+            max-height: 160px;
+
+            padding: 14px 15px;
+
+            border: 1px solid #CFCBC1;
+            border-radius: 0;
+
+            resize: vertical;
+
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+
+            box-sizing: border-box;
+        }
+
+
+        #helloInput:focus {
+            outline: 2px solid #173D2B;
+            outline-offset: 2px;
+        }
+
+
+        .hello-send {
+            min-height: 52px;
+
+            padding: 0 22px;
+
+            border: 1px solid #173D2B;
+            background: #173D2B;
+            color: white;
+
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
 
             cursor: pointer;
         }
 
-        .wheel-priority-button:hover,
-        .wheel-priority-button.selected {
-            border-color: #173D2B;
-            background: #173D2B;
-            color: #FFFFFF;
+
+        .hello-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+
+            margin-top: 18px;
         }
 
 
-        /* =========================================================
-           REFLECTION
-        ========================================================= */
+        .hello-action {
+            padding: 11px 15px;
 
-        .wheel-reflection {
-            display: none;
+            border: 1px solid #173D2B;
+            background: transparent;
+            color: #173D2B;
 
-            margin-top: 35px;
-            padding-top: 35px;
+            text-decoration: none;
 
-            border-top: 1px solid #D8D5CB;
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
         }
 
-        .wheel-reflection.active {
-            display: block;
+
+        .hello-summary {
+            padding: 24px;
+
+            background: #F7F3EA;
+            border: 1px solid #D8D5CB;
         }
 
-        .wheel-reflection h3 {
-            margin: 0 0 25px;
+
+        .hello-summary h2 {
+            margin: 0 0 18px;
 
             font-family: Georgia, "Times New Roman", serif;
             font-size: 30px;
@@ -517,200 +258,78 @@
             color: #173D2B;
         }
 
-        .wheel-reflection-field {
-            margin-bottom: 24px;
+
+        .hello-summary-item {
+            margin-bottom: 18px;
         }
 
-        .wheel-reflection-field label {
+
+        .hello-summary-item strong {
             display: block;
 
-            margin-bottom: 9px;
+            margin-bottom: 4px;
 
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.7px;
 
-            color: #173D2B;
-        }
-
-        .wheel-reflection-field textarea,
-        .wheel-reflection-field input {
-            width: 100%;
-
-            padding: 15px 16px;
-
-            border: 1px solid #CFCBC1;
-            border-radius: 0;
-
-            background: #FFFFFF;
-            color: #242824;
-
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 15px;
-            line-height: 1.5;
-
-            box-sizing: border-box;
-        }
-
-        .wheel-reflection-field textarea {
-            min-height: 110px;
-            resize: vertical;
-        }
-
-        .wheel-reflection-field input[type="number"] {
-            max-width: 150px;
-        }
-
-        .wheel-reflection-field textarea:focus,
-        .wheel-reflection-field input:focus {
-            outline: 2px solid #173D2B;
-            outline-offset: 2px;
+            color: #7E9861;
         }
 
 
-        /* =========================================================
-           COMPLETION MESSAGE
-        ========================================================= */
+        .hello-note {
+            margin-top: 30px;
 
-        .wheel-complete-message {
-            display: none;
-
-            margin-top: 28px;
-            padding: 22px;
-
-            border: 1px solid #A8BD85;
-            background: #F3F7EE;
-
-            line-height: 1.65;
-        }
-
-        .wheel-complete-message.active {
-            display: block;
-        }
-
-        .wheel-complete-message strong {
-            color: #173D2B;
-        }
-
-
-        /* =========================================================
-           DISCLAIMER
-        ========================================================= */
-
-        .wheel-disclaimer {
-            padding: 65px 5%;
+            padding: 18px;
 
             background: #EEF0E8;
 
-            text-align: center;
+            font-size: 12px;
+            line-height: 1.65;
+
+            color: #586158;
         }
 
-        .wheel-disclaimer-inner {
-            max-width: 740px;
-            margin: 0 auto;
-        }
-
-        .wheel-disclaimer h2 {
-            margin: 0 0 16px;
-
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 36px;
-            font-weight: 400;
-
-            color: #173D2B;
-        }
-
-        .wheel-disclaimer p {
-            margin: 0;
-
-            font-size: 15px;
-            line-height: 1.75;
-        }
-
-
-        /* =========================================================
-           MOBILE
-        ========================================================= */
 
         @media (max-width: 768px) {
 
-            .wheel-hero {
-                padding: 60px 24px 55px;
+            .hello-shell {
+                width: calc(100% - 40px);
+                padding-top: 40px;
             }
 
-            .wheel-hero-description {
-                font-size: 16px;
+
+            .hello-chat {
+                padding: 20px 16px;
             }
 
-            .wheel-intro {
+
+            .hello-message {
+                max-width: 92%;
+            }
+
+
+            .hello-input-wrap {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+
+            .hello-send {
+                width: 100%;
+            }
+
+
+            .hello-actions {
+                flex-direction: column;
+            }
+
+
+            .hello-action {
                 width: 100%;
 
-                padding: 55px 24px 32px;
+                text-align: center;
 
                 box-sizing: border-box;
-            }
-
-            .wheel-progress-wrap,
-            .wheel-assessment {
-                width: calc(100% - 48px);
-            }
-
-            .wheel-question {
-                padding: 30px 22px;
-            }
-
-            .wheel-scale {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 8px;
-            }
-
-            .wheel-score-button {
-                height: 48px;
-            }
-
-            .wheel-question-nav {
-                flex-direction: column-reverse;
-            }
-
-            .wheel-button {
-                width: 100%;
-            }
-
-            .wheel-results {
-                width: calc(100% - 48px);
-                padding: 60px 0 80px;
-            }
-
-            .wellness-chart-wrap {
-                width: 100%;
-                height: 420px;
-
-                padding: 12px;
-                margin-bottom: 40px;
-            }
-
-            .wheel-results-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .wheel-priority {
-                padding: 30px 22px;
-            }
-
-            .wheel-priority-options {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-
-        @media (max-width: 430px) {
-
-            .wellness-chart-wrap {
-                height: 370px;
-            }
-
-            .wheel-scale-labels {
-                font-size: 10px;
             }
 
         }
@@ -720,22 +339,14 @@
 </head>
 
 
-<body class="wellness-wheel-page">
+<body class="hello-page">
 
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
 
 <header class="site-header">
 
-    <a
-        class="site-logo"
-        href="index.html"
-    >
+    <a class="site-logo" href="index.html">
         My Simple Health
     </a>
-
 
     <button
         class="menu-button"
@@ -744,7 +355,6 @@
     >
         <i class="fa-solid fa-bars"></i>
     </button>
-
 
     <nav class="site-nav">
 
@@ -778,423 +388,108 @@
 
     </nav>
 
-
-    <div class="header-search">
-
-        <button
-            class="search-button"
-            aria-label="Search"
-            onclick="toggleSearch()"
-        >
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-
-
-        <div
-            class="search-box"
-            id="searchBox"
-        >
-
-            <input
-                type="search"
-                id="siteSearch"
-                placeholder="Search My Simple Health..."
-                aria-label="Search My Simple Health"
-            >
-
-            <button
-                type="button"
-                onclick="runSearch()"
-            >
-                Search
-            </button>
-
-        </div>
-
-    </div>
-
 </header>
-
 
 
 <main>
 
 
-<!-- =========================================================
-     HERO
-========================================================= -->
+<section class="hello-shell">
 
-<section class="wheel-hero">
 
-    <div class="wheel-hero-inner">
+    <div class="hello-heading">
 
-        <p class="wheel-eyebrow">
-            MY SIMPLE HEALTH ASSESSMENTS
+        <div class="hello-mark">
+            H
+        </div>
+
+        <p class="section-eyebrow">
+            MY SIMPLE HEALTH
         </p>
 
         <h1>
-            Your Wellness Wheel
+            Hello.
         </h1>
 
-        <p class="wheel-hero-description">
-            Take a few minutes to reflect on eight areas of your life.
-            Your Wellness Wheel is a snapshot of how satisfied you feel
-            with each area right now.
-        </p>
-
-        <p class="wheel-hero-note">
-            There are no passing or failing scores.
-            This is a self-reflection tool, not a clinical
-            or diagnostic assessment.
-        </p>
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================================
-     INTRO
-========================================================= -->
-
-<section class="wheel-intro">
-
-    <p class="wheel-eyebrow">
-        REFLECT ON WHERE YOU ARE
-    </p>
-
-    <h2>
-        Wellness is multidimensional.
-    </h2>
-
-    <p>
-        For each dimension, choose the number that best reflects
-        how satisfied you feel with that area of your life today.
-        Answer based on your current experience rather than where
-        you think you should be.
-    </p>
-
-</section>
-
-
-
-<!-- =========================================================
-     PROGRESS
-========================================================= -->
-
-<div
-    class="wheel-progress-wrap"
-    id="progressWrap"
->
-
-    <div class="wheel-progress-text">
-
-        <span id="progressLabel">
-            Dimension 1 of 8
-        </span>
-
-        <span id="progressPercent">
-            13%
-        </span>
-
-    </div>
-
-
-    <div class="wheel-progress">
-
-        <div
-            class="wheel-progress-bar"
-            id="progressBar"
-        ></div>
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================================================
-     ASSESSMENT
-========================================================= -->
-
-<section
-    class="wheel-assessment"
-    id="wheelAssessment"
->
-
-    <div id="questionsContainer"></div>
-
-</section>
-
-
-
-<!-- =========================================================
-     RESULTS
-========================================================= -->
-
-<section
-    class="wheel-results"
-    id="wheelResults"
->
-
-    <div class="wheel-results-header">
-
-        <p class="wheel-eyebrow">
-            YOUR REFLECTION
-        </p>
-
-        <h2>
-            Your Wellness Wheel
-        </h2>
-
         <p>
-            These ratings reflect how you see different areas of
-            your life right now. A lower rating does not mean
-            something is wrong, and a higher rating does not mean
-            there is nothing to explore.
+            A guided space to reflect on your wellbeing,
+            clarify what matters, and identify realistic
+            next steps.
         </p>
 
     </div>
 
-
-    <!-- RADAR CHART -->
-
-    <div class="wellness-chart-wrap">
-
-        <canvas
-            id="wellnessChart"
-            role="img"
-            aria-label="Radar chart displaying your eight Wellness Wheel ratings"
-        ></canvas>
-
-    </div>
-
-
-    <!-- ACCESSIBLE SCORE LIST -->
 
     <div
-        class="wheel-results-grid"
-        id="resultsGrid"
+        class="hello-context"
+        id="helloContext"
     ></div>
 
 
-    <!-- PRIORITY SELECTION -->
-
-    <div class="wheel-priority">
-
-        <p class="wheel-eyebrow">
-            CHOOSE WHAT MATTERS TO YOU
-        </p>
-
-        <h2>
-            What would you like to explore?
-        </h2>
-
-        <p>
-            You do not have to choose your lowest-rated area.
-            Choose the dimension that feels most meaningful
-            or useful to focus on right now.
-        </p>
-
+    <div class="hello-chat">
 
         <div
-            class="wheel-priority-options"
-            id="priorityOptions"
+            class="hello-messages"
+            id="helloMessages"
+            aria-live="polite"
         ></div>
 
+    </div>
 
-        <!-- REFLECTION -->
 
-        <div
-            class="wheel-reflection"
-            id="reflectionSection"
+    <div
+        class="hello-input-wrap"
+        id="helloInputWrap"
+    >
+
+        <textarea
+            id="helloInput"
+            placeholder="Type your response..."
+            aria-label="Your response"
+        ></textarea>
+
+
+        <button
+            type="button"
+            class="hello-send"
+            onclick="sendHelloResponse()"
         >
-
-            <h3 id="reflectionHeading">
-                Explore this area.
-            </h3>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="workingWell">
-                    What is already going well in this area?
-                </label>
-
-                <textarea
-                    id="workingWell"
-                    placeholder="Think about strengths, habits, people, resources, or circumstances that are already helping."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="desiredChange">
-                    What would you like to be different?
-                </label>
-
-                <textarea
-                    id="desiredChange"
-                    placeholder="Describe what you would like this area of your life to look or feel like."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="whyMatters">
-                    Why would that change matter to you?
-                </label>
-
-                <textarea
-                    id="whyMatters"
-                    placeholder="Think about your values, priorities, purpose, or quality of life."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="strengths">
-                    What strengths, resources, or support could help you?
-                </label>
-
-                <textarea
-                    id="strengths"
-                    placeholder="Consider personal strengths, supportive people, knowledge, tools, or resources."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="barriers">
-                    What might get in the way?
-                </label>
-
-                <textarea
-                    id="barriers"
-                    placeholder="Think about time, energy, environment, competing priorities, habits, or other barriers."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="goal">
-                    What is one goal you would like to work toward?
-                </label>
-
-                <textarea
-                    id="goal"
-                    placeholder="Example: I want movement to become a more consistent part of my week."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="actionStep">
-                    What is one small action you could take next?
-                </label>
-
-                <textarea
-                    id="actionStep"
-                    placeholder="Choose something realistic and specific that you could begin soon."
-                ></textarea>
-
-            </div>
-
-
-            <div class="wheel-reflection-field">
-
-                <label for="confidence">
-                    How confident are you that you could take this step? (1–10)
-                </label>
-
-                <input
-                    type="number"
-                    id="confidence"
-                    min="1"
-                    max="10"
-                    placeholder="1–10"
-                >
-
-            </div>
-
-
-            <button
-                type="button"
-                class="wheel-button"
-                onclick="finishReflection()"
-            >
-                COMPLETE REFLECTION
-            </button>
-
-
-            <div
-                class="wheel-complete-message"
-                id="completeMessage"
-            >
-
-                <strong>
-                    Reflection complete.
-                </strong>
-
-                <p>
-                    You identified an area that matters to you,
-                    considered what is already working, and chose
-                    a possible next step.
-                </p>
-
-                <p>
-                    In a future version, you will be able to save
-                    this reflection and continue working with Hello.
-                </p>
-
-            </div>
-
-        </div>
+            SEND →
+        </button>
 
     </div>
 
-</section>
+
+    <div class="hello-actions">
+
+        <a
+            href="wellness-wheel.html"
+            class="hello-action"
+        >
+            ← RETURN TO WELLNESS WHEEL
+        </a>
 
 
-
-<!-- =========================================================
-     DISCLAIMER
-========================================================= -->
-
-<section class="wheel-disclaimer">
-
-    <div class="wheel-disclaimer-inner">
-
-        <p class="wheel-eyebrow">
-            ABOUT THIS TOOL
-        </p>
-
-        <h2>
-            Reflection, not diagnosis.
-        </h2>
-
-        <p>
-            The My Simple Health Wellness Wheel is designed for
-            general wellness education and self-reflection.
-            Your ratings are subjective and should not be interpreted
-            as medical diagnoses, mental health diagnoses,
-            or measures of clinical risk.
-        </p>
+        <button
+            type="button"
+            class="hello-action"
+            onclick="restartHelloReflection()"
+        >
+            RESTART REFLECTION
+        </button>
 
     </div>
+
+
+    <div class="hello-note">
+
+        Hello is currently a guided prototype.
+        It is not yet connected to an AI service and does not
+        diagnose, prescribe, or provide individualized medical care.
+        Responses in this prototype remain within your browser session.
+
+    </div>
+
 
 </section>
 
@@ -1203,672 +498,215 @@
 
 
 
-<!-- =========================================================
-     FOOTER
-========================================================= -->
-
-<footer class="site-footer">
-
-    <div class="footer-main">
-
-
-        <div class="footer-brand">
-
-            <h2>
-                MY SIMPLE HEALTH
-            </h2>
-
-            <p>
-                Practical, science-based<br>
-                health information for everyday life.
-            </p>
-
-
-            <div class="footer-socials">
-
-                <a
-                    href="https://www.instagram.com/hellomysimplehealth/"
-                    aria-label="Instagram"
-                >
-                    <i class="fa-brands fa-instagram"></i>
-                </a>
-
-
-                <a
-                    href="https://www.linkedin.com/company/143299965/"
-                    aria-label="LinkedIn"
-                >
-                    <i class="fa-brands fa-linkedin-in"></i>
-                </a>
-
-
-                <a
-                    href="https://www.pinterest.com/hellomysimplehealth/"
-                    aria-label="Pinterest"
-                >
-                    <i class="fa-brands fa-pinterest-p"></i>
-                </a>
-
-
-                <a
-                    href="mailto:hello.mysimplehealth@gmail.com"
-                    aria-label="Email"
-                >
-                    <i class="fa-regular fa-envelope"></i>
-                </a>
-
-            </div>
-
-        </div>
-
-
-
-        <div class="footer-column">
-
-            <h3>
-                EXPLORE
-            </h3>
-
-            <a href="topics.html">
-                Topics
-            </a>
-
-            <a href="recipes.html">
-                Recipes
-            </a>
-
-            <a href="resources.html">
-                Resources
-            </a>
-
-            <a href="blog.html">
-                Blog
-            </a>
-
-        </div>
-
-
-
-        <div class="footer-column">
-
-            <h3>
-                ABOUT
-            </h3>
-
-            <a href="about.html">
-                About My Simple Health
-            </a>
-
-            <a href="about.html#mission">
-                Mission &amp; Values
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
-
-        </div>
-
-
-
-        <div class="footer-connect">
-
-            <h3>
-                LET'S STAY CONNECTED
-            </h3>
-
-            <p>
-                Join the community for new articles,<br>
-                healthy recipes, and free resources.
-            </p>
-
-
-            <form class="footer-email">
-
-                <input
-                    type="email"
-                    placeholder="Email address"
-                    aria-label="Email address"
-                >
-
-                <button type="submit">
-                    →
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="footer-bottom">
-
-        <p>
-            © 2026 My Simple Health. All rights reserved.
-        </p>
-
-
-        <div class="footer-legal">
-
-            <a href="privacy.html">
-                Privacy Policy
-            </a>
-
-            <a href="terms.html">
-                Terms of Use
-            </a>
-
-            <a href="disclaimer.html">
-                Disclaimer
-            </a>
-
-        </div>
-
-    </div>
-
-</footer>
-
-
-
 <script>
 
+
 /* =========================================================
-   WELLNESS DIMENSIONS
+   REFLECTION QUESTIONS
 ========================================================= */
 
-const wellnessDimensions = [
+const reflectionSteps = [
 
     {
-        key: "physical",
-
-        name: "Physical Wellness",
+        key:
+            "workingWell",
 
         question:
-            "Thinking about your current routines, energy, movement, sleep, nourishment, and physical wellbeing, how satisfied do you feel with this area of your life right now?"
+            "What is already going well in this area?"
     },
 
 
     {
-        key: "emotional",
-
-        name: "Emotional Wellness",
+        key:
+            "desiredChange",
 
         question:
-            "How satisfied do you feel with the way you currently experience, understand, and respond to emotions and everyday stress?"
+            "What would you like to be different?"
     },
 
 
     {
-        key: "social",
-
-        name: "Social Wellness",
+        key:
+            "whyMatters",
 
         question:
-            "How satisfied do you feel with your relationships, social connection, sense of belonging, and support from others?"
+            "Why would that change matter to you?"
     },
 
 
     {
-        key: "occupational",
-
-        name: "Occupational Wellness",
+        key:
+            "strengths",
 
         question:
-            "How satisfied do you feel with your work, responsibilities, sense of purpose, and balance between work and the rest of your life?"
+            "What strengths, resources, people, or support could help you?"
     },
 
 
     {
-        key: "financial",
-
-        name: "Financial Wellness",
+        key:
+            "barriers",
 
         question:
-            "How satisfied do you feel with your current relationship with money, financial stability, planning, and ability to manage financial responsibilities?"
+            "What might get in the way?"
     },
 
 
     {
-        key: "environmental",
-
-        name: "Environmental Wellness",
+        key:
+            "goal",
 
         question:
-            "How satisfied do you feel with the environments where you live, work, rest, and spend your time?"
+            "Thinking about everything you have reflected on, what is one goal you would like to work toward?"
     },
 
 
     {
-        key: "intellectual",
-
-        name: "Intellectual Wellness",
+        key:
+            "actionStep",
 
         question:
-            "How satisfied do you feel with your opportunities to learn, grow, be curious, solve problems, and engage your mind?"
+            "What is one small, realistic action you could take next?"
     },
 
 
     {
-        key: "spiritual",
-
-        name: "Spiritual Wellness",
+        key:
+            "confidence",
 
         question:
-            "How satisfied do you feel with your current sense of meaning, purpose, values, beliefs, or connection to something important to you?"
+            "On a scale from 1 to 10, how confident do you feel that you could take that step?"
     }
 
 ];
 
 
 
-let currentQuestion = 0;
-
-const responses = {};
-
-let selectedPriority = null;
-
-let wellnessChart = null;
+let helloState =
+    loadHelloState();
 
 
 
 /* =========================================================
-   BUILD QUESTIONS
+   LOAD STATE
 ========================================================= */
 
-function buildQuestions() {
+function loadHelloState() {
 
-    const container =
-        document.getElementById("questionsContainer");
+    const saved =
+        sessionStorage.getItem(
+            "helloWellnessState"
+        );
 
 
-    wellnessDimensions.forEach(function(dimension, index) {
+    if (!saved) {
 
-        const question =
-            document.createElement("div");
-
-
-        question.className =
-            "wheel-question" +
-            (index === 0 ? " active" : "");
-
-
-        question.dataset.index =
-            index;
-
-
-        let scaleButtons = "";
-
-
-        for (let score = 1; score <= 10; score++) {
-
-            scaleButtons += `
-
-                <button
-                    type="button"
-                    class="wheel-score-button"
-                    data-dimension="${dimension.key}"
-                    data-score="${score}"
-                    aria-label="${dimension.name}: ${score} out of 10"
-                    onclick="selectScore(this)"
-                >
-                    ${score}
-                </button>
-
-            `;
-
-        }
-
-
-        question.innerHTML = `
-
-            <span class="wheel-dimension">
-                ${dimension.name.toUpperCase()}
-            </span>
-
-
-            <h2>
-                How does this area feel right now?
-            </h2>
-
-
-            <p class="wheel-question-copy">
-                ${dimension.question}
-            </p>
-
-
-            <div class="wheel-scale">
-
-                ${scaleButtons}
-
-            </div>
-
-
-            <div class="wheel-scale-labels">
-
-                <span>
-                    Very dissatisfied
-                </span>
-
-                <span>
-                    Very satisfied
-                </span>
-
-            </div>
-
-
-            <div class="wheel-question-nav">
-
-                <button
-                    type="button"
-                    class="wheel-button secondary"
-                    onclick="previousQuestion()"
-                    ${index === 0 ? "disabled" : ""}
-                >
-                    ← BACK
-                </button>
-
-
-                <button
-                    type="button"
-                    class="wheel-button next-button"
-                    onclick="nextQuestion()"
-                    disabled
-                >
-
-                    ${
-                        index === wellnessDimensions.length - 1
-                        ? "SEE MY WELLNESS WHEEL"
-                        : "NEXT →"
-                    }
-
-                </button>
-
-            </div>
-
-        `;
-
-
-        container.appendChild(question);
-
-    });
-
-}
-
-
-
-buildQuestions();
-
-
-
-/* =========================================================
-   SELECT SCORE
-========================================================= */
-
-function selectScore(button) {
-
-    const dimension =
-        button.dataset.dimension;
-
-
-    const score =
-        Number(button.dataset.score);
-
-
-    responses[dimension] =
-        score;
-
-
-    const question =
-        button.closest(".wheel-question");
-
-
-    question
-        .querySelectorAll(".wheel-score-button")
-        .forEach(function(item) {
-
-            item.classList.remove("selected");
-
-            item.setAttribute(
-                "aria-pressed",
-                "false"
-            );
-
-        });
-
-
-    button.classList.add("selected");
-
-    button.setAttribute(
-        "aria-pressed",
-        "true"
-    );
-
-
-    question
-        .querySelector(".next-button")
-        .disabled =
-        false;
-
-}
-
-
-
-/* =========================================================
-   NEXT QUESTION
-========================================================= */
-
-function nextQuestion() {
-
-    const currentDimension =
-        wellnessDimensions[currentQuestion];
-
-
-    if (
-        responses[currentDimension.key] === undefined
-    ) {
-
-        return;
+        return null;
 
     }
 
 
-    if (
-        currentQuestion <
-        wellnessDimensions.length - 1
-    ) {
+    try {
 
-        currentQuestion++;
+        return JSON.parse(saved);
 
-        showQuestion();
+    }
+
+    catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SAVE STATE
+========================================================= */
+
+function saveHelloState() {
+
+    if (!helloState) {
+        return;
+    }
+
+
+    sessionStorage.setItem(
+
+        "helloWellnessState",
+
+        JSON.stringify(
+            helloState
+        )
+
+    );
+
+}
+
+
+
+/* =========================================================
+   ADD MESSAGE
+========================================================= */
+
+function addMessage(
+    text,
+    sender
+) {
+
+    const messages =
+        document.getElementById(
+            "helloMessages"
+        );
+
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+
+    message.className =
+        "hello-message " +
+        sender;
+
+
+    if (sender === "hello") {
+
+        message.innerHTML = `
+
+            <strong>
+                Hello
+            </strong>
+
+            ${escapeHTML(text)}
+
+        `;
 
     }
 
     else {
 
-        showResults();
-
-    }
-
-}
-
-
-
-/* =========================================================
-   PREVIOUS QUESTION
-========================================================= */
-
-function previousQuestion() {
-
-    if (currentQuestion > 0) {
-
-        currentQuestion--;
-
-        showQuestion();
-
-    }
-
-}
-
-
-
-/* =========================================================
-   SHOW QUESTION
-========================================================= */
-
-function showQuestion() {
-
-    document
-        .querySelectorAll(".wheel-question")
-        .forEach(function(question) {
-
-            question.classList.remove("active");
-
-        });
-
-
-    const activeQuestion =
-        document.querySelector(
-            `.wheel-question[data-index="${currentQuestion}"]`
-        );
-
-
-    activeQuestion.classList.add("active");
-
-
-    const currentDimension =
-        wellnessDimensions[currentQuestion];
-
-
-    const savedScore =
-        responses[currentDimension.key];
-
-
-    if (savedScore !== undefined) {
-
-        activeQuestion
-            .querySelectorAll(".wheel-score-button")
-            .forEach(function(button) {
-
-                if (
-                    Number(button.dataset.score) === savedScore
-                ) {
-
-                    button.classList.add("selected");
-
-                }
-
-            });
-
-
-        activeQuestion
-            .querySelector(".next-button")
-            .disabled =
-            false;
+        message.textContent =
+            text;
 
     }
 
 
-    updateProgress();
+    messages.appendChild(
+        message
+    );
 
 
-    const progress =
-        document.getElementById("progressWrap");
-
-
-    window.scrollTo({
-
-        top:
-            progress.offsetTop - 110,
-
-        behavior:
-            "smooth"
-
-    });
-
-}
-
-
-
-/* =========================================================
-   PROGRESS
-========================================================= */
-
-function updateProgress() {
-
-    const completed =
-        currentQuestion + 1;
-
-
-    const percent =
-        Math.round(
-
-            completed /
-            wellnessDimensions.length *
-            100
-
-        );
-
-
-    document
-        .getElementById("progressLabel")
-        .textContent =
-        `Dimension ${completed} of ${wellnessDimensions.length}`;
-
-
-    document
-        .getElementById("progressPercent")
-        .textContent =
-        percent + "%";
-
-
-    document
-        .getElementById("progressBar")
-        .style.width =
-        percent + "%";
-
-}
-
-
-
-/* =========================================================
-   SHOW RESULTS
-========================================================= */
-
-function showResults() {
-
-    document
-        .getElementById("wheelAssessment")
-        .style.display =
-        "none";
-
-
-    document
-        .getElementById("progressWrap")
-        .style.display =
-        "none";
-
-
-    const results =
-        document.getElementById("wheelResults");
-
-
-    results.classList.add("active");
-
-
-    buildResults();
-
-    buildWellnessChart();
-
-
-    results.scrollIntoView({
+    message.scrollIntoView({
 
         behavior:
             "smooth",
 
         block:
-            "start"
+            "nearest"
 
     });
 
@@ -1877,585 +715,252 @@ function showResults() {
 
 
 /* =========================================================
-   BUILD RESULT ITEMS
+   ESCAPE TEXT
 ========================================================= */
 
-function buildResults() {
+function escapeHTML(text) {
 
-    const grid =
-        document.getElementById("resultsGrid");
-
-
-    const priorities =
-        document.getElementById("priorityOptions");
-
-
-    grid.innerHTML =
-        "";
-
-
-    priorities.innerHTML =
-        "";
-
-
-    wellnessDimensions.forEach(function(dimension) {
-
-        const score =
-            responses[dimension.key];
-
-
-        const resultItem =
-            document.createElement("div");
-
-
-        resultItem.className =
-            "wheel-result-item";
-
-
-        resultItem.innerHTML = `
-
-            <span class="wheel-result-name">
-                ${dimension.name}
-            </span>
-
-
-            <span class="wheel-result-score">
-                ${score}/10
-            </span>
-
-        `;
-
-
-        grid.appendChild(
-            resultItem
+    const div =
+        document.createElement(
+            "div"
         );
 
 
-
-        const priorityButton =
-            document.createElement("button");
-
-
-        priorityButton.type =
-            "button";
+    div.textContent =
+        text;
 
 
-        priorityButton.className =
-            "wheel-priority-button";
-
-
-        priorityButton.textContent =
-            dimension.name;
-
-
-        priorityButton.dataset.dimension =
-            dimension.name;
-
-
-        priorityButton.onclick =
-            function() {
-
-                selectPriority(
-                    priorityButton
-                );
-
-            };
-
-
-        priorities.appendChild(
-            priorityButton
-        );
-
-    });
+    return div.innerHTML;
 
 }
 
 
 
 /* =========================================================
-   BUILD RADAR WELLNESS WHEEL
+   START REFLECTION
 ========================================================= */
 
-function buildWellnessChart() {
+function startHello() {
 
-    const canvas =
-        document.getElementById(
-            "wellnessChart"
+    if (!helloState) {
+
+        addMessage(
+
+            "It looks like you have not completed a Wellness Wheel reflection yet. Start with the Wellness Wheel, then come back and we can continue from there.",
+
+            "hello"
+
         );
 
 
-    if (!canvas) {
+        document
+            .getElementById(
+                "helloInputWrap"
+            )
+            .style.display =
+            "none";
+
 
         return;
 
     }
 
 
-    const labels =
-        wellnessDimensions.map(
-            function(dimension) {
-
-                return dimension.name.replace(
-                    " Wellness",
-                    ""
-                );
-
-            }
+    const context =
+        document.getElementById(
+            "helloContext"
         );
 
 
-    const values =
-        wellnessDimensions.map(
-            function(dimension) {
+    context.textContent =
+        `${helloState.selectedDimension} • Your reflection rating: ${helloState.selectedScore}/10`;
 
-                return responses[
-                    dimension.key
-                ];
 
-            }
-        );
+    context.classList.add(
+        "active"
+    );
 
 
-    if (wellnessChart) {
+    addMessage(
 
-        wellnessChart.destroy();
+        `You chose ${helloState.selectedDimension}. Your rating is a reflection of how this area feels to you right now — not a diagnosis or judgment. Let's explore it a little further.`,
 
-    }
+        "hello"
 
+    );
 
-    wellnessChart =
-        new Chart(
 
-            canvas,
-
-            {
-
-                type:
-                    "radar",
-
-
-                data: {
-
-                    labels:
-                        labels,
-
-
-                    datasets: [
-
-                        {
-
-                            label:
-                                "Your Wellness Wheel",
-
-                            data:
-                                values,
-
-                            backgroundColor:
-                                "rgba(126, 152, 97, 0.22)",
-
-                            borderColor:
-                                "#173D2B",
-
-                            pointBackgroundColor:
-                                "#173D2B",
-
-                            pointBorderColor:
-                                "#FFFFFF",
-
-                            pointBorderWidth:
-                                2,
-
-                            pointRadius:
-                                5,
-
-                            pointHoverRadius:
-                                7,
-
-                            borderWidth:
-                                2,
-
-                            fill:
-                                true
-
-                        }
-
-                    ]
-
-                },
-
-
-                options: {
-
-                    responsive:
-                        true,
-
-                    maintainAspectRatio:
-                        false,
-
-
-                    animation: {
-
-                        duration:
-                            700
-
-                    },
-
-
-                    scales: {
-
-                        r: {
-
-                            min:
-                                0,
-
-                            max:
-                                10,
-
-                            beginAtZero:
-                                true,
-
-
-                            ticks: {
-
-                                stepSize:
-                                    2,
-
-                                backdropColor:
-                                    "transparent",
-
-                                color:
-                                    "#667067",
-
-                                font: {
-
-                                    size:
-                                        11
-
-                                }
-
-                            },
-
-
-                            grid: {
-
-                                color:
-                                    "rgba(23, 61, 43, 0.15)"
-
-                            },
-
-
-                            angleLines: {
-
-                                color:
-                                    "rgba(23, 61, 43, 0.15)"
-
-                            },
-
-
-                            pointLabels: {
-
-                                color:
-                                    "#173D2B",
-
-                                font: {
-
-                                    size:
-                                        13,
-
-                                    weight:
-                                        "600"
-
-                                }
-
-                            }
-
-                        }
-
-                    },
-
-
-                    plugins: {
-
-                        legend: {
-
-                            display:
-                                false
-
-                        },
-
-
-                        tooltip: {
-
-                            callbacks: {
-
-                                label:
-                                    function(context) {
-
-                                        return (
-                                            context.label +
-                                            ": " +
-                                            context.raw +
-                                            "/10"
-                                        );
-
-                                    }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        );
+    askCurrentQuestion();
 
 }
 
 
 
 /* =========================================================
-   PRIORITY SELECTION
+   ASK CURRENT QUESTION
 ========================================================= */
 
-function selectPriority(button) {
+function askCurrentQuestion() {
 
-    selectedPriority =
-        button.dataset.dimension;
+    if (
+        helloState.currentStep >=
+        reflectionSteps.length
+    ) {
+
+        showSummary();
+
+        return;
+
+    }
 
 
-    document
-        .querySelectorAll(
-            ".wheel-priority-button"
-        )
-        .forEach(function(item) {
+    const step =
+        reflectionSteps[
+            helloState.currentStep
+        ];
 
-            item.classList.remove(
-                "selected"
+
+    addMessage(
+
+        step.question,
+
+        "hello"
+
+    );
+
+}
+
+
+
+/* =========================================================
+   USER SEND
+========================================================= */
+
+function sendHelloResponse() {
+
+    if (!helloState) {
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "helloInput"
+        );
+
+
+    const response =
+        input.value.trim();
+
+
+    if (!response) {
+        return;
+    }
+
+
+    const currentStep =
+        reflectionSteps[
+            helloState.currentStep
+        ];
+
+
+    if (
+        currentStep.key ===
+        "confidence"
+    ) {
+
+        const confidence =
+            Number(response);
+
+
+        if (
+            !Number.isInteger(confidence) ||
+            confidence < 1 ||
+            confidence > 10
+        ) {
+
+            addMessage(
+
+                "For this reflection, enter a whole number from 1 to 10.",
+
+                "hello"
+
             );
 
-        });
+            return;
+
+        }
+
+    }
 
 
-    button.classList.add(
-        "selected"
+    addMessage(
+        response,
+        "user"
     );
 
 
-    document
-        .getElementById(
-            "reflectionHeading"
-        )
-        .textContent =
-        `Explore your ${selectedPriority.toLowerCase()}.`;
+    helloState.answers[
+        currentStep.key
+    ] =
+        response;
 
 
-    document
-        .getElementById(
-            "reflectionSection"
-        )
-        .classList.add(
-            "active"
+    helloState.currentStep++;
+
+
+    saveHelloState();
+
+
+    input.value =
+        "";
+
+
+    if (
+        helloState.currentStep <
+        reflectionSteps.length
+    ) {
+
+        setTimeout(
+            askCurrentQuestion,
+            350
         );
 
+    }
 
-    document
-        .getElementById(
-            "reflectionSection"
-        )
-        .scrollIntoView({
+    else {
 
-            behavior:
-                "smooth",
+        setTimeout(
+            showSummary,
+            350
+        );
 
-            block:
-                "start"
-
-        });
+    }
 
 }
 
 
 
 /* =========================================================
-   COMPLETE REFLECTION
+   ENTER KEY
 ========================================================= */
-
-function finishReflection() {
-
-    const goal =
-        document
-            .getElementById("goal")
-            .value
-            .trim();
-
-
-    const action =
-        document
-            .getElementById("actionStep")
-            .value
-            .trim();
-
-
-    const confidence =
-        Number(
-            document
-                .getElementById("confidence")
-                .value
-        );
-
-
-    if (!selectedPriority) {
-
-        alert(
-            "Choose a wellness area to explore first."
-        );
-
-        return;
-
-    }
-
-
-    if (!goal) {
-
-        alert(
-            "Add one goal you would like to work toward."
-        );
-
-        return;
-
-    }
-
-
-    if (!action) {
-
-        alert(
-            "Add one small action you could take next."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !confidence ||
-        confidence < 1 ||
-        confidence > 10
-    ) {
-
-        alert(
-            "Choose a confidence rating from 1 to 10."
-        );
-
-        return;
-
-    }
-
-
-    const completeMessage =
-        document.getElementById(
-            "completeMessage"
-        );
-
-
-    completeMessage.classList.add(
-        "active"
-    );
-
-
-    completeMessage.scrollIntoView({
-
-        behavior:
-            "smooth",
-
-        block:
-            "center"
-
-    });
-
-}
-
-
-
-/* =========================================================
-   HEADER SEARCH
-========================================================= */
-
-function toggleSearch() {
-
-    const searchBox =
-        document.getElementById(
-            "searchBox"
-        );
-
-
-    const searchInput =
-        document.getElementById(
-            "siteSearch"
-        );
-
-
-    searchBox.classList.toggle(
-        "active"
-    );
-
-
-    if (
-        searchBox.classList.contains(
-            "active"
-        )
-    ) {
-
-        searchInput.focus();
-
-    }
-
-}
-
-
-
-function runSearch() {
-
-    const searchInput =
-        document.getElementById(
-            "siteSearch"
-        );
-
-
-    const query =
-        searchInput.value.trim();
-
-
-    if (query) {
-
-        window.location.href =
-            "https://www.google.com/search?q=site:mysimplehealth.org+" +
-            encodeURIComponent(query);
-
-    }
-
-}
-
-
 
 document
     .getElementById(
-        "siteSearch"
+        "helloInput"
     )
     .addEventListener(
         "keydown",
         function(event) {
 
             if (
-                event.key === "Enter"
+                event.key === "Enter" &&
+                !event.shiftKey
             ) {
 
                 event.preventDefault();
 
-                runSearch();
+                sendHelloResponse();
 
             }
 
@@ -2465,7 +970,270 @@ document
 
 
 /* =========================================================
-   MOBILE MENU
+   SUMMARY
+========================================================= */
+
+function showSummary() {
+
+    document
+        .getElementById(
+            "helloInputWrap"
+        )
+        .style.display =
+        "none";
+
+
+    const messages =
+        document.getElementById(
+            "helloMessages"
+        );
+
+
+    const answers =
+        helloState.answers;
+
+
+    const summary =
+        document.createElement(
+            "div"
+        );
+
+
+    summary.className =
+        "hello-summary";
+
+
+    summary.innerHTML = `
+
+        <h2>
+            Your Reflection
+        </h2>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                WELLNESS AREA
+            </strong>
+
+            ${escapeHTML(
+                helloState.selectedDimension
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                WHAT'S ALREADY WORKING
+            </strong>
+
+            ${escapeHTML(
+                answers.workingWell
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                WHAT YOU'D LIKE TO CHANGE
+            </strong>
+
+            ${escapeHTML(
+                answers.desiredChange
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                WHY IT MATTERS
+            </strong>
+
+            ${escapeHTML(
+                answers.whyMatters
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                STRENGTHS + SUPPORT
+            </strong>
+
+            ${escapeHTML(
+                answers.strengths
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                POSSIBLE BARRIERS
+            </strong>
+
+            ${escapeHTML(
+                answers.barriers
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                YOUR GOAL
+            </strong>
+
+            ${escapeHTML(
+                answers.goal
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                YOUR NEXT ACTION
+            </strong>
+
+            ${escapeHTML(
+                answers.actionStep
+            )}
+
+        </div>
+
+
+        <div class="hello-summary-item">
+
+            <strong>
+                CONFIDENCE
+            </strong>
+
+            ${escapeHTML(
+                answers.confidence
+            )}/10
+
+        </div>
+
+    `;
+
+
+    messages.appendChild(
+        summary
+    );
+
+
+    addMessage(
+
+        "You identified what matters to you and chose your own next step. This is your plan — you can revisit and adjust it as your circumstances change.",
+
+        "hello"
+
+    );
+
+
+    saveHelloState();
+
+}
+
+
+
+/* =========================================================
+   RESTART
+========================================================= */
+
+function restartHelloReflection() {
+
+    if (!helloState) {
+
+        window.location.href =
+            "wellness-wheel.html";
+
+        return;
+
+    }
+
+
+    helloState.currentStep =
+        0;
+
+
+    helloState.answers = {
+
+        workingWell:
+            "",
+
+        desiredChange:
+            "",
+
+        whyMatters:
+            "",
+
+        strengths:
+            "",
+
+        barriers:
+            "",
+
+        goal:
+            "",
+
+        actionStep:
+            "",
+
+        confidence:
+            ""
+
+    };
+
+
+    saveHelloState();
+
+
+    document
+        .getElementById(
+            "helloMessages"
+        )
+        .innerHTML =
+        "";
+
+
+    document
+        .getElementById(
+            "helloInputWrap"
+        )
+        .style.display =
+        "flex";
+
+
+    addMessage(
+
+        `Let's start your ${helloState.selectedDimension} reflection again.`,
+
+        "hello"
+
+    );
+
+
+    askCurrentQuestion();
+
+}
+
+
+
+/* =========================================================
+   MOBILE NAV
 ========================================================= */
 
 function toggleMenu() {
@@ -2481,6 +1249,14 @@ function toggleMenu() {
     );
 
 }
+
+
+
+/* =========================================================
+   START PAGE
+========================================================= */
+
+startHello();
 
 </script>
 
