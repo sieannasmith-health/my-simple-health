@@ -5420,3 +5420,172 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================================
+   SMALL STEPS ARTICLE — SLEEP-STYLE LAYOUT
+========================================================= */
+
+.article-layout {
+    width: min(1180px, calc(100% - 48px));
+    margin: 0 auto 100px;
+
+    display: grid !important;
+    grid-template-columns: minmax(0, 760px) 240px !important;
+    grid-template-areas: "content sidebar";
+    gap: 70px;
+
+    align-items: start;
+}
+
+
+/* LEFT ARTICLE COLUMN */
+
+.article-layout > .article-content {
+    grid-area: content !important;
+
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* RIGHT SIDEBAR */
+
+.article-layout > .article-sidebar {
+    grid-area: sidebar !important;
+
+    width: 100%;
+    position: sticky;
+    top: 30px;
+}
+
+
+/* =========================================================
+   IN THIS ARTICLE BOX
+========================================================= */
+
+.article-sidebar-box {
+    padding: 28px 26px;
+
+    background: #F3F0E8;
+    border: 1px solid #E1DCD1;
+    border-radius: 20px;
+}
+
+.article-sidebar-label {
+    margin: 0 0 18px;
+
+    color: #7D9460;
+
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.article-sidebar-box a {
+    display: block;
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid #DDD8CC;
+
+    color: #353832 !important;
+
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+
+    text-decoration: none !important;
+}
+
+.article-sidebar-box a:last-child {
+    border-bottom: none;
+}
+
+.article-sidebar-box a:hover {
+    color: #7D9460 !important;
+}
+
+
+/* =========================================================
+   MOVEMENT RESOURCE CARD
+========================================================= */
+
+.article-resource-card {
+    margin-top: 22px;
+    padding: 28px 26px;
+
+    background: #173D2B;
+    border-radius: 20px;
+
+    color: #FCFBF7;
+}
+
+.article-resource-card .article-resource-label {
+    margin: 0 0 15px;
+
+    color: #D8D3C7;
+
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.article-resource-card h3 {
+    margin: 0 0 14px;
+
+    color: #FCFBF7;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.15;
+}
+
+.article-resource-card p {
+    margin: 0 0 18px;
+
+    color: #FCFBF7;
+
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.article-resource-card a {
+    color: #FCFBF7 !important;
+
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+
+    text-decoration: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .article-layout {
+        width: calc(100% - 40px);
+
+        display: flex !important;
+        flex-direction: column;
+
+        gap: 40px;
+    }
+
+    .article-layout > .article-content {
+        order: 1;
+    }
+
+    .article-layout > .article-sidebar {
+        order: 2;
+        position: static;
+    }
+}
