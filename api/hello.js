@@ -1,4 +1,5 @@
 import { retrieveEvidence } from "./retrieveEvidence.js";
+
 import {
     searchPubMed
 } from "./pubmed.js";
@@ -11,6 +12,10 @@ import {
 import {
     synthesizeEvidence
 } from "./synthesizeEvidence.js";
+
+import {
+    buildResearchQuery
+} from "./buildResearchQuery.js";
 
 // My Simple Health AI backend
 
@@ -177,11 +182,17 @@ if (
            LIVE SCHOLARLY RETRIEVAL
         ============================================== */
 
-        const studies =
-            await searchPubMed(
-                cleanMessage,
-                10
-            );
+   const researchQuery =
+    buildResearchQuery(
+        cleanMessage
+    );
+
+
+const studies =
+    await searchPubMed(
+        researchQuery,
+        10
+    );
 
 
         const rankedStudies =
