@@ -23,6 +23,8 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+<style>
+
 /* =========================================
    HEALTHCARE VISIT PREP
 ========================================== */
@@ -82,7 +84,8 @@
 
     color: #7d9460;
 }
-    <style>
+
+</style>
 
         /* =========================================
            HELLO PAGE
@@ -1468,60 +1471,88 @@ function classifyRequest(
             .trim();
 
 
-    /*
-        SAFETY
+  /* =========================================
+   SAFETY — MEDICAL EMERGENCY
+========================================== */
 
-        Very obvious immediate-danger language.
-        Production will need substantially more
-        sophisticated detection.
-    */
+const medicalEmergencyPatterns = [
 
-    const safetyPatterns = [
+    "severe chest pain",
 
-        "severe chest pain",
+    "crushing chest pain",
 
-        "crushing chest pain",
+    "can't breathe",
 
-        "can't breathe",
+    "cannot breathe",
 
-        "cannot breathe",
+    "difficulty breathing right now",
 
-        "difficulty breathing right now",
+    "signs of stroke",
 
-        "signs of stroke",
+    "face drooping",
 
-        "face drooping",
+    "passed out",
 
-        "passed out",
+    "unconscious",
 
-        "unconscious",
+    "severe allergic reaction",
 
-        "severe allergic reaction",
+    "heavy bleeding",
 
-        "i want to kill myself",
+    "severe bleeding"
 
-        "i'm going to kill myself",
-
-        "i am going to kill myself",
-
-        "hurt myself right now",
-
-        "harm myself right now"
-
-    ];
+];
 
 
-    if (
-        safetyPatterns.some(
-            pattern =>
-                text.includes(
-                    pattern
-                )
-        )
-    ) {
+if (
+    medicalEmergencyPatterns.some(
+        pattern =>
+            text.includes(
+                pattern
+            )
+    )
+) {
 
-        return "SAFETY";
+    return "SAFETY_MEDICAL";
 
+}
+
+
+/* =========================================
+   SAFETY — CRISIS
+========================================== */
+
+const crisisPatterns = [
+
+    "i want to kill myself",
+
+    "i'm going to kill myself",
+
+    "i am going to kill myself",
+
+    "i want to die",
+
+    "hurt myself right now",
+
+    "harm myself right now",
+
+    "suicidal"
+
+];
+
+
+if (
+    crisisPatterns.some(
+        pattern =>
+            text.includes(
+                pattern
+            )
+    )
+) {
+
+    return "SAFETY_CRISIS";
+
+}
     }
 
 
@@ -1592,7 +1623,7 @@ function classifyRequest(
     }
 
 
-    /*
+ /*
         YELLOW
 
         Medical context without necessarily
@@ -1654,6 +1685,8 @@ function classifyRequest(
     ) {
 
         return "YELLOW";
+
+    }
 
     }
 
@@ -1750,21 +1783,48 @@ function handleAskHello(
     }
 
 
-    if (
-        route === "SAFETY"
-    ) {
+/* =========================================
+   SAFETY — MEDICAL EMERGENCY RESPONSE
+========================================== */
 
-        addMessage(
+if (
+    route === "SAFETY_MEDICAL"
+) {
 
-            "This may involve an immediate safety concern. Hello should stop the normal educational or coaching flow and direct the person toward immediate emergency or crisis support appropriate to their situation and location.",
+    addMessage(
 
-            "assistant",
+        "This may be a medical emergency. Please call 911 or your local emergency number now, or go to the nearest emergency department. Hello should not continue the normal health education or coaching conversation during a possible emergency.",
 
-            "SAFETY"
+        "assistant",
 
-        );
+        "SAFETY"
 
-    }
+    );
+
+    return;
+
+}
+
+
+/* =========================================
+   SAFETY — CRISIS RESPONSE
+========================================== */
+
+if (
+    route === "SAFETY_CRISIS"
+) {
+
+    addMessage(
+
+        "This may be an immediate emotional or suicide crisis. In the United States, call or text 988 for the Suicide & Crisis Lifeline. If you may act on these thoughts, someone is in immediate danger, or you cannot stay safe, call 911 or go to the nearest emergency department.",
+
+        "assistant",
+
+        "SAFETY"
+
+    );
+
+    return;
 
 }
 
