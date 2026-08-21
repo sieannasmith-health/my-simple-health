@@ -5589,3 +5589,222 @@ main > section.topics-page { display: block !important; width: 90% !important; m
         position: static;
     }
 }
+/* =========================================================
+   MY SIMPLE HEALTH — FINAL DESKTOP HEADER ALIGNMENT
+========================================================= */
+
+.site-header {
+    width: 100%;
+    min-height: 92px;
+
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+
+    padding: 0 56px;
+    box-sizing: border-box;
+
+    background: #FCFBF7;
+    border-bottom: 1px solid #E7E2D8;
+}
+
+
+/* BRAND */
+
+.site-logo {
+    grid-column: 1;
+
+    margin: 0 !important;
+
+    color: #173D2B !important;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    font-weight: 400;
+
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+
+/* NAVIGATION */
+
+.site-nav {
+    grid-column: 2;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    gap: 34px;
+
+    margin: 0 35px !important;
+}
+
+.site-nav a {
+    display: inline-flex;
+    align-items: center;
+
+    color: #252822 !important;
+
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+
+/* HELLO */
+
+.hello-nav-link {
+    gap: 9px;
+    color: #173D2B !important;
+    font-weight: 700 !important;
+}
+
+.hello-nav-link img {
+    width: 50px !important;
+    height: 50px !important;
+
+    display: block !important;
+    object-fit: contain !important;
+}
+
+
+/* SEARCH — STAYS ON FAR RIGHT */
+
+.header-search {
+    grid-column: 3;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 !important;
+
+    position: relative;
+}
+
+.search-button {
+    width: 42px;
+    height: 42px;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background: transparent;
+    border: 0;
+
+    color: #173D2B;
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+
+/* SEARCH DROPDOWN */
+
+.search-box {
+    display: none;
+
+    position: absolute;
+    top: 52px;
+    right: 0;
+
+    min-width: 310px;
+
+    padding: 12px;
+
+    background: #FCFBF7;
+    border: 1px solid #D8D3C7;
+    border-radius: 12px;
+
+    box-shadow: 0 10px 30px rgba(23, 61, 43, 0.12);
+
+    z-index: 2000;
+}
+
+.search-box.active {
+    display: flex !important;
+    gap: 8px;
+}
+
+
+/* DESKTOP: HAMBURGER OFF */
+
+.menu-button {
+    display: none;
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+========================================================= */
+
+@media (max-width: 950px) {
+
+    .site-header {
+        grid-template-columns: 1fr auto auto;
+
+        min-height: 76px;
+        padding: 0 22px;
+    }
+
+    .site-logo {
+        grid-column: 1;
+    }
+
+    .menu-button {
+        grid-column: 2;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 42px;
+        height: 42px;
+
+        background: transparent;
+        border: 0;
+
+        color: #173D2B;
+        font-size: 21px;
+
+        cursor: pointer;
+    }
+
+    .header-search {
+        grid-column: 3;
+        margin-left: 6px !important;
+    }
+
+    .site-nav {
+        display: none !important;
+
+        grid-column: 1 / -1;
+
+        width: 100%;
+        margin: 0 !important;
+        padding: 20px 0;
+
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+    }
+
+    .site-nav.active,
+    .site-nav.nav-open {
+        display: flex !important;
+    }
+
+    .hello-nav-link img {
+        width: 42px !important;
+        height: 42px !important;
+    }
+}
