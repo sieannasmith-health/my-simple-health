@@ -6092,3 +6092,66 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     margin-left: 0 !important;
     margin-right: 0 !important;
 }
+/* =========================================================
+   PREVENTIVE HEALTH TOPIC CARDS — MOBILE FIX
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .movement-topics {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+        overflow: hidden;
+    }
+
+    .movement-topics-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    .movement-topic-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+
+        padding: 28px 26px !important;
+        gap: 12px !important;
+
+        box-sizing: border-box;
+    }
+
+    .movement-topic-number {
+        display: block;
+        margin: 0 0 4px !important;
+    }
+
+    .movement-topic-card h3 {
+        width: 100% !important;
+        margin: 0 0 8px !important;
+
+        font-size: 32px !important;
+        line-height: 1.1 !important;
+    }
+
+    .movement-topic-card p {
+        width: 100% !important;
+        margin: 0 0 10px !important;
+
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+    }
+
+    .movement-topic-link {
+        display: inline-block !important;
+        width: auto !important;
+        margin-top: 2px !important;
+    }
+}
