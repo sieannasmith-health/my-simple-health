@@ -23,79 +23,72 @@
 
 <body>
 
-<!-- =========================================================
-     SITE HEADER
-========================================================= -->
+<!-- =========================================
+     HEADER
+========================================== -->
 
 <header class="site-header">
 
-    <div class="header-container">
+    <a class="site-logo" href="index.html">
+        My Simple Health
+    </a>
 
-        <a class="site-logo" href="index.html">
-            My Simple Health
+    <button
+        class="menu-button"
+        aria-label="Open menu"
+        onclick="toggleMenu()"
+    >
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="site-nav">
+
+        <a href="hello.html" class="hello-nav-link">
+            <img src="hello-icon.png" alt="">
+            <span>Hello</span>
         </a>
 
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="topics.html">Topics</a>
+        <a href="assessments.html">Assessments</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+
+    </nav>
+
+    <div class="header-search">
+
         <button
-            class="menu-button"
-            type="button"
-            aria-label="Open menu"
-            onclick="toggleMenu()"
+            class="search-button"
+            aria-label="Search"
+            onclick="toggleSearch()"
         >
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
         </button>
 
-        <nav class="site-nav" id="siteNav">
+        <div class="search-box" id="searchBox">
 
-            <a href="hello.html" class="hello-nav-link">
-                <img src="hello-icon.png" alt="">
-                <span>Hello</span>
-            </a>
-
-            <a href="index.html">Home</a>
-            <a href="about.html">About</a>
-            <a href="topics.html">Topics</a>
-            <a href="assessments.html">Assessments</a>
-            <a href="recipes.html">Recipes</a>
-            <a href="blog.html">Blog</a>
-            <a href="contact.html">Contact</a>
-
-        </nav>
-
-        <div class="header-search">
+            <input
+                type="search"
+                id="siteSearch"
+                placeholder="Search My Simple Health..."
+                aria-label="Search My Simple Health"
+            >
 
             <button
-                class="search-button"
                 type="button"
-                aria-label="Search"
-                onclick="toggleSearch()"
+                onclick="runSearch()"
             >
-                <i class="fa-solid fa-magnifying-glass"></i>
+                Search
             </button>
-
-            <div class="search-box" id="searchBox">
-
-                <input
-                    type="search"
-                    id="siteSearch"
-                    placeholder="Search My Simple Health..."
-                    aria-label="Search My Simple Health"
-                >
-
-                <button
-                    type="button"
-                    onclick="runSearch()"
-                >
-                    Search
-                </button>
-
-            </div>
 
         </div>
 
     </div>
 
 </header>
-
 
 <!-- =========================================================
      ARTICLE
@@ -933,22 +926,125 @@
 
 </main>
 
-<!-- =========================================================
+<!-- =========================================
      FOOTER
-========================================================= -->
+========================================== -->
 
 <footer class="site-footer">
 
-    <div class="footer-container">
+    <div class="footer-main">
 
-        <p>© 2026 My Simple Health</p>
+        <div class="footer-brand">
 
-        <p>Nourish your body. Simplify your life.</p>
+            <h2>MY SIMPLE HEALTH</h2>
+
+            <p>
+                Practical, science-based<br>
+                health information for everyday life.
+            </p>
+
+            <div class="footer-socials">
+
+                <a
+                    href="https://www.instagram.com/hellomysimplehealth/"
+                    aria-label="Instagram"
+                >
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a
+                    href="https://www.linkedin.com/company/143299965/"
+                    aria-label="LinkedIn"
+                >
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+                <a
+                    href="https://www.pinterest.com/hellomysimplehealth/"
+                    aria-label="Pinterest"
+                >
+                    <i class="fa-brands fa-pinterest-p"></i>
+                </a>
+
+                <a
+                    href="mailto:hello.mysimplehealth@gmail.com"
+                    aria-label="Email"
+                >
+                    <i class="fa-regular fa-envelope"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>EXPLORE</h3>
+
+            <a href="topics.html">Topics</a>
+            <a href="assessments.html">Assessments</a>
+            <a href="recipes.html">Recipes</a>
+            <a href="resources.html">Resources</a>
+            <a href="blog.html">Blog</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>ABOUT</h3>
+
+            <a href="about.html">About My Simple Health</a>
+            <a href="about.html#mission">Mission &amp; Values</a>
+            <a href="contact.html">Contact</a>
+
+        </div>
+
+
+        <div class="footer-connect">
+
+            <h3>LET'S STAY CONNECTED</h3>
+
+            <p>
+                Join the community for new articles,<br>
+                healthy recipes, and free resources.
+            </p>
+
+            <form class="footer-email">
+
+                <input
+                    type="email"
+                    placeholder="Email address"
+                    aria-label="Email address"
+                >
+
+                <button type="submit">
+                    →
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 My Simple Health. All rights reserved.
+        </p>
+
+        <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+        </div>
 
     </div>
 
 </footer>
-
 
 <!-- =========================================================
      SITE INTERACTIONS
