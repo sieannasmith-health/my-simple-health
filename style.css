@@ -6885,3 +6885,438 @@ main > section.topics-page { display: block !important; width: 90% !important; m
     }
 
 }
+/* =========================================
+   HOME HERO BUTTON PRIORITY
+========================================= */
+
+.hero-button-primary {
+    background: #165c3a;
+    color: #ffffff;
+    border: 1px solid #165c3a;
+}
+
+.hero-button-secondary {
+    background: transparent;
+    color: #165c3a;
+    border: 1px solid #165c3a;
+}
+/* =========================================
+   MY SIMPLE HEALTH — ONBOARDING
+========================================= */
+
+.onboarding-page {
+    margin: 0;
+    background: #f7f5ef;
+    color: #173d2b;
+}
+
+.onboarding-shell {
+    width: 100%;
+    min-height: 100vh;
+    padding: 48px;
+    box-sizing: border-box;
+}
+
+
+/* SCREENS */
+
+.onboarding-screen {
+    display: none;
+}
+
+.onboarding-screen.active {
+    display: block;
+}
+
+
+/* INTRO CARD */
+
+.onboarding-intro-card {
+    width: min(1100px, 100%);
+    min-height: 650px;
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    background: #fffdf8;
+    border: 1px solid #ddd9cf;
+    border-radius: 22px;
+    overflow: hidden;
+}
+
+
+/* INTRO COPY */
+
+.onboarding-intro-copy {
+    padding: 80px 65px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.onboarding-eyebrow {
+    margin: 0 0 20px;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+
+    color: #37674d;
+}
+
+.onboarding-intro-copy h1 {
+    margin: 0 0 24px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(48px, 6vw, 76px);
+    line-height: 0.98;
+    font-weight: 400;
+
+    color: #183d2b;
+}
+
+.onboarding-description {
+    max-width: 430px;
+    margin: 0 0 35px;
+
+    font-size: 17px;
+    line-height: 1.7;
+
+    color: #4c554f;
+}
+
+
+/* INTRO IMAGE */
+
+.onboarding-intro-image {
+    min-height: 650px;
+}
+
+.onboarding-intro-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+/* PRIMARY BUTTON */
+
+.onboarding-primary-button {
+    width: fit-content;
+    min-width: 190px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+
+    padding: 16px 24px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: #155b38;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.onboarding-primary-button:hover:not(:disabled) {
+    background: #10482d;
+    transform: translateY(-1px);
+}
+
+.onboarding-primary-button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+
+/* PRIVACY */
+
+.onboarding-privacy {
+    margin-top: 18px;
+
+    font-size: 13px;
+
+    color: #657069;
+}
+
+
+/* =========================================
+   QUESTION CARD
+========================================= */
+
+.onboarding-question-card {
+    width: min(1000px, 100%);
+    min-height: 650px;
+
+    margin: 0 auto;
+    padding: 35px 55px 55px;
+
+    box-sizing: border-box;
+
+    background: #fffdf8;
+
+    border: 1px solid #ddd9cf;
+    border-radius: 22px;
+}
+
+
+/* TOP BAR */
+
+.onboarding-topbar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+
+    font-size: 14px;
+
+    color: #32483b;
+}
+
+.onboarding-topbar > :last-child {
+    justify-self: end;
+}
+
+.onboarding-topbar a {
+    color: #32483b;
+    text-decoration: none;
+}
+
+.onboarding-text-button {
+    width: fit-content;
+
+    padding: 0;
+
+    border: none;
+    background: none;
+
+    color: #32483b;
+
+    font: inherit;
+
+    cursor: pointer;
+}
+
+
+/* PROGRESS */
+
+.onboarding-progress {
+    max-width: 430px;
+
+    margin: 22px auto 45px;
+
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.onboarding-progress span {
+    height: 5px;
+
+    background: #dedfd8;
+
+    border-radius: 999px;
+}
+
+.onboarding-progress span.complete {
+    background: #155b38;
+}
+
+
+/* QUESTION HEADING */
+
+.onboarding-question-heading {
+    text-align: center;
+
+    margin-bottom: 35px;
+}
+
+.onboarding-question-heading h1 {
+    max-width: 650px;
+
+    margin: 0 auto 10px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(34px, 5vw, 48px);
+    line-height: 1.08;
+    font-weight: 400;
+
+    color: #183d2b;
+}
+
+.onboarding-question-heading p {
+    margin: 0;
+
+    color: #606862;
+}
+
+
+/* =========================================
+   OPTIONS
+========================================= */
+
+.onboarding-options-grid {
+    max-width: 760px;
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.onboarding-option {
+    position: relative;
+
+    min-height: 84px;
+
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 16px 18px;
+
+    text-align: left;
+
+    background: #fffdf8;
+
+    border: 1px solid #d8d8cf;
+    border-radius: 13px;
+
+    color: #243b30;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.onboarding-option:hover {
+    border-color: #6d927b;
+    transform: translateY(-1px);
+}
+
+.onboarding-option.selected {
+    border-color: #155b38;
+    background: #f1f6f1;
+}
+
+.onboarding-option.selected::after {
+    content: "✓";
+
+    position: absolute;
+    top: 12px;
+    right: 13px;
+
+    width: 23px;
+    height: 23px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #155b38;
+    color: white;
+
+    font-size: 12px;
+}
+
+
+/* OPTION ICON */
+
+.onboarding-option-icon {
+    flex: 0 0 43px;
+
+    width: 43px;
+    height: 43px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #eef2ea;
+
+    font-size: 22px;
+
+    color: #155b38;
+}
+
+.onboarding-option strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 15px;
+}
+
+.onboarding-option small {
+    display: block;
+
+    font-size: 13px;
+    line-height: 1.35;
+
+    color: #69716c;
+}
+
+
+/* ACTION AREA */
+
+.onboarding-actions {
+    margin-top: 35px;
+
+    display: flex;
+    justify-content: center;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 760px) {
+
+    .onboarding-shell {
+        padding: 18px;
+    }
+
+    .onboarding-intro-card {
+        grid-template-columns: 1fr;
+    }
+
+    .onboarding-intro-copy {
+        padding: 50px 30px;
+    }
+
+    .onboarding-intro-image {
+        min-height: 300px;
+    }
+
+    .onboarding-question-card {
+        padding: 25px 20px 40px;
+    }
+
+    .onboarding-options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .onboarding-progress {
+        margin-bottom: 35px;
+    }
+
+}
