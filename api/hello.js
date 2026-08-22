@@ -1,3 +1,7 @@
+import {
+    filterEvidenceRelevance
+} from "./filterEvidenceRelevance.js";
+
 import { retrieveEvidence } from "./retrieveEvidence.js";
 
 import {
@@ -599,11 +603,23 @@ const wantsEvidenceDisplay =
                     study.abstract &&
                     study.abstract.trim()
             );
+        const relevantStudies =
+    await filterEvidenceRelevance({
+
+        question:
+            cleanMessage,
+
+        studies:
+            rankedStudies,
+
+        profile
+
+    });
 
 
         if (
-            rankedStudies.length === 0
-        ) {
+    relevantStudies.length === 0
+) {
 
             const response =
                 await generateHelloResponse({
@@ -660,24 +676,24 @@ const wantsEvidenceDisplay =
         }
 
 
-        const preliminaryStrength =
-            getEvidenceStrength(
-                rankedStudies
-            );
+const preliminaryStrength =
+    getEvidenceStrength(
+        relevantStudies
+    );
 
 
-        const synthesis =
-            await synthesizeEvidence({
+const synthesis =
+    await synthesizeEvidence({
 
-                question:
-                    cleanMessage,
+        question:
+            cleanMessage,
 
-                studies:
-                    rankedStudies,
+        studies:
+            relevantStudies,
 
-                preliminaryStrength
+        preliminaryStrength
 
-            });
+    });
 
 
         /*
