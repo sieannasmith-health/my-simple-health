@@ -18,6 +18,11 @@
    DO NOT PERSONALIZE CLINICAL DETERMINATION.
 ========================================================= */
 
+import {
+    isWellnessContextRelevantToQuestion,
+    sanitizeWellnessContext
+} from "./wellnessContext.js";
+
 
 export async function filterEvidenceRelevance({
     question,
@@ -88,7 +93,8 @@ ${study.abstract}
 
     const profileContext =
         buildSafeProfileContext(
-            profile
+            profile,
+            question
         );
 
 
@@ -159,6 +165,14 @@ User context must NOT be used to:
 - determine medication appropriateness
 - provide medical clearance
 - predict an individualized clinical outcome
+
+Wellness Wheel ratings, when supplied, are subjective
+self-reflection context. They are not clinical measurements.
+
+Wellness Wheel dimensions are broad domains, not measurements
+of a single health topic. Do not infer that a Physical Wellness
+rating specifically measures sleep, nutrition, movement, energy,
+or any other single factor.
 
 =====================================================
 RELEVANCE SCREENING
@@ -299,13 +313,6 @@ Screen these studies for actual relevance to the user's question.
 
 
     if (!response.ok) {
-
-        console.error(
-            "Evidence relevance API error:",
-            data
-        );
-
-
         throw new Error(
             "Evidence relevance screening failed."
         );
@@ -347,13 +354,7 @@ Screen these studies for actual relevance to the user's question.
 
     }
 
-    catch (error) {
-
-        console.error(
-            "Could not parse evidence relevance JSON:",
-            outputText
-        );
-
+    catch {
 
         throw new Error(
             "Invalid evidence relevance output."
@@ -447,7 +448,10 @@ Screen these studies for actual relevance to the user's question.
    Missing information must remain unknown.
 ========================================================= */
 
-function buildSafeProfileContext(profile) {
+function buildSafeProfileContext(
+    profile,
+    question
+) {
 
     if (
         !profile ||
@@ -486,6 +490,25 @@ function buildSafeProfileContext(profile) {
             profile.culturalConsiderations || []
 
     };
+
+
+    const wellnessContext =
+        sanitizeWellnessContext(
+            profile
+        );
+
+
+    if (
+        isWellnessContextRelevantToQuestion(
+            question,
+            wellnessContext
+        )
+    ) {
+
+        safeProfile.wellnessContext =
+            wellnessContext;
+
+    }
 
 
     return JSON.stringify(

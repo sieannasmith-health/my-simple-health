@@ -21,6 +21,17 @@ import {
     buildResearchQuery
 } from "./buildResearchQuery.js";
 
+import {
+    sanitizeWellnessContext
+} from "./wellnessContext.js";
+
+import {
+    consumeRateLimit,
+    createHelloRequestId,
+    getClientIdentityHash,
+    getRateLimitConfiguration
+} from "./rateLimit.js";
+
 
 /* =========================================================
    MY SIMPLE HEALTH — HELLO
@@ -34,26 +45,531 @@ const MODEL =
     "gpt-5.6-luna";
 
 
+const MAX_REQUEST_BODY_BYTES =
+    96 * 1024;
+
+const MAX_MESSAGE_CHARACTERS =
+    4000;
+
+const MAX_CONVERSATION_TURNS =
+    10;
+
+const MAX_CONVERSATION_TURN_CHARACTERS =
+    1500;
+
+
+const HELLO_PRODUCTION_ORIGINS = [
+    "https://mysimplehealth.org",
+    "https://www.mysimplehealth.org"
+];
+
+
+function normalizeOrigin(value) {
+
+    if (
+        typeof value !== "string" ||
+        !value.trim()
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const url =
+            new URL(
+                value.trim()
+            );
+
+
+        if (
+            (
+                url.protocol !== "https:" &&
+                url.protocol !== "http:"
+            ) ||
+            url.username ||
+            url.password ||
+            url.pathname !== "/" ||
+            url.search ||
+            url.hash
+        ) {
+
+            return null;
+
+        }
+
+
+        return url.origin;
+
+    }
+
+    catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+function getVercelOrigin(value) {
+
+    if (
+        typeof value !== "string" ||
+        !value.trim()
+    ) {
+
+        return null;
+
+    }
+
+
+    const hostname =
+        value
+            .trim()
+            .replace(
+                /^https?:\/\//i,
+                ""
+            );
+
+
+    return normalizeOrigin(
+        `https://${hostname}`
+    );
+
+}
+
+
+function getAllowedHelloOrigins() {
+
+    const origins =
+        new Set(
+            HELLO_PRODUCTION_ORIGINS
+        );
+
+
+    const configuredOrigins =
+        typeof process.env.HELLO_ALLOWED_ORIGINS === "string"
+            ? process.env.HELLO_ALLOWED_ORIGINS
+                .split(",")
+            : [];
+
+
+    configuredOrigins.forEach(value => {
+
+        const origin =
+            normalizeOrigin(
+                value
+            );
+
+
+        if (origin) {
+            origins.add(origin);
+        }
+
+    });
+
+
+    [
+        process.env.VERCEL_URL,
+        process.env.VERCEL_BRANCH_URL,
+        process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ]
+    .forEach(value => {
+
+        const origin =
+            getVercelOrigin(
+                value
+            );
+
+
+        if (origin) {
+            origins.add(origin);
+        }
+
+    });
+
+
+    return origins;
+
+}
+
+
+function isDevelopmentEnvironment() {
+
+    return (
+        process.env.NODE_ENV === "development" ||
+        process.env.VERCEL_ENV === "development"
+    );
+
+}
+
+
+function isAllowedHelloOrigin(origin) {
+
+    const normalizedOrigin =
+        normalizeOrigin(
+            origin
+        );
+
+
+    if (
+        !normalizedOrigin ||
+        normalizedOrigin !== origin
+    ) {
+
+        return false;
+
+    }
+
+
+    const hostname =
+        new URL(
+            normalizedOrigin
+        )
+        .hostname;
+
+
+    if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1"
+    ) {
+
+        return isDevelopmentEnvironment();
+
+    }
+
+
+    if (
+        getAllowedHelloOrigins()
+            .has(normalizedOrigin)
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+function sendHelloError(
+    res,
+    status,
+    code,
+    message,
+    requestId,
+    retryAfterSeconds = null
+) {
+
+    if (
+        Number.isInteger(retryAfterSeconds) &&
+        retryAfterSeconds > 0
+    ) {
+
+        res.setHeader(
+            "Retry-After",
+            String(retryAfterSeconds)
+        );
+
+    }
+
+
+    return res.status(status).json({
+        success: false,
+        code,
+        message,
+        requestId
+    });
+
+}
+
+
+function logHelloEvent(
+    requestId,
+    code
+) {
+
+    console.error(
+        JSON.stringify({
+            requestId,
+            code
+        })
+    );
+
+}
+
+
+function getHeaderValue(
+    req,
+    name
+) {
+
+    if (
+        !req ||
+        !req.headers
+    ) {
+
+        return null;
+
+    }
+
+
+    const value =
+        req.headers[
+            name.toLowerCase()
+        ];
+
+
+    return typeof value === "string"
+        ? value
+        : null;
+
+}
+
+
+function isJsonRequest(req) {
+
+    const contentType =
+        getHeaderValue(
+            req,
+            "content-type"
+        );
+
+
+    return (
+        typeof contentType === "string" &&
+        /^application\/json(?:\s*;|$)/i.test(
+            contentType.trim()
+        )
+    );
+
+}
+
+
+function getDeclaredBodySize(req) {
+
+    const contentLength =
+        getHeaderValue(
+            req,
+            "content-length"
+        );
+
+
+    if (contentLength === null) {
+        return null;
+    }
+
+
+    if (!/^\d+$/.test(contentLength.trim())) {
+        return NaN;
+    }
+
+
+    return Number(contentLength);
+
+}
+
+
+function getParsedBodySize(body) {
+
+    try {
+
+        return Buffer.byteLength(
+            JSON.stringify(
+                body
+            ),
+            "utf8"
+        );
+
+    }
+
+    catch {
+
+        return NaN;
+
+    }
+
+}
+
+
+function sanitizeConversationInput(value) {
+
+    if (!Array.isArray(value)) {
+        return null;
+    }
+
+
+    return value
+        .filter(
+            item => {
+
+                return (
+                    item &&
+                    typeof item === "object" &&
+                    !Array.isArray(item) &&
+                    (
+                        item.role === "user" ||
+                        item.role === "assistant"
+                    ) &&
+                    typeof item.content === "string" &&
+                    item.content.trim()
+                );
+
+            }
+        )
+        .map(
+            item => ({
+                role:
+                    item.role,
+
+                content:
+                    item.content
+                        .trim()
+                        .slice(
+                            0,
+                            MAX_CONVERSATION_TURN_CHARACTERS
+                        )
+            })
+        )
+        .slice(
+            -MAX_CONVERSATION_TURNS
+        );
+
+}
+
+
+function sanitizeProfileInput(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return {
+            valid: true,
+            profile: null
+        };
+
+    }
+
+
+    if (
+        typeof value !== "object" ||
+        Array.isArray(value)
+    ) {
+
+        return {
+            valid: false,
+            profile: null
+        };
+
+    }
+
+
+    const wellnessContext =
+        sanitizeWellnessContext(
+            value
+        );
+
+
+    return {
+        valid: true,
+
+        profile:
+            wellnessContext
+                ? { wellnessContext }
+                : null
+    };
+
+}
+
+
 export default async function handler(req, res) {
+
+    const requestId =
+        createHelloRequestId();
+
+
+    res.setHeader(
+        "X-Request-ID",
+        requestId
+    );
 
     /* =====================================================
        CORS
     ====================================================== */
 
     res.setHeader(
-        "Access-Control-Allow-Origin",
-        "https://mysimplehealth.org"
+        "Vary",
+        "Origin"
     );
 
-    res.setHeader(
-        "Access-Control-Allow-Methods",
-        "POST, OPTIONS"
-    );
 
-    res.setHeader(
-        "Access-Control-Allow-Headers",
-        "Content-Type"
-    );
+    const originHeader =
+        req.headers
+            ? req.headers.origin
+            : undefined;
+
+
+    const hasOriginHeader =
+        originHeader !== undefined;
+
+
+    const requestOrigin =
+        typeof originHeader === "string"
+            ? originHeader
+            : null;
+
+
+    if (
+        hasOriginHeader &&
+        (
+            !requestOrigin ||
+            !isAllowedHelloOrigin(
+                requestOrigin
+            )
+        )
+    ) {
+
+        return sendHelloError(
+            res,
+            403,
+            "ORIGIN_NOT_ALLOWED",
+            "Origin not allowed.",
+            requestId
+        );
+
+    }
+
+
+    if (requestOrigin) {
+
+        res.setHeader(
+            "Access-Control-Allow-Origin",
+            requestOrigin
+        );
+
+        res.setHeader(
+            "Access-Control-Allow-Methods",
+            "POST, OPTIONS"
+        );
+
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type"
+        );
+
+        res.setHeader(
+            "Access-Control-Expose-Headers",
+            "X-Request-ID, Retry-After"
+        );
+
+    }
 
 
     if (req.method === "OPTIONS") {
@@ -63,23 +579,121 @@ export default async function handler(req, res) {
 
     if (req.method !== "POST") {
 
-        return res.status(405).json({
-            success: false,
-            message: "Method not allowed."
-        });
+        res.setHeader(
+            "Allow",
+            "POST, OPTIONS"
+        );
+
+
+        return sendHelloError(
+            res,
+            405,
+            "METHOD_NOT_ALLOWED",
+            "Method not allowed.",
+            requestId
+        );
 
     }
 
 
     /* =====================================================
-       INPUT
+       CONTENT TYPE + BODY SIZE
     ====================================================== */
 
-    const {
-        message,
-        conversation = [],
-        profile = null
-    } = req.body || {};
+
+    if (!isJsonRequest(req)) {
+
+        return sendHelloError(
+            res,
+            415,
+            "UNSUPPORTED_MEDIA_TYPE",
+            "Content-Type must be application/json.",
+            requestId
+        );
+
+    }
+
+
+    const declaredBodySize =
+        getDeclaredBodySize(
+            req
+        );
+
+
+    if (Number.isNaN(declaredBodySize)) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "The request could not be processed.",
+            requestId
+        );
+
+    }
+
+
+    if (
+        declaredBodySize !== null &&
+        declaredBodySize > MAX_REQUEST_BODY_BYTES
+    ) {
+
+        return sendHelloError(
+            res,
+            413,
+            "PAYLOAD_TOO_LARGE",
+            "The request is too large.",
+            requestId
+        );
+
+    }
+
+
+    if (
+        !req.body ||
+        typeof req.body !== "object" ||
+        Array.isArray(req.body)
+    ) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "The request could not be processed.",
+            requestId
+        );
+
+    }
+
+
+    const parsedBodySize =
+        getParsedBodySize(
+            req.body
+        );
+
+
+    if (
+        !Number.isFinite(parsedBodySize) ||
+        parsedBodySize > MAX_REQUEST_BODY_BYTES
+    ) {
+
+        return sendHelloError(
+            res,
+            413,
+            "PAYLOAD_TOO_LARGE",
+            "The request is too large.",
+            requestId
+        );
+
+    }
+
+
+    /* =====================================================
+       VALIDATED INPUT
+    ====================================================== */
+
+    const message =
+        req.body.message;
 
 
     if (
@@ -87,10 +701,13 @@ export default async function handler(req, res) {
         typeof message !== "string"
     ) {
 
-        return res.status(400).json({
-            success: false,
-            message: "A message is required."
-        });
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "A message is required.",
+            requestId
+        );
 
     }
 
@@ -98,7 +715,67 @@ export default async function handler(req, res) {
     const cleanMessage =
         message
             .trim()
-            .slice(0, 4000);
+            .slice(
+                0,
+                MAX_MESSAGE_CHARACTERS
+            );
+
+
+    if (!cleanMessage) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "A message is required.",
+            requestId
+        );
+
+    }
+
+
+    const conversation =
+        sanitizeConversationInput(
+            req.body.conversation === undefined
+                ? []
+                : req.body.conversation
+        );
+
+
+    if (!conversation) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "Conversation history is invalid.",
+            requestId
+        );
+
+    }
+
+
+    const profileResult =
+        sanitizeProfileInput(
+            req.body.profile
+        );
+
+
+    if (!profileResult.valid) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "Profile context is invalid.",
+            requestId
+        );
+
+    }
+
+
+    const profile =
+        profileResult.profile;
 
 
     /* =====================================================
@@ -158,14 +835,277 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       UNDERSTAND THE CONVERSATION
+       DURABLE PAID-WORK RATE LIMIT
     ====================================================== */
+
+    let rateLimitConfiguration;
+
+    let identityHash;
+
+
+    try {
+
+        rateLimitConfiguration =
+            getRateLimitConfiguration();
+
+        identityHash =
+            getClientIdentityHash(
+                req,
+                rateLimitConfiguration.identitySecret
+            );
+
+
+        if (!identityHash) {
+            throw new Error("Limiter identity unavailable.");
+        }
+
+
+        const normalLimitResult =
+            await consumeRateLimit({
+                identityHash,
+                limiterType:
+                    "normal",
+                limit:
+                    rateLimitConfiguration.normalLimit,
+                windowSeconds:
+                    rateLimitConfiguration.windowSeconds,
+                restUrl:
+                    rateLimitConfiguration.restUrl,
+                restToken:
+                    rateLimitConfiguration.restToken
+            });
+
+
+        if (!normalLimitResult.allowed) {
+
+            logHelloEvent(
+                requestId,
+                "RATE_LIMITED"
+            );
+
+
+            return sendHelloError(
+                res,
+                429,
+                "RATE_LIMITED",
+                "Too many requests. Please try again later.",
+                requestId,
+                normalLimitResult.retryAfterSeconds
+            );
+
+        }
+
+    }
+
+    catch {
+
+        logHelloEvent(
+            requestId,
+            "RATE_LIMIT_UNAVAILABLE"
+        );
+
+
+        return sendHelloError(
+            res,
+            503,
+            "RATE_LIMIT_UNAVAILABLE",
+            "Hello is temporarily unavailable. Please try again.",
+            requestId
+        );
+
+    }
+
+
+    const medicalScope =
+        classifyMedicalScope(
+            cleanMessage
+        );
 
     const conversationIntent =
         classifyConversationIntent(
             cleanMessage
         );
 
+    const needsResearch =
+        shouldRetrieveResearch(
+            cleanMessage,
+            conversationIntent
+        );
+
+    const wantsEvidenceDisplay =
+        shouldDisplayEvidence(
+            cleanMessage
+        );
+
+    const usesResearchPath =
+        medicalScope !== "INDIVIDUAL_CLINICAL" &&
+        conversationIntent !== "RELATIONAL" &&
+        conversationIntent !== "BOUNDARY" &&
+        needsResearch;
+
+
+    if (usesResearchPath) {
+
+        try {
+
+            const researchLimitResult =
+                await consumeRateLimit({
+                    identityHash,
+                    limiterType:
+                        "research",
+                    limit:
+                        rateLimitConfiguration.researchLimit,
+                    windowSeconds:
+                        rateLimitConfiguration.windowSeconds,
+                    restUrl:
+                        rateLimitConfiguration.restUrl,
+                    restToken:
+                        rateLimitConfiguration.restToken
+                });
+
+
+            if (!researchLimitResult.allowed) {
+
+                logHelloEvent(
+                    requestId,
+                    "RESEARCH_RATE_LIMITED"
+                );
+
+
+                return sendHelloError(
+                    res,
+                    429,
+                    "RESEARCH_RATE_LIMITED",
+                    "Research requests are temporarily limited. Please try again later.",
+                    requestId,
+                    researchLimitResult.retryAfterSeconds
+                );
+
+            }
+
+        }
+
+        catch {
+
+            logHelloEvent(
+                requestId,
+                "RATE_LIMIT_UNAVAILABLE"
+            );
+
+
+            return sendHelloError(
+                res,
+                503,
+                "RATE_LIMIT_UNAVAILABLE",
+                "Hello is temporarily unavailable. Please try again.",
+                requestId
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       MEDICAL SCOPE
+    ====================================================== */
+
+
+    /*
+       Individualized clinical requests take priority over
+       conversational repair so phrases such as "stop my
+       medication" still receive the clinical boundary.
+    */
+
+    if (medicalScope === "INDIVIDUAL_CLINICAL") {
+
+        try {
+
+            const response =
+                await generateHelloResponse({
+
+                    message:
+                        cleanMessage,
+
+                    conversation,
+
+                    profile,
+
+                    mode:
+                        "CLINICAL_BOUNDARY",
+
+                    evidenceContext:
+                        "",
+
+                    evidenceAvailable:
+                        false
+
+                });
+
+
+            return res.status(200).json({
+
+                success: true,
+
+                route:
+                    "RED",
+
+                conversationIntent:
+                    "CLINICAL_BOUNDARY",
+
+                response,
+
+                showEvidence:
+                    false,
+
+                sources: [],
+
+                offerVisitPrep:
+                    true
+
+            });
+
+        }
+
+        catch {
+
+            logHelloEvent(
+                requestId,
+                "CLINICAL_RESPONSE_FALLBACK"
+            );
+
+
+            return res.status(200).json({
+
+                success: true,
+
+                route:
+                    "RED",
+
+                conversationIntent:
+                    "CLINICAL_BOUNDARY",
+
+                response:
+                    "I can't determine a diagnosis, prescribe treatment, change medication, or decide whether a medical option is appropriate for you. I can help you understand the options generally, what the evidence says, and what questions could be useful to discuss with a healthcare professional.",
+
+                showEvidence:
+                    false,
+
+                sources: [],
+
+                offerVisitPrep:
+                    true
+
+            });
+
+        }
+
+    }
+
+
+    /* =====================================================
+       UNDERSTAND THE CONVERSATION
+    ====================================================== */
 
     /* =====================================================
        RELATIONAL / CONVERSATIONAL REPAIR
@@ -225,11 +1165,11 @@ export default async function handler(req, res) {
 
         }
 
-        catch (error) {
+        catch {
 
-            console.error(
-                "Relational response error:",
-                error
+            logHelloEvent(
+                requestId,
+                "RELATIONAL_RESPONSE_FALLBACK"
             );
 
 
@@ -258,124 +1198,8 @@ export default async function handler(req, res) {
 
 
     /* =====================================================
-       MEDICAL SCOPE
-    ====================================================== */
-
-    const medicalScope =
-        classifyMedicalScope(
-            cleanMessage
-        );
-
-
-    /*
-       Do not terminate the conversation for individualized
-       medical requests.
-
-       Hello sets the boundary and redirects toward education,
-       options, questions, or navigation.
-    */
-
-    if (medicalScope === "INDIVIDUAL_CLINICAL") {
-
-        try {
-
-            const response =
-                await generateHelloResponse({
-
-                    message:
-                        cleanMessage,
-
-                    conversation,
-
-                    profile,
-
-                    mode:
-                        "CLINICAL_BOUNDARY",
-
-                    evidenceContext:
-                        "",
-
-                    evidenceAvailable:
-                        false
-
-                });
-
-
-            return res.status(200).json({
-
-                success: true,
-
-                route:
-                    "RED",
-
-                conversationIntent:
-                    "CLINICAL_BOUNDARY",
-
-                response,
-
-                showEvidence:
-                    false,
-
-                sources: [],
-
-                offerVisitPrep:
-                    true
-
-            });
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Clinical boundary error:",
-                error
-            );
-
-
-            return res.status(200).json({
-
-                success: true,
-
-                route:
-                    "RED",
-
-                conversationIntent:
-                    "CLINICAL_BOUNDARY",
-
-                response:
-                    "I can't determine a diagnosis, prescribe treatment, change medication, or decide whether a medical option is appropriate for you. I can help you understand the options generally, what the evidence says, and what questions could be useful to discuss with a healthcare professional.",
-
-                showEvidence:
-                    false,
-
-                sources: [],
-
-                offerVisitPrep:
-                    true
-
-            });
-
-        }
-
-    }
-
-
-    /* =====================================================
        SHOULD THIS QUESTION USE RESEARCH?
     ====================================================== */
-
-const needsResearch =
-    shouldRetrieveResearch(
-        cleanMessage,
-        conversationIntent
-    );
-
-const wantsEvidenceDisplay =
-    shouldDisplayEvidence(
-        cleanMessage
-    );
-
 
     /*
        Reflection, planning, organization, goal setting,
@@ -437,22 +1261,21 @@ const wantsEvidenceDisplay =
 
         }
 
-        catch (error) {
+        catch {
 
-            console.error(
-                "Hello conversation error:",
-                error
+            logHelloEvent(
+                requestId,
+                "HELLO_PROVIDER_UNAVAILABLE"
             );
 
 
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Hello is temporarily unavailable. Please try again."
-
-            });
+            return sendHelloError(
+                res,
+                500,
+                "HELLO_UNAVAILABLE",
+                "Hello is temporarily unavailable. Please try again.",
+                requestId
+            );
 
         }
 
@@ -563,11 +1386,11 @@ const wantsEvidenceDisplay =
 
         }
 
-        catch (error) {
+        catch {
 
-            console.error(
-                "Curated evidence response error:",
-                error
+            logHelloEvent(
+                requestId,
+                "CURATED_RESPONSE_FALLBACK"
             );
 
         }
@@ -782,11 +1605,11 @@ const synthesis =
 
     }
 
-    catch (error) {
+    catch {
 
-        console.error(
-            "Live evidence retrieval error:",
-            error
+        logHelloEvent(
+            requestId,
+            "RESEARCH_PIPELINE_FALLBACK"
         );
 
 
@@ -844,14 +1667,19 @@ const synthesis =
 
         catch {
 
-            return res.status(500).json({
+            logHelloEvent(
+                requestId,
+                "HELLO_PROVIDER_UNAVAILABLE"
+            );
 
-                success: false,
 
-                message:
-                    "Hello is temporarily unavailable. Please try again."
-
-            });
+            return sendHelloError(
+                res,
+                500,
+                "HELLO_UNAVAILABLE",
+                "Hello is temporarily unavailable. Please try again.",
+                requestId
+            );
 
         }
 
@@ -981,13 +1809,6 @@ Do not automatically explain study methodology, evidence grades, or limitations 
 
 
     if (!response.ok) {
-
-        console.error(
-            "OpenAI API error:",
-            data
-        );
-
-
         throw new Error(
             "Hello generation failed."
         );
@@ -1641,6 +2462,28 @@ When an appropriate tool is available:
 6. reflect afterward if useful
 
 Do not advertise tools randomly.
+
+=====================================================
+WELLNESS WHEEL CONTEXT
+=====================================================
+
+When wellnessContext is supplied, it contains subjective
+self-reflection ratings from the Wellness Wheel.
+
+You may acknowledge the user's selected dimension as an area
+they chose to explore when that context is relevant.
+
+Wellness Wheel dimensions are broad domains. They are not
+specific health-topic measurements. For example, a Physical
+Wellness rating does not specifically measure sleep, nutrition,
+movement, energy, or any other single factor.
+
+Never interpret a Wellness Wheel rating as evidence of disease,
+diagnosis, symptom severity, dysfunction, objectively poor health,
+or clinical risk.
+
+Do not assume that a lower rating identifies the user's most
+important priority. The user remains the decision-maker.
 
 =====================================================
 HEALTH EDUCATION
@@ -2579,22 +3422,15 @@ function buildConversationHistory(
     conversation
 ) {
 
-    if (!Array.isArray(conversation)) {
-        return "";
-    }
+    const safeConversation =
+        sanitizeConversationInput(
+            conversation
+        ) || [];
 
 
-    return conversation
-        .slice(-10)
+    return safeConversation
         .map(
             item => {
-
-                if (
-                    !item ||
-                    typeof item !== "object"
-                ) {
-                    return "";
-                }
 
 
                 const role =
@@ -2603,24 +3439,10 @@ function buildConversationHistory(
                         : "USER";
 
 
-                const content =
-                    typeof item.content === "string"
-                        ? item.content
-                            .trim()
-                            .slice(0, 1500)
-                        : "";
-
-
-                if (!content) {
-                    return "";
-                }
-
-
-                return `${role}: ${content}`;
+                return `${role}: ${item.content}`;
 
             }
         )
-        .filter(Boolean)
         .join("\n");
 
 }
@@ -2642,53 +3464,19 @@ function buildProfileContext(profile) {
     }
 
 
-    /*
-       Only use information the application deliberately
-       supplies.
+    const wellnessContext =
+        sanitizeWellnessContext(
+            profile
+        );
 
-       Do not infer missing traits.
 
-       This prepares Hello for future persistent profiles
-       without forcing you to implement storage yet.
-    */
-
-    const safeProfile = {
-
-        goals:
-            profile.goals || [],
-
-        values:
-            profile.values || [],
-
-        priorities:
-            profile.priorities || [],
-
-        barriers:
-            profile.barriers || [],
-
-        strengths:
-            profile.strengths || [],
-
-        preferences:
-            profile.preferences || [],
-
-        routines:
-            profile.routines || [],
-
-        strategiesTried:
-            profile.strategiesTried || [],
-
-        helpfulStrategies:
-            profile.helpfulStrategies || [],
-
-        toolsUsed:
-            profile.toolsUsed || []
-
-    };
+    if (!wellnessContext) {
+        return "";
+    }
 
 
     return JSON.stringify(
-        safeProfile,
+        { wellnessContext },
         null,
         2
     );

@@ -46,149 +46,7 @@
     background: #173d2b;
     color: #ffffff;
 }
-    
-/* =========================================================
-   CARE NAVIGATION
-========================================================= */
 
-function addCareOptions() {
-
-    const chat =
-        document.getElementById("helloChat");
-
-
-    /*
-        Keep this conversational instead of
-        treating professional care like a hard stop.
-    */
-
-    addMessage(
-        "If you'd like, I can also help you think through what kind of health professional might be useful, or help you organize questions for a visit.",
-        "assistant"
-    );
-
-
-    const row =
-        document.createElement("div");
-
-
-    row.className =
-        "hello-message-row assistant";
-
-
-    const options =
-        document.createElement("div");
-
-
-    options.className =
-        "hello-care-options";
-
-
-    /* =====================================
-       WHO COULD HELP
-    ====================================== */
-
-    const professionalButton =
-        document.createElement("button");
-
-
-    professionalButton.type =
-        "button";
-
-
-    professionalButton.className =
-        "hello-care-option";
-
-
-    professionalButton.textContent =
-        "Who could help with this?";
-
-
-    professionalButton.onclick =
-        function() {
-
-            row.remove();
-
-            explainCareNavigation();
-
-        };
-
-
-    /* =====================================
-       VISIT QUESTIONS
-    ====================================== */
-
-    const visitButton =
-        document.createElement("button");
-
-
-    visitButton.type =
-        "button";
-
-
-    visitButton.className =
-        "hello-care-option";
-
-
-    visitButton.textContent =
-        "Help me plan what to ask";
-
-
-    visitButton.onclick =
-        function() {
-
-            row.remove();
-
-            startVisitPrep();
-
-        };
-
-
-    options.appendChild(
-        professionalButton
-    );
-
-
-    options.appendChild(
-        visitButton
-    );
-
-
-    row.appendChild(
-        options
-    );
-
-
-    chat.appendChild(
-        row
-    );
-
-
-    chat.scrollTop =
-        chat.scrollHeight;
-
-}
-
-
-
-/* =========================================================
-   CARE NAVIGATION INTRO
-========================================================= */
-
-function explainCareNavigation() {
-
-    addMessage(
-        "Different health professionals can help with different parts of your health. Depending on the question, that might include a primary care professional, pharmacist, registered dietitian, physical therapist, mental health professional, or another specialist.",
-        "assistant"
-    );
-
-
-    addMessage(
-        "I can help you understand what these professionals do and which types of services may be worth exploring. We can also eventually look at nearby care or telehealth options.",
-        "assistant"
-    );
-
-}
 .hello-visit-summary {
     margin-top: 8px;
     padding: 20px;
@@ -1098,6 +956,7 @@ body {
                 <button
                     type="button"
                     class="hello-send-btn"
+                    id="helloSendButton"
                     onclick="handleSend()"
                 >
                     SEND →
@@ -1162,6 +1021,38 @@ let currentMode = "guided";
 let state = null;
 
 let lastAssistantSender = null;
+
+let askConversation = [];
+
+let askResponseSequence = 0;
+
+let careOptionResponseIds = new Set();
+
+let conversationGeneration = 0;
+
+let activeAskRequest = null;
+
+
+function getHelloApiEndpoint() {
+
+    const hostname =
+        window.location.hostname
+            .toLowerCase();
+
+
+    if (
+        hostname === "mysimplehealth.org" ||
+        hostname === "www.mysimplehealth.org"
+    ) {
+
+        return "https://my-simple-health.vercel.app/api/hello";
+
+    }
+
+
+    return "/api/hello";
+
+}
 
 
 
@@ -1291,10 +1182,231 @@ function saveState() {
 
 
 /* =========================================================
+   WELLNESS WHEEL PROFILE
+========================================================= */
+
+const helloWellnessDimensions = {
+    physical: "Physical Wellness",
+    emotional: "Emotional Wellness",
+    social: "Social Wellness",
+    occupational: "Occupational Wellness",
+    financial: "Financial Wellness",
+    environmental: "Environmental Wellness",
+    intellectual: "Intellectual Wellness",
+    spiritual: "Spiritual Wellness"
+};
+
+
+function getWellnessProfileForRequest() {
+
+    if (
+        !state ||
+        typeof state !== "object" ||
+        Array.isArray(state) ||
+        state.source !== "wellness-wheel"
+    ) {
+        return null;
+    }
+
+
+    const selectedEntry =
+        Object.entries(
+            helloWellnessDimensions
+        )
+        .find(
+            ([key, name]) =>
+                key === state.selectedDimensionKey &&
+                name === state.selectedDimension
+        );
+
+
+    if (
+        !selectedEntry ||
+        !isValidWellnessScore(
+            state.selectedScore
+        )
+    ) {
+        return null;
+    }
+
+
+    if (
+        !state.wheelScores ||
+        typeof state.wheelScores !== "object" ||
+        Array.isArray(state.wheelScores)
+    ) {
+        return null;
+    }
+
+
+    const [selectedKey] =
+        selectedEntry;
+
+
+    const wheelScores = {};
+
+
+    Object.keys(
+        helloWellnessDimensions
+    )
+    .forEach(key => {
+
+        const score =
+            state.wheelScores[key];
+
+
+        if (isValidWellnessScore(score)) {
+            wheelScores[key] = score;
+        }
+
+    });
+
+
+    if (
+        wheelScores[selectedKey] !==
+        state.selectedScore
+    ) {
+        return null;
+    }
+
+
+    return {
+        wellnessContext: {
+            source: "wellness-wheel",
+            selectedDimension:
+                state.selectedDimension,
+            selectedScore:
+                state.selectedScore,
+            wheelScores
+        }
+    };
+
+}
+
+
+function isValidWellnessScore(value) {
+
+    return (
+        typeof value === "number" &&
+        Number.isInteger(value) &&
+        value >= 1 &&
+        value <= 10
+    );
+
+}
+
+
+
+/* =========================================================
    CLEAR CHAT
 ========================================================= */
 
+function setAskPending(isPending) {
+
+    const input =
+        document.getElementById(
+            "helloInput"
+        );
+
+    const sendButton =
+        document.getElementById(
+            "helloSendButton"
+        );
+
+
+    if (input) {
+        input.disabled =
+            isPending;
+    }
+
+
+    if (sendButton) {
+        sendButton.disabled =
+            isPending;
+    }
+
+}
+
+
+function invalidateActiveAskRequest() {
+
+    conversationGeneration++;
+
+
+    if (activeAskRequest) {
+
+        if (
+            activeAskRequest.controller
+        ) {
+
+            activeAskRequest.controller.abort();
+
+        }
+
+
+        removeLoadingMessage(
+            activeAskRequest.loadingMessage
+        );
+
+
+        activeAskRequest =
+            null;
+
+    }
+
+
+    setAskPending(false);
+
+}
+
+
+function isAskRequestActive(request) {
+
+    return (
+        activeAskRequest === request &&
+        request.generation === conversationGeneration &&
+        currentMode === "ask"
+    );
+
+}
+
+
+function scheduleModeCallback(callback, delay) {
+
+    const generation =
+        conversationGeneration;
+
+    const mode =
+        currentMode;
+
+
+    setTimeout(
+        function() {
+
+            if (
+                generation !== conversationGeneration ||
+                mode !== currentMode
+            ) {
+
+                return;
+
+            }
+
+
+            callback();
+
+        },
+        delay
+    );
+
+}
+
+
 function clearChat() {
+
+    invalidateActiveAskRequest();
+
+    resetVisitPrepState();
 
     document
         .getElementById("helloChat")
@@ -1304,6 +1416,46 @@ function clearChat() {
 
     lastAssistantSender =
         null;
+
+
+    askConversation = [];
+
+    careOptionResponseIds = new Set();
+
+}
+
+
+
+/* =========================================================
+   ASK CONVERSATION HISTORY
+========================================================= */
+
+function getAskConversationForRequest() {
+
+    return askConversation
+        .filter(
+            item =>
+                item &&
+                typeof item === "object" &&
+                (
+                    item.role === "user" ||
+                    item.role === "assistant"
+                ) &&
+                typeof item.content === "string" &&
+                item.content.trim()
+        )
+        .map(
+            item => ({
+                role:
+                    item.role,
+
+                content:
+                    item.content
+                        .trim()
+                        .slice(0, 1500)
+            })
+        )
+        .slice(-10);
 
 }
 
@@ -1435,7 +1587,7 @@ function addMessage(
         chat.scrollHeight;
 
 }
-function showLoadingMessage() {
+function showLoadingMessage(requestId) {
 
     const chat =
         document.getElementById(
@@ -1451,7 +1603,7 @@ function showLoadingMessage() {
         "hello-message-row assistant";
 
     row.id =
-        "helloLoadingMessage";
+        `helloLoadingMessage-${requestId}`;
 
 
     const bubble =
@@ -1490,15 +1642,13 @@ row.appendChild(loadingGroup);
     chat.scrollTop =
         chat.scrollHeight;
 
+
+    return row;
+
 }
 
 
-function removeLoadingMessage() {
-
-    const loadingMessage =
-        document.getElementById(
-            "helloLoadingMessage"
-        );
+function removeLoadingMessage(loadingMessage) {
 
     if (
         loadingMessage
@@ -1513,10 +1663,8 @@ function removeLoadingMessage() {
 function addEvidenceDetails(data) {
 
     if (
-        !data.evidenceStrength &&
-        !data.whatWeKnow &&
-        !data.whatWeDontKnowYet &&
-        (!data.sources || data.sources.length === 0)
+        !data ||
+        data.showEvidence !== true
     ) {
 
         return;
@@ -1660,7 +1808,7 @@ if (
 
 
         heading.textContent =
-            "What we don't know yet";
+            "What we do not know yet";
 
 
         const text =
@@ -1691,12 +1839,77 @@ if (
 
 
     /* =====================================
-       SOURCES
+       IMPORTANT LIMITATIONS
     ====================================== */
 
     if (
-        Array.isArray(data.sources) &&
-        data.sources.length > 0
+        data.limitations
+    ) {
+
+        const section =
+            document.createElement(
+                "div"
+            );
+
+
+        section.className =
+            "hello-evidence-section";
+
+
+        const heading =
+            document.createElement(
+                "strong"
+            );
+
+
+        heading.textContent =
+            "Important limitations";
+
+
+        const text =
+            document.createElement(
+                "div"
+            );
+
+
+        text.textContent =
+            data.limitations;
+
+
+        section.appendChild(
+            heading
+        );
+
+
+        section.appendChild(
+            text
+        );
+
+
+        card.appendChild(
+            section
+        );
+
+    }
+
+
+    /* =====================================
+       SOURCES
+    ====================================== */
+
+    const sources =
+        Array.isArray(data.sources)
+            ? data.sources.filter(
+                source =>
+                    source &&
+                    typeof source === "object" &&
+                    !Array.isArray(source)
+            )
+            : [];
+
+
+    if (
+        sources.length > 0
     ) {
 
         const details =
@@ -1716,7 +1929,7 @@ if (
 
 
         summary.textContent =
-            `View sources (${data.sources.length})`;
+            `View sources (${sources.length})`;
 
 
         details.appendChild(
@@ -1724,7 +1937,7 @@ if (
         );
 
 
-        data.sources.forEach(
+        sources.forEach(
             source => {
 
                 const item =
@@ -1777,6 +1990,7 @@ if (
 
 
                 if (
+                    typeof source.evidenceDesign === "string" &&
                     source.evidenceDesign
                 ) {
 
@@ -1801,9 +2015,13 @@ if (
                 }
 
 
-                if (
-                    source.url
-                ) {
+                const safeUrl =
+                    getSafeEvidenceSourceUrl(
+                        source.url
+                    );
+
+
+                if (safeUrl) {
 
                     const link =
                         document.createElement(
@@ -1812,7 +2030,7 @@ if (
 
 
                     link.href =
-                        source.url;
+                        safeUrl;
 
 
                     link.target =
@@ -1861,6 +2079,49 @@ if (
 
     chat.scrollTop =
         chat.scrollHeight;
+
+}
+
+
+function getSafeEvidenceSourceUrl(value) {
+
+    if (
+        typeof value !== "string" ||
+        !value.trim()
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const url =
+            new URL(
+                value
+            );
+
+
+        if (
+            url.protocol === "https:" ||
+            url.protocol === "http:"
+        ) {
+
+            return url.href;
+
+        }
+
+    }
+
+    catch (error) {
+
+        return null;
+
+    }
+
+
+    return null;
 
 }
 
@@ -2121,7 +2382,7 @@ function handleGuidedResponse(
         reflectionSteps.length
     ) {
 
-        setTimeout(
+        scheduleModeCallback(
             showSummary,
             250
         );
@@ -2130,7 +2391,7 @@ function handleGuidedResponse(
 
     else {
 
-        setTimeout(
+        scheduleModeCallback(
             askGuidedQuestion,
             250
         );
@@ -2293,185 +2554,80 @@ function startAskMode() {
 
 
 /* =========================================================
-   LOCAL SAFETY / SCOPE ROUTER
-========================================================= */
-
-function classifyRequest(message) {
-
-    const text =
-        message
-            .toLowerCase()
-            .trim();
-
-
-    /* =========================================
-       SAFETY — MEDICAL EMERGENCY
-    ========================================== */
-
-    const medicalEmergencyPatterns = [
-
-        "severe chest pain",
-        "crushing chest pain",
-        "can't breathe",
-        "cannot breathe",
-        "difficulty breathing right now",
-        "signs of stroke",
-        "face drooping",
-        "passed out",
-        "unconscious",
-        "severe allergic reaction",
-        "heavy bleeding",
-        "severe bleeding"
-
-    ];
-
-
-    if (
-        medicalEmergencyPatterns.some(
-            pattern =>
-                text.includes(pattern)
-        )
-    ) {
-
-        return "SAFETY_MEDICAL";
-
-    }
-
-
-    /* =========================================
-       SAFETY — CRISIS
-    ========================================== */
-
-    const crisisPatterns = [
-
-        "i want to kill myself",
-        "i'm going to kill myself",
-        "i am going to kill myself",
-        "i want to die",
-        "hurt myself right now",
-        "harm myself right now",
-        "suicidal"
-
-    ];
-
-
-    if (
-        crisisPatterns.some(
-            pattern =>
-                text.includes(pattern)
-        )
-    ) {
-
-        return "SAFETY_CRISIS";
-
-    }
-
-
-    /* =========================================
-       RED
-    ========================================== */
-
-    const redPatterns = [
-
-        "diagnose me",
-        "what disease do i have",
-        "tell me what disease i have",
-        "do i have cancer",
-        "do i have diabetes",
-        "do i have depression",
-        "interpret my labs",
-        "interpret these labs",
-        "interpret my bloodwork",
-        "change my medication",
-        "change my dose",
-        "stop my medication",
-        "should i stop taking",
-        "should i stop my medication",
-        "prescribe me",
-        "prescribe medication",
-        "what dose should i take",
-        "am i medically cleared",
-        "clear me for exercise",
-        "tell me if it is safe for me to exercise"
-
-    ];
-
-
-    if (
-        redPatterns.some(
-            pattern =>
-                text.includes(pattern)
-        )
-    ) {
-
-        return "RED";
-
-    }
-
-
-    /* =========================================
-       YELLOW
-    ========================================== */
-
-    const yellowPatterns = [
-
-        "i have diabetes",
-        "i have hypertension",
-        "i have high blood pressure",
-        "i have heart disease",
-        "i have kidney disease",
-        "i have cancer",
-        "i am pregnant",
-        "i'm pregnant",
-        "my medication",
-        "my prescription",
-        "my lab",
-        "my bloodwork",
-        "my cholesterol",
-        "my glucose",
-        "my blood pressure",
-        "my doctor said",
-        "i was diagnosed",
-        "i have anxiety",
-        "i have depression",
-        "i have an eating disorder"
-
-    ];
-
-
-    if (
-        yellowPatterns.some(
-            pattern =>
-                text.includes(pattern)
-        )
-    ) {
-
-        return "YELLOW";
-
-    }
-
-
-    return "GREEN";
-
-}
-
-/* =========================================================
    LOCAL ROUTER RESPONSE
 ========================================================= */
 
 async function handleAskHello(value) {
+
+    if (activeAskRequest) {
+        return;
+    }
+
+
+    const responseId =
+        ++askResponseSequence;
+
+    const controller =
+        typeof AbortController === "function"
+            ? new AbortController()
+            : null;
+
+    const request = {
+        id:
+            responseId,
+
+        generation:
+            conversationGeneration,
+
+        controller,
+
+        loadingMessage:
+            null
+    };
+
+
+    activeAskRequest =
+        request;
+
+
+    setAskPending(true);
+
+    const conversation =
+        getAskConversationForRequest();
+
+    const profile =
+        getWellnessProfileForRequest();
+
+    const requestBody = {
+        message: value,
+        conversation
+    };
+
+
+    if (profile) {
+        requestBody.profile = profile;
+    }
 
     addMessage(
         value,
         "user"
     );
 
+    askConversation.push({
+        role: "user",
+        content: value
+    });
+
     try {
-        showLoadingMessage();
+
+        request.loadingMessage =
+            showLoadingMessage(
+                request.id
+            );
 
         const response =
             await fetch(
-             "https://my-simple-health.vercel.app/api/hello",
+                getHelloApiEndpoint(),
                 {
                     method: "POST",
 
@@ -2479,15 +2635,39 @@ async function handleAskHello(value) {
                         "Content-Type": "application/json"
                     },
 
-                    body: JSON.stringify({
-                        message: value
-                    })
+                    signal:
+                        controller
+                            ? controller.signal
+                            : undefined,
+
+                    body:
+                        JSON.stringify(
+                            requestBody
+                        )
                 }
             );
 
+
+        if (!isAskRequestActive(request)) {
+            return;
+        }
+
+
         const data =
             await response.json();
-        removeLoadingMessage();
+
+
+        if (!isAskRequestActive(request)) {
+            return;
+        }
+
+
+        removeLoadingMessage(
+            request.loadingMessage
+        );
+
+        request.loadingMessage =
+            null;
 
         if (!response.ok) {
 
@@ -2504,21 +2684,57 @@ async function handleAskHello(value) {
             data.response,
             "assistant"
          );
+
+        if (
+            typeof data.response === "string" &&
+            data.response.trim()
+        ) {
+
+            askConversation.push({
+                role: "assistant",
+                content: data.response
+            });
+
+        }
         
         addEvidenceDetails(data);
         
         if (
-            data.route === "YELLOW"
+            data.offerVisitPrep === true &&
+            data.stopNormalFlow !== true
         ) {
 
-            addCareOptions();
+            addCareOptions(responseId);
 
         }
 
     }
 
     catch (error) {
-removeLoadingMessage();
+
+        if (!isAskRequestActive(request)) {
+            return;
+        }
+
+
+        removeLoadingMessage(
+            request.loadingMessage
+        );
+
+        request.loadingMessage =
+            null;
+
+
+        if (
+            error &&
+            error.name === "AbortError"
+        ) {
+
+            return;
+
+        }
+
+
         addMessage(
             "Hello is having trouble connecting right now. Please try again.",
             "assistant"
@@ -2526,29 +2742,46 @@ removeLoadingMessage();
 
     }
 
-}
+    finally {
+
+        if (
+            activeAskRequest === request
+        ) {
+
+            removeLoadingMessage(
+                request.loadingMessage
+            );
 
 
-function getDisplayRoute(route) {
+            activeAskRequest =
+                null;
 
-    if (
-        route === "SAFETY_MEDICAL" ||
-        route === "SAFETY_CRISIS"
-    ) {
 
-        return "SAFETY";
+            setAskPending(false);
+
+        }
 
     }
 
-    return route;
-
 }
+
 
 /* =========================================================
    CARE NAVIGATION
 ========================================================= */
 
-function addCareOptions() {
+function addCareOptions(responseId) {
+
+    if (
+        careOptionResponseIds.has(responseId)
+    ) {
+
+        return;
+
+    }
+
+
+    careOptionResponseIds.add(responseId);
 
     const chat =
         document.getElementById("helloChat");
@@ -2717,51 +2950,25 @@ let visitPrepState = {
 };
 
 
-/* =========================================
-   ADD VISIT PREP BUTTON
-========================================== */
+function resetVisitPrepState() {
 
-function addVisitPrepButton() {
+    visitPrepState.active =
+        false;
 
-    const chat =
-        document.getElementById("helloChat");
+    visitPrepState.currentStep =
+        0;
 
+    visitPrepState.answers = {
 
-    const row =
-        document.createElement("div");
+        understand: "",
 
+        questions: "",
 
-    row.className =
-        "hello-message-row assistant";
+        bring: "",
 
+        followUp: ""
 
-    const button =
-        document.createElement("button");
-
-
-    button.type =
-        "button";
-
-
-    button.className =
-        "hello-visit-btn";
-
-
-    button.textContent =
-        "PREPARE FOR MY HEALTHCARE VISIT →";
-
-
-    button.onclick =
-        startVisitPrep;
-
-
-    row.appendChild(button);
-
-    chat.appendChild(row);
-
-
-    chat.scrollTop =
-        chat.scrollHeight;
+    };
 
 }
 
@@ -2873,7 +3080,7 @@ function handleVisitPrepResponse(value) {
         visitPrepSteps.length
     ) {
 
-        setTimeout(
+        scheduleModeCallback(
             showVisitPrepSummary,
             250
         );
@@ -2882,7 +3089,7 @@ function handleVisitPrepResponse(value) {
 
     else {
 
-        setTimeout(
+        scheduleModeCallback(
             askVisitPrepQuestion,
             250
         );
@@ -3010,6 +3217,17 @@ function handleSend() {
     if (!value) {
         return;
     }
+
+
+    if (
+        currentMode === "ask" &&
+        activeAskRequest
+    ) {
+
+        return;
+
+    }
+
 
     input.value = "";
 

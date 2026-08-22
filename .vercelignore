@@ -1,0 +1,4 @@
+tests/
+docs/
+AGENTS.md
+.env.example

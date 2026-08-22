@@ -384,13 +384,6 @@ Determine the final evidence-strength label based on what the abstracts actually
 
 
     if (!response.ok) {
-
-        console.error(
-            "Evidence synthesis API error:",
-            data
-        );
-
-
         throw new Error(
             "Evidence synthesis failed."
         );
@@ -431,12 +424,7 @@ Determine the final evidence-strength label based on what the abstracts actually
 
 }
 
-catch (error) {
-
-    console.error(
-        "Could not parse synthesis JSON:",
-        outputText
-    );
+catch {
 
     throw new Error(
         "Invalid synthesis output."

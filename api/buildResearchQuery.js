@@ -83,12 +83,6 @@ Return only the search query.
 
 
         if (!response.ok) {
-
-            console.error(
-                "Research query builder API error:",
-                data
-            );
-
             return cleanQuestion;
 
         }
@@ -114,13 +108,7 @@ Return only the search query.
 
     }
 
-    catch (error) {
-
-        console.error(
-            "Research query builder error:",
-            error
-        );
-
+    catch {
 
         /*
             Safe fallback:
