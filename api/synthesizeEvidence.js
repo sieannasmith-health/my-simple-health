@@ -267,11 +267,46 @@ Use exactly this structure:
     "agreement": "CONSISTENT",
     "summary": "Technical plain-language synthesis for the evidence engine.",
     "limitations": "Important limitations or uncertainty.",
-    "plainLanguageAnswer": "Brief conversational response for the user.",
-    "whatWeKnow": "What the supplied evidence supports with reasonable confidence.",
-    "whatWeDontKnowYet": "What remains uncertain, limited, or not established."
+    "plainLanguageAnswer": "Short user-facing answer in everyday language.",
+    "whatWeKnow": "What the evidence supports with reasonable confidence.",
+    "whatWeDontKnowYet": "What remains uncertain, limited, or not established.",
+    "relevantStatistic": {
+        "statistic": "A quantitative finding reported directly in the supplied research.",
+        "context": "A short conversational explanation of why this number may be useful."
+    }
+}
+For relevantStatistic:
+
+- Include a statistic only when it helps the user understand a constructive health or wellness topic, appreciate the potential value of a positive behavior, or make an evidence-supported concept easier to understand.
+
+- Prefer statistics that support health literacy, self-efficacy, informed reflection, or positive behavior change.
+
+- The statistic must come directly from the supplied research abstracts.
+
+- Never invent, estimate, calculate, extrapolate, or reconstruct a statistic that is not explicitly supported by the supplied research.
+
+- Preserve important context such as population, intervention, comparison, timeframe, and outcome when those details are necessary to interpret the statistic accurately.
+
+- Do not select a statistic merely because it is dramatic or attention-grabbing.
+
+- Avoid statistics whose primary effect would be fear, alarm, shame, or unnecessary risk amplification.
+
+- When the user's question involves fear, symptoms, diagnosis, prognosis, mortality, or personal medical risk, do not automatically provide a statistic. Prioritize understanding the user's question and providing appropriate education.
+
+- Write the context conversationally. Explain why the number matters rather than simply presenting it.
+
+- If no genuinely useful and well-supported statistic exists in the supplied research, return null.
+
+Example:
+
+"relevantStatistic": {
+    "statistic": "The research reported...",
+    "context": "That number is useful because..."
 }
 
+Or:
+
+"relevantStatistic": null
 FIELD RULES
 
 For summary:
@@ -440,6 +475,17 @@ whatWeKnow:
 whatWeDontKnowYet:
     parsed.whatWeDontKnowYet ||
     "",
+        relevantStatistic:
+    parsed.relevantStatistic &&
+    typeof parsed.relevantStatistic === "object"
+        ? {
+            statistic:
+                parsed.relevantStatistic.statistic || "",
+
+            context:
+                parsed.relevantStatistic.context || ""
+        }
+        : null,
 
         sources:
             usableStudies.map(
