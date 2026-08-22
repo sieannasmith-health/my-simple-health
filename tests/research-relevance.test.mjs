@@ -681,14 +681,21 @@ test(
 
 
 test(
-    "Hello plaintext normalization removes simple Markdown markers without interpreting HTML",
+    "Hello plaintext normalization removes simple Markdown markers and em dashes without interpreting HTML",
     () => {
 
         assert.equal(
             normalizeHelloPlainText(
-                "You **do not** need __special__ `formatting`. <strong>Safe text</strong>"
+                "You **do not** need __special__ `formatting`—just safe text. <strong>Safe text</strong>"
             ),
-            "You do not need special formatting. <strong>Safe text</strong>"
+            "You do not need special formatting-just safe text. <strong>Safe text</strong>"
+        );
+
+        assert.doesNotMatch(
+            normalizeHelloPlainText(
+                "Hello-generated text—without an em dash."
+            ),
+            /—/
         );
 
     }

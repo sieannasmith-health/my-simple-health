@@ -56,7 +56,7 @@ export const RESEARCH_STATES = Object.freeze({
 
 
 const NO_QUALIFYING_EVIDENCE_RESPONSE =
-    "I couldn't find enough directly relevant evidence to answer that question confidently. That doesn't mean no evidence exists—only that the research retrieved for this question didn't meet the relevance and applicability threshold. If you'd like, you can choose to broaden the research question or ask about a related, explicitly broader topic. I won't broaden the question unless you ask.";
+    "I couldn't find enough directly relevant evidence to answer that question confidently. That doesn't mean no evidence exists. It only means that the research retrieved for this question didn't meet the relevance and applicability threshold. If you'd like, you can choose to broaden the research question or ask about a related, explicitly broader topic. I won't broaden the question unless you ask.";
 
 const RESEARCH_UNAVAILABLE_RESPONSE =
     "I couldn't complete the research search well enough to answer that question confidently. That doesn't mean no evidence exists. You can try again, or choose to ask a broader or related question if you'd like.";
@@ -1818,6 +1818,10 @@ export function normalizeHelloPlainText(
 
     return String(value || "")
         .replace(
+            /—/g,
+            "-"
+        )
+        .replace(
             /\*\*([^*\n]+)\*\*/g,
             "$1"
         )
@@ -2154,7 +2158,7 @@ If corrected:
 
 Example:
 
-"You're right — I misunderstood what you meant.
+"You're right. I misunderstood what you meant.
 Thanks for correcting me."
 
 If you do not know something, say so.
@@ -2834,6 +2838,8 @@ Do not use Markdown headings in user-facing responses.
 
 Return plain text. Do not use Markdown emphasis markers,
 backticks, or other formatting syntax.
+
+Do not use em dashes.
 
 Do not overwhelm the user with information.
 

@@ -13,7 +13,7 @@
 
     <meta
         name="description"
-        content="Hello is the interactive health education and wellness guide from My Simple Health."
+        content="Hello is your My Simple Health guide to understanding health information and finding what fits your life."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -878,12 +878,11 @@ body {
             </p>
 
             <h1>
-                Hello.
+                Hello
             </h1>
 
             <p>
-                Explore your wellbeing, understand health information,
-                and identify realistic next steps.
+                Your guide to understanding health information and finding what fits your life.
             </p>
 
         </div>
@@ -998,7 +997,7 @@ body {
         ========================================== -->
 
         <div class="hello-note">
-            Hello is an evidence-informed health education prototype. 
+            Hello is My Simple Health’s evidence-informed health education guide.
             Responses may use AI-assisted synthesis of curated sources and scholarly research. 
             Hello does not diagnose, prescribe, or replace professional healthcare.
 
@@ -1301,7 +1300,7 @@ function isValidWellnessScore(value) {
    CLEAR CHAT
 ========================================================= */
 
-function setAskPending(isPending) {
+function setHelloControlsDisabled(isDisabled) {
 
     const input =
         document.getElementById(
@@ -1316,14 +1315,23 @@ function setAskPending(isPending) {
 
     if (input) {
         input.disabled =
-            isPending;
+            isDisabled;
     }
 
 
     if (sendButton) {
         sendButton.disabled =
-            isPending;
+            isDisabled;
     }
+
+}
+
+
+function setAskPending(isPending) {
+
+    setHelloControlsDisabled(
+        isPending
+    );
 
 }
 
@@ -2200,6 +2208,8 @@ function startGuidedReflection() {
 
     if (!state) {
 
+        setHelloControlsDisabled(true);
+
         context.classList.remove(
             "active"
         );
@@ -2214,9 +2224,15 @@ function startGuidedReflection() {
         );
 
 
+        addGuidedPrerequisiteAction();
+
+
         return;
 
     }
+
+
+    setHelloControlsDisabled(false);
 
 
     context.innerHTML = `
@@ -2265,6 +2281,47 @@ function startGuidedReflection() {
 
 
     askGuidedQuestion();
+
+}
+
+
+function addGuidedPrerequisiteAction() {
+
+    const chat =
+        document.getElementById(
+            "helloChat"
+        );
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    row.className =
+        "hello-message-row assistant";
+
+    link.className =
+        "hello-secondary-btn";
+
+    link.href =
+        "wellness-wheel.html";
+
+    link.textContent =
+        "GO TO WELLNESS WHEEL →";
+
+
+    row.appendChild(link);
+
+    chat.appendChild(row);
+
+    chat.scrollTop =
+        chat.scrollHeight;
 
 }
 
@@ -2521,6 +2578,8 @@ function restartReflection() {
 ========================================================= */
 
 function startAskMode() {
+
+    setHelloControlsDisabled(false);
 
     document
         .getElementById(
@@ -3216,6 +3275,16 @@ function handleSend() {
 
     if (!value) {
         return;
+    }
+
+
+    if (
+        currentMode === "guided" &&
+        !state
+    ) {
+
+        return;
+
     }
 
 
