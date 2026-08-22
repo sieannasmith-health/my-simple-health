@@ -1554,9 +1554,10 @@ function addEvidenceDetails(data) {
        EVIDENCE STRENGTH
     ====================================== */
 
-    if (
-        data.evidenceStrength
-    ) {
+if (
+    data.showEvidence &&
+    data.evidenceStrength
+) {
 
         const strength =
             document.createElement(
