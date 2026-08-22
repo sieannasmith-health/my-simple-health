@@ -45,6 +45,83 @@ const MODEL =
     "gpt-5.6-luna";
 
 
+export const RESEARCH_STATES = Object.freeze({
+    QUALIFYING_EVIDENCE:
+        "QUALIFYING_EVIDENCE",
+    NO_QUALIFYING_EVIDENCE:
+        "NO_QUALIFYING_EVIDENCE",
+    RESEARCH_UNAVAILABLE:
+        "RESEARCH_UNAVAILABLE"
+});
+
+
+const NO_QUALIFYING_EVIDENCE_RESPONSE =
+    "I couldn't find enough directly relevant evidence to answer that question confidently. That doesn't mean no evidence exists—only that the research retrieved for this question didn't meet the relevance and applicability threshold. If you'd like, you can choose to broaden the research question or ask about a related, explicitly broader topic. I won't broaden the question unless you ask.";
+
+const RESEARCH_UNAVAILABLE_RESPONSE =
+    "I couldn't complete the research search well enough to answer that question confidently. That doesn't mean no evidence exists. You can try again, or choose to ask a broader or related question if you'd like.";
+
+
+export function createNoQualifyingEvidenceResult({
+    medicalScope = "GENERAL"
+} = {}) {
+
+    return {
+        success: true,
+        route:
+            medicalScope === "MEDICAL_CONTEXT"
+                ? "YELLOW"
+                : "GREEN",
+        conversationIntent:
+            "HEALTH_EDUCATION",
+        response:
+            NO_QUALIFYING_EVIDENCE_RESPONSE,
+        researchState:
+            RESEARCH_STATES.NO_QUALIFYING_EVIDENCE,
+        evidenceStrength:
+            "INSUFFICIENT",
+        evidenceAvailable:
+            false,
+        showEvidence:
+            false,
+        sources: [],
+        offerVisitPrep:
+            medicalScope === "MEDICAL_CONTEXT"
+    };
+
+}
+
+
+function createResearchUnavailableResult({
+    conversationIntent,
+    medicalScope
+}) {
+
+    return {
+        success: true,
+        route:
+            medicalScope === "MEDICAL_CONTEXT"
+                ? "YELLOW"
+                : "GREEN",
+        conversationIntent,
+        response:
+            RESEARCH_UNAVAILABLE_RESPONSE,
+        researchState:
+            RESEARCH_STATES.RESEARCH_UNAVAILABLE,
+        evidenceStrength:
+            "INSUFFICIENT",
+        evidenceAvailable:
+            false,
+        showEvidence:
+            false,
+        sources: [],
+        offerVisitPrep:
+            medicalScope === "MEDICAL_CONTEXT"
+    };
+
+}
+
+
 const MAX_REQUEST_BODY_BYTES =
     96 * 1024;
 
@@ -1348,6 +1425,9 @@ export default async function handler(req, res) {
                 evidenceSource:
                     "MY_SIMPLE_HEALTH",
 
+                researchState:
+                    RESEARCH_STATES.QUALIFYING_EVIDENCE,
+
                 /*
                    Evidence is available underneath the
                    conversation, but the UI does not need
@@ -1444,57 +1524,11 @@ export default async function handler(req, res) {
     relevantStudies.length === 0
 ) {
 
-            const response =
-                await generateHelloResponse({
-
-                    message:
-                        cleanMessage,
-
-                    conversation,
-
-                    profile,
-
-                    mode:
-                        "LIMITED_EVIDENCE",
-
-                    evidenceContext:
-                        "",
-
-                    evidenceAvailable:
-                        false
-
-                });
-
-
-            return res.status(200).json({
-
-                success: true,
-
-                route:
-                    medicalScope === "MEDICAL_CONTEXT"
-                        ? "YELLOW"
-                        : "GREEN",
-
-                conversationIntent:
-                    "HEALTH_EDUCATION",
-
-                response,
-
-                evidenceStrength:
-                    "INSUFFICIENT",
-
-                evidenceAvailable:
-                    false,
-
-                showEvidence:
-                    false,
-
-                sources: [],
-
-                offerVisitPrep:
-                    medicalScope === "MEDICAL_CONTEXT"
-
-            });
+            return res.status(200).json(
+                createNoQualifyingEvidenceResult({
+                    medicalScope
+                })
+            );
 
         }
 
@@ -1598,6 +1632,9 @@ const synthesis =
             evidenceSource:
                 "LIVE_SCHOLARLY_RETRIEVAL",
 
+            researchState:
+                RESEARCH_STATES.QUALIFYING_EVIDENCE,
+
             offerVisitPrep:
                 medicalScope === "MEDICAL_CONTEXT"
 
@@ -1613,75 +1650,12 @@ const synthesis =
         );
 
 
-        try {
-
-            const response =
-                await generateHelloResponse({
-
-                    message:
-                        cleanMessage,
-
-                    conversation,
-
-                    profile,
-
-                    mode:
-                        "LIMITED_EVIDENCE",
-
-                    evidenceContext:
-                        "",
-
-                    evidenceAvailable:
-                        false
-
-                });
-
-
-            return res.status(200).json({
-
-                success: true,
-
-                route:
-                    medicalScope === "MEDICAL_CONTEXT"
-                        ? "YELLOW"
-                        : "GREEN",
-
+        return res.status(200).json(
+            createResearchUnavailableResult({
                 conversationIntent,
-
-                response,
-
-                evidenceStrength:
-                    "INSUFFICIENT",
-
-                evidenceAvailable:
-                    false,
-
-                showEvidence:
-                    false,
-
-                sources: []
-
-            });
-
-        }
-
-        catch {
-
-            logHelloEvent(
-                requestId,
-                "HELLO_PROVIDER_UNAVAILABLE"
-            );
-
-
-            return sendHelloError(
-                res,
-                500,
-                "HELLO_UNAVAILABLE",
-                "Hello is temporarily unavailable. Please try again.",
-                requestId
-            );
-
-        }
+                medicalScope
+            })
+        );
 
     }
 
@@ -3096,7 +3070,11 @@ function shouldRetrieveResearch(
         "what are the statistics",
         "what does the data show",
         "according to research",
-        "according to science"
+        "according to science",
+        "broaden the research question",
+        "broaden this research question",
+        "broaden the question",
+        "search more broadly"
 
     ];
 

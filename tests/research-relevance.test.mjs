@@ -9,8 +9,13 @@ import {
     buildResearchQuery
 } from "../api/buildResearchQuery.js";
 import {
+    createNoQualifyingEvidenceResult,
+    RESEARCH_STATES,
     normalizeHelloPlainText
 } from "../api/hello.js";
+import {
+    retrieveEvidence
+} from "../api/retrieveEvidence.js";
 import {
     deriveResearchConcepts,
     evaluateResearchConceptGate
@@ -685,6 +690,253 @@ test(
             ),
             "You do not need special formatting. <strong>Safe text</strong>"
         );
+
+    }
+);
+
+
+test(
+    "zero qualifying evidence returns a fixed non-claiming research result",
+    () => {
+
+        const result =
+            createNoQualifyingEvidenceResult();
+
+
+        assert.equal(
+            result.researchState,
+            RESEARCH_STATES.NO_QUALIFYING_EVIDENCE
+        );
+        assert.equal(result.evidenceAvailable, false);
+        assert.equal(result.showEvidence, false);
+        assert.deepEqual(result.sources, []);
+        assert.match(
+            result.response,
+            /couldn't find enough directly relevant evidence/i
+        );
+        assert.match(
+            result.response,
+            /doesn't mean no evidence exists/i
+        );
+        assert.match(
+            result.response,
+            /won't broaden the question unless you ask/i
+        );
+        assert.doesNotMatch(
+            result.response,
+            /studies (?:show|report|found)|research suggests|modest reductions|weight loss|calorie intake|medication/i
+        );
+
+    }
+);
+
+
+test(
+    "rejected study findings cannot leak into the zero-evidence response",
+    () => {
+
+        const rejectedStudies = [
+            study(
+                "40533200 Intermittent fasting and metabolic health",
+                "Some studies report modest reductions through weight loss, calorie intake, or medication changes."
+            ),
+            study(
+                "37827491 Intermittent energy restriction in obesity",
+                "This tangential finding must not reach the answer."
+            )
+        ];
+
+        const selected =
+            selectRelevantStudies(
+                rejectedStudies,
+                [
+                    result({
+                        studyNumber: 1,
+                        score: 95
+                    }),
+                    result({
+                        studyNumber: 2,
+                        score: 95
+                    })
+                ],
+                "What does the research say about time-restricted eating and blood pressure in adults?"
+            );
+
+        const response =
+            createNoQualifyingEvidenceResult()
+                .response;
+
+
+        assert.deepEqual(selected, []);
+        assert.doesNotMatch(response, /40533200|37827491/);
+        assert.doesNotMatch(response, /modest reductions|weight loss|calorie intake|medication changes|tangential finding/i);
+
+    }
+);
+
+
+test(
+    "one qualifying study still supports a deliberately limited synthesis",
+    { concurrency: false },
+    async () => {
+
+        const originalFetch = globalThis.fetch;
+        let synthesisInput = "";
+
+        globalThis.fetch = async (_url, options) => {
+            const body = JSON.parse(options.body);
+
+            if (
+                String(body.instructions).includes(
+                    "evidence-relevance screening layer"
+                )
+            ) {
+                return {
+                    ok: true,
+                    async json() {
+                        return {
+                            output_text: JSON.stringify({
+                                relevantStudies: [
+                                    result({
+                                        studyNumber: 1,
+                                        score: 96
+                                    })
+                                ]
+                            })
+                        };
+                    }
+                };
+            }
+
+            synthesisInput = body.input;
+
+            return {
+                ok: true,
+                async json() {
+                    return {
+                        output_text: JSON.stringify({
+                            evidenceStrength: "EMERGING",
+                            agreement: "LIMITED",
+                            summary: "One directly relevant study was found.",
+                            limitations: "Only one qualifying study was available.",
+                            plainLanguageAnswer: "The evidence is limited to one study.",
+                            whatWeKnow: "One qualifying study reported blood-pressure outcomes.",
+                            whatWeDontKnowYet: "Replication and broader applicability remain uncertain.",
+                            relevantStatistic: null
+                        })
+                    };
+                }
+            };
+        };
+
+        try {
+            const question =
+                "What does the research say about time-restricted eating and blood pressure in adults?";
+            const qualifyingStudy =
+                study(
+                    "900 Time-restricted eating and blood pressure in adults",
+                    "Adults followed a time-restricted eating intervention; systolic and diastolic blood pressure were measured."
+                );
+            const selected =
+                await filterEvidenceRelevance({
+                    question,
+                    studies: [qualifyingStudy]
+                });
+            const synthesis =
+                await synthesizeEvidence({
+                    question,
+                    studies: selected,
+                    preliminaryStrength: "EMERGING"
+                });
+
+
+            assert.equal(selected.length, 1);
+            assert.match(synthesisInput, /Time-restricted eating and blood pressure in adults/);
+            assert.equal(synthesis.evidenceStrength, "EMERGING");
+            assert.match(synthesis.limitations, /one qualifying study/i);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+
+    }
+);
+
+
+test(
+    "curated approved evidence remains a qualifying evidence source",
+    () => {
+
+        const approvedEvidence =
+            retrieveEvidence(
+                "What does fiber do?"
+            );
+
+
+        assert.ok(approvedEvidence.length > 0);
+        assert.equal(
+            RESEARCH_STATES.QUALIFYING_EVIDENCE,
+            "QUALIFYING_EVIDENCE"
+        );
+        assert.ok(
+            approvedEvidence.every(
+                source =>
+                    source.id &&
+                    source.title &&
+                    source.url
+            )
+        );
+
+    }
+);
+
+
+test(
+    "research broadening remains user-controlled and starts only with a new explicit request",
+    { concurrency: false },
+    async () => {
+
+        const originalFetch = globalThis.fetch;
+        let providerCalls = 0;
+        let providerInput = "";
+
+        globalThis.fetch = async (_url, options) => {
+            providerCalls += 1;
+            providerInput =
+                JSON.parse(options.body).input;
+
+            return {
+                ok: true,
+                async json() {
+                    return {
+                        output_text:
+                            "(adults) AND (intermittent fasting) AND (blood pressure OR hypertension)"
+                    };
+                }
+            };
+        };
+
+        try {
+            const noEvidenceResult =
+                createNoQualifyingEvidenceResult();
+
+
+            assert.equal(providerCalls, 0);
+            assert.match(
+                noEvidenceResult.response,
+                /choose to broaden/i
+            );
+
+
+            await buildResearchQuery(
+                "Please broaden the question to intermittent fasting and blood pressure in adults."
+            );
+
+
+            assert.equal(providerCalls, 1);
+            assert.match(providerInput, /Please broaden the question/i);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
 
     }
 );

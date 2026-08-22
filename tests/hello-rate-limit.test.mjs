@@ -129,6 +129,7 @@ function createResponse() {
 
 
 function createMockNetwork({
+    emptyPubMedResults = false,
     redisUnavailable = false,
     providerUnavailable = false
 } = {}) {
@@ -218,6 +219,32 @@ function createMockNetwork({
                                 next,
                                 expiration
                             ]
+                        };
+                    }
+                };
+
+            }
+
+
+            if (
+                emptyPubMedResults &&
+                requestUrl.includes(
+                    "eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+                )
+            ) {
+
+                call.type =
+                    "pubmed";
+
+
+                return {
+                    ok: true,
+
+                    async json() {
+                        return {
+                            esearchresult: {
+                                idlist: []
+                            }
                         };
                     }
                 };
@@ -557,6 +584,96 @@ test(
                 assert.equal(normalCommands.length, 6);
                 assert.equal(researchCommands.length, 6);
                 assert.equal(callsOfType(network, "openai").length, 5);
+
+            }
+        );
+
+
+        await t.test(
+            "zero PubMed results return the explicit no-qualifying-evidence result without final model generation",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        emptyPubMedResults: true
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does the research say about time-restricted eating and blood pressure in adults?"
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.researchState,
+                    "NO_QUALIFYING_EVIDENCE"
+                );
+                assert.equal(
+                    result.response.body.evidenceAvailable,
+                    false
+                );
+                assert.equal(
+                    result.response.body.showEvidence,
+                    false
+                );
+                assert.deepEqual(
+                    result.response.body.sources,
+                    []
+                );
+                assert.match(
+                    result.response.body.response,
+                    /doesn't mean no evidence exists/i
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /studies (?:show|report|found)|research suggests|modest reductions/i
+                );
+                assert.equal(
+                    callsOfType(network, "pubmed").length,
+                    1
+                );
+                assert.equal(
+                    callsOfType(network, "openai").length,
+                    1
+                );
+                assert.ok(
+                    callsOfType(network, "openai")
+                        .every(
+                            call =>
+                                !String(call.body).includes(
+                                    "CURRENT CONVERSATION MODE"
+                                )
+                        )
+                );
+
+
+                const broadened =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "Please broaden the research question to intermittent fasting and blood pressure in adults."
+                        },
+                        network
+                    });
+
+
+                assert.equal(broadened.response.statusCode, 200);
+                assert.equal(
+                    callsOfType(network, "pubmed").length,
+                    2
+                );
+                assert.equal(
+                    callsOfType(network, "openai").length,
+                    2
+                );
 
             }
         );
