@@ -61,6 +61,9 @@ ${study.journal}
 ABSTRACT:
 ${study.abstract}
 
+APPLICABILITY LIMITATIONS:
+${formatApplicabilityLimitations(study)}
+
 `
             )
             .join("\n");
@@ -140,6 +143,10 @@ Do not provide medical clearance.
 Do not replace professional healthcare.
 
 When evidence is limited, say so accurately without making the entire response sound like a disclaimer.
+
+When a study includes supplied applicability limitations, carry those
+limitations into the synthesis rather than silently generalizing the study
+population.
 
 EVIDENCE EVALUATION
 
@@ -499,6 +506,31 @@ whatWeDontKnowYet:
             )
 
     };
+
+}
+
+
+function formatApplicabilityLimitations(
+    study
+) {
+
+    if (
+        !Array.isArray(
+            study &&
+            study.applicabilityLimitations
+        ) ||
+        study.applicabilityLimitations.length === 0
+    ) {
+        return "None identified by the deterministic applicability gate.";
+    }
+
+
+    return study.applicabilityLimitations
+        .filter(item =>
+            typeof item === "string" &&
+            item.trim()
+        )
+        .join(" ");
 
 }
 

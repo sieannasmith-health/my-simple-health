@@ -22,6 +22,10 @@ import {
     isWellnessContextRelevantToQuestion,
     sanitizeWellnessContext
 } from "./wellnessContext.js";
+import {
+    deriveResearchConcepts,
+    evaluateResearchConceptGate
+} from "./researchConceptGate.js";
 
 
 const MINIMUM_RELEVANCE_SCORE = 80;
@@ -477,7 +481,8 @@ Screen these studies for actual relevance to the user's question.
     const relevantStudies =
         selectRelevantStudies(
             candidates,
-            parsed.relevantStudies
+            parsed.relevantStudies,
+            question
         );
 
 
@@ -488,7 +493,8 @@ Screen these studies for actual relevance to the user's question.
 
 export function selectRelevantStudies(
     candidates,
-    screeningResults
+    screeningResults,
+    question = ""
 ) {
 
     if (
@@ -503,81 +509,122 @@ export function selectRelevantStudies(
         new Set();
 
 
-    return [...screeningResults]
+    const researchConcepts =
+        deriveResearchConcepts(
+            question
+        );
+
+
+    const selectedStudies = [];
+
+
+    for (
+        const result of [...screeningResults]
         .sort(
             (a, b) =>
                 Number(b && b.relevanceScore) -
                 Number(a && a.relevanceScore)
         )
-        .filter(result => {
+    ) {
 
-            const score =
-                Number(
-                    result &&
-                    result.relevanceScore
-                );
-
-
-            if (
-                !result ||
-                !Number.isInteger(result.studyNumber) ||
-                result.studyNumber < 1 ||
-                result.studyNumber > candidates.length ||
-                !Number.isInteger(score) ||
-                score < MINIMUM_RELEVANCE_SCORE ||
-                score > 100 ||
-                !ALLOWED_POPULATION_MATCHES.has(
-                    result.populationMatch
-                ) ||
-                !ALLOWED_INTERVENTION_MATCHES.has(
-                    result.interventionMatch
-                ) ||
-                !ALLOWED_OUTCOME_MATCHES.has(
-                    result.outcomeMatch
-                ) ||
-                !ALLOWED_PURPOSE_MATCHES.has(
-                    result.studyPurposeMatch
-                ) ||
-                !ALLOWED_APPLICABILITY_MATCHES.has(
-                    result.contextualApplicability
-                ) ||
-                selectedStudyNumbers.has(
-                    result.studyNumber
-                )
-            ) {
-                return false;
-            }
-
-
-            selectedStudyNumbers.add(
-                result.studyNumber
+        const score =
+            Number(
+                result &&
+                result.relevanceScore
             );
 
 
-            return true;
+        if (
+            !result ||
+            !Number.isInteger(result.studyNumber) ||
+            result.studyNumber < 1 ||
+            result.studyNumber > candidates.length ||
+            !Number.isInteger(score) ||
+            score < MINIMUM_RELEVANCE_SCORE ||
+            score > 100 ||
+            !ALLOWED_POPULATION_MATCHES.has(
+                result.populationMatch
+            ) ||
+            !ALLOWED_INTERVENTION_MATCHES.has(
+                result.interventionMatch
+            ) ||
+            !ALLOWED_OUTCOME_MATCHES.has(
+                result.outcomeMatch
+            ) ||
+            !ALLOWED_PURPOSE_MATCHES.has(
+                result.studyPurposeMatch
+            ) ||
+            !ALLOWED_APPLICABILITY_MATCHES.has(
+                result.contextualApplicability
+            ) ||
+            selectedStudyNumbers.has(
+                result.studyNumber
+            )
+        ) {
+            continue;
+        }
 
-        })
-        .slice(
-            0,
-            MAX_RELEVANT_STUDIES
-        )
-        .map(result => ({
 
-            ...candidates[
+        const study =
+            candidates[
                 result.studyNumber - 1
-            ],
+            ];
+
+
+        const conceptGate =
+            evaluateResearchConceptGate({
+                question,
+                study,
+                concepts:
+                    researchConcepts
+            });
+
+
+        if (!conceptGate.passed) {
+            continue;
+        }
+
+
+        selectedStudyNumbers.add(
+            result.studyNumber
+        );
+
+
+        selectedStudies.push({
+
+            ...study,
 
             relevanceScore:
-                Number(
-                    result.relevanceScore
-                ),
+                score,
 
             relevanceReason:
                 typeof result.reason === "string"
                     ? result.reason
-                    : ""
+                    : "",
 
-        }));
+            deterministicConceptGate:
+                conceptGate.applied,
+
+            populationApplicability:
+                conceptGate.populationApplicability,
+
+            applicabilityLimitations:
+                conceptGate.applicabilityLimitations
+
+        });
+
+
+        if (
+            selectedStudies.length >=
+            MAX_RELEVANT_STUDIES
+        ) {
+            break;
+        }
+
+    }
+
+
+    return selectedStudies;
 
 }
 

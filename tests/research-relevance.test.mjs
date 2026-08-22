@@ -11,6 +11,13 @@ import {
 import {
     normalizeHelloPlainText
 } from "../api/hello.js";
+import {
+    deriveResearchConcepts,
+    evaluateResearchConceptGate
+} from "../api/researchConceptGate.js";
+import {
+    synthesizeEvidence
+} from "../api/synthesizeEvidence.js";
 
 
 function study(
@@ -182,13 +189,282 @@ test(
         for (const benchmark of benchmarkCases) {
             const selected = selectRelevantStudies(
                 benchmark.studies,
-                benchmark.screenings
+                benchmark.screenings,
+                benchmark.question
             );
 
             assert.deepEqual(
                 selected.map(item => item.title),
                 [benchmark.expectedTitle],
                 benchmark.domain
+            );
+        }
+
+    }
+);
+
+
+test(
+    "deterministic concept gate rejects the two broad live-failure equivalents even when the model calls them direct",
+    () => {
+
+        const question =
+            "What does the research say about time-restricted eating and blood pressure in adults?";
+
+
+        const candidates = [
+            {
+                ...study(
+                    "Effects of DASH diet with or without time-restricted eating in the management of stage 1 primary hypertension"
+                ),
+                pmid: "38886740",
+                abstract:
+                    "Adults with stage 1 hypertension were assigned to DASH with or without time-restricted eating. Time-restricted eating plus DASH reduced blood pressure during the trial."
+            },
+            {
+                ...study(
+                    "Intermittent fasting strategies and their effects on body weight and cardiometabolic risk factors"
+                ),
+                pmid: "40533200",
+                abstract:
+                    "This network meta-analysis evaluated intermittent fasting strategies for body weight and cardiometabolic risk factors in adults. Strategies included time-restricted eating and alternate-day fasting. Time-restricted eating and blood pressure were included among many secondary comparisons."
+            },
+            {
+                ...study(
+                    "Intermittent energy restriction compared with continuous energy restriction for body composition and cardiometabolic risk markers"
+                ),
+                pmid: "37827491",
+                abstract:
+                    "This review examined intermittent energy restriction, body composition, and general cardiometabolic risk markers in adults. Time-restricted eating was mentioned as one form of intermittent energy restriction. Time-restricted eating and blood pressure were not the review's specific purpose."
+            }
+        ];
+
+
+        const selected =
+            selectRelevantStudies(
+                candidates,
+                [
+                    result({ studyNumber: 1, score: 92 }),
+                    result({ studyNumber: 2, score: 99 }),
+                    result({ studyNumber: 3, score: 98 })
+                ],
+                question
+            );
+
+
+        assert.deepEqual(
+            selected.map(item => item.pmid),
+            ["38886740"]
+        );
+
+        assert.equal(
+            selected[0].deterministicConceptGate,
+            true
+        );
+
+        assert.equal(
+            selected[0].populationApplicability,
+            "NARROW_RELEVANT"
+        );
+
+        assert.match(
+            selected[0].applicabilityLimitations[0],
+            /people with hypertension/
+        );
+
+    }
+);
+
+
+test(
+    "TRE and blood-pressure synonyms must be directly present and linked",
+    () => {
+
+        const question =
+            "What does the research say about time-restricted eating and blood pressure in adults?";
+
+
+        const cases = [
+            {
+                name: "TRE plus blood pressure passes",
+                study: study(
+                    "Time-restricted eating and blood pressure in adults",
+                    "Time-restricted eating was evaluated against blood pressure outcomes in adults."
+                ),
+                passed: true
+            },
+            {
+                name: "TRE plus systolic and diastolic BP passes",
+                study: study(
+                    "Time-restricted eating in adults",
+                    "TRE was evaluated for systolic BP and diastolic BP."
+                ),
+                passed: true
+            },
+            {
+                name: "TRE without a blood-pressure outcome fails",
+                study: study(
+                    "Time-restricted eating and body weight in adults",
+                    "TRE was evaluated for weight loss and body composition."
+                ),
+                passed: false
+            },
+            {
+                name: "blood pressure plus general intermittent fasting fails",
+                study: study(
+                    "Intermittent fasting and blood pressure in adults",
+                    "Intermittent fasting was evaluated for blood pressure outcomes."
+                ),
+                passed: false
+            },
+            {
+                name: "intermittent energy restriction does not substitute for TRE",
+                study: study(
+                    "Intermittent energy restriction and blood pressure in adults",
+                    "Intermittent energy restriction was evaluated for systolic blood pressure."
+                ),
+                passed: false
+            }
+        ];
+
+
+        for (const testCase of cases) {
+            const assessment =
+                evaluateResearchConceptGate({
+                    question,
+                    study:
+                        testCase.study
+                });
+
+
+            assert.equal(
+                assessment.passed,
+                testCase.passed,
+                testCase.name
+            );
+        }
+
+    }
+);
+
+
+test(
+    "narrow clinical populations pass only with direct concepts and an applicability flag",
+    () => {
+
+        const question =
+            "What does the research say about time-restricted eating and blood pressure in adults?";
+
+
+        const directNarrowStudy =
+            evaluateResearchConceptGate({
+                question,
+                study: study(
+                    "Time-restricted eating and blood pressure in adults with hypertension",
+                    "Adults with hypertension used time-restricted eating, and blood pressure was measured."
+                )
+            });
+
+
+        assert.equal(
+            directNarrowStudy.passed,
+            true
+        );
+
+        assert.equal(
+            directNarrowStudy.populationApplicability,
+            "NARROW_RELEVANT"
+        );
+
+        assert.match(
+            directNarrowStudy.applicabilityLimitations[0],
+            /people with hypertension/
+        );
+
+
+        const narrowButTangential =
+            evaluateResearchConceptGate({
+                question,
+                study: study(
+                    "Intermittent fasting in adults with hypertension",
+                    "Adults with hypertension used intermittent fasting, and blood pressure was measured."
+                )
+            });
+
+
+        assert.equal(
+            narrowButTangential.passed,
+            false
+        );
+
+    }
+);
+
+
+test(
+    "adult research questions reject child-only populations",
+    () => {
+
+        const assessment =
+            evaluateResearchConceptGate({
+                question:
+                    "Does walking improve mood in adults?",
+                study: study(
+                    "Walking and mood in children",
+                    "Walking improved mood outcomes in children."
+                )
+            });
+
+
+        assert.equal(
+            assessment.passed,
+            false
+        );
+
+        assert.equal(
+            assessment.populationApplicability,
+            "POPULATION_MISMATCH"
+        );
+
+    }
+);
+
+
+test(
+    "controlled catalog derives structured concepts across all benchmark domains",
+    () => {
+
+        const questions = [
+            "Does dietary fiber affect cholesterol in adults?",
+            "Does walking improve mood in adults?",
+            "Do consistent sleep schedules improve wellbeing in adults?",
+            "Does mindfulness reduce perceived stress in adults?",
+            "Does sunscreen prevent skin cancer in adults?",
+            "Does red-light therapy improve muscle recovery in adults?"
+        ];
+
+
+        for (const question of questions) {
+            const concepts =
+                deriveResearchConcepts(
+                    question
+                );
+
+
+            assert.equal(
+                concepts.structured,
+                true,
+                question
+            );
+
+            assert.ok(
+                concepts.interventions.length > 0,
+                question
+            );
+
+            assert.ok(
+                concepts.outcomes.length > 0,
+                question
             );
         }
 
@@ -320,6 +596,77 @@ test(
             assert.match(requestBody.instructions, /intervention or exposure/);
             assert.match(requestBody.instructions, /outcome/);
             assert.match(requestBody.instructions, /intermittent fasting should not replace/);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+
+    }
+);
+
+
+test(
+    "deterministic population limitations are supplied to evidence synthesis",
+    { concurrency: false },
+    async () => {
+
+        const originalFetch = globalThis.fetch;
+        let requestBody;
+
+
+        globalThis.fetch = async (_url, options) => {
+            requestBody = JSON.parse(options.body);
+
+
+            return {
+                ok: true,
+                async json() {
+                    return {
+                        output_text: JSON.stringify({
+                            evidenceStrength: "EMERGING",
+                            agreement: "LIMITED",
+                            summary: "Mock synthesis.",
+                            limitations: "Narrow population.",
+                            plainLanguageAnswer: "Mock answer.",
+                            whatWeKnow: "Mock known finding.",
+                            whatWeDontKnowYet: "Mock uncertainty.",
+                            relevantStatistic: null
+                        })
+                    };
+                }
+            };
+        };
+
+
+        try {
+            await synthesizeEvidence({
+                question:
+                    "What does the research say about time-restricted eating and blood pressure in adults?",
+                studies: [
+                    {
+                        ...study(
+                            "Time-restricted eating and blood pressure in adults with hypertension"
+                        ),
+                        url:
+                            "https://pubmed.ncbi.nlm.nih.gov/100/",
+                        applicabilityLimitations: [
+                            "The study population is limited to people with hypertension; do not silently generalize the finding beyond that population."
+                        ]
+                    }
+                ],
+                preliminaryStrength:
+                    "EMERGING"
+            });
+
+
+            assert.match(
+                requestBody.input,
+                /study population is limited to people with hypertension/
+            );
+
+            assert.match(
+                requestBody.instructions,
+                /carry those\s+limitations into the synthesis/
+            );
         } finally {
             globalThis.fetch = originalFetch;
         }
