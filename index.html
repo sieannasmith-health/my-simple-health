@@ -82,39 +82,305 @@
      HOME HERO
 ========================================== -->
 
-<section class="home-hero">
+<section class="home-hero home-hero-new">
 
     <div class="hero-text">
 
-        <p>
-            HEALTH EDUCATION • HEALTH PROMOTION
+        <p class="section-label">
+            WELCOME TO MY SIMPLE HEALTH
         </p>
 
-        <h2>
-            Practical knowledge.<br>
-            Healthier living.
-        </h2>
+        <h1>
+            Your health.<br>
+            Made simpler.
+        </h1>
 
-<p>
-    Practical, science-based health information designed to help you
-    better understand nutrition, movement, sleep, stress, behavior change,
-    and everyday wellbeing.
-</p>
+        <p class="hero-intro">
+            Explore your wellbeing, understand your health,
+            and discover realistic ways to move toward
+            what matters to you.
+        </p>
 
-        <a href="topics.html">
-            Explore Topics
-        </a>
+        <div class="hero-actions">
+
+            <a
+                class="hero-primary-button"
+                href="hello.html"
+            >
+                Talk to Hello →
+            </a>
+
+            <a
+                class="hero-secondary-button"
+                href="#start-with-you"
+            >
+                Start with you
+            </a>
+
+        </div>
 
     </div>
 
-    <img
-        src="hero-home.png"
-        alt="Healthy lifestyle essentials including food, movement, and health education"
-    >
+
+    <div class="hero-visual">
+
+        <img
+            src="hero-home.png"
+            alt="Everyday wellbeing and healthy living"
+        >
+
+    </div>
 
 </section>
 
 
+<!-- =========================================
+     START WITH YOU
+========================================== -->
+
+<section
+    class="home-tools-section"
+    id="start-with-you"
+>
+
+    <div class="home-tools-heading">
+
+        <div>
+
+            <p class="section-label">
+                START WITH YOU
+            </p>
+
+            <h2>
+                What would you like to explore?
+            </h2>
+
+            <p>
+                Try a simple activity, learn something about yourself,
+                or start with whatever feels useful today.
+            </p>
+
+        </div>
+
+
+        <div class="home-tools-controls">
+
+            <button
+                type="button"
+                aria-label="Previous tools"
+                onclick="scrollHomeTools(-1)"
+            >
+                ‹
+            </button>
+
+            <button
+                type="button"
+                aria-label="Next tools"
+                onclick="scrollHomeTools(1)"
+            >
+                ›
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="home-tools-carousel"
+        id="homeToolsCarousel"
+    >
+
+
+        <!-- HELLO -->
+
+        <a
+            class="home-tool-card home-tool-card-featured"
+            href="hello.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-regular fa-comments"></i>
+            </div>
+
+            <span>
+                TALK IT THROUGH
+            </span>
+
+            <h3>
+                Hello
+            </h3>
+
+            <p>
+                Ask a question, explore what's getting in the way,
+                or figure out a realistic next step.
+            </p>
+
+            <strong>
+                Talk to Hello →
+            </strong>
+
+        </a>
+
+
+        <!-- WELLNESS WHEEL -->
+
+        <a
+            class="home-tool-card"
+            href="assessments.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+
+            <span>
+                CHECK IN
+            </span>
+
+            <h3>
+                Wellness Wheel
+            </h3>
+
+            <p>
+                Step back and explore the different areas
+                of your wellbeing.
+            </p>
+
+            <strong>
+                Check in with yourself →
+            </strong>
+
+        </a>
+
+
+        <!-- LIFE VISION -->
+
+        <a
+            class="home-tool-card"
+            href="resources.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-regular fa-compass"></i>
+            </div>
+
+            <span>
+                LOOK AHEAD
+            </span>
+
+            <h3>
+                Life Vision
+            </h3>
+
+            <p>
+                Explore what you want your health and wellbeing
+                to help make possible.
+            </p>
+
+            <strong>
+                Create your vision →
+            </strong>
+
+        </a>
+
+
+        <!-- VALUES -->
+
+        <a
+            class="home-tool-card"
+            href="resources.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-regular fa-heart"></i>
+            </div>
+
+            <span>
+                WHAT MATTERS
+            </span>
+
+            <h3>
+                Values
+            </h3>
+
+            <p>
+                Get clearer about what matters to you
+                and what you want your choices to support.
+            </p>
+
+            <strong>
+                Explore your values →
+            </strong>
+
+        </a>
+
+
+        <!-- GOALS -->
+
+        <a
+            class="home-tool-card"
+            href="resources.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-solid fa-bullseye"></i>
+            </div>
+
+            <span>
+                MOVE FORWARD
+            </span>
+
+            <h3>
+                Goals &amp; Milestones
+            </h3>
+
+            <p>
+                Turn something important into realistic
+                steps you can actually work toward.
+            </p>
+
+            <strong>
+                Build a goal →
+            </strong>
+
+        </a>
+
+
+        <!-- WELLBEING TOOLBOX -->
+
+        <a
+            class="home-tool-card"
+            href="resources.html"
+        >
+
+            <div class="home-tool-icon">
+                <i class="fa-solid fa-toolbox"></i>
+            </div>
+
+            <span>
+                BUILD YOUR TOOLBOX
+            </span>
+
+            <h3>
+                Wellbeing Toolbox
+            </h3>
+
+            <p>
+                Discover strategies and resources you can
+                return to when you need them.
+            </p>
+
+            <strong>
+                Explore your toolbox →
+            </strong>
+
+        </a>
+
+
+    </div>
+
+</section>
 
 <!-- =========================================
      HEALTH TOPICS
