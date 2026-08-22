@@ -361,11 +361,16 @@ export default async function handler(req, res) {
        SHOULD THIS QUESTION USE RESEARCH?
     ====================================================== */
 
-    const needsEvidence =
-        shouldRetrieveEvidence(
-            cleanMessage,
-            conversationIntent
-        );
+const needsResearch =
+    shouldRetrieveResearch(
+        cleanMessage,
+        conversationIntent
+    );
+
+const wantsEvidenceDisplay =
+    shouldDisplayEvidence(
+        cleanMessage
+    );
 
 
     /*
@@ -377,8 +382,8 @@ export default async function handler(req, res) {
        information becomes relevant.
     */
 
-    if (!needsEvidence) {
-
+   if (!needsResearch) {
+       
         try {
 
             const response =
@@ -521,9 +526,8 @@ export default async function handler(req, res) {
                    conversation, but the UI does not need
                    to automatically expand it.
                 */
-
-                showEvidence:
-                    false,
+              showEvidence:
+             wantsEvidenceDisplay,
 
                 evidenceAvailable:
                     true,
@@ -747,7 +751,7 @@ export default async function handler(req, res) {
                 true,
 
             showEvidence:
-                false,
+                wantsEvidenceDisplay,
 
             sources:
                 synthesis.sources,
@@ -2146,23 +2150,10 @@ function classifyConversationIntent(message) {
 /* =========================================================
    SHOULD WE RETRIEVE HEALTH EVIDENCE?
 ========================================================= */
-
-function shouldRetrieveEvidence(
+function shouldRetrieveResearch(
     message,
     conversationIntent
 ) {
-
-    if (
-        conversationIntent === "RELATIONAL" ||
-        conversationIntent === "BOUNDARY" ||
-        conversationIntent === "ACTION" ||
-        conversationIntent === "REFLECTION"
-    ) {
-
-        return false;
-
-    }
-
 
     const text =
         message
@@ -2170,74 +2161,150 @@ function shouldRetrieveEvidence(
             .trim();
 
 
-    const healthKnowledgeSignals = [
+    /*
+       These conversational modes should normally stay
+       human-first rather than automatically triggering
+       scholarly research.
+    */
 
-        "health",
-        "nutrition",
-        "protein",
-        "fiber",
-        "carbohydrate",
-        "carbs",
-        "fat",
-        "vitamin",
-        "mineral",
-        "creatine",
-        "supplement",
-        "exercise",
-        "fitness",
-        "strength training",
-        "cardio",
-        "sleep",
-        "stress",
-        "metabolic",
-        "metabolism",
-        "glucose",
-        "cholesterol",
-        "blood pressure",
-        "diabetes",
-        "heart",
-        "kidney",
-        "cancer",
-        "medication",
-        "medicine",
-        "drug",
-        "glp-1",
-        "glp1",
-        "semaglutide",
-        "tirzepatide",
-        "peptide",
-        "therapy",
-        "treatment",
-        "research",
-        "study",
-        "studies",
-        "evidence",
-        "science",
-        "scientific",
-        "risk",
-        "benefit",
-        "side effect",
-        "symptom",
-        "disease",
-        "condition",
-        "diagnosis",
-        "prevention",
-        "wellness",
-        "recovery",
-        "wearable",
-        "continuous glucose monitor",
-        "cgm"
+    const humanFirstIntents = [
+        "EMOTIONAL_SUPPORT",
+        "CONFLICT",
+        "REFLECTION",
+        "GOAL_SETTING",
+        "PLANNING",
+        "ORGANIZATION",
+        "ACCOUNTABILITY",
+        "RESOURCEFULNESS"
+    ];
+
+
+    if (
+        humanFirstIntents.includes(
+            conversationIntent
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       Explicit requests for scientific or factual
+       health information should use research.
+    */
+
+    const researchPatterns = [
+
+        "what does the research say",
+        "what does research say",
+        "what does the evidence say",
+        "what does science say",
+        "what do studies show",
+        "what do studies say",
+        "is there evidence",
+        "is there research",
+        "show me the evidence",
+        "show me the research",
+        "show me the studies",
+        "what are the statistics",
+        "what does the data show",
+        "according to research",
+        "according to science"
 
     ];
 
 
-    return healthKnowledgeSignals.some(
-        signal =>
-            text.includes(signal)
+    if (
+        researchPatterns.some(
+            pattern =>
+                text.includes(pattern)
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+       Structured factual health questions can use
+       research even when the user did not explicitly
+       ask to see citations.
+    */
+
+    const factualHealthPatterns = [
+
+        "what is ",
+        "what are ",
+        "how does ",
+        "how do ",
+        "does ",
+        "can ",
+        "why does ",
+        "why do ",
+        "benefits of",
+        "risks of",
+        "effects of",
+        "difference between",
+        "how much",
+        "how often"
+
+    ];
+
+
+    return factualHealthPatterns.some(
+        pattern =>
+            text.startsWith(pattern) ||
+            text.includes(pattern)
     );
 
 }
 
+
+/* =========================================================
+   SHOULD THE USER SEE THE EVIDENCE?
+========================================================= */
+
+function shouldDisplayEvidence(message) {
+
+    const text =
+        message
+            .toLowerCase()
+            .trim();
+
+
+    const evidenceDisplayPatterns = [
+
+        "show me the evidence",
+        "what does the evidence say",
+        "show me the research",
+        "what does the research say",
+        "show me the studies",
+        "what studies",
+        "show me your sources",
+        "what are your sources",
+        "give me the sources",
+        "where did you get that",
+        "where does that come from",
+        "how strong is the evidence",
+        "is there evidence for",
+        "is there research on",
+        "what do studies show",
+        "what does science say",
+        "give me the statistics",
+        "what are the statistics"
+
+    ];
+
+
+    return evidenceDisplayPatterns.some(
+        pattern =>
+            text.includes(pattern)
+    );
+
+}
 
 /* =========================================================
    MEDICAL SCOPE
