@@ -55,6 +55,26 @@ Create a PubMed-friendly search expression using:
 
 Preserve the meaning of the user's question.
 
+First identify any explicitly stated:
+- population
+- intervention or exposure
+- outcome
+
+Preserve each stated core concept as its own AND-connected concept group.
+Use OR only for close synonyms within the same concept group.
+
+Do not replace a specific intervention with a broader category alone.
+For example, time-restricted eating may include close synonyms such as
+time-restricted feeding, but intermittent fasting should not replace the
+specific time-restricted-eating concept.
+
+Do not replace a requested outcome with adjacent outcomes.
+For example, blood pressure should remain an explicit query concept rather
+than being replaced by weight loss, metabolic health, or cardiovascular risk.
+
+When the user asks about adults generally, do not add a disease-specific
+population that the user did not request.
+
 Do not:
 - answer the question
 - diagnose
@@ -64,7 +84,8 @@ Do not:
 - include Markdown
 - include quotation marks around the entire output
 
-Prefer a query broad enough to retrieve systematic reviews, meta-analyses, randomized trials, and other relevant human research.
+Prefer a query broad enough to retrieve relevant human study designs without
+dropping the user's explicit population, intervention/exposure, or outcome.
 
 Return only the search query.
 `,

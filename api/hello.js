@@ -1831,7 +1831,30 @@ Do not automatically explain study methodology, evidence grades, or limitations 
     }
 
 
-    return outputText;
+    return normalizeHelloPlainText(
+        outputText
+    );
+
+}
+
+
+export function normalizeHelloPlainText(
+    value
+) {
+
+    return String(value || "")
+        .replace(
+            /\*\*([^*\n]+)\*\*/g,
+            "$1"
+        )
+        .replace(
+            /__([^_\n]+)__/g,
+            "$1"
+        )
+        .replace(
+            /`([^`\n]+)`/g,
+            "$1"
+        );
 
 }
 
@@ -2834,6 +2857,9 @@ Keep most answers concise.
 Use bullets only when they genuinely improve clarity.
 
 Do not use Markdown headings in user-facing responses.
+
+Return plain text. Do not use Markdown emphasis markers,
+backticks, or other formatting syntax.
 
 Do not overwhelm the user with information.
 

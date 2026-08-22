@@ -24,6 +24,35 @@ import {
 } from "./wellnessContext.js";
 
 
+const MINIMUM_RELEVANCE_SCORE = 80;
+
+const MAX_RELEVANT_STUDIES = 3;
+
+const ALLOWED_POPULATION_MATCHES = new Set([
+    "DIRECT",
+    "REASONABLY_APPLICABLE"
+]);
+
+const ALLOWED_INTERVENTION_MATCHES = new Set([
+    "DIRECT"
+]);
+
+const ALLOWED_OUTCOME_MATCHES = new Set([
+    "DIRECT",
+    "SECONDARY_MEANINGFUL"
+]);
+
+const ALLOWED_PURPOSE_MATCHES = new Set([
+    "DIRECT",
+    "SUPPORTING"
+]);
+
+const ALLOWED_APPLICABILITY_MATCHES = new Set([
+    "DIRECT",
+    "REASONABLY_APPLICABLE"
+]);
+
+
 export async function filterEvidenceRelevance({
     question,
     studies,
@@ -219,6 +248,43 @@ Would including this study improve the usefulness or accuracy of the answer?
 If not, exclude it.
 
 =====================================================
+STRICT MATCHING GATE
+=====================================================
+
+Assess each study separately across all five dimensions:
+
+- populationMatch
+- interventionMatch
+- outcomeMatch
+- studyPurposeMatch
+- contextualApplicability
+
+Use only the exact labels defined in the output contract.
+
+A study normally qualifies only when:
+
+- the population directly matches or is reasonably applicable
+- the intervention or exposure directly matches
+- the requested outcome is directly measured or is a meaningful
+  prespecified/clearly reported secondary outcome
+- the study purpose directly addresses or strongly supports the question
+- the study context is directly or reasonably applicable
+
+Exclude a study when any core concept is merely tangential.
+
+For example, when the question asks about time-restricted eating and
+blood pressure in adults:
+
+- intermittent fasting generally is not a direct intervention match
+- weight loss or metabolic health alone is not a blood-pressure match
+- a blood-pressure mention that is incidental is tangential
+- a highly specific clinical population is limited unless the question
+  asks about that population or applicability is clearly justified
+
+Do not use a broad review to fill the evidence set when it does not
+meaningfully evaluate the specific intervention and outcome.
+
+=====================================================
 DO NOT FORCE EVIDENCE
 =====================================================
 
@@ -255,6 +321,11 @@ Use exactly this structure:
         {
             "studyNumber": 1,
             "relevanceScore": 95,
+            "populationMatch": "DIRECT",
+            "interventionMatch": "DIRECT",
+            "outcomeMatch": "DIRECT",
+            "studyPurposeMatch": "DIRECT",
+            "contextualApplicability": "DIRECT",
             "reason": "Directly examines the behavior and outcome asked about."
         }
     ]
@@ -262,25 +333,46 @@ Use exactly this structure:
 
 relevanceScore must be an integer from 0 to 100.
 
-Use this general interpretation:
+Use these exact match labels:
 
-90–100:
-Directly answers the question.
+populationMatch:
+- DIRECT
+- REASONABLY_APPLICABLE
+- NARROW_LIMITED
+- MISMATCH
 
-75–89:
-Strongly relevant and useful.
+interventionMatch:
+- DIRECT
+- BROADER_RELATED
+- MISMATCH
 
-60–74:
-Somewhat relevant but indirect.
+outcomeMatch:
+- DIRECT
+- SECONDARY_MEANINGFUL
+- TANGENTIAL
+- MISMATCH
 
-Below 60:
-Do not include.
+studyPurposeMatch:
+- DIRECT
+- SUPPORTING
+- TANGENTIAL
+- MISMATCH
 
-Only return studies with relevanceScore of 60 or greater.
+contextualApplicability:
+- DIRECT
+- REASONABLY_APPLICABLE
+- LIMITED
+- MISMATCH
 
-Prefer direct evidence over tangential evidence.
+relevanceScore must be 80 or greater for a study to qualify.
 
-Do not include more than 6 studies.
+Do not include more than 3 studies.
+
+Prefer one directly relevant study over several indirect studies.
+
+Do not return BROADER_RELATED, TANGENTIAL, NARROW_LIMITED,
+LIMITED, or MISMATCH studies merely because they are scientifically
+strong or share keywords with the question.
 
 If nothing is sufficiently relevant, return:
 
@@ -383,58 +475,109 @@ Screen these studies for actual relevance to the user's question.
     */
 
     const relevantStudies =
-        parsed.relevantStudies
-            .filter(
-                result =>
-                    Number.isInteger(
-                        result.studyNumber
-                    ) &&
-                    result.studyNumber >= 1 &&
-                    result.studyNumber <= candidates.length &&
-                    Number(
-                        result.relevanceScore
-                    ) >= 60
-            )
-            .sort(
-                (a, b) =>
-                    Number(
-                        b.relevanceScore
-                    ) -
-                    Number(
-                        a.relevanceScore
-                    )
-            )
-            .slice(0, 6)
-            .map(
-                result => {
-
-                    const study =
-                        candidates[
-                            result.studyNumber - 1
-                        ];
-
-
-                    return {
-
-                        ...study,
-
-                        relevanceScore:
-                            Number(
-                                result.relevanceScore
-                            ),
-
-                        relevanceReason:
-                            typeof result.reason === "string"
-                                ? result.reason
-                                : ""
-
-                    };
-
-                }
-            );
+        selectRelevantStudies(
+            candidates,
+            parsed.relevantStudies
+        );
 
 
     return relevantStudies;
+
+}
+
+
+export function selectRelevantStudies(
+    candidates,
+    screeningResults
+) {
+
+    if (
+        !Array.isArray(candidates) ||
+        !Array.isArray(screeningResults)
+    ) {
+        return [];
+    }
+
+
+    const selectedStudyNumbers =
+        new Set();
+
+
+    return [...screeningResults]
+        .sort(
+            (a, b) =>
+                Number(b && b.relevanceScore) -
+                Number(a && a.relevanceScore)
+        )
+        .filter(result => {
+
+            const score =
+                Number(
+                    result &&
+                    result.relevanceScore
+                );
+
+
+            if (
+                !result ||
+                !Number.isInteger(result.studyNumber) ||
+                result.studyNumber < 1 ||
+                result.studyNumber > candidates.length ||
+                !Number.isInteger(score) ||
+                score < MINIMUM_RELEVANCE_SCORE ||
+                score > 100 ||
+                !ALLOWED_POPULATION_MATCHES.has(
+                    result.populationMatch
+                ) ||
+                !ALLOWED_INTERVENTION_MATCHES.has(
+                    result.interventionMatch
+                ) ||
+                !ALLOWED_OUTCOME_MATCHES.has(
+                    result.outcomeMatch
+                ) ||
+                !ALLOWED_PURPOSE_MATCHES.has(
+                    result.studyPurposeMatch
+                ) ||
+                !ALLOWED_APPLICABILITY_MATCHES.has(
+                    result.contextualApplicability
+                ) ||
+                selectedStudyNumbers.has(
+                    result.studyNumber
+                )
+            ) {
+                return false;
+            }
+
+
+            selectedStudyNumbers.add(
+                result.studyNumber
+            );
+
+
+            return true;
+
+        })
+        .slice(
+            0,
+            MAX_RELEVANT_STUDIES
+        )
+        .map(result => ({
+
+            ...candidates[
+                result.studyNumber - 1
+            ],
+
+            relevanceScore:
+                Number(
+                    result.relevanceScore
+                ),
+
+            relevanceReason:
+                typeof result.reason === "string"
+                    ? result.reason
+                    : ""
+
+        }));
 
 }
 
