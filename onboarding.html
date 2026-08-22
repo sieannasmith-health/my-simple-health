@@ -1,1 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Start With You | My Simple Health</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="onboarding-page">
+
+<main class="onboarding-shell">
+
+    <!-- =====================================
+         ONBOARDING INTRO
+    ====================================== -->
+
+    <section
+        class="onboarding-screen active"
+        id="onboardingIntro"
+    >
+
+        <div class="onboarding-intro-card">
+
+            <div class="onboarding-intro-copy">
+
+                <p class="onboarding-eyebrow">
+                    WELCOME
+                </p>
+
+                <h1>
+                    Let’s start<br>
+                    with you.
+                </h1>
+
+                <p class="onboarding-description">
+                    A few quick questions to understand what
+                    matters most to you so we can guide you
+                    in the right direction.
+                </p>
+
+                <button
+                    class="onboarding-primary-button"
+                    type="button"
+                    onclick="startOnboarding()"
+                >
+                    Begin
+                    <span>→</span>
+                </button>
+
+                <p class="onboarding-privacy">
+                    ♡ Your answers stay private.
+                </p>
+
+            </div>
+
+
+            <div class="onboarding-intro-image">
+
+                <img
+                    src="hero-home.png"
+                    alt="Notebook and everyday health items"
+                >
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         STEP 1
+         HEALTH FOCUS
+    ====================================== -->
+
+    <section
+        class="onboarding-screen"
+        id="onboardingStep1"
+    >
+
+        <div class="onboarding-question-card">
+
+            <div class="onboarding-topbar">
+
+                <button
+                    type="button"
+                    class="onboarding-text-button"
+                    onclick="showOnboardingIntro()"
+                >
+                    ← Back
+                </button>
+
+                <span>
+                    Step 1 of 5
+                </span>
+
+                <a href="index.html">
+                    Exit
+                </a>
+
+            </div>
+
+
+            <div class="onboarding-progress">
+
+                <span class="complete"></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </div>
+
+
+            <div class="onboarding-question-heading">
+
+                <h1>
+                    What would you like to focus on?
+                </h1>
+
+                <p>
+                    Choose all that apply.
+                </p>
+
+            </div>
+
+
+            <div class="onboarding-options-grid">
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="sleep"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ☾
+                    </span>
+
+                    <span>
+                        <strong>Sleep</strong>
+                        <small>Improve your sleep quality</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="nutrition"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ♧
+                    </span>
+
+                    <span>
+                        <strong>Nutrition</strong>
+                        <small>Build healthier eating habits</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="movement"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ◌
+                    </span>
+
+                    <span>
+                        <strong>Movement</strong>
+                        <small>Move more and feel stronger</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="wellbeing"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ❧
+                    </span>
+
+                    <span>
+                        <strong>Stress &amp; Wellbeing</strong>
+                        <small>Feel calmer and more supported</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="prevention"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ♢
+                    </span>
+
+                    <span>
+                        <strong>Prevention</strong>
+                        <small>Support your long-term health</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="habits"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ✓
+                    </span>
+
+                    <span>
+                        <strong>Habits</strong>
+                        <small>Build more consistent routines</small>
+                    </span>
+                </button>
+
+
+                <button
+                    class="onboarding-option"
+                    type="button"
+                    data-value="other"
+                    onclick="toggleOnboardingOption(this)"
+                >
+                    <span class="onboarding-option-icon">
+                        ✎
+                    </span>
+
+                    <span>
+                        <strong>Something else</strong>
+                        <small>Tell us what you need</small>
+                    </span>
+                </button>
+
+            </div>
+
+
+            <div class="onboarding-actions">
+
+                <button
+                    class="onboarding-primary-button"
+                    id="onboardingContinue1"
+                    type="button"
+                    disabled
+                >
+                    Continue
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    /* =====================================
+       ONBOARDING STATE
+    ====================================== */
+
+    const onboardingAnswers = {
+        focus: [],
+        challenge: "",
+        currentSituation: "",
+        desiredProgress: ""
+    };
+
+
+    /* =====================================
+       START
+    ====================================== */
+
+    function startOnboarding() {
+
+        document
+            .getElementById("onboardingIntro")
+            .classList.remove("active");
+
+        document
+            .getElementById("onboardingStep1")
+            .classList.add("active");
+    }
+
+
+    function showOnboardingIntro() {
+
+        document
+            .getElementById("onboardingStep1")
+            .classList.remove("active");
+
+        document
+            .getElementById("onboardingIntro")
+            .classList.add("active");
+    }
+
+
+    /* =====================================
+       SELECT FOCUS AREAS
+    ====================================== */
+
+    function toggleOnboardingOption(button) {
+
+        const value = button.dataset.value;
+
+        button.classList.toggle("selected");
+
+        if (button.classList.contains("selected")) {
+
+            if (!onboardingAnswers.focus.includes(value)) {
+                onboardingAnswers.focus.push(value);
+            }
+
+        } else {
+
+            onboardingAnswers.focus =
+                onboardingAnswers.focus.filter(function(item) {
+                    return item !== value;
+                });
+
+        }
+
+
+        const continueButton =
+            document.getElementById("onboardingContinue1");
+
+        continueButton.disabled =
+            onboardingAnswers.focus.length === 0;
+    }
+
+</script>
+
+</body>
+</html>
