@@ -1,0 +1,420 @@
+/* =========================================================
+   MY SIMPLE HEALTH — MY HEALTH WORKSPACE
+   Prototype V1 app layer. Kept separate from the public site.
+========================================================= */
+
+:root {
+  --msh-forest: #173D2B;
+  --msh-sage: #7D9460;
+  --msh-cream: #F5F1E7;
+  --msh-warm-white: #FCFBF7;
+  --msh-charcoal: #252822;
+  --msh-soft-line: #D8D3C7;
+  --msh-muted: #69716C;
+  --msh-card: #FFFFFF;
+  --msh-radius-lg: 24px;
+  --msh-radius-md: 16px;
+  --msh-shadow: 0 12px 34px rgba(23, 61, 43, 0.07);
+}
+
+.msh-app-page {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--msh-warm-white);
+  color: var(--msh-charcoal);
+  font-family: Arial, sans-serif;
+}
+
+.msh-app-page *, .msh-app-page *::before, .msh-app-page *::after {
+  box-sizing: border-box;
+}
+
+.msh-app-shell {
+  min-height: 100vh;
+}
+
+.msh-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(252, 251, 247, 0.96);
+  border-bottom: 1px solid var(--msh-soft-line);
+  backdrop-filter: blur(12px);
+}
+
+.msh-app-header-inner {
+  width: min(92%, 1280px);
+  margin: 0 auto;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 28px;
+}
+
+.msh-app-logo {
+  color: var(--msh-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.msh-app-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.msh-app-nav a,
+.msh-app-nav span {
+  padding: 10px 13px;
+  border-radius: 999px;
+  color: var(--msh-charcoal);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.msh-app-nav a:hover,
+.msh-app-nav a[aria-current="page"] {
+  background: var(--msh-cream);
+  color: var(--msh-forest);
+}
+
+.msh-app-nav .is-coming-soon {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.msh-hello-launcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--msh-forest);
+  border-radius: 999px;
+  background: var(--msh-forest);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.msh-app-main {
+  width: min(92%, 1180px);
+  margin: 0 auto;
+  padding: 64px 0 96px;
+}
+
+.msh-dashboard-intro {
+  max-width: 830px;
+  margin-bottom: 46px;
+}
+
+.msh-eyebrow {
+  margin: 0 0 14px;
+  color: var(--msh-sage);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.msh-dashboard-intro h1 {
+  margin: 0 0 18px;
+  color: var(--msh-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(48px, 7vw, 78px);
+  font-weight: 400;
+  line-height: 0.98;
+}
+
+.msh-dashboard-intro p {
+  max-width: 700px;
+  margin: 0;
+  color: #4f5752;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.msh-journey-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid var(--msh-soft-line);
+  border-radius: var(--msh-radius-lg);
+  background: #f7f4ec;
+}
+
+.msh-journey-step {
+  min-width: 0;
+}
+
+.msh-journey-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--msh-sage);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.msh-journey-step strong {
+  display: block;
+  color: var(--msh-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.msh-journey-arrow {
+  align-self: center;
+  color: var(--msh-sage);
+  font-size: 22px;
+}
+
+.msh-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.msh-card {
+  grid-column: span 6;
+  padding: 28px;
+  border: 1px solid var(--msh-soft-line);
+  border-radius: var(--msh-radius-md);
+  background: var(--msh-card);
+  box-shadow: var(--msh-shadow);
+}
+
+.msh-card-wide {
+  grid-column: 1 / -1;
+}
+
+.msh-card h2 {
+  margin: 0 0 10px;
+  color: var(--msh-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.msh-card h3 {
+  margin: 20px 0 8px;
+  color: var(--msh-forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.msh-card p {
+  margin: 0;
+  color: #59615c;
+  line-height: 1.7;
+}
+
+.msh-card-kicker {
+  margin-bottom: 10px !important;
+  color: var(--msh-sage) !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.msh-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.msh-button,
+.msh-button-secondary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.msh-button {
+  border: 1px solid var(--msh-forest);
+  background: var(--msh-forest);
+  color: #fff;
+}
+
+.msh-button-secondary {
+  border: 1px solid var(--msh-soft-line);
+  background: transparent;
+  color: var(--msh-forest);
+}
+
+.msh-empty-state {
+  padding: 18px 0 2px;
+}
+
+.msh-empty-state strong {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--msh-forest);
+  font-size: 15px;
+}
+
+.msh-status-list,
+.msh-learning-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.msh-status-list li,
+.msh-learning-list li {
+  padding: 14px 0;
+  border-top: 1px solid #e9e5db;
+}
+
+.msh-status-list li:first-child,
+.msh-learning-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.msh-status-label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--msh-sage);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.msh-local-note {
+  margin-top: 32px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--msh-sage);
+  background: var(--msh-cream);
+  color: #5a625d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.msh-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .msh-app-header-inner {
+    grid-template-columns: 1fr auto;
+    min-height: 68px;
+  }
+
+  .msh-app-nav {
+    display: none;
+  }
+
+  .msh-app-main {
+    padding-top: 42px;
+    padding-bottom: 110px;
+  }
+
+  .msh-journey-strip {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .msh-journey-arrow {
+    transform: rotate(90deg);
+    justify-self: start;
+    margin-left: 4px;
+  }
+
+  .msh-card,
+  .msh-card-wide {
+    grid-column: 1 / -1;
+  }
+
+  .msh-mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--msh-soft-line);
+    background: rgba(252, 251, 247, 0.98);
+  }
+
+  .msh-mobile-nav a,
+  .msh-mobile-nav span {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    color: var(--msh-charcoal);
+    font-size: 11px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .msh-mobile-nav a[aria-current="page"] {
+    color: var(--msh-forest);
+    font-weight: 700;
+  }
+
+  .msh-mobile-nav .is-coming-soon {
+    opacity: .4;
+  }
+}
+
+@media (max-width: 560px) {
+  .msh-app-header-inner,
+  .msh-app-main {
+    width: min(92%, 100%);
+  }
+
+  .msh-hello-launcher {
+    min-height: 40px;
+    padding: 0 14px;
+  }
+
+  .msh-dashboard-intro h1 {
+    font-size: 52px;
+  }
+
+  .msh-dashboard-intro p {
+    font-size: 16px;
+  }
+
+  .msh-card,
+  .msh-journey-strip {
+    padding: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
