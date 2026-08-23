@@ -11,7 +11,8 @@ import {
 import {
     createNoQualifyingEvidenceResult,
     RESEARCH_STATES,
-    normalizeHelloPlainText
+    normalizeHelloPlainText,
+    validateGeneralEducationProvenance
 } from "../api/hello.js";
 import {
     retrieveEvidence
@@ -703,7 +704,45 @@ test(
 
 
 test(
-    "zero qualifying evidence returns a fixed non-claiming research result",
+    "general-education provenance validation rejects unsupported evidence language but permits limited conceptual education",
+    () => {
+
+        const prohibited = [
+            "Research suggests this lowers blood pressure.",
+            "Studies show a 12% reduction in risk.",
+            "Current research has found that this can lower cholesterol.",
+            "According to scientific evidence, blood pressure drops.",
+            "The result had a confidence interval of 1.1 to 1.4.",
+            "See PMID: 12345678 for details.",
+            "This works by activating a metabolic pathway."
+        ];
+
+
+        prohibited.forEach(
+            value => {
+                assert.ok(
+                    validateGeneralEducationProvenance(
+                        value
+                    ).length > 0,
+                    value
+                );
+            }
+        );
+
+
+        assert.deepEqual(
+            validateGeneralEducationProvenance(
+                "Body-fat percentage describes how much of body weight is fat tissue. It is one piece of context, not a diagnosis."
+            ),
+            []
+        );
+
+    }
+);
+
+
+test(
+    "zero qualifying evidence metadata preserves a non-claiming fallback",
     () => {
 
         const result =

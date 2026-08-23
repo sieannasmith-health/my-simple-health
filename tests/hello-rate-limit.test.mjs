@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import handler from "../api/hello.js";
+import handler, {
+    validateGeneralEducationProvenance
+} from "../api/hello.js";
 
 import {
     consumeRateLimit,
@@ -130,6 +132,9 @@ function createResponse() {
 
 function createMockNetwork({
     emptyPubMedResults = false,
+    openAIResponses = [],
+    pubMedUnavailable = false,
+    rejectedPubMedStudy = false,
     redisUnavailable = false,
     providerUnavailable = false
 } = {}) {
@@ -138,6 +143,8 @@ function createMockNetwork({
         new Map();
 
     const calls = [];
+
+    let openAIResponseIndex = 0;
 
 
     const fetchImplementation =
@@ -227,9 +234,67 @@ function createMockNetwork({
 
 
             if (
-                emptyPubMedResults &&
                 requestUrl.includes(
                     "eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+                )
+            ) {
+
+                call.type =
+                    "pubmed";
+
+
+                if (pubMedUnavailable) {
+                    return {
+                        ok: false,
+
+                        async json() {
+                            return {
+                                error:
+                                    "mock PubMed detail"
+                            };
+                        }
+                    };
+                }
+
+
+                if (emptyPubMedResults) {
+                    return {
+                    ok: true,
+
+                    async json() {
+                        return {
+                            esearchresult: {
+                                idlist: []
+                            }
+                        };
+                    }
+                    };
+                }
+
+
+                if (rejectedPubMedStudy) {
+                    return {
+                        ok: true,
+
+                        async json() {
+                            return {
+                                esearchresult: {
+                                    idlist: [
+                                        "40533200"
+                                    ]
+                                }
+                            };
+                        }
+                    };
+                }
+
+            }
+
+
+            if (
+                rejectedPubMedStudy &&
+                requestUrl.includes(
+                    "eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
                 )
             ) {
 
@@ -242,10 +307,43 @@ function createMockNetwork({
 
                     async json() {
                         return {
-                            esearchresult: {
-                                idlist: []
+                            result: {
+                                "40533200": {
+                                    authors: [],
+                                    fulljournalname:
+                                        "Mock Journal",
+                                    pubdate:
+                                        "2025",
+                                    pubtype: [
+                                        "Randomized Controlled Trial"
+                                    ],
+                                    title:
+                                        "Intermittent fasting and metabolic health in adults"
+                                }
                             }
                         };
+                    }
+                };
+
+            }
+
+
+            if (
+                rejectedPubMedStudy &&
+                requestUrl.includes(
+                    "eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+                )
+            ) {
+
+                call.type =
+                    "pubmed";
+
+
+                return {
+                    ok: true,
+
+                    async text() {
+                        return `<PubmedArticle><PMID>40533200</PMID><AbstractText>REJECTED_FINDING_TOKEN: intermittent fasting changed metabolic markers and weight.</AbstractText></PubmedArticle>`;
                     }
                 };
 
@@ -278,9 +376,19 @@ function createMockNetwork({
                 ok: true,
 
                 async json() {
+                    const outputText =
+                        openAIResponses[
+                            openAIResponseIndex
+                        ] ||
+                        "Mock Hello response";
+
+
+                    openAIResponseIndex += 1;
+
+
                     return {
                         output_text:
-                            "Mock Hello response"
+                            outputText
                     };
                 }
             };
@@ -590,7 +698,7 @@ test(
 
 
         await t.test(
-            "zero PubMed results return the explicit no-qualifying-evidence result without final model generation",
+            "zero PubMed results preserve state while explicit research receives a useful constrained answer",
             async () => {
 
                 setEnvironment();
@@ -598,7 +706,11 @@ test(
 
                 const network =
                     createMockNetwork({
-                        emptyPubMedResults: true
+                        emptyPubMedResults: true,
+                        openAIResponses: [
+                            "(adults) AND (time-restricted eating) AND (blood pressure)",
+                            "I couldn't find sufficiently relevant evidence for that exact question. That does not mean no research exists. In general terms, time-restricted eating means limiting daily eating to a consistent time window. I can help you broaden the question if you choose."
+                        ]
                     });
 
                 const result =
@@ -630,7 +742,11 @@ test(
                 );
                 assert.match(
                     result.response.body.response,
-                    /doesn't mean no evidence exists/i
+                    /does not mean no research exists/i
+                );
+                assert.match(
+                    result.response.body.response,
+                    /time-restricted eating means/i
                 );
                 assert.doesNotMatch(
                     result.response.body.response,
@@ -642,16 +758,25 @@ test(
                 );
                 assert.equal(
                     callsOfType(network, "openai").length,
-                    1
+                    2
                 );
-                assert.ok(
-                    callsOfType(network, "openai")
-                        .every(
-                            call =>
-                                !String(call.body).includes(
-                                    "CURRENT CONVERSATION MODE"
-                                )
-                        )
+                assert.match(
+                    String(
+                        callsOfType(network, "openai")[1].body
+                    ),
+                    /RESEARCH INTENT:\\nEXPLICIT/
+                );
+                assert.match(
+                    String(
+                        callsOfType(network, "openai")[1].body
+                    ),
+                    /RESEARCH STATE:\\nNO_QUALIFYING_EVIDENCE/
+                );
+                assert.match(
+                    String(
+                        callsOfType(network, "openai")[1].body
+                    ),
+                    /CLAIM BASIS:\\nGENERAL_EDUCATION/
                 );
 
 
@@ -672,8 +797,422 @@ test(
                 );
                 assert.equal(
                     callsOfType(network, "openai").length,
+                    4
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "supporting retrieval with zero evidence answers the body-fat question without a forced research disclosure",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        emptyPubMedResults: true,
+                        openAIResponses: [
+                            "(adults) AND (body fat percentage) AND (health interpretation)",
+                            "Body-fat percentage is one way to describe how much of a person's body weight is fat tissue. It is only one piece of health context, and its meaning depends on factors such as age, sex, measurement method, and the person's goals."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does body fat percentage mean?"
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.researchState,
+                    "NO_QUALIFYING_EVIDENCE"
+                );
+                assert.match(
+                    result.response.body.response,
+                    /one way to describe/i
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /couldn't find|research search|no evidence/i
+                );
+                assert.equal(
+                    validateGeneralEducationProvenance(
+                        result.response.body.response
+                    ).length,
+                    0
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "rejected PubMed findings are absent from zero-evidence final generation",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        rejectedPubMedStudy: true,
+                        openAIResponses: [
+                            "(adults) AND (time-restricted eating) AND (blood pressure)",
+                            JSON.stringify({
+                                relevantStudies: [
+                                    {
+                                        studyNumber: 1,
+                                        relevanceScore: 99,
+                                        populationMatch: "DIRECT",
+                                        interventionMatch: "DIRECT",
+                                        outcomeMatch: "DIRECT",
+                                        studyPurposeMatch: "DIRECT",
+                                        contextualApplicability: "DIRECT",
+                                        reason: "Mock model over-admission."
+                                    }
+                                ]
+                            }),
+                            "I couldn't find sufficiently relevant evidence for that exact question. That does not mean no research exists. I can explain the general concepts without treating rejected findings as evidence."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does the research say about time-restricted eating and blood pressure in adults?"
+                        },
+                        network
+                    });
+
+                const openAICalls =
+                    callsOfType(network, "openai");
+                const relevanceBody =
+                    String(openAICalls[1].body);
+                const finalBody =
+                    String(openAICalls[2].body);
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.researchState,
+                    "NO_QUALIFYING_EVIDENCE"
+                );
+                assert.match(
+                    relevanceBody,
+                    /REJECTED_FINDING_TOKEN/
+                );
+                assert.doesNotMatch(
+                    finalBody,
+                    /REJECTED_FINDING_TOKEN|40533200|changed metabolic markers/i
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /REJECTED_FINDING_TOKEN|40533200|changed metabolic markers/i
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "general-education provenance violations trigger one constrained retry",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        emptyPubMedResults: true,
+                        openAIResponses: [
+                            "(adults) AND (body fat percentage) AND (health interpretation)",
+                            "Research suggests a 20% reduction in disease risk.",
+                            "Body-fat percentage is a descriptive measurement that can be discussed alongside other health context."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does body fat percentage mean?"
+                        },
+                        network
+                    });
+
+                const openAICalls =
+                    callsOfType(network, "openai");
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(openAICalls.length, 3);
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /research suggests|20%|disease risk/i
+                );
+                assert.match(
+                    String(openAICalls[2].body),
+                    /CORRECTION REQUIRED/
+                );
+                assert.doesNotMatch(
+                    String(openAICalls[2].body),
+                    /20% reduction/
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "two invalid general-education drafts use a safe fallback without forced supporting-research status",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        emptyPubMedResults: true,
+                        openAIResponses: [
+                            "(adults) AND (body fat percentage) AND (health interpretation)",
+                            "Studies show a 15% reduction in disease risk.",
+                            "Research suggests this treatment lowers body fat."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does body fat percentage mean?"
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.match(
+                    result.response.body.response,
+                    /general concept/i
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /studies show|research suggests|15%|research search|couldn't find evidence/i
+                );
+                assert.equal(
+                    callsOfType(network, "openai").length,
+                    3
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "research-unavailable stays distinct and uses conversational generation",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        pubMedUnavailable: true,
+                        openAIResponses: [
+                            "(adults) AND (time-restricted eating) AND (blood pressure)",
+                            "I couldn't complete the research search for that exact question. That does not mean evidence is absent. I can still explain the general concepts or try the search again later."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does the research say about time-restricted eating and blood pressure in adults?"
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.researchState,
+                    "RESEARCH_UNAVAILABLE"
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /no qualifying evidence/i
+                );
+                assert.match(
+                    result.response.body.response,
+                    /couldn't complete the research search/i
+                );
+                assert.equal(
+                    callsOfType(network, "openai").length,
                     2
                 );
+
+            }
+        );
+
+
+        await t.test(
+            "supporting research unavailability does not force a status disclosure",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        pubMedUnavailable: true,
+                        openAIResponses: [
+                            "(adults) AND (body fat percentage) AND (health interpretation)",
+                            "Body-fat percentage is a descriptive measurement that is best considered alongside other context."
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "What does body fat percentage mean?"
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.researchState,
+                    "RESEARCH_UNAVAILABLE"
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /research search|unavailable|couldn't complete/i
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "multi-turn general education uses ordered Ask history without forcing research status",
+            async () => {
+
+                setEnvironment();
+
+
+                const cases = [
+                    {
+                        message:
+                            "Tell me more about that.",
+                        conversation: [
+                            {
+                                role: "user",
+                                content: "I want to understand body composition."
+                            },
+                            {
+                                role: "assistant",
+                                content: "Body composition describes the different tissues that make up body weight."
+                            }
+                        ],
+                        answer:
+                            "Body composition can be considered as context rather than a single judgment about health."
+                    },
+                    {
+                        message:
+                            "I don't want to count calories.",
+                        conversation: [
+                            {
+                                role: "user",
+                                content: "I want a realistic nutrition routine."
+                            },
+                            {
+                                role: "assistant",
+                                content: "We can focus on patterns that feel manageable."
+                            }
+                        ],
+                        answer:
+                            "That preference matters. We can explore meal patterns without making calorie counting the center of the plan."
+                    }
+                ];
+
+
+                for (const testCase of cases) {
+
+                    const network =
+                        createMockNetwork({
+                            openAIResponses: [
+                                testCase.answer
+                            ]
+                        });
+
+                    const result =
+                        await invokeHello({
+                            body: {
+                                message:
+                                    testCase.message,
+                                conversation:
+                                    testCase.conversation
+                            },
+                            network
+                        });
+
+                    const providerBody =
+                        String(
+                            callsOfType(network, "openai")[0].body
+                        );
+
+
+                    assert.equal(result.response.statusCode, 200);
+                    assert.equal(
+                        result.response.body.response,
+                        testCase.answer
+                    );
+                    assert.match(
+                        providerBody,
+                        /RESEARCH INTENT:\\nNONE/
+                    );
+                    assert.match(
+                        providerBody,
+                        /RESEARCH STATE:\\nNOT_ATTEMPTED/
+                    );
+                    assert.ok(
+                        providerBody.indexOf(
+                            testCase.conversation[0].content
+                        ) <
+                        providerBody.indexOf(
+                            testCase.conversation[1].content
+                        )
+                    );
+                    assert.equal(
+                        providerBody.match(
+                            new RegExp(
+                                testCase.message.replace(
+                                    /[.*+?^${}()|[\]\\]/g,
+                                    "\\$&"
+                                ),
+                                "g"
+                            )
+                        )?.length,
+                        1
+                    );
+                    assert.doesNotMatch(
+                        result.response.body.response,
+                        /research search|couldn't find evidence/i
+                    );
+
+                }
 
             }
         );
@@ -1526,6 +2065,38 @@ test(
                     assert.equal(clinical.response.body.offerVisitPrep, true);
 
                 }
+
+
+                const clinicalBoundaryNetwork =
+                    createMockNetwork({
+                        openAIResponses: [
+                            "I can't tell you to stop a prescribed medication. Changing it without professional guidance can increase risk, so I can help you prepare questions for your clinician."
+                        ]
+                    });
+
+                const clinicalBoundary =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "Should I stop my medication?"
+                        },
+                        network:
+                            clinicalBoundaryNetwork
+                    });
+
+
+                assert.equal(clinicalBoundary.response.body.route, "RED");
+                assert.match(
+                    clinicalBoundary.response.body.response,
+                    /increase risk/i
+                );
+                assert.equal(
+                    callsOfType(
+                        clinicalBoundaryNetwork,
+                        "openai"
+                    ).length,
+                    1
+                );
 
 
                 const relational =

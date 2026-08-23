@@ -46,12 +46,34 @@ const MODEL =
 
 
 export const RESEARCH_STATES = Object.freeze({
+    NOT_ATTEMPTED:
+        "NOT_ATTEMPTED",
     QUALIFYING_EVIDENCE:
         "QUALIFYING_EVIDENCE",
     NO_QUALIFYING_EVIDENCE:
         "NO_QUALIFYING_EVIDENCE",
     RESEARCH_UNAVAILABLE:
         "RESEARCH_UNAVAILABLE"
+});
+
+
+export const RESEARCH_INTENTS = Object.freeze({
+    NONE:
+        "NONE",
+    SUPPORTING:
+        "SUPPORTING",
+    EXPLICIT:
+        "EXPLICIT"
+});
+
+
+export const CLAIM_BASES = Object.freeze({
+    GENERAL_EDUCATION:
+        "GENERAL_EDUCATION",
+    CURATED_EVIDENCE:
+        "CURATED_EVIDENCE",
+    RETRIEVED_EVIDENCE:
+        "RETRIEVED_EVIDENCE"
 });
 
 
@@ -63,7 +85,9 @@ const RESEARCH_UNAVAILABLE_RESPONSE =
 
 
 export function createNoQualifyingEvidenceResult({
-    medicalScope = "GENERAL"
+    medicalScope = "GENERAL",
+    response =
+        NO_QUALIFYING_EVIDENCE_RESPONSE
 } = {}) {
 
     return {
@@ -75,7 +99,7 @@ export function createNoQualifyingEvidenceResult({
         conversationIntent:
             "HEALTH_EDUCATION",
         response:
-            NO_QUALIFYING_EVIDENCE_RESPONSE,
+            response,
         researchState:
             RESEARCH_STATES.NO_QUALIFYING_EVIDENCE,
         evidenceStrength:
@@ -94,7 +118,9 @@ export function createNoQualifyingEvidenceResult({
 
 function createResearchUnavailableResult({
     conversationIntent,
-    medicalScope
+    medicalScope,
+    response =
+        RESEARCH_UNAVAILABLE_RESPONSE
 }) {
 
     return {
@@ -105,7 +131,7 @@ function createResearchUnavailableResult({
                 : "GREEN",
         conversationIntent,
         response:
-            RESEARCH_UNAVAILABLE_RESPONSE,
+            response,
         researchState:
             RESEARCH_STATES.RESEARCH_UNAVAILABLE,
         evidenceStrength:
@@ -1003,11 +1029,16 @@ export default async function handler(req, res) {
             cleanMessage
         );
 
-    const needsResearch =
-        shouldRetrieveResearch(
+    const researchIntent =
+        classifyResearchIntent(
             cleanMessage,
             conversationIntent
         );
+
+
+    const needsResearch =
+        researchIntent !==
+            RESEARCH_INTENTS.NONE;
 
     const wantsEvidenceDisplay =
         shouldDisplayEvidence(
@@ -1115,7 +1146,16 @@ export default async function handler(req, res) {
                         "",
 
                     evidenceAvailable:
-                        false
+                        false,
+
+                    researchIntent:
+                        RESEARCH_INTENTS.NONE,
+
+                    researchState:
+                        RESEARCH_STATES.NOT_ATTEMPTED,
+
+                    claimBasis:
+                        CLAIM_BASES.GENERAL_EDUCATION
 
                 });
 
@@ -1217,7 +1257,16 @@ export default async function handler(req, res) {
                         "",
 
                     evidenceAvailable:
-                        false
+                        false,
+
+                    researchIntent:
+                        RESEARCH_INTENTS.NONE,
+
+                    researchState:
+                        RESEARCH_STATES.NOT_ATTEMPTED,
+
+                    claimBasis:
+                        CLAIM_BASES.GENERAL_EDUCATION
 
                 });
 
@@ -1308,7 +1357,15 @@ export default async function handler(req, res) {
                         "",
 
                     evidenceAvailable:
-                        false
+                        false,
+
+                    researchIntent,
+
+                    researchState:
+                        RESEARCH_STATES.NOT_ATTEMPTED,
+
+                    claimBasis:
+                        CLAIM_BASES.GENERAL_EDUCATION
 
                 });
 
@@ -1398,7 +1455,15 @@ export default async function handler(req, res) {
                     evidenceContext,
 
                     evidenceAvailable:
-                        true
+                        true,
+
+                    researchIntent,
+
+                    researchState:
+                        RESEARCH_STATES.QUALIFYING_EVIDENCE,
+
+                    claimBasis:
+                        CLAIM_BASES.CURATED_EVIDENCE
 
                 });
 
@@ -1524,9 +1589,60 @@ export default async function handler(req, res) {
     relevantStudies.length === 0
 ) {
 
+            let conversationalResponse =
+                getNoQualifyingEvidenceFallback(
+                    researchIntent
+                );
+
+
+            try {
+
+                conversationalResponse =
+                    await generateHelloResponse({
+
+                        message:
+                            cleanMessage,
+
+                        conversation,
+
+                        profile,
+
+                        mode:
+                            "HEALTH_EDUCATION",
+
+                        evidenceContext:
+                            "",
+
+                        evidenceAvailable:
+                            false,
+
+                        researchIntent,
+
+                        researchState:
+                            RESEARCH_STATES.NO_QUALIFYING_EVIDENCE,
+
+                        claimBasis:
+                            CLAIM_BASES.GENERAL_EDUCATION
+
+                    });
+
+            }
+
+            catch {
+
+                logHelloEvent(
+                    requestId,
+                    "NO_EVIDENCE_RESPONSE_FALLBACK"
+                );
+
+            }
+
+
             return res.status(200).json(
                 createNoQualifyingEvidenceResult({
-                    medicalScope
+                    medicalScope,
+                    response:
+                        conversationalResponse
                 })
             );
 
@@ -1579,7 +1695,15 @@ const synthesis =
                     ),
 
                 evidenceAvailable:
-                    true
+                    true,
+
+                researchIntent,
+
+                researchState:
+                    RESEARCH_STATES.QUALIFYING_EVIDENCE,
+
+                claimBasis:
+                    CLAIM_BASES.RETRIEVED_EVIDENCE
 
             });
 
@@ -1650,10 +1774,61 @@ const synthesis =
         );
 
 
+        let conversationalResponse =
+            getResearchUnavailableFallback(
+                researchIntent
+            );
+
+
+        try {
+
+            conversationalResponse =
+                await generateHelloResponse({
+
+                    message:
+                        cleanMessage,
+
+                    conversation,
+
+                    profile,
+
+                    mode:
+                        "HEALTH_EDUCATION",
+
+                    evidenceContext:
+                        "",
+
+                    evidenceAvailable:
+                        false,
+
+                    researchIntent,
+
+                    researchState:
+                        RESEARCH_STATES.RESEARCH_UNAVAILABLE,
+
+                    claimBasis:
+                        CLAIM_BASES.GENERAL_EDUCATION
+
+                });
+
+        }
+
+        catch {
+
+            logHelloEvent(
+                requestId,
+                "RESEARCH_RESPONSE_FALLBACK"
+            );
+
+        }
+
+
         return res.status(200).json(
             createResearchUnavailableResult({
                 conversationIntent,
-                medicalScope
+                medicalScope,
+                response:
+                    conversationalResponse
             })
         );
 
@@ -1678,7 +1853,13 @@ async function generateHelloResponse({
 
     evidenceContext,
 
-    evidenceAvailable
+    evidenceAvailable,
+
+    researchIntent,
+
+    researchState,
+
+    claimBasis
 
 }) {
 
@@ -1694,43 +1875,18 @@ async function generateHelloResponse({
         );
 
 
-    const response =
-        await fetch(
-            OPENAI_URL,
-            {
-
-                method:
-                    "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        `Bearer ${process.env.OPENAI_API_KEY}`
-
-                },
-
-                body:
-                    JSON.stringify({
-
-                        model:
-                            MODEL,
-
-                        reasoning: {
-                            effort: "low"
-                        },
-
-                        max_output_tokens:
-                            500,
-
-                        instructions:
-                            HELLO_INSTRUCTIONS,
-
-                        input: `
+    const generationInput = `
 CURRENT CONVERSATION MODE:
 ${mode}
+
+RESEARCH INTENT:
+${researchIntent}
+
+RESEARCH STATE:
+${researchState}
+
+CLAIM BASIS:
+${claimBasis}
 
 USER MESSAGE:
 ${message}
@@ -1757,7 +1913,17 @@ Do not expose internal frameworks, classifications, psychological models, public
 
 If evidence is supplied, factual health claims must remain within that evidence.
 
-If evidence is not supplied, do not invent specific health facts, statistics, clinical conclusions, or research findings.
+If CLAIM BASIS is GENERAL_EDUCATION, you may provide stable, non-diagnostic health education, explain concepts in plain language, help with health literacy, discuss options, or support planning. Do not present model knowledge as retrieved research. Do not invent citations, statistics, effect sizes, treatment-effect conclusions, or specific research findings. Do not claim a physiological mechanism as established unless approved evidence was supplied.
+
+If RESEARCH INTENT is EXPLICIT and RESEARCH STATE is NO_QUALIFYING_EVIDENCE, briefly say that sufficiently relevant evidence was not found. Do not say that no research exists. Answer the person's underlying question with appropriately limited general education when possible. Do not broaden the research question unless the user asks.
+
+If RESEARCH INTENT is SUPPORTING and RESEARCH STATE is NO_QUALIFYING_EVIDENCE, answer conversationally with appropriately limited general education. Do not mention the internal search or force a research-status disclosure.
+
+If RESEARCH INTENT is EXPLICIT and RESEARCH STATE is RESEARCH_UNAVAILABLE, briefly say that the research search could not be completed. Do not imply that evidence is absent. Answer with appropriately limited general education when possible.
+
+If RESEARCH INTENT is SUPPORTING and RESEARCH STATE is RESEARCH_UNAVAILABLE, do not force a research-status disclosure. Answer conversationally with appropriately limited general education when possible.
+
+If evidence is not supplied, keep health education general and non-diagnostic. Do not invent statistics, clinical conclusions, citations, effect sizes, or research findings.
 
 When appropriate, help the person clarify, explore, choose, plan, or identify a realistic next step.
 
@@ -1771,43 +1937,242 @@ If evidence is available, you may briefly mention that research or sources are a
 
 Do not automatically explain study methodology, evidence grades, or limitations unless they materially affect the answer or the user asks.
 
-`
-                    })
+`;
 
+
+    const enforceGeneralEducationProvenance =
+        claimBasis === CLAIM_BASES.GENERAL_EDUCATION &&
+        mode !== "CLINICAL_BOUNDARY" &&
+        mode !== "RELATIONAL" &&
+        mode !== "BOUNDARY";
+
+
+    const maxAttempts =
+        enforceGeneralEducationProvenance
+            ? 2
+            : 1;
+
+
+    for (
+        let attempt = 0;
+        attempt < maxAttempts;
+        attempt += 1
+    ) {
+
+        const correctionInstruction =
+            attempt === 0
+                ? ""
+                : `
+
+CORRECTION REQUIRED:
+The prior draft violated the GENERAL_EDUCATION provenance rules. Produce a fresh answer without research attribution, invented citations, quantitative findings, treatment-effect claims, or unsupported mechanism claims. Do not mention this correction.`;
+
+
+        const response =
+            await fetch(
+                OPENAI_URL,
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${process.env.OPENAI_API_KEY}`
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            model:
+                                MODEL,
+
+                            reasoning: {
+                                effort: "low"
+                            },
+
+                            max_output_tokens:
+                                500,
+
+                            instructions:
+                                HELLO_INSTRUCTIONS,
+
+                            input:
+                                generationInput +
+                                correctionInstruction
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+            throw new Error(
+                "Hello generation failed."
+            );
+
+        }
+
+
+        const outputText =
+            extractOutputText(
+                data
+            );
+
+
+        if (!outputText) {
+
+            throw new Error(
+                "Hello returned no usable text."
+            );
+
+        }
+
+
+        const normalizedOutput =
+            normalizeHelloPlainText(
+                outputText
+            );
+
+
+        if (
+            !enforceGeneralEducationProvenance ||
+            validateGeneralEducationProvenance(
+                normalizedOutput
+            ).length === 0
+        ) {
+
+            return normalizedOutput;
+
+        }
+
+    }
+
+
+    return getProvenanceSafeFallback({
+        researchIntent,
+        researchState
+    });
+
+}
+
+
+export function validateGeneralEducationProvenance(
+    value
+) {
+
+    const text =
+        String(value || "");
+
+    const violations = [];
+
+    const checks = [
+        {
+            code:
+                "RESEARCH_ATTRIBUTION",
+            pattern:
+                /(?:\baccording to (?:research|studies|scientific evidence|clinical trials?|data)\b|\b(?:(?:some|the|available|current)\s+)?(?:research|studies?|scientific evidence|clinical trials?|data)\s+(?:(?:has|have)\s+)?(?:shows?|suggests?|indicates?|finds?|found|reports?|demonstrates?|supports?|points? to)\b)/i
+        },
+        {
+            code:
+                "INVENTED_CITATION",
+            pattern:
+                /(?:https?:\/\/|\bdoi\s*:|\bpmid\s*:|\[\s*\d+\s*\])/i
+        },
+        {
+            code:
+                "QUANTITATIVE_FINDING",
+            pattern:
+                /(?:\b\d+(?:\.\d+)?\s*%|\bconfidence interval\b|\b(?:odds|risk|hazard) ratio\b|\bp\s*[<=>]\s*0?\.\d+)/i
+        },
+        {
+            code:
+                "TREATMENT_EFFECT",
+            pattern:
+                /(?:\b(?:reduce|reduces|lower|lowers|decrease|decreases|increase|increases|improve|improves|prevent|prevents|treat|treats|reverse|reverses|cure|cures)\b[^.!?\n]{0,80}\b(?:risk|symptoms?|disease|condition|blood pressure|cholesterol|blood sugar|glucose|body fat|weight)\b|\b(?:risk|symptoms?|disease|condition|blood pressure|cholesterol|blood sugar|glucose|body fat|weight)\b[^.!?\n]{0,80}\b(?:falls?|drops?|declines?|improves?|increases?|decreases?)\b)/i
+        },
+        {
+            code:
+                "UNSUPPORTED_MECHANISM",
+            pattern:
+                /\b(?:works?|acts?)\s+by\b|\b(?:biological|physiological) mechanism\b|\bthrough (?:a|the) [a-z-]+ pathway\b/i
+        }
+    ];
+
+
+    checks.forEach(
+        check => {
+
+            if (check.pattern.test(text)) {
+                violations.push(
+                    check.code
+                );
             }
-        );
 
-
-    const data =
-        await response.json();
-
-
-    if (!response.ok) {
-        throw new Error(
-            "Hello generation failed."
-        );
-
-    }
-
-
-    const outputText =
-        extractOutputText(
-            data
-        );
-
-
-    if (!outputText) {
-
-        throw new Error(
-            "Hello returned no usable text."
-        );
-
-    }
-
-
-    return normalizeHelloPlainText(
-        outputText
+        }
     );
+
+
+    return violations;
+
+}
+
+
+function getProvenanceSafeFallback({
+    researchIntent,
+    researchState
+}) {
+
+    if (
+        researchIntent === RESEARCH_INTENTS.EXPLICIT &&
+        researchState ===
+            RESEARCH_STATES.NO_QUALIFYING_EVIDENCE
+    ) {
+        return NO_QUALIFYING_EVIDENCE_RESPONSE;
+    }
+
+
+    if (
+        researchIntent === RESEARCH_INTENTS.EXPLICIT &&
+        researchState ===
+            RESEARCH_STATES.RESEARCH_UNAVAILABLE
+    ) {
+        return RESEARCH_UNAVAILABLE_RESPONSE;
+    }
+
+
+    return "I can help explain the general concept and think through practical options, but I can't support the specific factual claims needed for a confident answer right now.";
+
+}
+
+
+function getNoQualifyingEvidenceFallback(
+    researchIntent
+) {
+
+    return researchIntent === RESEARCH_INTENTS.EXPLICIT
+        ? NO_QUALIFYING_EVIDENCE_RESPONSE
+        : "I can help explain the general concept and think through practical options, but I can't support a more specific evidence-based answer right now.";
+
+}
+
+
+function getResearchUnavailableFallback(
+    researchIntent
+) {
+
+    return researchIntent === RESEARCH_INTENTS.EXPLICIT
+        ? RESEARCH_UNAVAILABLE_RESPONSE
+        : "I can still help with a general explanation or help you think through practical options.";
 
 }
 
@@ -3015,7 +3380,7 @@ function classifyConversationIntent(message) {
 /* =========================================================
    SHOULD WE RETRIEVE HEALTH EVIDENCE?
 ========================================================= */
-function shouldRetrieveResearch(
+function classifyResearchIntent(
     message,
     conversationIntent
 ) {
@@ -3050,7 +3415,7 @@ function shouldRetrieveResearch(
         )
     ) {
 
-        return false;
+        return RESEARCH_INTENTS.NONE;
 
     }
 
@@ -3092,7 +3457,7 @@ function shouldRetrieveResearch(
         )
     ) {
 
-        return true;
+        return RESEARCH_INTENTS.EXPLICIT;
 
     }
 
@@ -3127,7 +3492,9 @@ function shouldRetrieveResearch(
         pattern =>
             text.startsWith(pattern) ||
             text.includes(pattern)
-    );
+    )
+        ? RESEARCH_INTENTS.SUPPORTING
+        : RESEARCH_INTENTS.NONE;
 
 }
 
