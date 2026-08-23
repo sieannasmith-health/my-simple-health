@@ -160,6 +160,48 @@ const MAX_CONVERSATION_TURNS =
 const MAX_CONVERSATION_TURN_CHARACTERS =
     1500;
 
+const MAX_GUIDED_SUMMARY_CHARACTERS =
+    600;
+
+const GUIDED_REFLECTION_MODE =
+    "guided-reflection";
+
+const GUIDED_OBJECTIVE_KEYS = Object.freeze([
+    "currentSuccesses",
+    "goals",
+    "motivationMeaning",
+    "readiness",
+    "perceivedBenefits",
+    "barriers",
+    "confidence",
+    "previousAttempts",
+    "strengthsResources",
+    "socialContext",
+    "environmentAccess",
+    "preferences",
+    "emotionalContext",
+    "optionsNextSteps"
+]);
+
+const GUIDED_OBJECTIVE_STATUSES = new Set([
+    "unresolved",
+    "partial",
+    "complete",
+    "deferred"
+]);
+
+const GUIDED_TURN_FUNCTIONS = new Set([
+    "OBJECTIVE_CONTENT",
+    "CLARIFICATION",
+    "EXAMPLE_REQUEST",
+    "DIRECT_QUESTION",
+    "UNCERTAINTY",
+    "CORRECTION",
+    "DETOUR",
+    "READINESS_HESITATION",
+    "FOCUS_SHIFT_REQUEST"
+]);
+
 
 const HELLO_PRODUCTION_ORIGINS = [
     "https://mysimplehealth.org",
@@ -592,6 +634,101 @@ function sanitizeProfileInput(value) {
 }
 
 
+function sanitizeRequestMode(value) {
+
+    if (
+        value === undefined ||
+        value === null ||
+        value === "ask"
+    ) {
+        return "ask";
+    }
+
+
+    return value === GUIDED_REFLECTION_MODE
+        ? GUIDED_REFLECTION_MODE
+        : null;
+
+}
+
+
+function sanitizeGuidedReflectionContext(
+    value
+) {
+
+    if (
+        !value ||
+        typeof value !== "object" ||
+        Array.isArray(value)
+    ) {
+        return null;
+    }
+
+
+    const activeObjective =
+        GUIDED_OBJECTIVE_KEYS.includes(
+            value.activeObjective
+        )
+            ? value.activeObjective
+            : "currentSuccesses";
+
+    const suppliedObjectives =
+        value.objectives &&
+        typeof value.objectives === "object" &&
+        !Array.isArray(value.objectives)
+            ? value.objectives
+            : {};
+
+    const objectives = {};
+
+
+    GUIDED_OBJECTIVE_KEYS.forEach(
+        key => {
+
+            const supplied =
+                suppliedObjectives[key];
+
+            const status =
+                supplied &&
+                typeof supplied === "object" &&
+                !Array.isArray(supplied) &&
+                GUIDED_OBJECTIVE_STATUSES.has(
+                    supplied.status
+                )
+                    ? supplied.status
+                    : "unresolved";
+
+            const summary =
+                supplied &&
+                typeof supplied.summary === "string"
+                    ? normalizeHelloPlainText(
+                        supplied.summary
+                    )
+                        .trim()
+                        .slice(
+                            0,
+                            MAX_GUIDED_SUMMARY_CHARACTERS
+                        )
+                    : "";
+
+
+            objectives[key] = {
+                status,
+                summary
+            };
+
+        }
+    );
+
+
+    return {
+        activeObjective,
+        objectives
+    };
+
+}
+
+
 export default async function handler(req, res) {
 
     const requestId =
@@ -795,6 +932,24 @@ export default async function handler(req, res) {
        VALIDATED INPUT
     ====================================================== */
 
+    const requestMode =
+        sanitizeRequestMode(
+            req.body.mode
+        );
+
+
+    if (!requestMode) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "Request mode is invalid.",
+            requestId
+        );
+
+    }
+
     const message =
         req.body.message;
 
@@ -879,6 +1034,32 @@ export default async function handler(req, res) {
 
     const profile =
         profileResult.profile;
+
+    const guidedReflectionContext =
+        requestMode === GUIDED_REFLECTION_MODE
+            ? sanitizeGuidedReflectionContext(
+                req.body.reflectionContext
+            )
+            : null;
+
+
+    if (
+        requestMode === GUIDED_REFLECTION_MODE &&
+        (
+            !guidedReflectionContext ||
+            !profile?.wellnessContext
+        )
+    ) {
+
+        return sendHelloError(
+            res,
+            400,
+            "INVALID_REQUEST",
+            "Valid Wellness and reflection context are required.",
+            requestId
+        );
+
+    }
 
 
     /* =====================================================
@@ -1046,6 +1227,7 @@ export default async function handler(req, res) {
         );
 
     const usesResearchPath =
+        requestMode !== GUIDED_REFLECTION_MODE &&
         medicalScope !== "INDIVIDUAL_CLINICAL" &&
         conversationIntent !== "RELATIONAL" &&
         conversationIntent !== "BOUNDARY" &&
@@ -1214,6 +1396,73 @@ export default async function handler(req, res) {
                     true
 
             });
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GUIDED REFLECTION
+
+       Current-message safety and individualized clinical
+       boundaries have already taken priority. Guided work
+       uses the normal limiter and never enters research
+       retrieval merely to conduct behavioral reflection.
+    ====================================================== */
+
+    if (requestMode === GUIDED_REFLECTION_MODE) {
+
+        try {
+
+            const guidedReflection =
+                await generateGuidedReflectionResponse({
+                    message:
+                        cleanMessage,
+                    conversation,
+                    profile,
+                    reflectionContext:
+                        guidedReflectionContext
+                });
+
+
+            return res.status(200).json({
+                success: true,
+                route:
+                    medicalScope === "MEDICAL_CONTEXT"
+                        ? "YELLOW"
+                        : "GREEN",
+                conversationIntent:
+                    "GUIDED_REFLECTION",
+                response:
+                    guidedReflection.response,
+                guidedReflection,
+                evidenceAvailable:
+                    false,
+                showEvidence:
+                    false,
+                sources: [],
+                offerVisitPrep:
+                    medicalScope === "MEDICAL_CONTEXT"
+            });
+
+        }
+
+        catch {
+
+            logHelloEvent(
+                requestId,
+                "GUIDED_RESPONSE_FALLBACK"
+            );
+
+
+            return sendHelloError(
+                res,
+                500,
+                "HELLO_UNAVAILABLE",
+                "Hello is temporarily unavailable. Please try again.",
+                requestId
+            );
 
         }
 
@@ -1835,6 +2084,530 @@ const synthesis =
     }
 
 }
+
+
+/* =========================================================
+   GUIDED REFLECTION ENGINE
+========================================================= */
+
+async function generateGuidedReflectionResponse({
+    message,
+    conversation,
+    profile,
+    reflectionContext
+}) {
+
+    const response =
+        await fetch(
+            OPENAI_URL,
+            {
+                method:
+                    "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json",
+                    "Authorization":
+                        `Bearer ${process.env.OPENAI_API_KEY}`
+                },
+                body:
+                    JSON.stringify({
+                        model:
+                            MODEL,
+                        reasoning: {
+                            effort: "low"
+                        },
+                        max_output_tokens:
+                            900,
+                        instructions:
+                            GUIDED_REFLECTION_INSTRUCTIONS,
+                        input: `
+SELECTED WELLNESS CONTEXT:
+${buildProfileContext(profile)}
+
+CURRENT STRUCTURED REFLECTION MAP:
+${JSON.stringify(reflectionContext, null, 2)}
+
+RECENT VISIBLE GUIDED CONVERSATION:
+${buildConversationHistory(conversation) || "No previous Guided turns supplied."}
+
+CURRENT USER MESSAGE:
+${message}
+
+Return only the required JSON object.
+`
+                    })
+            }
+        );
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(
+            "Guided Reflection generation failed."
+        );
+    }
+
+
+    const outputText =
+        extractOutputText(data);
+
+    const parsed =
+        parseGuidedReflectionOutput(
+            outputText
+        );
+
+
+    return validateGuidedReflectionOutput({
+        message,
+        parsed,
+        reflectionContext
+    });
+
+}
+
+
+function parseGuidedReflectionOutput(value) {
+
+    const text =
+        String(value || "")
+            .trim()
+            .replace(
+                /^```(?:json)?\s*/i,
+                ""
+            )
+            .replace(
+                /\s*```$/,
+                ""
+            );
+
+
+    if (!text) {
+        throw new Error(
+            "Guided Reflection returned no usable output."
+        );
+    }
+
+
+    const parsed =
+        JSON.parse(text);
+
+
+    if (
+        !parsed ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed)
+    ) {
+        throw new Error(
+            "Guided Reflection output was invalid."
+        );
+    }
+
+
+    return parsed;
+
+}
+
+
+function validateGuidedReflectionOutput({
+    message,
+    parsed,
+    reflectionContext
+}) {
+
+    const response =
+        normalizeHelloPlainText(
+            parsed.response
+        )
+            .trim()
+            .slice(0, 1600);
+
+
+    if (!response) {
+        throw new Error(
+            "Guided Reflection response was empty."
+        );
+    }
+
+
+    const turnFunctions =
+        Array.isArray(parsed.turnFunctions)
+            ? [
+                ...new Set(
+                    parsed.turnFunctions
+                        .filter(
+                            value =>
+                                GUIDED_TURN_FUNCTIONS.has(
+                                    value
+                                )
+                        )
+                )
+            ]
+            : [];
+
+    const deterministicFunctions =
+        getDeterministicGuidedTurnFunctions(
+            message
+        );
+
+
+    deterministicFunctions.forEach(
+        value => {
+            if (!turnFunctions.includes(value)) {
+                turnFunctions.push(value);
+            }
+        }
+    );
+
+
+    const updatesByKey =
+        new Map();
+
+
+    if (Array.isArray(parsed.objectiveUpdates)) {
+
+        parsed.objectiveUpdates.forEach(
+            update => {
+
+                if (
+                    !update ||
+                    typeof update !== "object" ||
+                    Array.isArray(update) ||
+                    !GUIDED_OBJECTIVE_KEYS.includes(
+                        update.key
+                    ) ||
+                    !GUIDED_OBJECTIVE_STATUSES.has(
+                        update.status
+                    ) ||
+                    typeof update.summary !== "string"
+                ) {
+                    return;
+                }
+
+
+                const summary =
+                    normalizeHelloPlainText(
+                        update.summary
+                    )
+                        .trim()
+                        .slice(
+                            0,
+                            MAX_GUIDED_SUMMARY_CHARACTERS
+                        );
+
+
+                if (!summary) {
+                    return;
+                }
+
+
+                updatesByKey.set(
+                    update.key,
+                    {
+                        key:
+                            update.key,
+                        status:
+                            update.status,
+                        summary
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    if (
+        turnFunctions.includes("CLARIFICATION") ||
+        turnFunctions.includes("EXAMPLE_REQUEST") ||
+        turnFunctions.includes("DIRECT_QUESTION")
+    ) {
+
+        const activeUpdate =
+            updatesByKey.get(
+                reflectionContext.activeObjective
+            );
+
+        const questionOnly =
+            /^(?:what|can|could|would|do|does|is|are)\b[^.!]*\?$/i.test(
+                String(message || "").trim()
+            );
+
+
+        if (
+            activeUpdate &&
+            !questionOnly &&
+            turnFunctions.includes(
+                "OBJECTIVE_CONTENT"
+            )
+        ) {
+            activeUpdate.status =
+                "partial";
+        }
+
+        else {
+            updatesByKey.delete(
+                reflectionContext.activeObjective
+            );
+        }
+    }
+
+
+    if (
+        turnFunctions.includes("UNCERTAINTY") &&
+        updatesByKey.get(
+            reflectionContext.activeObjective
+        )?.status === "complete"
+    ) {
+        updatesByKey.get(
+            reflectionContext.activeObjective
+        ).status = "partial";
+    }
+
+
+    if (
+        turnFunctions.includes(
+            "READINESS_HESITATION"
+        )
+    ) {
+        updatesByKey.delete(
+            "optionsNextSteps"
+        );
+    }
+
+
+    const objectiveUpdates =
+        [...updatesByKey.values()];
+
+    const mergedObjectives =
+        mergeGuidedObjectiveState(
+            reflectionContext.objectives,
+            objectiveUpdates
+        );
+
+    const reflectionComplete =
+        parsed.reflectionComplete === true &&
+        !turnFunctions.includes(
+            "READINESS_HESITATION"
+        ) &&
+        mergedObjectives.goals.status === "complete" &&
+        mergedObjectives.optionsNextSteps.status === "complete" &&
+        mergedObjectives.readiness.status !== "deferred";
+
+    const nextObjective =
+        reflectionComplete
+            ? null
+            : selectNextGuidedObjective({
+                currentObjective:
+                    reflectionContext.activeObjective,
+                objectives:
+                    mergedObjectives,
+                suggestedObjective:
+                    turnFunctions.includes(
+                        "READINESS_HESITATION"
+                    ) &&
+                    parsed.suggestedNextObjective ===
+                        "optionsNextSteps"
+                        ? null
+                        : parsed.suggestedNextObjective
+            });
+
+
+    return {
+        response,
+        turnFunctions,
+        objectiveUpdates,
+        nextObjective,
+        reflectionComplete
+    };
+
+}
+
+
+function getDeterministicGuidedTurnFunctions(
+    message
+) {
+
+    const text =
+        String(message || "")
+            .toLowerCase()
+            .trim();
+
+    const functions = [];
+
+
+    if (
+        /\bwhat do you mean\b|\bwhat does .+ mean\b|\bcan you clarify\b|\bclarify that\b/.test(
+            text
+        )
+    ) {
+        functions.push("CLARIFICATION");
+    }
+
+
+    if (
+        /\b(?:give|show) me (?:an )?examples?\b|\bfor example\b|\bwhat kind of\b/.test(
+            text
+        )
+    ) {
+        functions.push("EXAMPLE_REQUEST");
+    }
+
+
+    if (
+        /\?$/.test(text) &&
+        !functions.includes("CLARIFICATION") &&
+        !functions.includes("EXAMPLE_REQUEST")
+    ) {
+        functions.push("DIRECT_QUESTION");
+    }
+
+
+    if (
+        /^(?:i do not know|i don't know|not sure|i'm not sure|i am not sure)[.!]?$/i.test(
+            text
+        )
+    ) {
+        functions.push("UNCERTAINTY");
+    }
+
+
+    return functions;
+
+}
+
+
+function mergeGuidedObjectiveState(
+    objectives,
+    updates
+) {
+
+    const merged =
+        Object.fromEntries(
+            GUIDED_OBJECTIVE_KEYS.map(
+                key => [
+                    key,
+                    {
+                        status:
+                            objectives[key]?.status ||
+                            "unresolved",
+                        summary:
+                            objectives[key]?.summary ||
+                            ""
+                    }
+                ]
+            )
+        );
+
+
+    updates.forEach(
+        update => {
+            merged[update.key] = {
+                status:
+                    update.status,
+                summary:
+                    update.summary
+            };
+        }
+    );
+
+
+    return merged;
+
+}
+
+
+function selectNextGuidedObjective({
+    currentObjective,
+    objectives,
+    suggestedObjective
+}) {
+
+    const isOpen =
+        key =>
+            GUIDED_OBJECTIVE_KEYS.includes(key) &&
+            objectives[key].status !== "complete" &&
+            objectives[key].status !== "deferred";
+
+
+    if (isOpen(suggestedObjective)) {
+        return suggestedObjective;
+    }
+
+
+    if (isOpen(currentObjective)) {
+        return currentObjective;
+    }
+
+
+    const priority = [
+        "goals",
+        "currentSuccesses",
+        "motivationMeaning",
+        "previousAttempts",
+        "barriers",
+        "strengthsResources",
+        "preferences",
+        "environmentAccess",
+        "socialContext",
+        "emotionalContext",
+        "perceivedBenefits",
+        "readiness",
+        "confidence",
+        "optionsNextSteps"
+    ];
+
+
+    return priority.find(isOpen) ||
+        "optionsNextSteps";
+
+}
+
+
+const GUIDED_REFLECTION_INSTRUCTIONS = `
+You are Hello in Guided Reflection mode for My Simple Health.
+
+Guided Reflection is Coach + Partner. It is a structured behavioral-discovery feature with natural conversational ability. The selected Wellness domain remains the primary focus. The behavioral objective catalog is an adaptive toolbox, not a checklist.
+
+Wellness Wheel scores are subjective self-reflection context, not clinical measurements, severity ratings, diagnoses, or objective health judgments. A broad Wellness dimension must not be treated as a measurement of one specific health topic.
+
+Interpret the user's current meaning, update only user-grounded reflection context, answer direct questions or clarifications first, then return naturally to the most useful unresolved behavioral objective.
+
+You may internally draw from the Health Belief Model, Transtheoretical Model, Social Cognitive Theory, Theory of Planned Behavior, and Social Ecological Model. Never name these frameworks to the user. Never diagnose, assign a personality type, label a stage, or use behavioral science to pressure compliance.
+
+Stay within behavioral reflection and general coaching. Do not invent research findings, statistics, citations, diagnoses, treatment recommendations, or medication guidance. If a detour requires detailed health evidence, answer only what is safe at a general level and make clear that Ask Hello is the place to explore the evidence without abandoning the reflection objective.
+
+Recognize goals, motivation, readiness, benefits, barriers, confidence, previous attempts, strengths, resources, social context, environment, access, preferences, relevant emotions, and realistic next steps when the user actually provides them. A response may update more than one objective. Do not mark an objective complete merely because it was the active question.
+
+A clarification request, request for examples, or direct question must be answered before returning to reflection. It does not complete the active objective by itself. If the user says they do not know, help them explore without mechanically advancing. Corrections must revise the working map. Relevant cross-domain context may be retained without changing the selected Wellness focus.
+
+Readiness governs action. Do not push a next step when the user is hesitant. Do not require every objective before the reflection can reach a useful destination.
+
+Sound warm, direct, concise, and natural. Usually use 1 to 4 short sentences and at most one purposeful question. Often answer directly. Do not rely on canned openings such as "Absolutely," "Great question," "That makes sense," "I hear you," "It sounds like," "Of course," or "If you'd like." Do not implement or imitate synonym rotation. Do not use Markdown or em dashes.
+
+Return only JSON with this shape:
+{
+  "response": "user-facing plaintext",
+  "turnFunctions": ["OBJECTIVE_CONTENT"],
+  "objectiveUpdates": [
+    {
+      "key": "one allowed objective key",
+      "status": "unresolved, partial, complete, or deferred",
+      "summary": "brief user-grounded summary"
+    }
+  ],
+  "suggestedNextObjective": "one allowed objective key or null",
+  "reflectionComplete": false
+}
+
+Allowed objective keys:
+currentSuccesses, goals, motivationMeaning, readiness, perceivedBenefits, barriers, confidence, previousAttempts, strengthsResources, socialContext, environmentAccess, preferences, emotionalContext, optionsNextSteps.
+
+Allowed turn functions:
+OBJECTIVE_CONTENT, CLARIFICATION, EXAMPLE_REQUEST, DIRECT_QUESTION, UNCERTAINTY, CORRECTION, DETOUR, READINESS_HESITATION, FOCUS_SHIFT_REQUEST.
+`;
 
 
 /* =========================================================

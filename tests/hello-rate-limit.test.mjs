@@ -494,6 +494,70 @@ function callsOfType(
 }
 
 
+function createGuidedProfile() {
+
+    return {
+        wellnessContext: {
+            source:
+                "wellness-wheel",
+            selectedDimension:
+                "Financial Wellness",
+            selectedScore:
+                4,
+            wheelScores: {
+                physical: 5,
+                emotional: 5,
+                social: 3,
+                occupational: 5,
+                financial: 4,
+                environmental: 5,
+                intellectual: 5,
+                spiritual: 5
+            }
+        }
+    };
+
+}
+
+
+function createGuidedContext({
+    activeObjective =
+        "currentSuccesses",
+    objectives = {}
+} = {}) {
+
+    return {
+        activeObjective,
+        objectives
+    };
+
+}
+
+
+function createGuidedModelOutput({
+    response =
+        "You have identified useful context. What feels most important to explore next?",
+    turnFunctions = [
+        "OBJECTIVE_CONTENT"
+    ],
+    objectiveUpdates = [],
+    suggestedNextObjective =
+        "currentSuccesses",
+    reflectionComplete =
+        false
+} = {}) {
+
+    return JSON.stringify({
+        response,
+        turnFunctions,
+        objectiveUpdates,
+        suggestedNextObjective,
+        reflectionComplete
+    });
+
+}
+
+
 test(
     "durable Hello limiter and regressions",
     { concurrency: false },
@@ -1219,6 +1283,654 @@ test(
 
 
         await t.test(
+            "Guided Reflection uses the normal protected path and never enters PubMed",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses: [
+                            createGuidedModelOutput({
+                                response:
+                                    "You named a clear goal - building savings for a home. What is already helping?",
+                                objectiveUpdates: [
+                                    {
+                                        key: "goals",
+                                        status: "complete",
+                                        summary: "Build savings for a home."
+                                    },
+                                    {
+                                        key: "unknownObjective",
+                                        status: "complete",
+                                        summary: "Discard this."
+                                    }
+                                ],
+                                suggestedNextObjective:
+                                    "currentSuccesses"
+                            })
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "I want to save enough to purchase a home.",
+                            mode:
+                                "guided-reflection",
+                            conversation: [],
+                            profile:
+                                createGuidedProfile(),
+                            reflectionContext:
+                                {
+                                    ...createGuidedContext({
+                                        objectives: {
+                                            goals: {
+                                                status: "partial",
+                                                summary: "Saving is a priority—next year."
+                                            },
+                                            unexpectedObjective: {
+                                                status: "complete",
+                                                summary: "UNEXPECTED_GUIDED_INPUT_TOKEN"
+                                            }
+                                        }
+                                    }),
+                                    unexpected:
+                                        "UNEXPECTED_GUIDED_INPUT_TOKEN"
+                                }
+                        },
+                        network
+                    });
+
+
+                assert.equal(result.response.statusCode, 200);
+                assert.equal(
+                    result.response.body.conversationIntent,
+                    "GUIDED_REFLECTION"
+                );
+                assert.equal(
+                    result.response.body.showEvidence,
+                    false
+                );
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .objectiveUpdates.length,
+                    1
+                );
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .objectiveUpdates[0].key,
+                    "goals"
+                );
+                assert.doesNotMatch(
+                    result.response.body.response,
+                    /—/
+                );
+                assert.equal(
+                    callsOfType(network, "redis").length,
+                    1
+                );
+                assert.equal(
+                    callsOfType(network, "openai").length,
+                    1
+                );
+                assert.doesNotMatch(
+                    String(
+                        callsOfType(network, "openai")[0]
+                            .body
+                    ),
+                    /UNEXPECTED_GUIDED_INPUT_TOKEN|priority—next/
+                );
+                assert.equal(
+                    callsOfType(network, "pubmed").length,
+                    0
+                );
+                assert.ok(
+                    network.calls.every(
+                        call =>
+                            !call.url.includes(
+                                "eutils.ncbi.nlm.nih.gov"
+                            )
+                    )
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided clarification, direct questions, and uncertainty cannot mechanically complete the active objective",
+            async () => {
+
+                setEnvironment();
+
+
+                const responses = [
+                    createGuidedModelOutput({
+                        response:
+                            "Strengths are qualities or abilities you can draw on. What do you feel you have going for you?",
+                        turnFunctions: [
+                            "OBJECTIVE_CONTENT"
+                        ],
+                        objectiveUpdates: [
+                            {
+                                key: "strengthsResources",
+                                status: "complete",
+                                summary: "The clarification was incorrectly treated as an answer."
+                            }
+                        ],
+                        suggestedNextObjective:
+                            "strengthsResources"
+                    }),
+                    createGuidedModelOutput({
+                        response:
+                            "We can make the question smaller and explore what has helped even a little.",
+                        objectiveUpdates: [
+                            {
+                                key: "strengthsResources",
+                                status: "complete",
+                                summary: "The user is uncertain."
+                            }
+                        ],
+                        suggestedNextObjective:
+                            "strengthsResources"
+                    }),
+                    createGuidedModelOutput({
+                        response:
+                            "No. You can name one or several strengths. What comes to mind first?",
+                        turnFunctions: [
+                            "OBJECTIVE_CONTENT"
+                        ],
+                        objectiveUpdates: [
+                            {
+                                key: "strengthsResources",
+                                status: "complete",
+                                summary: "The direct question was incorrectly treated as an answer."
+                            }
+                        ],
+                        suggestedNextObjective:
+                            "strengthsResources"
+                    })
+                ];
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses:
+                            responses
+                    });
+
+                const baseBody = {
+                    mode:
+                        "guided-reflection",
+                    conversation: [],
+                    profile:
+                        createGuidedProfile(),
+                    reflectionContext:
+                        createGuidedContext({
+                            activeObjective:
+                                "strengthsResources"
+                        })
+                };
+
+                const clarification =
+                    await invokeHello({
+                        body: {
+                            ...baseBody,
+                            message:
+                                "What do you mean by strengths?"
+                        },
+                        network
+                    });
+
+                const uncertainty =
+                    await invokeHello({
+                        body: {
+                            ...baseBody,
+                            message:
+                                "I don't know."
+                        },
+                        network
+                    });
+
+                const directQuestion =
+                    await invokeHello({
+                        body: {
+                            ...baseBody,
+                            message:
+                                "Do I have to choose only one strength?"
+                        },
+                        network
+                    });
+
+
+                assert.deepEqual(
+                    clarification.response.body
+                        .guidedReflection.objectiveUpdates,
+                    []
+                );
+                assert.ok(
+                    clarification.response.body
+                        .guidedReflection.turnFunctions
+                        .includes("CLARIFICATION")
+                );
+                assert.equal(
+                    uncertainty.response.body
+                        .guidedReflection.objectiveUpdates[0]
+                        .status,
+                    "partial"
+                );
+                assert.ok(
+                    uncertainty.response.body
+                        .guidedReflection.turnFunctions
+                        .includes("UNCERTAINTY")
+                );
+                assert.deepEqual(
+                    directQuestion.response.body
+                        .guidedReflection.objectiveUpdates,
+                    []
+                );
+                assert.ok(
+                    directQuestion.response.body
+                        .guidedReflection.turnFunctions
+                        .includes("DIRECT_QUESTION")
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided objective catalog can finish without becoming a mandatory checklist",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses: [
+                            createGuidedModelOutput({
+                                response:
+                                    "Twice a week at home is a realistic next step that fits your constraints.",
+                                objectiveUpdates: [
+                                    {
+                                        key: "goals",
+                                        status: "complete",
+                                        summary: "Get stronger at home."
+                                    },
+                                    {
+                                        key: "optionsNextSteps",
+                                        status: "complete",
+                                        summary: "Use resistance bands twice a week."
+                                    }
+                                ],
+                                suggestedNextObjective:
+                                    null,
+                                reflectionComplete:
+                                    true
+                            })
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "I can use my resistance bands twice a week.",
+                            mode:
+                                "guided-reflection",
+                            conversation: [],
+                            profile:
+                                createGuidedProfile(),
+                            reflectionContext:
+                                createGuidedContext()
+                        },
+                        network
+                    });
+
+
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .reflectionComplete,
+                    true
+                );
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .nextObjective,
+                    null
+                );
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .objectiveUpdates.length,
+                    2
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided readiness hesitation cannot be converted into forced action completion",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses: [
+                            createGuidedModelOutput({
+                                response:
+                                    "You do not need to choose an action yet. What feels unresolved?",
+                                turnFunctions: [
+                                    "READINESS_HESITATION"
+                                ],
+                                objectiveUpdates: [
+                                    {
+                                        key: "readiness",
+                                        status: "deferred",
+                                        summary: "The user is not ready to act."
+                                    },
+                                    {
+                                        key: "optionsNextSteps",
+                                        status: "complete",
+                                        summary: "A model-invented action that must be discarded."
+                                    }
+                                ],
+                                suggestedNextObjective:
+                                    "optionsNextSteps",
+                                reflectionComplete:
+                                    true
+                            })
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "I am not ready to make a plan.",
+                            mode:
+                                "guided-reflection",
+                            conversation: [],
+                            profile:
+                                createGuidedProfile(),
+                            reflectionContext:
+                                createGuidedContext({
+                                    activeObjective:
+                                        "readiness",
+                                    objectives: {
+                                        goals: {
+                                            status: "complete",
+                                            summary: "Build savings."
+                                        }
+                                    }
+                                })
+                        },
+                        network
+                    });
+
+
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .reflectionComplete,
+                    false
+                );
+                assert.ok(
+                    result.response.body.guidedReflection
+                        .objectiveUpdates.every(
+                            update =>
+                                update.key !==
+                                    "optionsNextSteps"
+                        )
+                );
+                assert.notEqual(
+                    result.response.body.guidedReflection
+                        .nextObjective,
+                    "optionsNextSteps"
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided objective selection skips information already completed",
+            async () => {
+
+                setEnvironment();
+
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses: [
+                            createGuidedModelOutput({
+                                response:
+                                    "You have named what is working and what you want. Why does that goal matter to you?",
+                                objectiveUpdates: [
+                                    {
+                                        key: "currentSuccesses",
+                                        status: "complete",
+                                        summary: "Automatic savings are already working."
+                                    }
+                                ],
+                                suggestedNextObjective:
+                                    "goals"
+                            })
+                        ]
+                    });
+
+                const result =
+                    await invokeHello({
+                        body: {
+                            message:
+                                "Automatic savings are already helping.",
+                            mode:
+                                "guided-reflection",
+                            conversation: [],
+                            profile:
+                                createGuidedProfile(),
+                            reflectionContext:
+                                createGuidedContext({
+                                    objectives: {
+                                        goals: {
+                                            status: "complete",
+                                            summary: "Save for a home."
+                                        }
+                                    }
+                                })
+                        },
+                        network
+                    });
+
+
+                assert.equal(
+                    result.response.body.guidedReflection
+                        .nextObjective,
+                    "motivationMeaning"
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided safety and clinical boundaries remain ahead of coaching generation",
+            async () => {
+
+                setEnvironment();
+
+
+                const urgentNetwork =
+                    createMockNetwork({
+                        redisUnavailable: true
+                    });
+
+                const guidedBody = {
+                    mode:
+                        "guided-reflection",
+                    conversation: [],
+                    profile:
+                        createGuidedProfile(),
+                    reflectionContext:
+                        createGuidedContext()
+                };
+
+                const urgent =
+                    await invokeHello({
+                        body: {
+                            ...guidedBody,
+                            message:
+                                "I have severe chest pain"
+                        },
+                        forwardedFor:
+                            null,
+                        network:
+                            urgentNetwork
+                    });
+
+
+                assert.equal(
+                    urgent.response.body.route,
+                    "SAFETY_MEDICAL"
+                );
+                assert.equal(
+                    urgentNetwork.calls.length,
+                    0
+                );
+
+
+                const clinicalNetwork =
+                    createMockNetwork({
+                        openAIResponses: [
+                            "I can't tell you to stop a prescribed medication. I can help you prepare questions for your clinician."
+                        ]
+                    });
+
+                const clinical =
+                    await invokeHello({
+                        body: {
+                            ...guidedBody,
+                            message:
+                                "Should I stop my medication?"
+                        },
+                        network:
+                            clinicalNetwork
+                    });
+
+
+                assert.equal(
+                    clinical.response.body.route,
+                    "RED"
+                );
+                assert.equal(
+                    clinical.response.body.offerVisitPrep,
+                    true
+                );
+                assert.equal(
+                    callsOfType(
+                        clinicalNetwork,
+                        "openai"
+                    ).length,
+                    1
+                );
+                assert.ok(
+                    clinicalNetwork.calls.every(
+                        call =>
+                            !call.url.includes(
+                                "eutils.ncbi.nlm.nih.gov"
+                            )
+                    )
+                );
+
+            }
+        );
+
+
+        await t.test(
+            "Guided raw text is absent from limiter keys and normal logs",
+            async () => {
+
+                setEnvironment({
+                    HELLO_RATE_LIMIT_NORMAL_MAX:
+                        "1"
+                });
+
+                const logs = [];
+
+
+                console.error =
+                    value => {
+                        logs.push(String(value));
+                    };
+
+
+                const network =
+                    createMockNetwork({
+                        openAIResponses: [
+                            createGuidedModelOutput()
+                        ]
+                    });
+
+                const rawGuidedText =
+                    "PRIVATE_GUIDED_REFLECTION_TOKEN";
+
+                const body = {
+                    message:
+                        rawGuidedText,
+                    mode:
+                        "guided-reflection",
+                    conversation: [],
+                    profile:
+                        createGuidedProfile(),
+                    reflectionContext:
+                        createGuidedContext()
+                };
+
+
+                await invokeHello({
+                    body,
+                    network
+                });
+
+                const limited =
+                    await invokeHello({
+                        body,
+                        network
+                    });
+
+
+                assert.equal(
+                    limited.response.statusCode,
+                    429
+                );
+
+                const redisBodies =
+                    callsOfType(network, "redis")
+                        .map(call => call.body)
+                        .join("\n");
+
+
+                assert.doesNotMatch(
+                    redisBodies,
+                    /PRIVATE_GUIDED_REFLECTION_TOKEN/
+                );
+                assert.doesNotMatch(
+                    logs.join("\n"),
+                    /PRIVATE_GUIDED_REFLECTION_TOKEN|Financial Wellness/
+                );
+
+
+                console.error =
+                    originalConsoleError;
+
+            }
+        );
+
+
+        await t.test(
             "separate canonical client identities receive separate quotas",
             async () => {
 
@@ -1630,6 +2342,25 @@ test(
                         body: {
                             message: "Hello",
                             profile: "invalid"
+                        },
+                        expectedCode: "INVALID_REQUEST",
+                        expectedStatus: 400
+                    },
+                    {
+                        body: {
+                            message: "Hello",
+                            mode: "unknown-mode"
+                        },
+                        expectedCode: "INVALID_REQUEST",
+                        expectedStatus: 400
+                    },
+                    {
+                        body: {
+                            message: "Hello",
+                            mode: "guided-reflection",
+                            conversation: [],
+                            profile:
+                                createGuidedProfile()
                         },
                         expectedCode: "INVALID_REQUEST",
                         expectedStatus: 400

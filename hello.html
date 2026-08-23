@@ -1031,6 +1031,12 @@ let conversationGeneration = 0;
 
 let activeAskRequest = null;
 
+let guidedConversation = [];
+
+let guidedResponseSequence = 0;
+
+let activeGuidedRequest = null;
+
 
 function getHelloApiEndpoint() {
 
@@ -1059,31 +1065,31 @@ function getHelloApiEndpoint() {
    GUIDED REFLECTION STEPS
 ========================================================= */
 
-const reflectionSteps = [
+const reflectionObjectives = [
 
     {
-        key: "workingWell",
+        key: "currentSuccesses",
 
         question:
             "What is already going well in this area?"
     },
 
     {
-        key: "desiredChange",
+        key: "goals",
 
         question:
             "What would you like to be different?"
     },
 
     {
-        key: "whyMatters",
+        key: "motivationMeaning",
 
         question:
             "Why would that change matter to you?"
     },
 
     {
-        key: "strengths",
+        key: "strengthsResources",
 
         question:
             "What strengths, resources, people, or support could help you?"
@@ -1097,27 +1103,75 @@ const reflectionSteps = [
     },
 
     {
-        key: "goal",
+        key: "previousAttempts",
 
         question:
-            "What is one goal you would like to work toward?"
+            "What have you tried before, and what happened?"
     },
 
     {
-        key: "actionStep",
+        key: "preferences",
 
         question:
-            "What is one small, realistic action you could take next?"
+            "What would make an approach feel more workable for you?"
+    },
+
+    {
+        key: "readiness",
+
+        question:
+            "How ready do you feel to work on this right now?"
     },
 
     {
         key: "confidence",
 
         question:
-            "On a scale from 1 to 10, how confident are you that you could take that step?"
+            "How confident do you feel about taking a manageable next step?"
+    },
+
+    {
+        key: "perceivedBenefits",
+
+        question:
+            "What could become better if this change worked for you?"
+    },
+
+    {
+        key: "socialContext",
+
+        question:
+            "Are there people or social expectations that affect this?"
+    },
+
+    {
+        key: "environmentAccess",
+
+        question:
+            "Are there practical, environmental, or access constraints to consider?"
+    },
+
+    {
+        key: "emotionalContext",
+
+        question:
+            "What feelings tend to come up around this?"
+    },
+
+    {
+        key: "optionsNextSteps",
+
+        question:
+            "What is one small, realistic next step that fits what you have described?"
     }
 
 ];
+
+
+const reflectionObjectiveKeys =
+    reflectionObjectives.map(
+        objective => objective.key
+    );
 
 
 
@@ -1175,6 +1229,278 @@ function saveState() {
         "helloWellnessState",
         JSON.stringify(state)
     );
+
+}
+
+
+function createEmptyReflectionObjectives() {
+
+    return Object.fromEntries(
+        reflectionObjectiveKeys.map(
+            key => [
+                key,
+                {
+                    status:
+                        "unresolved",
+                    summary:
+                        "",
+                    updatedAtTurn:
+                        0
+                }
+            ]
+        )
+    );
+
+}
+
+
+function ensureReflectionState() {
+
+    if (!state) {
+        return null;
+    }
+
+
+    const objectives =
+        createEmptyReflectionObjectives();
+
+    const existingReflection =
+        state.reflection &&
+        typeof state.reflection === "object" &&
+        !Array.isArray(state.reflection)
+            ? state.reflection
+            : null;
+
+
+    if (
+        existingReflection?.objectives &&
+        typeof existingReflection.objectives === "object" &&
+        !Array.isArray(
+            existingReflection.objectives
+        )
+    ) {
+
+        reflectionObjectiveKeys.forEach(
+            key => {
+
+                const supplied =
+                    existingReflection.objectives[key];
+
+
+                if (
+                    !supplied ||
+                    typeof supplied !== "object" ||
+                    Array.isArray(supplied)
+                ) {
+                    return;
+                }
+
+
+                const status =
+                    [
+                        "unresolved",
+                        "partial",
+                        "complete",
+                        "deferred"
+                    ].includes(supplied.status)
+                        ? supplied.status
+                        : "unresolved";
+
+                const summary =
+                    typeof supplied.summary === "string"
+                        ? supplied.summary
+                            .replace(/—/g, "-")
+                            .trim()
+                            .slice(0, 600)
+                        : "";
+
+
+                objectives[key] = {
+                    status,
+                    summary,
+                    updatedAtTurn:
+                        Number.isInteger(
+                            supplied.updatedAtTurn
+                        )
+                            ? supplied.updatedAtTurn
+                            : 0
+                };
+
+            }
+        );
+
+    }
+
+    else {
+
+        const answers =
+            state.answers || {};
+
+        const legacyValues = {
+            currentSuccesses:
+                answers.workingWell,
+            goals:
+                answers.goal ||
+                answers.desiredChange,
+            motivationMeaning:
+                answers.whyMatters,
+            barriers:
+                answers.barriers,
+            confidence:
+                answers.confidence,
+            strengthsResources:
+                answers.strengths,
+            optionsNextSteps:
+                answers.actionStep
+        };
+
+
+        Object.entries(legacyValues)
+            .forEach(
+                ([key, value]) => {
+
+                    if (
+                        typeof value === "string" &&
+                        value.trim()
+                    ) {
+                        objectives[key] = {
+                            status:
+                                "complete",
+                            summary:
+                                value
+                                    .replace(/—/g, "-")
+                                    .trim()
+                                    .slice(0, 600),
+                            updatedAtTurn:
+                                0
+                        };
+                    }
+
+                }
+            );
+
+    }
+
+
+    const activeObjective =
+        reflectionObjectiveKeys.includes(
+            existingReflection?.activeObjective
+        )
+            ? existingReflection.activeObjective
+            : (
+                existingReflection?.activeObjective === null &&
+                objectives.optionsNextSteps.status === "complete"
+                    ? null
+                    : (
+                        !existingReflection &&
+                        state.currentStep >= 8 &&
+                        objectives.optionsNextSteps.status === "complete"
+                            ? null
+                            : "currentSuccesses"
+                    )
+            );
+
+
+    state.reflection = {
+        version: 1,
+        activeObjective,
+        turnNumber:
+            Number.isInteger(
+                existingReflection?.turnNumber
+            )
+                ? existingReflection.turnNumber
+                : 0,
+        objectives
+    };
+
+
+    return state.reflection;
+
+}
+
+
+function getReflectionObjective(
+    key
+) {
+
+    return reflectionObjectives.find(
+        objective =>
+            objective.key === key
+    ) || null;
+
+}
+
+
+function getReflectionContextForRequest() {
+
+    const reflection =
+        ensureReflectionState();
+
+
+    if (!reflection) {
+        return null;
+    }
+
+
+    return {
+        activeObjective:
+            reflection.activeObjective,
+        objectives:
+            Object.fromEntries(
+                reflectionObjectiveKeys.map(
+                    key => [
+                        key,
+                        {
+                            status:
+                                reflection.objectives[key].status,
+                            summary:
+                                reflection.objectives[key].summary
+                        }
+                    ]
+                )
+            )
+    };
+
+}
+
+
+function syncLegacyReflectionAnswers() {
+
+    if (!state?.reflection) {
+        return;
+    }
+
+
+    state.answers =
+        state.answers || {};
+
+    const objectives =
+        state.reflection.objectives;
+
+
+    state.answers.workingWell =
+        objectives.currentSuccesses.summary;
+    state.answers.desiredChange =
+        objectives.goals.summary;
+    state.answers.whyMatters =
+        objectives.motivationMeaning.summary;
+    state.answers.strengths =
+        objectives.strengthsResources.summary;
+    state.answers.barriers =
+        objectives.barriers.summary;
+    state.answers.goal =
+        objectives.goals.summary;
+    state.answers.actionStep =
+        objectives.optionsNextSteps.summary;
+    state.answers.confidence =
+        objectives.confidence.summary;
+
+    state.currentStep =
+        reflectionObjectiveKeys.filter(
+            key =>
+                objectives[key].status ===
+                    "complete"
+        ).length;
 
 }
 
@@ -1379,6 +1705,105 @@ function isAskRequestActive(request) {
 }
 
 
+function invalidateActiveGuidedRequest() {
+
+    if (activeGuidedRequest) {
+
+        if (
+            activeGuidedRequest.controller
+        ) {
+            activeGuidedRequest.controller.abort();
+        }
+
+
+        removeLoadingMessage(
+            activeGuidedRequest.loadingMessage
+        );
+
+
+        activeGuidedRequest =
+            null;
+
+    }
+
+
+    if (currentMode === "guided") {
+        setHelloControlsDisabled(false);
+    }
+
+}
+
+
+function isGuidedRequestActive(request) {
+
+    return (
+        activeGuidedRequest === request &&
+        request.generation === conversationGeneration &&
+        currentMode === "guided"
+    );
+
+}
+
+
+function getGuidedConversationForRequest() {
+
+    return guidedConversation
+        .filter(
+            item =>
+                item &&
+                (
+                    item.role === "user" ||
+                    item.role === "assistant"
+                ) &&
+                typeof item.content === "string" &&
+                item.content.trim()
+        )
+        .map(
+            item => ({
+                role:
+                    item.role,
+                content:
+                    item.content
+                        .trim()
+                        .slice(0, 1500)
+            })
+        )
+        .slice(-10);
+
+}
+
+
+function appendGuidedConversationTurn(
+    role,
+    content
+) {
+
+    if (
+        (
+            role !== "user" &&
+            role !== "assistant"
+        ) ||
+        typeof content !== "string" ||
+        !content.trim()
+    ) {
+        return;
+    }
+
+
+    guidedConversation.push({
+        role,
+        content:
+            content
+                .trim()
+                .slice(0, 1500)
+    });
+
+    guidedConversation =
+        guidedConversation.slice(-10);
+
+}
+
+
 function scheduleModeCallback(callback, delay) {
 
     const generation =
@@ -1414,6 +1839,8 @@ function clearChat() {
 
     invalidateActiveAskRequest();
 
+    invalidateActiveGuidedRequest();
+
     resetVisitPrepState();
 
     document
@@ -1427,6 +1854,8 @@ function clearChat() {
 
 
     askConversation = [];
+
+    guidedConversation = [];
 
     careOptionResponseIds = new Set();
 
@@ -2206,7 +2635,12 @@ function startGuidedReflection() {
         );
 
 
-    if (!state) {
+    if (
+        !state ||
+        !getWellnessProfileForRequest()
+    ) {
+
+        state = null;
 
         setHelloControlsDisabled(true);
 
@@ -2233,6 +2667,12 @@ function startGuidedReflection() {
 
 
     setHelloControlsDisabled(false);
+
+    const reflection =
+        ensureReflectionState();
+
+
+    saveState();
 
 
     context.innerHTML = `
@@ -2269,8 +2709,9 @@ function startGuidedReflection() {
 
 
     if (
-        state.currentStep >=
-        reflectionSteps.length
+        reflection.objectives.optionsNextSteps
+            .status === "complete" &&
+        reflection.activeObjective === null
     ) {
 
         showSummary();
@@ -2338,10 +2779,13 @@ function askGuidedQuestion() {
     }
 
 
+    const reflection =
+        ensureReflectionState();
+
     const step =
-        reflectionSteps[
-            state.currentStep
-        ];
+        getReflectionObjective(
+            reflection.activeObjective
+        );
 
 
     if (!step) {
@@ -2366,54 +2810,60 @@ function askGuidedQuestion() {
    GUIDED RESPONSE
 ========================================================= */
 
-function handleGuidedResponse(
+async function handleGuidedResponse(
     value
 ) {
 
-    if (!state) {
+    if (
+        !state ||
+        activeGuidedRequest
+    ) {
         return;
     }
 
 
-    const step =
-        reflectionSteps[
-            state.currentStep
-        ];
+    const profile =
+        getWellnessProfileForRequest();
 
-
-    if (!step) {
-        return;
-    }
+    const reflectionContext =
+        getReflectionContextForRequest();
 
 
     if (
-        step.key === "confidence"
+        !profile ||
+        !reflectionContext
     ) {
-
-        const number =
-            Number(value);
-
-
-        if (
-            !Number.isInteger(number) ||
-            number < 1 ||
-            number > 10
-        ) {
-
-            addMessage(
-
-                "Enter a whole number from 1 to 10 for this confidence reflection.",
-
-                "assistant"
-
-            );
-
-
-            return;
-
-        }
-
+        return;
     }
+
+
+    const responseId =
+        `guided-${++guidedResponseSequence}`;
+
+    const controller =
+        typeof AbortController === "function"
+            ? new AbortController()
+            : null;
+
+    const request = {
+        id:
+            responseId,
+        generation:
+            conversationGeneration,
+        controller,
+        loadingMessage:
+            null
+    };
+
+
+    const conversation =
+        getGuidedConversationForRequest();
+
+
+    activeGuidedRequest =
+        request;
+
+    setHelloControlsDisabled(true);
 
 
     addMessage(
@@ -2421,38 +2871,251 @@ function handleGuidedResponse(
         "user"
     );
 
-
-    state.answers[
-        step.key
-    ] =
-        value;
-
-
-    state.currentStep++;
+    appendGuidedConversationTurn(
+        "user",
+        value
+    );
 
 
+    try {
+
+        request.loadingMessage =
+            showLoadingMessage(
+                request.id
+            );
+
+
+        const response =
+            await fetch(
+                getHelloApiEndpoint(),
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    signal:
+                        controller
+                            ? controller.signal
+                            : undefined,
+                    body:
+                        JSON.stringify({
+                            message:
+                                value,
+                            mode:
+                                "guided-reflection",
+                            conversation,
+                            profile,
+                            reflectionContext
+                        })
+                }
+            );
+
+
+        if (!isGuidedRequestActive(request)) {
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!isGuidedRequestActive(request)) {
+            return;
+        }
+
+        removeLoadingMessage(
+            request.loadingMessage
+        );
+
+        request.loadingMessage =
+            null;
+
+
+        if (!response.ok) {
+            addMessage(
+                data.message ||
+                "Hello could not process that reflection.",
+                "assistant"
+            );
+
+            return;
+        }
+
+
+        addMessage(
+            data.response,
+            "assistant"
+        );
+
+
+        if (
+            typeof data.response === "string" &&
+            data.response.trim()
+        ) {
+            appendGuidedConversationTurn(
+                "assistant",
+                data.response
+            );
+        }
+
+
+        if (
+            data.guidedReflection &&
+            typeof data.guidedReflection === "object"
+        ) {
+            applyGuidedReflectionResult(
+                data.guidedReflection
+            );
+        }
+
+
+        if (
+            data.offerVisitPrep === true &&
+            data.stopNormalFlow !== true
+        ) {
+            addCareOptions(responseId);
+        }
+
+    }
+
+    catch (error) {
+
+        if (!isGuidedRequestActive(request)) {
+            return;
+        }
+
+
+        removeLoadingMessage(
+            request.loadingMessage
+        );
+
+        request.loadingMessage =
+            null;
+
+
+        if (
+            error &&
+            error.name === "AbortError"
+        ) {
+            return;
+        }
+
+
+        addMessage(
+            "Hello is having trouble connecting right now. Please try again.",
+            "assistant"
+        );
+
+    }
+
+    finally {
+
+        if (
+            activeGuidedRequest === request
+        ) {
+            removeLoadingMessage(
+                request.loadingMessage
+            );
+
+            activeGuidedRequest =
+                null;
+
+            setHelloControlsDisabled(
+                state?.reflection
+                    ?.activeObjective === null
+            );
+        }
+
+    }
+
+}
+
+
+function applyGuidedReflectionResult(
+    result
+) {
+
+    const reflection =
+        ensureReflectionState();
+
+
+    if (!reflection) {
+        return;
+    }
+
+
+    reflection.turnNumber++;
+
+
+    if (Array.isArray(result.objectiveUpdates)) {
+
+        result.objectiveUpdates.forEach(
+            update => {
+
+                if (
+                    !update ||
+                    !reflectionObjectiveKeys.includes(
+                        update.key
+                    ) ||
+                    ![
+                        "unresolved",
+                        "partial",
+                        "complete",
+                        "deferred"
+                    ].includes(update.status) ||
+                    typeof update.summary !== "string" ||
+                    !update.summary.trim()
+                ) {
+                    return;
+                }
+
+
+                reflection.objectives[
+                    update.key
+                ] = {
+                    status:
+                        update.status,
+                    summary:
+                        update.summary
+                            .replace(/—/g, "-")
+                            .trim()
+                            .slice(0, 600),
+                    updatedAtTurn:
+                        reflection.turnNumber
+                };
+
+            }
+        );
+
+    }
+
+
+    reflection.activeObjective =
+        result.reflectionComplete === true
+            ? null
+            : (
+                reflectionObjectiveKeys.includes(
+                    result.nextObjective
+                )
+                    ? result.nextObjective
+                    : reflection.activeObjective
+            );
+
+
+    syncLegacyReflectionAnswers();
     saveState();
 
 
-    if (
-        state.currentStep >=
-        reflectionSteps.length
-    ) {
+    if (result.reflectionComplete === true) {
+
+        setHelloControlsDisabled(true);
 
         scheduleModeCallback(
             showSummary,
             250
         );
-
-    }
-
-    else {
-
-        scheduleModeCallback(
-            askGuidedQuestion,
-            250
-        );
-
     }
 
 }
@@ -2478,31 +3141,44 @@ function showSummary() {
         "none";
 
 
-    addMessage(
+    const reflection =
+        ensureReflectionState();
 
-        `Your goal: ${state.answers.goal}`,
-
-        "assistant"
-
-    );
+    const objectives =
+        reflection.objectives;
 
 
-    addMessage(
+    if (objectives.goals.summary) {
+        addMessage(
+            `Your goal: ${objectives.goals.summary}`,
+            "assistant"
+        );
+    }
 
-        `Your next step: ${state.answers.actionStep}`,
 
-        "assistant"
+    if (objectives.optionsNextSteps.summary) {
+        addMessage(
+            `Your next step: ${objectives.optionsNextSteps.summary}`,
+            "assistant"
+        );
+    }
 
-    );
+
+    if (objectives.confidence.summary) {
+
+        const confidenceText =
+            /^\d+$/.test(
+                objectives.confidence.summary
+            )
+                ? `Confidence: ${objectives.confidence.summary}/10`
+                : `Your confidence reflection: ${objectives.confidence.summary}`;
 
 
-    addMessage(
-
-        `Confidence: ${state.answers.confidence}/10`,
-
-        "assistant"
-
-    );
+        addMessage(
+            confidenceText,
+            "assistant"
+        );
+    }
 
 
     addMessage(
@@ -2560,6 +3236,21 @@ function restartReflection() {
         confidence: ""
 
     };
+
+
+    state.reflection = {
+        version: 1,
+        activeObjective:
+            "currentSuccesses",
+        turnNumber: 0,
+        objectives:
+            createEmptyReflectionObjectives()
+    };
+
+
+    guidedConversation = [];
+
+    invalidateActiveGuidedRequest();
 
 
     saveState();
