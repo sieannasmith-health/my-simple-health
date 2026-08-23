@@ -4,7 +4,7 @@
 
   const navItems = [
     { key: 'health', label: 'My Health', href: 'my-health.html' },
-    { key: 'landscape', label: 'Landscape', href: 'my-landscape.html', comingSoon: true },
+    { key: 'landscape', label: 'Landscape', href: 'my-landscape.html' },
     { key: 'project', label: 'Project', href: 'my-project.html', comingSoon: true },
     { key: 'learning', label: 'Learning', href: 'my-learning.html', comingSoon: true }
   ];
