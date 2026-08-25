@@ -686,6 +686,10 @@
             there is nothing to explore.
         </p>
 
+        <button type="button" class="wheel-button secondary" onclick="startWheelAgain()">
+            MAP A NEW SNAPSHOT
+        </button>
+
     </div>
 
 
@@ -928,6 +932,7 @@
 </footer>
 
 
+<script src="js/msh-storage.js"></script>
 <script>
 
 
@@ -1005,6 +1010,40 @@ let selectedPriority = null;
 let selectedPriorityKey = null;
 
 let wellnessChart = null;
+
+let wellnessRecordId = null;
+
+
+function persistWheelResult() {
+
+    if (!window.MSHStorage) {
+        return;
+    }
+
+    const existing = MSHStorage.getState().wellnessWheel.current;
+
+    if (!wellnessRecordId) {
+        wellnessRecordId = MSHStorage.uid("wellness");
+        MSHStorage.saveWellnessWheel({
+            id: wellnessRecordId,
+            scores: { ...responses },
+            selectedDimension: selectedPriority,
+            selectedDimensionKey: selectedPriorityKey,
+            completedAt: new Date().toISOString()
+        });
+        return;
+    }
+
+    MSHStorage.updateState(function(data) {
+        if (data.wellnessWheel.current && data.wellnessWheel.current.id === wellnessRecordId) {
+            data.wellnessWheel.current.scores = { ...responses };
+            data.wellnessWheel.current.selectedDimension = selectedPriority;
+            data.wellnessWheel.current.selectedDimensionKey = selectedPriorityKey;
+        }
+        return data;
+    });
+
+}
 
 
 /* =========================================
@@ -1126,6 +1165,43 @@ function buildQuestions() {
 
 
 buildQuestions();
+
+
+const savedWellnessWheel = window.MSHStorage
+    ? window.MSHStorage.getState().wellnessWheel.current
+    : null;
+
+
+if (savedWellnessWheel && savedWellnessWheel.scores) {
+    Object.assign(responses, savedWellnessWheel.scores);
+    wellnessRecordId = savedWellnessWheel.id;
+    selectedPriority = savedWellnessWheel.selectedDimension || null;
+    selectedPriorityKey = savedWellnessWheel.selectedDimensionKey || null;
+    currentQuestion = wellnessDimensions.length - 1;
+    window.setTimeout(showResults, 0);
+}
+
+
+function startWheelAgain() {
+    Object.keys(responses).forEach(function(key) {
+        delete responses[key];
+    });
+    wellnessRecordId = null;
+    selectedPriority = null;
+    selectedPriorityKey = null;
+    currentQuestion = 0;
+    document.getElementById("wheelResults").classList.remove("active");
+    document.getElementById("wheelAssessment").style.display = "block";
+    document.getElementById("progressWrap").style.display = "block";
+    document.querySelectorAll(".wheel-score-button").forEach(function(button) {
+        button.classList.remove("selected");
+    });
+    document.querySelectorAll(".next-button").forEach(function(button) {
+        button.disabled = true;
+    });
+    showQuestion();
+    document.getElementById("wheelAssessment").scrollIntoView({ behavior: "smooth" });
+}
 
 
 /* =========================================
@@ -1367,6 +1443,8 @@ function updateProgress() {
 ========================================== */
 
 function showResults() {
+
+    persistWheelResult();
 
     document
         .getElementById(
@@ -1690,6 +1768,9 @@ function selectPriority(button) {
 
     selectedPriorityKey =
         button.dataset.key;
+
+
+    persistWheelResult();
 
 
     document

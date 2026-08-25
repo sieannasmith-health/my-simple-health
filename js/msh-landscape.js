@@ -1,52 +1,34 @@
-/* My Simple Health — Wellbeing Landscape prototype flow */
+/* My Simple Health — Dimensions of Health V2 progressive self-discovery flow */
 (function () {
   'use strict';
 
   const mount = document.querySelector('[data-msh-landscape]');
   const config = window.MSHLandscapeConfig;
+  const dimensions = window.MSHDimensionsV2;
   const storage = window.MSHStorage;
-
-  if (!mount || !config || !storage) return;
+  if (!mount || !config || !dimensions || !storage) return;
 
   let screen = 'landing';
   let currentIndex = 0;
   let draft = null;
-  let expandedContext = false;
   let expandedWhy = false;
+  let lastObservation = null;
   let resultsDraft = null;
 
-  function uid(prefix) {
-    if (window.crypto && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  }
-
+  function uid(prefix) { return storage.uid ? storage.uid(prefix) : `${prefix}_${Date.now()}`; }
   function escapeHtml(value) {
     return String(value == null ? '' : value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
-
-  function domainFor(id) {
-    return config.domains.find(domain => domain.id === id);
-  }
-
-  function itemFor(id) {
-    return config.items.find(item => item.id === id);
-  }
-
-  function currentResponse(itemId) {
-    if (!draft) return null;
-    return draft.responses.find(response => response.itemId === itemId) || null;
-  }
+  function domainFor(id) { return config.domains.find(domain => domain.id === id); }
+  function itemFor(id) { return config.items.find(item => item.id === id); }
+  function currentResponse(itemId) { return draft && draft.responses.find(response => response.itemId === itemId) || null; }
 
   function saveDraft() {
     if (!draft) return;
     draft.updatedAt = new Date().toISOString();
     draft.currentItemIndex = currentIndex;
-
     storage.updateState(state => {
       const index = state.landscapes.findIndex(item => item.id === draft.id);
       if (index >= 0) state.landscapes[index] = draft;
@@ -55,26 +37,24 @@
     });
   }
 
+  function newestLandscape(predicate) {
+    return storage.getState().landscapes.filter(predicate).sort((a, b) =>
+      new Date(b.updatedAt || b.completedAt || b.startedAt || 0) - new Date(a.updatedAt || a.completedAt || a.startedAt || 0)
+    )[0] || null;
+  }
+
   function getInProgress() {
-    const state = storage.getState();
-    return [...state.landscapes]
-      .filter(item => item.status === 'in_progress' && item.instrumentVersion === config.version)
-      .sort((a, b) => new Date(b.updatedAt || b.startedAt || 0) - new Date(a.updatedAt || a.startedAt || 0))[0] || null;
+    return newestLandscape(item => item.status === 'in_progress' && item.instrumentVersion === config.version);
   }
 
   function startNew() {
+    const timestamp = new Date().toISOString();
     draft = {
-      id: uid('landscape'),
-      type: 'full',
-      instrumentVersion: config.version,
-      status: 'in_progress',
-      startedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      currentItemIndex: 0,
-      responses: [],
-      finalContext: '',
-      confirmation: null,
-      correction: ''
+      id: uid('landscape'), type: 'progressive', instrumentVersion: config.version,
+      experienceVersion: dimensions.EXPERIENCE_VERSION,
+      healthMapRole: 'canonical_measurement_record', selfMapRole: 'derived_visualization_only',
+      status: 'in_progress', startedAt: timestamp, updatedAt: timestamp, currentItemIndex: 0,
+      responses: [], finalContext: '', confirmation: null, correction: ''
     };
     currentIndex = 0;
     saveDraft();
@@ -84,33 +64,35 @@
 
   function resume(existing) {
     draft = existing;
-    currentIndex = Math.min(existing.currentItemIndex || 0, config.items.length - 1);
-    screen = 'question';
+    const next = dimensions.nextUnexploredIndex(config, draft.responses, (existing.currentItemIndex || 0) - 1);
+    currentIndex = next < 0 ? Math.min(existing.currentItemIndex || 0, config.items.length - 1) : next;
+    screen = next < 0 ? 'summary' : 'question';
     render();
   }
 
-  function setAnswer(item, option) {
-    const response = currentResponse(item.id);
-    if (response) {
-      response.value = option.value;
-      response.label = option.label;
-      response.signal = option.signal;
-      response.direction = option.direction || null;
-      response.answeredAt = new Date().toISOString();
-    } else {
-      draft.responses.push({
-        itemId: item.id,
-        domain: item.domain,
-        construct: item.construct,
-        value: option.value,
-        label: option.label,
-        signal: option.signal,
-        direction: option.direction || null,
-        context: '',
-        answeredAt: new Date().toISOString()
-      });
-    }
+  function saveObservation(item, selection, missingReason) {
+    const existing = currentResponse(item.id);
+    const observation = dimensions.createObservation(config, item, selection, {
+      observationId: existing && existing.observationId,
+      context: existing && existing.context || '', missingReason
+    });
+    draft.responses = draft.responses.filter(response => response.itemId !== item.id);
+    draft.responses.push(observation);
+    lastObservation = observation;
     saveDraft();
+    screen = 'discovery';
+    render();
+  }
+
+  function skipArea(item) {
+    const domainItems = config.items.filter(candidate => candidate.domain === item.domain);
+    domainItems.forEach(candidate => {
+      if (currentResponse(candidate.id)) return;
+      draft.responses.push(dimensions.createObservation(config, candidate, null, { missingReason: 'SKIPPED_AREA' }));
+    });
+    lastObservation = currentResponse(item.id);
+    saveDraft();
+    screen = 'discovery';
     render();
   }
 
@@ -118,392 +100,185 @@
     const response = currentResponse(itemId);
     if (!response) return;
     response.context = text;
+    response.contextProvenance = storage.createProvenance(storage.PROVENANCE.USER_STATED, {
+      sourceId: response.observationId, recordedAt: new Date().toISOString()
+    });
     saveDraft();
   }
 
-  function nextQuestion() {
-    if (!currentResponse(config.items[currentIndex].id)) return;
-    if (currentIndex < config.items.length - 1) {
-      currentIndex += 1;
-      expandedContext = false;
-      expandedWhy = false;
-      saveDraft();
-      render();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+  function continueExploring() {
+    const next = dimensions.nextUnexploredIndex(config, draft.responses, currentIndex);
+    if (next < 0) { completeAssessment(); return; }
+    currentIndex = next;
+    expandedWhy = false;
     saveDraft();
-    screen = 'final-context';
+    screen = 'question';
     render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function previousQuestion() {
-    if (currentIndex > 0) {
-      currentIndex -= 1;
-      expandedContext = false;
-      expandedWhy = false;
-      saveDraft();
-      render();
-    } else {
-      screen = 'landing';
-      render();
-    }
+  function completeAssessment() {
+    draft.status = 'completed';
+    draft.completedAt = draft.completedAt || new Date().toISOString();
+    draft.domainSummaries = config.domains.map(domain => dimensions.summarizeDomain(config, draft.responses, domain.id));
+    saveDraft();
+    storage.updateState(state => {
+      storage.recordEvent(state, {
+        progressType: 'landscape_mapped', statement: 'Brought a current Dimensions of Health picture into focus.',
+        sourceType: 'landscape', sourceId: draft.id,
+        dedupeKey: `landscape-completed:${draft.id}`, createdAt: draft.completedAt
+      });
+      return state;
+    });
+    resultsDraft = draft.domainSummaries;
+    screen = 'summary';
+    render();
   }
 
-  function summarizeDomain(domainId) {
-    const responses = draft.responses.filter(response => response.domain === domainId);
-    const attention = responses.filter(response => response.signal === 'attention').length;
-    const mixed = responses.filter(response => response.signal === 'mixed').length;
-    const fit = responses.filter(response => response.signal === 'fit').length;
-    const directional = responses.filter(response => response.direction && response.direction !== 'fit');
-
-    let state = 'Fits well';
-    if (attention > 0) state = 'Worth noticing';
-    else if (mixed > 0) state = 'Mixed';
-
-    if (responses.length && directional.length === responses.length && fit === 0) {
-      const low = directional.filter(response => response.direction === 'low').length;
-      const high = directional.filter(response => response.direction === 'high').length;
-      if (low === directional.length) state = 'Less than fits right now';
-      if (high === directional.length) state = 'More than fits right now';
-    }
-
-    return { domainId, state, responses, attention, mixed, fit };
+  function showPartialSummary() {
+    saveDraft();
+    resultsDraft = config.domains.map(domain => dimensions.summarizeDomain(config, draft.responses, domain.id));
+    screen = 'summary';
+    render();
   }
 
   function summarySentence(summary) {
     const domain = domainFor(summary.domainId);
-    const attentionItems = summary.responses.filter(response => response.signal === 'attention').map(response => itemFor(response.itemId).construct.replace(/_/g, ' '));
-    const mixedItems = summary.responses.filter(response => response.signal === 'mixed').map(response => itemFor(response.itemId).construct.replace(/_/g, ' '));
-
-    if (summary.state === 'Fits well') {
-      return `Your responses suggest that the parts of ${domain.label.toLowerCase()} reflected here are generally fitting well right now.`;
-    }
-    if (summary.state === 'More than fits right now') {
-      return `You described the amount here as more than feels right for you at the moment.`;
-    }
-    if (summary.state === 'Less than fits right now') {
-      return `You described the amount here as less than feels right for you at the moment.`;
-    }
-    if (summary.state === 'Worth noticing') {
-      const named = attentionItems.slice(0, 2).join(' and ');
-      return `Some parts of this area may deserve a closer look${named ? `, particularly ${named}` : ''}. That does not mean you need to work on them.`;
-    }
-    const named = mixedItems.slice(0, 2).join(' and ');
-    return `Your responses are mixed${named ? ` around ${named}` : ''}. The details may matter more than a single overall label.`;
+    const observed = summary.responses.filter(response => response.value != null);
+    if (!observed.length) return 'You left this part open. Nothing has been assumed in its place.';
+    if (summary.state === 'Fits well') return `The ${domain.label.toLowerCase()} signals explored so far generally fit well right now.`;
+    if (summary.state === 'More than fits right now') return 'You described the amount here as more than feels right at the moment.';
+    if (summary.state === 'Less than fits right now') return 'You described the amount here as less than feels right at the moment.';
+    if (summary.state === 'Worth noticing') return `Something in ${domain.label.toLowerCase()} came into view as worth noticing. That does not mean it needs to become a goal.`;
+    return `The ${domain.label.toLowerCase()} signals explored so far are mixed. More context may change the picture.`;
   }
 
-  function buildResults() {
-    return config.domains.map(domain => summarizeDomain(domain.id));
+  function selfMapMarkup(compact) {
+    const map = dimensions.buildSelfMap(config, draft ? draft.responses : []);
+    const exploredDomains = map.domains.filter(domain => domain.responses.length).length;
+    return `<section class="msh-self-map ${compact ? 'msh-self-map-compact' : ''}" aria-label="Self Map: ${exploredDomains} of ${map.domains.length} areas explored">
+      <div class="msh-self-map-heading"><div><p class="msh-eyebrow">Self Map</p><h2>Your picture is coming into focus.</h2></div><p><strong>${exploredDomains}</strong> ${exploredDomains === 1 ? 'area' : 'areas'} explored</p></div>
+      <div class="msh-self-map-grid">${map.domains.map(domain => {
+        const percent = Math.round(domain.resolution * 100);
+        const label = domain.observedCount ? `${domain.observedCount} ${domain.observedCount === 1 ? 'signal' : 'signals'}` : domain.missingCount ? 'Open for later' : 'Not explored';
+        return `<article class="msh-self-map-area ${domain.responses.length ? 'is-emerging' : ''}" data-map-domain="${domain.id}"><span class="msh-map-mark" aria-hidden="true"></span><h3>${escapeHtml(domain.label)}</h3><p>${escapeHtml(label)}</p><span class="msh-resolution-line" aria-hidden="true"><i style="width:${percent}%"></i></span></article>`;
+      }).join('')}</div>
+      <p class="msh-map-method">The Self Map is a view over your saved Health Map responses. It does not add facts or infer relationships.</p>
+    </section>`;
   }
 
-  function completeAssessment() {
-    const finalInput = document.querySelector('[data-final-context]');
-    draft.finalContext = finalInput ? finalInput.value.trim() : '';
-    draft.status = 'completed';
-    draft.completedAt = new Date().toISOString();
-    draft.currentItemIndex = config.items.length - 1;
-    draft.domainSummaries = buildResults();
-    saveDraft();
-    resultsDraft = draft.domainSummaries;
-    screen = 'results';
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function wellnessWheelVisual() {
+    const wheel = storage.getState().wellnessWheel && storage.getState().wellnessWheel.current;
+    const scores = wheel && wheel.scores;
+    if (!scores) return `<section class="msh-signature-wheel msh-wheel-empty"><div class="msh-wheel-orbit" aria-hidden="true"><i></i><i></i><i></i></div><div><p class="msh-eyebrow">Signature Landscape</p><h2>Your Wellness Wheel</h2><p>Eight dimensions become one calm, explorable picture of where you are now.</p><a class="msh-button" href="wellness-wheel.html">Map My Wellness Wheel →</a></div></section>`;
+    const keys = ['physical','emotional','social','occupational','financial','environmental','intellectual','spiritual'];
+    const labels = ['Physical','Emotional','Social','Purpose','Financial','Environment','Learning','Meaning'];
+    const points = keys.map((key, index) => { const angle = -Math.PI / 2 + index * Math.PI / 4; const radius = 20 + (Number(scores[key]) || 0) * 5.5; return `${100 + Math.cos(angle) * radius},${100 + Math.sin(angle) * radius}`; }).join(' ');
+    return `<section class="msh-signature-wheel"><div class="msh-wheel-visual"><svg viewBox="0 0 200 200" role="img" aria-label="Your Wellness Wheel across eight dimensions"><g class="grid"><circle cx="100" cy="100" r="75"></circle><circle cx="100" cy="100" r="50"></circle><circle cx="100" cy="100" r="25"></circle>${keys.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 4; return `<line x1="100" y1="100" x2="${100 + Math.cos(a) * 75}" y2="${100 + Math.sin(a) * 75}"></line>`; }).join('')}</g><polygon points="${points}"></polygon></svg></div><div><p class="msh-eyebrow">Signature Landscape · ${new Date(wheel.completedAt).toLocaleDateString()}</p><h2>Your Wellness Wheel is alive with context.</h2><p>Touch any dimension below to reconnect the shape with what you shared.</p><div class="msh-wheel-legend">${keys.map((key, i) => `<button type="button" data-wheel-key="${key}"><span>${labels[i]}</span><strong>${escapeHtml(scores[key])}/10</strong></button>`).join('')}</div><p class="msh-wheel-insight" data-wheel-insight>Choose a dimension to explore it.</p><a class="msh-text-button" href="wellness-wheel.html">Reassess the Wheel →</a></div></section>`;
+  }
+
+  function renderLanding() {
+    const inProgress = getInProgress();
+    const current = storage.getCurrentLandscape();
+    mount.innerHTML = `<section class="msh-landscape-landing msh-v2-landing"><p class="msh-eyebrow">Dimensions of Health</p><h1>Bring your picture into focus.</h1><p class="msh-landscape-lede">Explore one part of life at a time. Every response adds a signal to your Health Map and gives you something useful to notice now.</p>
+      <div class="msh-discovery-loop" aria-label="Explore, answer, discover, map, then choose whether to continue"><span>Explore</span><i></i><span>Answer</span><i></i><span>Discover</span><i></i><span>Map</span><i></i><span>Choose</span></div>
+      ${wellnessWheelVisual()}
+      <div class="msh-landscape-principles"><article><strong>Understanding arrives as you go.</strong><span>You do not need to finish everything before this becomes useful.</span></article><article><strong>Uncertainty can stay visible.</strong><span>“Not sure” and skipping are recorded without filling in the blanks.</span></article><article><strong>Your meaning stays yours.</strong><span>A signal never automatically becomes an identity, problem, or goal.</span></article></div>
+      <div class="msh-card-actions">${inProgress ? '<button class="msh-button" type="button" data-action="resume">Continue exploring</button><button class="msh-button-secondary" type="button" data-action="view-partial">See my picture so far</button>' : '<button class="msh-button" type="button" data-action="start">Explore my dimensions</button>'}${current ? '<button class="msh-button-secondary" type="button" data-action="view-results">View completed picture</button>' : ''}</div>
+      ${inProgress ? '<p class="msh-landscape-resume-note">Your partial picture is saved. Stopping was not a failure.</p>' : ''}<p class="msh-local-note">For this prototype, your My Health information is stored in this browser on this device. Clearing site data may remove it.</p></section>`;
+  }
+
+  function renderQuestion() {
+    const item = config.items[currentIndex];
+    const domain = domainFor(item.domain);
+    const map = dimensions.buildSelfMap(config, draft.responses);
+    const domainSummary = map.domains.find(candidate => candidate.id === item.domain);
+    const scaleStyle = dimensions.scaleIdFor(config, item) === 'amountFit5' ? 'continuum' : 'choices';
+    if (storage.setHelloActivity) storage.setHelloActivity({ page: 'landscape', activity: 'dimension_assessment', dimension: item.domain, questionId: item.id, questionText: item.prompt, currentResponse: null, contextId: draft.id, contextLabel: `${domain.label} Dimensions of Health question` });
+    mount.innerHTML = `<section class="msh-v2-explore-shell"><div class="msh-v2-topline"><button type="button" class="msh-text-button" data-action="partial-summary">See my picture so far</button><span>${map.exploredCount ? `${map.exploredCount} reflections held` : 'A fresh picture'}</span></div><div class="msh-v2-question-layout"><div class="msh-v2-question-stage">
+      <div class="msh-question-domain"><p class="msh-eyebrow">Exploring · ${escapeHtml(domain.label)}</p><h1>${escapeHtml(item.prompt)}</h1><p>${escapeHtml(domain.description)}</p></div>
+      <fieldset class="msh-response-fieldset" data-scale-style="${scaleStyle}"><legend class="msh-sr-only">Choose the response that fits best</legend><div class="msh-response-options">${item.options.map(option => `<label class="msh-response-option"><input type="radio" name="landscape-response" value="${escapeHtml(option.value)}"><span>${escapeHtml(option.label)}</span></label>`).join('')}</div></fieldset>
+      <div class="msh-question-tools"><button type="button" class="msh-text-button" data-action="not-sure">I’m not sure</button><button type="button" class="msh-text-button" data-action="toggle-why">${expandedWhy ? 'Hide why this is asked' : 'Why are you asking this?'}</button></div>
+      ${expandedWhy ? `<div class="msh-optional-panel msh-why-panel"><strong>Why this question?</strong><p>${escapeHtml(item.why)}</p></div>` : ''}<div class="msh-v2-skip-row"><button type="button" class="msh-text-button" data-action="skip-area">Leave the rest of ${escapeHtml(domain.label)} open for now</button></div></div>
+      <aside class="msh-v2-map-glimpse" aria-label="Current area resolution"><p class="msh-eyebrow">Your map</p><span class="msh-map-mark is-active"></span><h2>${escapeHtml(domain.label)}</h2><p>${domainSummary.observedCount ? `${domainSummary.observedCount} signals already in view` : 'Ready for its first signal'}</p><span class="msh-resolution-line"><i style="width:${Math.round(domainSummary.resolution * 100)}%"></i></span></aside></div></section>`;
+  }
+
+  function renderDiscovery() {
+    const observation = lastObservation || currentResponse(config.items[currentIndex].id);
+    const item = itemFor(observation.itemId);
+    const domain = domainFor(item.domain);
+    const next = dimensions.nextUnexploredIndex(config, draft.responses, currentIndex);
+    mount.innerHTML = `<section class="msh-v2-discovery"><header><p class="msh-eyebrow">Discover · ${escapeHtml(domain.label)}</p><h1>A little more of your picture is in focus.</h1></header>
+      <div class="msh-v2-discovery-card"><span class="msh-map-mark is-active" aria-hidden="true"></span><div><p class="msh-card-kicker">${escapeHtml(observation.label)}</p><h2>${escapeHtml(item.construct.replace(/_/g, ' '))}</h2><p>${escapeHtml(dimensions.interpretationFor(observation, item))}</p></div></div>
+      ${observation.value != null ? `<label class="msh-v2-context-label" for="msh-context"><strong>Add context, if it would make this signal more accurate.</strong><span>The response remains the measurement; your words stay alongside it as user-stated context.</span></label><textarea id="msh-context" data-item-context data-item-id="${escapeHtml(item.id)}" rows="3" placeholder="Anything the response alone does not capture...">${escapeHtml(observation.context || '')}</textarea>` : ''}
+      ${selfMapMarkup(true)}<div class="msh-v2-choice-gate"><div><p class="msh-eyebrow">Choose</p><h2>${next < 0 ? 'Your full picture is ready.' : 'Would you like to keep exploring?'}</h2></div><div class="msh-card-actions"><button class="msh-button" type="button" data-action="continue">${next < 0 ? 'See my full picture' : 'Explore another question'} →</button><button class="msh-button-secondary" type="button" data-action="partial-summary">Stop here with a useful picture</button></div></div></section>`;
+  }
+
+  function renderSummary() {
+    if (!draft) draft = storage.getCurrentLandscape() || getInProgress();
+    if (!draft) { screen = 'landing'; render(); return; }
+    resultsDraft = config.domains.map(domain => dimensions.summarizeDomain(config, draft.responses, domain.id));
+    const isComplete = draft.status === 'completed';
+    const explored = resultsDraft.filter(summary => summary.responses.length);
+    mount.innerHTML = `<section class="msh-landscape-results msh-v2-summary"><header class="msh-results-header"><p class="msh-eyebrow">${isComplete ? 'Your Dimensions of Health' : 'Your picture so far'}</p><h1>${isComplete ? 'Your current picture has come into focus.' : 'What you explored is already useful.'}</h1><p>${isComplete ? 'This is a reflection of what you shared—not a diagnosis, grade, or instruction.' : 'This partial picture keeps what you answered, what you left open, and what remains unexplored distinct.'}</p></header>
+      ${selfMapMarkup(false)}<div class="msh-domain-results">${explored.map(summary => { const domain = domainFor(summary.domainId); const contexts = summary.responses.filter(response => response.context).slice(0, 2); return `<article class="msh-domain-card" data-domain="${domain.id}"><p class="msh-card-kicker">${escapeHtml(summary.state)}</p><h2>${escapeHtml(domain.label)}</h2><p>${escapeHtml(summarySentence(summary))}</p><small>${summary.observedCount} measured · ${summary.missingCount} left open</small>${contexts.length ? `<details><summary>Your context</summary>${contexts.map(response => `<p>“${escapeHtml(response.context)}”</p>`).join('')}</details>` : ''}</article>`; }).join('')}</div>
+      <aside class="msh-v2-boundary-note"><strong>No relationships have been inferred.</strong><p>More responses increase resolution. They do not by themselves establish correlations, causes, or personal meaning.</p></aside>
+      ${isComplete ? renderConfirmation() : `<section class="msh-v2-choice-gate"><div><p class="msh-eyebrow">Choose</p><h2>You can continue now or return later.</h2><p>Your unfinished picture is saved as in progress—not failed.</p></div><div class="msh-card-actions"><button class="msh-button" type="button" data-action="resume-current">Continue exploring →</button><button class="msh-button-secondary" type="button" data-action="landing">Done for now</button></div></section>`}</section>`;
+  }
+
+  function renderConfirmation() {
+    return `<section class="msh-confirmation-card"><p class="msh-eyebrow">Your read matters</p><h2>Does this picture feel accurate enough to keep?</h2><p>The map is based on your responses. You can confirm it, add a correction, or simply leave it as a measurement without choosing any action.</p><div class="msh-confirmation-options"><button type="button" data-confirm="yes" class="${draft.confirmation === 'yes' ? 'selected' : ''}">Yes</button><button type="button" data-confirm="mostly" class="${draft.confirmation === 'mostly' ? 'selected' : ''}">Mostly</button><button type="button" data-confirm="no" class="${draft.confirmation === 'no' ? 'selected' : ''}">Not really</button></div>${draft.confirmation && draft.confirmation !== 'yes' ? `<label class="msh-large-text-label" for="msh-correction">What is missing or different?</label><textarea id="msh-correction" data-landscape-correction rows="4">${escapeHtml(draft.correction || '')}</textarea><button type="button" class="msh-button-secondary" data-action="save-confirmation">Save correction</button>` : ''}${draft.confirmation ? `<div class="msh-card-actions"><a class="msh-button" href="my-health.html">Keep this in My Health →</a><button class="msh-button-secondary" type="button" data-action="landing">Done for now</button></div>` : ''}</section>`;
   }
 
   function saveConfirmation(value) {
     draft.confirmation = value;
     const correction = document.querySelector('[data-landscape-correction]');
     draft.correction = correction ? correction.value.trim() : draft.correction || '';
+    draft.confirmationProvenance = storage.createProvenance(storage.PROVENANCE.USER_CONFIRMED, { sourceId: draft.id });
     saveDraft();
     render();
-  }
-
-  function saveFocus(domainId, navigationState) {
-    const domain = domainFor(domainId);
-    storage.updateState(state => {
-      state.focuses.forEach(focus => {
-        if (focus.status === 'active') focus.status = 'historical';
-      });
-      state.focuses.push({
-        id: uid('focus'),
-        sourceType: 'landscape',
-        sourceId: draft.id,
-        domain: domainId,
-        label: domain.label,
-        navigationState,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-      return state;
-    });
-    screen = 'done';
-    render();
-  }
-
-  function renderLanding() {
-    const inProgress = getInProgress();
-    const current = storage.getCurrentLandscape();
-
-    mount.innerHTML = `
-      <section class="msh-landscape-landing">
-        <p class="msh-eyebrow">My Wellbeing Landscape</p>
-        <h1>Understand where you are right now.</h1>
-        <p class="msh-landscape-lede">Look across different parts of your life, notice what is working, and identify anything that may deserve more attention.</p>
-
-        <div class="msh-landscape-principles" aria-label="How the Landscape works">
-          <article><strong>There is no ideal Landscape.</strong><span>Your answers are not being compared with an ideal person.</span></article>
-          <article><strong>Context is optional.</strong><span>Explain an answer when it helps, or leave it alone.</span></article>
-          <article><strong>You choose what happens next.</strong><span>A difficult area does not automatically become a Project.</span></article>
-        </div>
-
-        <div class="msh-card-actions">
-          ${inProgress ? '<button class="msh-button" type="button" data-action="resume">Continue My Landscape</button>' : '<button class="msh-button" type="button" data-action="start">Explore My Landscape</button>'}
-          ${current ? '<button class="msh-button-secondary" type="button" data-action="view-results">View Current Landscape</button>' : ''}
-        </div>
-        ${inProgress ? `<p class="msh-landscape-resume-note">${inProgress.responses.length} of ${config.items.length} reflections saved.</p>` : ''}
-        <p class="msh-local-note">For this prototype, your My Health information is stored in this browser on this device. Clearing site data may remove it.</p>
-      </section>`;
-  }
-
-  function renderQuestion() {
-    const item = config.items[currentIndex];
-    const domain = domainFor(item.domain);
-    const response = currentResponse(item.id);
-    const domainItems = config.items.filter(candidate => candidate.domain === item.domain);
-    const domainPosition = domainItems.findIndex(candidate => candidate.id === item.id) + 1;
-    const percent = Math.round(((currentIndex + 1) / config.items.length) * 100);
-
-    mount.innerHTML = `
-      <section class="msh-landscape-question-shell">
-        <div class="msh-assessment-topline">
-          <button type="button" class="msh-text-button" data-action="back">← Back</button>
-          <span>${currentIndex + 1} of ${config.items.length}</span>
-          <button type="button" class="msh-text-button" data-action="save-exit">Save & finish later</button>
-        </div>
-        <div class="msh-assessment-progress" aria-label="Assessment progress"><span style="width:${percent}%"></span></div>
-
-        <div class="msh-question-domain">
-          <p class="msh-eyebrow">${escapeHtml(domain.label)} · ${domainPosition} of ${domainItems.length}</p>
-          <h1>${escapeHtml(item.prompt)}</h1>
-        </div>
-
-        <fieldset class="msh-response-fieldset">
-          <legend class="msh-sr-only">Choose the response that fits best</legend>
-          <div class="msh-response-options">
-            ${item.options.map(option => `
-              <label class="msh-response-option ${response && response.value === option.value ? 'selected' : ''}">
-                <input type="radio" name="landscape-response" value="${escapeHtml(option.value)}" ${response && response.value === option.value ? 'checked' : ''}>
-                <span>${escapeHtml(option.label)}</span>
-              </label>`).join('')}
-          </div>
-        </fieldset>
-
-        <div class="msh-question-tools">
-          <button type="button" class="msh-text-button" data-action="toggle-context">${expandedContext ? '− Hide context' : '+ Add context, if you want'}</button>
-          <button type="button" class="msh-text-button" data-action="toggle-why">${expandedWhy ? '− Hide explanation' : 'Why are you asking this?'}</button>
-        </div>
-
-        ${expandedContext ? `
-          <div class="msh-optional-panel">
-            <label for="msh-context"><strong>Anything about this answer that would help put it in context?</strong></label>
-            <textarea id="msh-context" data-item-context rows="4" placeholder="For example, when this tends to happen, what affects it, or anything the answer alone doesn't capture.">${escapeHtml(response ? response.context : '')}</textarea>
-          </div>` : ''}
-
-        ${expandedWhy ? `<div class="msh-optional-panel msh-why-panel"><strong>Why this question?</strong><p>${escapeHtml(item.why)}</p></div>` : ''}
-
-        <div class="msh-assessment-actions">
-          <button type="button" class="msh-button" data-action="next" ${response ? '' : 'disabled'}>${currentIndex === config.items.length - 1 ? 'Continue' : 'Next'} <span aria-hidden="true">→</span></button>
-        </div>
-      </section>`;
-  }
-
-  function renderFinalContext() {
-    mount.innerHTML = `
-      <section class="msh-landscape-final">
-        <p class="msh-eyebrow">Before we show your Landscape</p>
-        <h1>Is there anything important these questions didn't capture?</h1>
-        <p>This is optional. The questionnaire does not get to define the boundaries of your experience.</p>
-        <label class="msh-large-text-label" for="msh-final-context">Add anything you want us to keep with this Landscape.</label>
-        <textarea id="msh-final-context" data-final-context rows="6" placeholder="Anything important that would help this picture make more sense...">${escapeHtml(draft.finalContext || '')}</textarea>
-        <div class="msh-card-actions">
-          <button class="msh-button-secondary" type="button" data-action="back-to-last">← Back</button>
-          <button class="msh-button" type="button" data-action="complete">Show My Landscape →</button>
-        </div>
-      </section>`;
-  }
-
-  function renderResults() {
-    if (!draft) draft = storage.getCurrentLandscape();
-    if (!draft) { screen = 'landing'; render(); return; }
-    resultsDraft = draft.domainSummaries || buildResults();
-
-    mount.innerHTML = `
-      <section class="msh-landscape-results">
-        <header class="msh-results-header">
-          <p class="msh-eyebrow">Your Wellbeing Landscape</p>
-          <h1>Here's how different parts of life seem to be fitting right now.</h1>
-          <p>This is a starting point for reflection, not a diagnosis or grade. It is based only on what you shared.</p>
-        </header>
-
-        <div class="msh-domain-results">
-          ${resultsDraft.map(summary => {
-            const domain = domainFor(summary.domainId);
-            const contexts = summary.responses.filter(response => response.context).slice(0, 2);
-            return `
-              <article class="msh-domain-card" data-domain="${domain.id}">
-                <p class="msh-card-kicker">${escapeHtml(summary.state)}</p>
-                <h2>${escapeHtml(domain.label)}</h2>
-                <p>${escapeHtml(summarySentence(summary))}</p>
-                ${contexts.length ? `<details><summary>Your context</summary>${contexts.map(response => `<p>“${escapeHtml(response.context)}”</p>`).join('')}</details>` : ''}
-              </article>`;
-          }).join('')}
-        </div>
-
-        ${draft.finalContext ? `<aside class="msh-final-context-card"><strong>You also wanted this Landscape to include:</strong><p>${escapeHtml(draft.finalContext)}</p></aside>` : ''}
-
-        <section class="msh-confirmation-card">
-          <p class="msh-eyebrow">Your read matters</p>
-          <h2>Does this feel like you?</h2>
-          <p>Before using this Landscape to decide what comes next, you can confirm or correct the picture.</p>
-          <div class="msh-confirmation-options">
-            <button type="button" data-confirm="yes" class="${draft.confirmation === 'yes' ? 'selected' : ''}">Yes</button>
-            <button type="button" data-confirm="mostly" class="${draft.confirmation === 'mostly' ? 'selected' : ''}">Mostly</button>
-            <button type="button" data-confirm="no" class="${draft.confirmation === 'no' ? 'selected' : ''}">Not really</button>
-          </div>
-          ${draft.confirmation && draft.confirmation !== 'yes' ? `
-            <label class="msh-large-text-label" for="msh-correction">What's missing or different?</label>
-            <textarea id="msh-correction" data-landscape-correction rows="4" placeholder="You can correct the picture here.">${escapeHtml(draft.correction || '')}</textarea>
-            <button type="button" class="msh-button-secondary msh-save-correction" data-action="save-confirmation">Save correction</button>` : ''}
-        </section>
-
-        ${draft.confirmation === 'yes' || draft.confirmation === 'mostly' ? renderFocusChooser() : draft.confirmation === 'no' ? `
-          <section class="msh-focus-card">
-            <h2>Let's not use this to push you somewhere it doesn't fit.</h2>
-            <p>Your correction stays with this Landscape. You can revisit your answers or leave the assessment here for now.</p>
-            <div class="msh-card-actions"><button class="msh-button-secondary" type="button" data-action="landing">Done for now</button></div>
-          </section>` : ''}
-      </section>`;
-  }
-
-  function renderFocusChooser() {
-    const candidates = resultsDraft.filter(summary => summary.state !== 'Fits well');
-    const choices = candidates.length ? candidates : resultsDraft;
-    return `
-      <section class="msh-focus-card">
-        <p class="msh-eyebrow">What matters to you right now?</p>
-        <h2>You choose what happens next.</h2>
-        <p>Nothing here automatically needs to become something you work on.</p>
-        <div class="msh-focus-options">
-          ${choices.map(summary => {
-            const domain = domainFor(summary.domainId);
-            return `<button type="button" data-focus-domain="${domain.id}"><strong>${escapeHtml(domain.label)}</strong><span>${escapeHtml(summary.state)}</span></button>`;
-          }).join('')}
-          <button type="button" data-action="no-focus"><strong>Nothing right now</strong><span>Keep the Landscape without choosing an active focus.</span></button>
-        </div>
-      </section>`;
-  }
-
-  function renderNavigation(domainId) {
-    const domain = domainFor(domainId);
-    mount.innerHTML = `
-      <section class="msh-navigation-choice">
-        <p class="msh-eyebrow">${escapeHtml(domain.label)}</p>
-        <h1>What would you like to do with this?</h1>
-        <div class="msh-navigation-options">
-          <button data-nav="preserve"><strong>Keep what is working</strong><span>Protect or maintain what fits.</span></button>
-          <button data-nav="explore"><strong>Understand this better</strong><span>Stay curious before deciding what to change.</span></button>
-          <button data-nav="develop"><strong>Work toward something different</strong><span>Choose a direction you want to actively work toward.</span></button>
-          <button data-nav="adapt"><strong>Change something I'm already doing</strong><span>Adjust an existing approach.</span></button>
-          <button data-nav="prepare"><strong>Save for later</strong><span>Keep this visible without working on it now.</span></button>
-          <button data-nav="no_action"><strong>Leave it alone for now</strong><span>No action is a valid choice.</span></button>
-        </div>
-        <button type="button" class="msh-text-button" data-action="back-results">← Back to results</button>
-      </section>`;
-    mount.dataset.selectedDomain = domainId;
-  }
-
-  function renderDone() {
-    mount.innerHTML = `
-      <section class="msh-landscape-done">
-        <p class="msh-eyebrow">Landscape saved</p>
-        <h1>Your Landscape is a starting point, not an assignment.</h1>
-        <p>You can return to it when something changes, when you want to understand an area better, or when you simply want to notice what is still working.</p>
-        <div class="msh-card-actions">
-          <a class="msh-button" href="my-health.html">Return to My Health →</a>
-          <button class="msh-button-secondary" type="button" data-action="view-results">Review My Landscape</button>
-        </div>
-      </section>`;
   }
 
   function render() {
     if (screen === 'landing') renderLanding();
     if (screen === 'question') renderQuestion();
-    if (screen === 'final-context') renderFinalContext();
-    if (screen === 'results') renderResults();
-    if (screen === 'done') renderDone();
+    if (screen === 'discovery') renderDiscovery();
+    if (screen === 'summary') renderSummary();
   }
 
   mount.addEventListener('change', event => {
-    if (event.target.matches('input[name="landscape-response"]')) {
-      const item = config.items[currentIndex];
-      const option = item.options.find(candidate => candidate.value === event.target.value);
-      if (option) setAnswer(item, option);
-    }
+    if (!event.target.matches('input[name="landscape-response"]')) return;
+    const item = config.items[currentIndex];
+    const option = item.options.find(candidate => candidate.value === event.target.value);
+    if (option) saveObservation(item, option, null);
   });
-
-  mount.addEventListener('input', event => {
-    if (event.target.matches('[data-item-context]')) setContext(config.items[currentIndex].id, event.target.value);
-  });
-
+  mount.addEventListener('input', event => { if (event.target.matches('[data-item-context]')) setContext(event.target.dataset.itemId, event.target.value); });
   mount.addEventListener('click', event => {
     const actionTarget = event.target.closest('[data-action]');
     const confirmTarget = event.target.closest('[data-confirm]');
-    const focusTarget = event.target.closest('[data-focus-domain]');
-    const navTarget = event.target.closest('[data-nav]');
-
-    if (confirmTarget) {
-      draft.confirmation = confirmTarget.dataset.confirm;
-      saveDraft();
-      render();
+    const wheelTarget = event.target.closest('[data-wheel-key]');
+    if (wheelTarget) {
+      const wheel = storage.getState().wellnessWheel.current;
+      const insight = mount.querySelector('[data-wheel-insight]');
+      const name = wheelTarget.querySelector('span').textContent;
+      if (insight && wheel) insight.textContent = `${name} is ${wheel.scores[wheelTarget.dataset.wheelKey]}/10 in the picture you created. The score is your reflection, not a diagnosis or instruction.`;
+      mount.querySelectorAll('[data-wheel-key]').forEach(button => button.classList.toggle('selected', button === wheelTarget));
       return;
     }
-
-    if (focusTarget) {
-      renderNavigation(focusTarget.dataset.focusDomain);
-      return;
-    }
-
-    if (navTarget) {
-      const domainId = mount.dataset.selectedDomain;
-      saveFocus(domainId, navTarget.dataset.nav);
-      return;
-    }
-
+    if (confirmTarget) { saveConfirmation(confirmTarget.dataset.confirm); return; }
     if (!actionTarget) return;
     const action = actionTarget.dataset.action;
-
     if (action === 'start') startNew();
     if (action === 'resume') resume(getInProgress());
-    if (action === 'view-results') {
-      draft = storage.getCurrentLandscape();
-      screen = 'results';
-      render();
-    }
-    if (action === 'back') previousQuestion();
-    if (action === 'next') nextQuestion();
-    if (action === 'save-exit') { saveDraft(); screen = 'landing'; render(); }
-    if (action === 'toggle-context') { expandedContext = !expandedContext; render(); }
+    if (action === 'resume-current') resume(draft);
+    if (action === 'view-partial') { draft = getInProgress(); showPartialSummary(); }
+    if (action === 'view-results') { draft = storage.getCurrentLandscape(); screen = 'summary'; render(); }
+    if (action === 'partial-summary') showPartialSummary();
+    if (action === 'continue') continueExploring();
+    if (action === 'not-sure') saveObservation(config.items[currentIndex], null, 'NOT_SURE');
+    if (action === 'skip-area') skipArea(config.items[currentIndex]);
     if (action === 'toggle-why') { expandedWhy = !expandedWhy; render(); }
-    if (action === 'back-to-last') { screen = 'question'; currentIndex = config.items.length - 1; render(); }
-    if (action === 'complete') completeAssessment();
     if (action === 'save-confirmation') saveConfirmation(draft.confirmation);
     if (action === 'landing') { screen = 'landing'; render(); }
-    if (action === 'back-results') { delete mount.dataset.selectedDomain; screen = 'results'; render(); }
-    if (action === 'no-focus') { screen = 'done'; render(); }
   });
-
   render();
 })();

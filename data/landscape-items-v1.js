@@ -234,6 +234,7 @@
 
   window.MSHLandscapeConfig = {
     version: 'WL-PROTOTYPE-1',
+    scales,
     domains,
     items
   };

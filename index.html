@@ -1,1702 +1,336 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>My Simple Health</title>
-
-    <link rel="stylesheet" href="style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="My Simple Health helps you understand where you are, clarify where you want to go, and learn what works for you along the way.">
+  <title>My Simple Health | Understand your health. Learn your way forward.</title>
+  <script src="js/msh-theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/msh-homepage.css">
 </head>
+<body class="msh-home">
+  <a class="home-skip-link" href="#main">Skip to main content</a>
 
-
-<body>
-
-
-<!-- =========================================
-     HEADER
-========================================== -->
-<header class="site-header">
-
-    <a class="site-logo" href="index.html">
-        My Simple Health
-    </a>
-
-    <button
-        class="menu-button"
-        aria-label="Open menu"
-        onclick="toggleMenu()"
-    >
-        <i class="fa-solid fa-bars"></i>
+  <header class="home-header" data-home-header>
+    <a class="home-brand" href="index.html" aria-label="My Simple Health home">My Simple Health</a>
+    <button class="home-menu" type="button" aria-expanded="false" aria-controls="home-navigation" data-home-menu>
+      <span class="home-menu-lines" aria-hidden="true"></span>
+      <span class="sr-only">Open navigation</span>
     </button>
-
-    <nav class="site-nav">
-
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="topics.html">Topics</a>
-        <a href="assessments.html">Assessments</a>
-        <a href="recipes.html">Recipes</a>
-        <a href="blog.html">Blog</a>
-        <a href="contact.html">Contact</a>
-
+    <nav class="home-navigation" id="home-navigation" aria-label="Primary navigation" data-home-navigation>
+      <a aria-current="page" href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="topics.html">Topics</a>
+      <a href="assessments.html">Assessments</a>
+      <a href="recipes.html">Recipes</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a class="home-nav-hello" href="hello.html?from=home">Hello <span aria-hidden="true">☀</span></a>
     </nav>
+  </header>
 
-    <div class="header-search">
+  <main id="main">
+    <section class="home-world" aria-labelledby="home-hero-title">
+      <div class="home-world-atmosphere" aria-hidden="true">
+        <span class="home-sun"></span>
+        <span class="home-ridge home-ridge-far"></span>
+        <span class="home-ridge home-ridge-mid"></span>
+        <span class="home-ridge home-ridge-near"></span>
+        <svg class="home-opening-path" viewBox="0 0 1200 700" preserveAspectRatio="none">
+          <path d="M 655 760 C 640 610, 790 540, 760 430 C 730 322, 856 260, 958 184" />
+        </svg>
+      </div>
+      <div class="home-world-copy">
+        <p class="home-eyebrow">WELCOME TO MY SIMPLE HEALTH</p>
+        <h1 id="home-hero-title">Your health.<br>Made simpler.</h1>
+        <p class="home-hero-deck">Understand where you are, clarify what matters,<br>and discover realistic ways to move forward<br>with confidence.</p>
+        <div class="home-hero-actions">
+          <a class="home-button home-button-primary" href="my-health.html">Explore My Health <span aria-hidden="true">→</span></a>
+          <a class="home-button home-button-quiet" href="#journey">Learn More</a>
+        </div>
+        <p class="home-trust-line">Science-based. Evidence-informed. Designed for you.</p>
+      </div>
+      <p class="home-scroll-note" aria-hidden="true"><span></span> Follow the path</p>
+    </section>
 
-        <button
-            class="search-button"
-            aria-label="Search"
-            onclick="toggleSearch()"
-        >
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
+    <section class="home-journey-intro home-reveal" aria-labelledby="journey-intro-title">
+      <p class="home-eyebrow">START WITH YOU</p>
+      <h2 id="journey-intro-title">See your way forward.</h2>
+      <p>My Simple Health helps you understand where you are, clarify where you want to go, and learn what works for you along the way.</p>
+    </section>
 
-        <div class="search-box" id="searchBox">
-
-            <input
-                type="search"
-                id="siteSearch"
-                placeholder="Search My Simple Health..."
-                aria-label="Search My Simple Health"
-            >
-
-            <button
-                type="button"
-                onclick="runSearch()"
-            >
-                Search
-            </button>
-
+    <section class="home-journey" id="journey" aria-labelledby="journey-title" data-journey>
+      <div class="home-journey-sticky">
+        <div class="home-journey-heading">
+          <div>
+            <p class="home-eyebrow">ONE CONNECTED JOURNEY</p>
+            <h2 id="journey-title">A path that moves with you.</h2>
+          </div>
+          <div class="home-journey-controls" aria-label="Journey controls">
+            <button type="button" data-journey-previous aria-label="Previous journey stage">←</button>
+            <p aria-live="polite"><span data-journey-position>1</span> / 6</p>
+            <button type="button" data-journey-next aria-label="Next journey stage">→</button>
+          </div>
         </div>
 
-    </div>
+        <div class="home-journey-viewport" data-journey-viewport>
+          <div class="home-journey-track" data-journey-track>
+            <article class="home-journey-card is-active" tabindex="0" data-journey-card data-stage="landscape">
+              <span class="home-card-number">01</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <path class="story-far" d="M24 112 57 72l23 28 24-42 51 54" />
+                  <path d="M25 119c29-9 47-8 69-3 23 6 39 7 61 0M43 105l15-20 11 13m31-20 6-10 20 25" />
+                  <path class="story-hatch" d="m48 110 10-9m-3 12 13-12m46 4 11-10m-4 15 12-11" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Landscape</p>
+              <h3>See where you are.</h3>
+              <p class="home-card-support">Explore the dimensions of your health and life and bring your current picture into focus.</p>
+              <div class="home-card-detail" aria-label="Landscape details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>What feels steady</li><li>What wants attention</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>A clearer view of where you are now.</p>
+              </div>
+              <a class="home-card-cta" href="my-landscape.html">Explore Landscape <span aria-hidden="true">→</span></a>
+            </article>
 
-</header>
+            <article class="home-journey-card" tabindex="0" data-journey-card data-stage="horizon">
+              <span class="home-card-number">02</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <g class="story-sun"><circle cx="116" cy="67" r="12" /><path class="story-hatch" d="M116 44v-9m0 64v-9m23-23h9m-64 0h9m40-16 7-7m-45 45 7-7m31 7 7 7" /></g>
+                  <path class="story-far" d="M25 112 56 83l23 21 26-35 50 43" />
+                  <path d="M25 120c29-8 56-7 80-2 18 4 33 4 50-1" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Horizon</p>
+              <h3>See where you want to go.</h3>
+              <p class="home-card-support">Bring the direction you care about into view and shape a vision that still sounds like you.</p>
+              <div class="home-card-detail" aria-label="Horizon details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>What matters ahead</li><li>What you want to preserve</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>A direction you have chosen and confirmed.</p>
+              </div>
+              <a class="home-card-cta" href="my-vision.html">Explore Horizon <span aria-hidden="true">→</span></a>
+            </article>
 
-<!-- =========================================
-     HOME HERO
-========================================== -->
+            <article class="home-journey-card" tabindex="0" data-journey-card data-stage="path">
+              <span class="home-card-number">03</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <path class="story-far" d="M25 108 55 82l24 22 26-36 50 40" />
+                  <path d="M25 118c31-9 55-7 79-2 18 4 34 4 51-2" />
+                  <path class="story-route" d="M67 143c0-24 31-22 22-43-7-17 9-26 25-34" />
+                  <path class="story-hatch" d="m44 111 13-10m70 9 12-9" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Path</p>
+              <h3>Choose what matters now.</h3>
+              <p class="home-card-support">Choose one meaningful direction and make the movement from here to there manageable.</p>
+              <div class="home-card-detail" aria-label="Path details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>Your Point A and Point B</li><li>A realistic first milestone</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>A visible path for what matters now.</p>
+              </div>
+              <a class="home-card-cta" href="my-project.html">Explore Path <span aria-hidden="true">→</span></a>
+            </article>
 
-<section class="home-hero home-hero-new">
+            <article class="home-journey-card" tabindex="0" data-journey-card data-stage="practice">
+              <span class="home-card-number">04</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <path d="M29 130c22-8 43-9 63-5 22 5 41 5 59-2M91 124c-1-22 0-37 2-54" />
+                  <path class="story-leaf story-leaf-left" d="M91 94c-18-2-26-12-26-27 16 1 26 10 26 27Z" />
+                  <path class="story-leaf story-leaf-right" d="M93 81c4-18 14-27 29-28-1 16-10 26-29 28Z" />
+                  <path class="story-hand" d="M30 128c13-13 24-17 35-12l16 7c7 3 14 1 21-5m-38-3 13-8m-6 13 16-9" />
+                  <path d="M140 117c-12-10-24-13-35-8" />
+                  <path class="story-hatch" d="m46 119 9-7m72 3 8-4" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Practice</p>
+              <h3>Try something in real life.</h3>
+              <p class="home-card-support">Try a small action in the context of your actual life, without making it a test of your worth.</p>
+              <div class="home-card-detail" aria-label="Practice details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>What fits your capacity</li><li>What happens when you try</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>A practice grounded in real life.</p>
+              </div>
+              <a class="home-card-cta" href="my-practice.html">Explore Practice <span aria-hidden="true">→</span></a>
+            </article>
 
-    <div class="hero-text">
+            <article class="home-journey-card" tabindex="0" data-journey-card data-stage="discovery">
+              <span class="home-card-number">05</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <path d="M48 131c13-23 22-44 27-69m-19 48c-11-2-18-9-20-20 12-1 20 6 20 20Zm11-21c-8-6-10-15-7-26 11 5 14 14 7 26Zm1 17c14-1 23-8 27-20-14-3-24 4-27 20Z" />
+                  <g class="story-reveal"><circle cx="111" cy="78" r="25" /><path d="m129 97 18 20M101 72c8-8 18-9 28-4m-27 17c9 5 18 5 27-1" /></g>
+                  <path class="story-hatch" d="m43 125 11-5m14-3 11-5" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Discovery</p>
+              <h3>Notice what happened.</h3>
+              <p class="home-card-support">Notice what fits, what changed, and what your experience may be teaching you.</p>
+              <div class="home-card-detail" aria-label="Discovery details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>What you noticed</li><li>What seems worth testing</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>Learning you can carry forward.</p>
+              </div>
+              <a class="home-card-cta" href="my-learning.html">Explore Discovery <span aria-hidden="true">→</span></a>
+            </article>
 
-        <p class="section-label">
-            WELCOME TO MY SIMPLE HEALTH
-        </p>
-
-        <h1>
-            Your health.<br>
-            Made simpler.
-        </h1>
-
-        <p class="hero-intro">
-            Explore your wellbeing, understand your health,
-            and discover realistic ways to move toward
-            what matters to you.
-        </p>
-
-        <div class="hero-actions">
-
-            <a
-                class="hero-primary-button"
-                href="hello.html"
-            >
-                Talk to Hello →
-            </a>
-
-<div class="footer-legal">
-
-    <a href="privacy.html">
-        Privacy Policy
-    </a>
-
-    <a href="terms.html">
-        Terms of Use
-    </a>
-
-    <a href="disclaimer.html">
-        Disclaimer
-    </a>
-
-</div>
-
+            <article class="home-journey-card" tabindex="0" data-journey-card data-stage="journey">
+              <span class="home-card-number">06</span>
+              <figure class="home-card-story" aria-hidden="true">
+                <svg viewBox="0 0 180 180" focusable="false">
+                  <circle class="story-frame" cx="90" cy="90" r="77" />
+                  <path class="story-far" d="M23 103 48 82l19 15 25-37 21 25 15-14 29 31" />
+                  <path d="M24 113c31-8 58-6 83-1 18 3 34 3 49-3" />
+                  <path class="story-route" d="M60 145c6-25 35-20 29-43-4-16 9-26 22-35" />
+                  <path class="story-hatch" d="m39 108 10-8m73 7 12-9m-62 31 10-4" />
+                </svg>
+              </figure>
+              <p class="home-card-stage">Journey</p>
+              <h3>See what you're learning.</h3>
+              <p class="home-card-support">Look across events over time and see how your picture, choices, and understanding have moved.</p>
+              <div class="home-card-detail" aria-label="Journey details">
+                <p class="home-card-detail-label">What you'll explore</p>
+                <ul><li>Movement over time</li><li>What you want to continue</li></ul>
+                <p class="home-card-outcome"><span>You'll leave with</span>A wider view of your unfolding journey.</p>
+              </div>
+              <a class="home-card-cta" href="my-progress.html">Explore Journey <span aria-hidden="true">→</span></a>
+            </article>
+          </div>
         </div>
 
-    </div>
-
-
-    <div class="hero-visual">
-
-        <img
-            src="hero-home.png"
-            alt="Everyday wellbeing and healthy living"
-        >
-
-    </div>
-
-</section>
-
-
-<!-- =========================================
-     START WITH YOU
-========================================== -->
-
-<section
-    class="home-tools-section"
-    id="start-with-you"
->
-
-    <div class="home-tools-heading">
-
-        <div>
-
-            <p class="section-label">
-                START WITH YOU
-            </p>
-
-            <h2>
-                What would you like to explore?
-            </h2>
-
-            <p>
-                Try a simple activity, learn something about yourself,
-                or start with whatever feels useful today.
-            </p>
-
+        <div class="home-journey-path" aria-hidden="true">
+          <span class="home-journey-path-line"></span>
+          <span class="home-journey-path-progress" data-journey-progress></span>
+          <span class="home-journey-stage-points">
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span class="home-journey-path-point" data-journey-point></span>
         </div>
-
-
-        <div class="home-tools-controls">
-
-            <button
-                type="button"
-                aria-label="Previous tools"
-                onclick="scrollHomeTools(-1)"
-            >
-                ‹
-            </button>
-
-            <button
-                type="button"
-                aria-label="Next tools"
-                onclick="scrollHomeTools(1)"
-            >
-                ›
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div
-        class="home-tools-carousel"
-        id="homeToolsCarousel"
-    >
-
-
-        <!-- HELLO -->
-
-        <a
-            class="home-tool-card home-tool-card-featured"
-            href="hello.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-regular fa-comments"></i>
-            </div>
-
-            <span>
-                TALK IT THROUGH
-            </span>
-
-            <h3>
-                Hello
-            </h3>
-
-            <p>
-                Ask a question, explore what's getting in the way,
-                or figure out a realistic next step.
-            </p>
-
-            <strong>
-                Talk to Hello →
-            </strong>
-
-        </a>
-
-
-        <!-- WELLNESS WHEEL -->
-
-        <a
-            class="home-tool-card"
-            href="assessments.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-solid fa-chart-pie"></i>
-            </div>
-
-            <span>
-                CHECK IN
-            </span>
-
-            <h3>
-                Wellness Wheel
-            </h3>
-
-            <p>
-                Step back and explore the different areas
-                of your wellbeing.
-            </p>
-
-            <strong>
-                Check in with yourself →
-            </strong>
-
-        </a>
-
-
-        <!-- LIFE VISION -->
-
-        <a
-            class="home-tool-card"
-            href="resources.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-regular fa-compass"></i>
-            </div>
-
-            <span>
-                LOOK AHEAD
-            </span>
-
-            <h3>
-                Life Vision
-            </h3>
-
-            <p>
-                Explore what you want your health and wellbeing
-                to help make possible.
-            </p>
-
-            <strong>
-                Create your vision →
-            </strong>
-
-        </a>
-
-
-        <!-- VALUES -->
-
-        <a
-            class="home-tool-card"
-            href="resources.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-regular fa-heart"></i>
-            </div>
-
-            <span>
-                WHAT MATTERS
-            </span>
-
-            <h3>
-                Values
-            </h3>
-
-            <p>
-                Get clearer about what matters to you
-                and what you want your choices to support.
-            </p>
-
-            <strong>
-                Explore your values →
-            </strong>
-
-        </a>
-
-
-        <!-- GOALS -->
-
-        <a
-            class="home-tool-card"
-            href="resources.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-solid fa-bullseye"></i>
-            </div>
-
-            <span>
-                MOVE FORWARD
-            </span>
-
-            <h3>
-                Goals &amp; Milestones
-            </h3>
-
-            <p>
-                Turn something important into realistic
-                steps you can actually work toward.
-            </p>
-
-            <strong>
-                Build a goal →
-            </strong>
-
-        </a>
-
-
-        <!-- WELLBEING TOOLBOX -->
-
-        <a
-            class="home-tool-card"
-            href="resources.html"
-        >
-
-            <div class="home-tool-icon">
-                <i class="fa-solid fa-toolbox"></i>
-            </div>
-
-            <span>
-                BUILD YOUR TOOLBOX
-            </span>
-
-            <h3>
-                Wellbeing Toolbox
-            </h3>
-
-            <p>
-                Discover strategies and resources you can
-                return to when you need them.
-            </p>
-
-            <strong>
-                Explore your toolbox →
-            </strong>
-
-        </a>
-
-
-    </div>
-
-</section>
-
-<!-- =========================================
-     HEALTH TOPICS
-========================================== -->
-
-<section class="topics-section">
-
-    <p class="section-label">
-        EXPLORE HEALTH TOPICS
-    </p>
-
-    <h2>
-        Simple guidance for everyday health.
-    </h2>
-
-    <p class="section-intro">
-        Explore practical, research-informed resources for building
-        healthier habits and understanding your health.
-    </p>
-
-
-    <div class="topic-grid">
-
-        <article class="topic-card">
-
-            <span>01</span>
-
-            <h3>
-                Nutrition
-            </h3>
-
-            <p>
-                Build a balanced, flexible approach to everyday eating through
-                nourishing choices.
-            </p>
-
-            <a href="nutrition.html">
-                Explore Nutrition →
-            </a>
-
-        </article>
-
-
-        <article class="topic-card">
-
-            <span>02</span>
-
-            <h3>
-                Movement
-            </h3>
-
-            <p>
-                Understand how everyday movement supports long-term health
-                and wellbeing.
-            </p>
-
-            <a href="movement.html">
-                Explore Movement →
-            </a>
-
-        </article>
-
-
-        <article class="topic-card">
-
-            <span>03</span>
-
-            <h3>
-                Sleep
-            </h3>
-
-            <p>
-                Learn how sleep habits, routines, and environments
-                influence your health.
-            </p>
-
-            <a href="sleep.html">
-                Explore Sleep →
-            </a>
-
-        </article>
-
-
-        <article class="topic-card">
-
-            <span>04</span>
-
-            <h3>
-                Wellbeing
-            </h3>
-
-            <p>
-                Explore factors that support mental, emotional,
-                and social wellbeing.
-            </p>
-
-            <a href="wellbeing.html">
-                Explore Wellbeing →
-            </a>
-
-        </article>
-
-
-        <article class="topic-card">
-
-            <span>05</span>
-
-            <h3>
-                Prevention
-            </h3>
-
-            <p>
-                Understand modifiable risk factors and everyday
-                opportunities for prevention.
-            </p>
-
-            <a href="preventive-health.html">
-                Explore Prevention →
-            </a>
-
-        </article>
-
-    </div>
-
-</section>
-
-<!-- =========================================
-     INTERACTIVE LATEST ARTICLES
-========================================== -->
-
-<section class="home-article-carousel">
-
-    <div class="home-article-carousel-header">
-
-        <h2>Latest Articles</h2>
-
-        <a href="blog.html">
-            VIEW ALL ARTICLES →
-        </a>
-
-    </div>
-
-
-    <div class="home-article-slider">
-
-        <button
-            class="home-article-arrow home-article-arrow-left"
-            type="button"
-            aria-label="Previous article"
-            onclick="changeHomeArticle(-1)"
-        >
-            ‹
-        </button>
-
-
-        <div class="home-article-slide active">
-
-            <img
-                src="blood-pressure.png"
-                alt="Blood pressure monitor"
-            >
-
-            <div class="home-article-slide-content">
-
-                <p class="article-category">
-                    PREVENTION
-                </p>
-
-                <h3>
-                    Know Your Numbers: Blood Pressure
-                </h3>
-
-                <p>
-                    Why it matters, what the numbers mean,
-                    and how to take action.
-                </p>
-
-<a href="know-your-numbers-blood-pressure.html">
-    READ ARTICLE →
-</a>
-
-            </div>
-
-        </div>
-
-
-        <div class="home-article-slide">
-
-            <img
-                src="nutrition-bowl.png"
-                alt="Salmon and vegetable nutrition bowl"
-            >
-
-            <div class="home-article-slide-content">
-
-                <p class="article-category">
-                    NUTRITION
-                </p>
-
-                <h3>
-                    Fiber: The Unsung Nutrition Hero
-                </h3>
-
-                <p>
-                    How fiber supports heart health, digestion,
-                    blood sugar, and more.
-                </p>
-
-<a href="fiber-unsung-nutrition-hero.html">
-    READ ARTICLE →
-</a>
-
-            </div>
-
-        </div>
-
-
-        <div class="home-article-slide">
-
-            <img
-                src="movement-walking.png"
-                alt="Person walking outdoors"
-            >
-
-            <div class="home-article-slide-content">
-
-                <p class="article-category">
-                    MOVEMENT
-                </p>
-
-                <h3>
-                    Small Steps, Big Impact
-                </h3>
-
-                <p>
-                    Simple, realistic ways to add movement
-                    to your routine, no gym required.
-                </p>
-
-<a href="small-steps-big-impact.html">
-    READ ARTICLE →
-</a>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="home-article-arrow home-article-arrow-right"
-            type="button"
-            aria-label="Next article"
-            onclick="changeHomeArticle(1)"
-        >
-            ›
-        </button>
-
-    </div>
-
-
-    <div class="home-article-dots">
-
-        <button
-            class="home-article-dot active"
-            type="button"
-            aria-label="Show article 1"
-            onclick="showHomeArticle(0)"
-        ></button>
-
-        <button
-            class="home-article-dot"
-            type="button"
-            aria-label="Show article 2"
-            onclick="showHomeArticle(1)"
-        ></button>
-
-        <button
-            class="home-article-dot"
-            type="button"
-            aria-label="Show article 3"
-            onclick="showHomeArticle(2)"
-        ></button>
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================
-     FREE RESOURCE LIBRARY
-========================================== -->
-
-<section class="home-resources">
-
-    <div class="home-resources-inner">
-
-        <div class="resource-icon">
-            ▤
-        </div>
-
-        <p class="section-label">
-            FREE RESOURCE LIBRARY
-        </p>
-
-        <h2>
-            Practical tools for everyday health.
-        </h2>
-
-        <p>
-            Explore simple guides, checklists, and resources designed
-            to help you understand your health and put what you learn
-            into practice.
-        </p>
-
-        <a href="resources.html">
-            EXPLORE RESOURCES →
-        </a>
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================
-     HEALTHY RECIPES
-========================================== -->
-
-<section class="recipes-section">
-
-    <div class="recipes-heading">
-
-        <h2>
-            Healthy Recipes for Real Life
-        </h2>
-
-        <a href="recipes.html">
-            VIEW ALL RECIPES →
-        </a>
-
-    </div>
-
-
-    <div class="recipes-grid">
-
-
-        <article class="recipe-card">
-
-            <a href="mediterranean-chicken-vegetables.html">
-
-                <img
-                    class="recipe-image"
-                    src="mediterranean-chicken-vegetables.jpg"
-                    alt="Mediterranean Chicken and Vegetables"
-                >
-
-            </a>
-
-            <h3>
-                Mediterranean Chicken<br>
-                &amp; Vegetables
-            </h3>
-
-        </article>
-
-
-
-        <article class="recipe-card">
-
-            <a href="harvest-salmon-bowl.html">
-
-                <img
-                    class="recipe-image"
-                    src="harvest-salmon-bowl.jpg"
-                    alt="Harvest Salmon Bowl"
-                >
-
-            </a>
-
-            <h3>
-                Harvest Salmon<br>
-                Bowl
-            </h3>
-
-        </article>
-
-
-
-        <article class="recipe-card">
-
-            <a href="apple-pecan-chicken-salad.html">
-
-                <img
-                    class="recipe-image"
-                    src="apple-pecan-chicken-salad.jpg"
-                    alt="Apple Pecan Chicken Salad"
-                >
-
-            </a>
-
-            <h3>
-                Apple Pecan<br>
-                Chicken Salad
-            </h3>
-
-        </article>
-
-
-
-        <article class="recipe-card">
-
-            <a href="blackened-cod-tacos.html">
-
-                <img
-                    class="recipe-image"
-                    src="blackened-cod-tacos.jpg"
-                    alt="Blackened Cod Tacos"
-                >
-
-            </a>
-
-            <h3>
-                Blackened Cod<br>
-                Tacos
-            </h3>
-
-        </article>
-
-
-
-        <article class="recipe-card">
-
-            <a href="honey-lime-shrimp-tacos.html">
-
-                <img
-                    class="recipe-image"
-                    src="honey-lime-shrimp-tacos.jpg"
-                    alt="Honey Lime Shrimp Tacos"
-                >
-
-            </a>
-
-            <h3>
-                Honey Lime Shrimp<br>
-                Tacos
-            </h3>
-
-        </article>
-
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================
-     MISSION
-========================================== -->
-
-<section class="mission-section">
-
-    <div class="mission-photo">
-
-        <img
-            class="mission-image"
-            src="mission-photo.png"
-            alt="Sieanna, founder of My Simple Health"
-        >
-
-    </div>
-
-
-    <div class="mission-content">
-
-        <p class="section-label">
-            HI, I'M SIEANNA.
-        </p>
-
-        <h2>
-            My mission
-        </h2>
-
-        <p>
-            I created My Simple Health to translate complex health evidence
-            into practical education you can actually use.
-        </p>
-
-        <p>
-            My goal is to empower you with knowledge, realistic strategies,
-            and tools that support long-term health and prevention,
-            one step at a time.
-        </p>
-
-        <a href="about.html#mission">
-            LEARN MORE ABOUT MY MISSION →
-        </a>
-
-    </div>
-
-
-    <aside class="mission-quote">
-
-        <span class="quote-mark">
-            “
-        </span>
-
-        <p>
-            Health isn’t about perfection.<br>
-            It’s about progress, consistency,<br>
-            and choices that support<br>
-            your future.
-        </p>
-
-        <div class="quote-leaf">
-            ❧
-        </div>
-
+      </div>
+    </section>
+
+    <aside class="home-hello-band home-reveal" aria-labelledby="hello-band-title">
+      <span class="home-hello-symbol" aria-hidden="true">H</span>
+      <div>
+        <p class="home-eyebrow">ALONGSIDE YOU</p>
+        <h2 id="hello-band-title">Hello is with you at every step.</h2>
+        <p>Ask a question, talk something through, or get support when you need it. The same Hello conversation follows you through My Health without taking authority over your experience.</p>
+      </div>
+      <a href="hello.html?from=home">Talk with Hello <span aria-hidden="true">→</span></a>
     </aside>
 
-</section>
-
-
-
-<!-- =========================================
-     NEWSLETTER
-========================================== -->
-
-<section class="newsletter-section">
-
-    <div class="newsletter-icon">
-        ✉
-    </div>
-
-
-    <div class="newsletter-copy">
-
-        <h2>
-            Stay inspired.
-        </h2>
-
-        <p>
-            Evidence-informed health tips and practical resources
-            delivered to your inbox.
-        </p>
-
-    </div>
-
-
-    <form class="newsletter-form">
-
-        <input
-            type="text"
-            placeholder="First name"
-            aria-label="First name"
-        >
-
-        <input
-            type="email"
-            placeholder="Email address"
-            aria-label="Email address"
-        >
-
-        <button type="submit">
-            SUBSCRIBE
-        </button>
-
-        <p class="newsletter-note">
-            No spam, ever. Unsubscribe anytime.
-        </p>
-
-    </form>
-
-</section>
-
-
-</main>
-
-
-
-<!-- =========================================
-     FOOTER
-========================================== -->
-
-<footer class="site-footer">
-
-    <div class="footer-main">
-
-
-        <div class="footer-brand">
-
-            <h2>
-                MY SIMPLE HEALTH
-            </h2>
-
-            <p>
-                Practical, evidence-informed<br>
-                health education for everyday life.
-            </p>
-
-
-            <div class="footer-socials">
-
-                <a
-                    href="https://www.instagram.com/hellomysimplehealth/"
-                    aria-label="Instagram"
-                >
-                    <i class="fa-brands fa-instagram"></i>
-                </a>
-
-                <a
-                    href="https://www.linkedin.com/company/143299965/"
-                    aria-label="LinkedIn"
-                >
-                    <i class="fa-brands fa-linkedin-in"></i>
-                </a>
-
-                <a
-                    href="https://www.pinterest.com/hellomysimplehealth/"
-                    aria-label="Pinterest"
-                >
-                    <i class="fa-brands fa-pinterest-p"></i>
-                </a>
-
-                <a
-                    href="mailto:hello.mysimplehealth@gmail.com"
-                    aria-label="Email"
-                >
-                    <i class="fa-regular fa-envelope"></i>
-                </a>
-
-            </div>
-
+    <section class="home-connected home-reveal" aria-labelledby="connected-title">
+      <div class="home-connected-copy">
+        <p class="home-eyebrow">YOUR HEALTH HUB</p>
+        <h2 id="connected-title">Everything connected.<br>Everything about you.</h2>
+        <p>Your landscape, your vision, your actions, your reflections, and your progress—together in one private space that helps you see the whole picture and take your next step.</p>
+        <a class="home-button home-button-primary" href="my-health.html">Take a Tour <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="home-health-map" aria-label="My Health workspace preview">
+        <div class="home-map-titlebar" aria-hidden="true"><span>My Health</span><strong>Your connected workspace</strong></div>
+        <div class="home-map-current">
+          <span>WHERE I AM</span>
+          <strong>Landscape</strong>
+          <p>Your current picture across the dimensions you have explored.</p>
         </div>
-
-
-
-        <div class="footer-column">
-
-            <h3>
-                EXPLORE
-            </h3>
-
-            <a href="topics.html">
-                Topics
-            </a>
-
-            <a href="recipes.html">
-                Recipes
-            </a>
-
-            <a href="resources.html">
-                Resources
-            </a>
-
-            <a href="blog.html">
-                Blog
-            </a>
-
+        <div class="home-map-direction">
+          <span>DIRECTION</span>
+          <strong>Vision</strong>
+          <p>The future you have described and confirmed.</p>
         </div>
-
-
-
-        <div class="footer-column">
-
-            <h3>
-                ABOUT
-            </h3>
-
-            <a href="about.html">
-                About Me
-            </a>
-
-            <a href="about.html#mission">
-                Mission &amp; Values
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
-
+        <div class="home-map-active">
+          <span>WHAT MATTERS NOW</span>
+          <strong>Project + Practice</strong>
+          <p>The direction and real-life experiment currently in view.</p>
         </div>
-
-
-
-        <div class="footer-connect">
-
-            <h3>
-                LET'S STAY CONNECTED
-            </h3>
-
-            <p>
-                Join the community for new articles,<br>
-                healthy recipes, and free resources.
-            </p>
-
-
-            <form class="footer-email">
-
-                <input
-                    type="email"
-                    placeholder="Email address"
-                    aria-label="Email address"
-                >
-
-                <button type="submit">
-                    →
-                </button>
-
-            </form>
-
+        <div class="home-map-learning">
+          <span>WHAT I'M LEARNING</span>
+          <strong>Discovery</strong>
+          <p>Reflections and learning you chose to carry forward.</p>
         </div>
+        <div class="home-map-progress">
+          <span>WHAT HAS CHANGED</span>
+          <strong>Progress</strong>
+          <p>Meaningful events that show movement over time.</p>
+        </div>
+        <span class="home-map-thread" aria-hidden="true"></span>
+      </div>
+    </section>
 
+    <section class="home-intelligence home-reveal" aria-labelledby="intelligence-title">
+      <div>
+        <p class="home-eyebrow">THE INTELLIGENCE THAT MATTERS MOST</p>
+        <h2 id="intelligence-title">Know yourself better.</h2>
+        <p>Science, data, and AI can provide information. My Simple Health helps you turn information and experience into understanding you can actually use.</p>
+      </div>
+      <ol class="home-intelligence-sequence" aria-label="From data to self-intelligence">
+        <li><span>01</span>Data</li>
+        <li><span>02</span>Information</li>
+        <li><span>03</span>Understanding</li>
+        <li><span>04</span>Self-intelligence</li>
+      </ol>
+    </section>
+
+    <section class="home-closing" aria-labelledby="closing-title">
+      <div class="home-closing-light" aria-hidden="true"></div>
+      <div class="home-closing-copy home-reveal">
+        <p class="home-eyebrow">YOUR WAY FORWARD</p>
+        <h2 id="closing-title">Your life isn't a score to optimize.</h2>
+        <p>Understand it.<br>Shape what you can.<br>Learn as you go.</p>
+        <a class="home-button home-button-primary" href="#journey">Begin your journey</a>
+      </div>
+    </section>
+  </main>
+
+  <a class="home-hello-companion" href="hello.html?from=home" aria-label="Talk with Hello">
+    <span aria-hidden="true">H</span><strong>Hello</strong>
+  </a>
+
+  <footer class="home-footer">
+    <div class="home-footer-main">
+      <div class="home-footer-brand">
+        <a href="index.html">My Simple Health</a>
+        <p>Health science and personal navigation, kept distinct and connected with care.</p>
+      </div>
+      <nav aria-label="Explore">
+        <p>EXPLORE</p>
+        <a href="topics.html">Health science</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="resources.html">Resources</a>
+        <a href="blog.html">Journal</a>
+      </nav>
+      <nav aria-label="My Simple Health application">
+        <p>MY HEALTH</p>
+        <a href="my-health.html">Workspace</a>
+        <a href="my-landscape.html">Landscape</a>
+        <a href="my-project.html">Project</a>
+        <a href="hello.html?from=home">Hello</a>
+      </nav>
+      <nav aria-label="About My Simple Health">
+        <p>ABOUT</p>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </nav>
     </div>
-
-
-
-    <div class="footer-bottom">
-
-        <p>
-            © 2026 My Simple Health. All rights reserved.
-        </p>
-
-
-<div class="footer-legal">
-
-    <a href="privacy.html">
-        Privacy Policy
-    </a>
-
-    <a href="terms.html">
-        Terms of Use
-    </a>
-
-    <a href="disclaimer.html">
-        Disclaimer
-    </a>
-
-</div>
-
+    <div class="home-footer-bottom">
+      <p>© 2026 My Simple Health. All rights reserved.</p>
+      <a href="disclaimer.html">Health information disclaimer</a>
     </div>
+  </footer>
 
-</footer>
-
-
-<!-- =====================================
-     JAVASCRIPT
-===================================== -->
-
-<script>
-
-    /* =========================
-       SEARCH
-    ========================= */
-
-    function toggleSearch() {
-        const searchBox = document.getElementById("searchBox");
-        const searchInput = document.getElementById("siteSearch");
-
-        searchBox.classList.toggle("active");
-
-        if (searchBox.classList.contains("active")) {
-            searchInput.focus();
-        }
-    }
-
-
-    function runSearch() {
-        const searchInput = document.getElementById("siteSearch");
-        const query = searchInput.value.trim();
-
-        if (query) {
-            window.location.href =
-                "https://www.google.com/search?q=site:mysimplehealth.org+" +
-                encodeURIComponent(query);
-        }
-    }
-
-
-    document.getElementById("siteSearch")
-        .addEventListener("keydown", function(event) {
-
-            if (event.key === "Enter") {
-                runSearch();
-            }
-
-        });
-
-
-    /* =========================
-       MOBILE MENU
-    ========================= */
-
-    function toggleMenu() {
-        const nav = document.querySelector(".site-nav");
-        nav.classList.toggle("active");
-    }
-
-
-    /* =========================
-       HOME ARTICLE CAROUSEL
-    ========================= */
-
-    let currentHomeArticle = 0;
-    let homeArticleTimer;
-
-
-    function showHomeArticle(index) {
-
-        const slides =
-            document.querySelectorAll(".home-article-slide");
-
-        const dots =
-            document.querySelectorAll(".home-article-dot");
-
-        if (slides.length === 0) {
-            return;
-        }
-
-        if (index < 0) {
-            index = slides.length - 1;
-        }
-
-        if (index >= slides.length) {
-            index = 0;
-        }
-
-        slides.forEach(function(slide) {
-            slide.classList.remove("active");
-        });
-
-        dots.forEach(function(dot) {
-            dot.classList.remove("active");
-        });
-
-        slides[index].classList.add("active");
-
-        if (dots[index]) {
-            dots[index].classList.add("active");
-        }
-
-        currentHomeArticle = index;
-    }
-
-
-    /* =========================
-       ARROW CONTROLS
-    ========================= */
-
-    function changeHomeArticle(direction) {
-
-        showHomeArticle(currentHomeArticle + direction);
-
-        restartHomeArticleTimer();
-    }
-
-
-    /* =========================
-       AUTOMATIC SLIDESHOW
-    ========================= */
-
-    function startHomeArticleTimer() {
-
-        clearInterval(homeArticleTimer);
-
-        homeArticleTimer = setInterval(function() {
-
-            showHomeArticle(currentHomeArticle + 1);
-
-        }, 5000);
-    }
-
-
-    function restartHomeArticleTimer() {
-
-        startHomeArticleTimer();
-    }
-
-
-    /* =========================
-       START CAROUSEL
-    ========================= */
-
-    document.addEventListener("DOMContentLoaded", function() {
-
-        showHomeArticle(0);
-
-        startHomeArticleTimer();
-
-    });
-/* =========================================================
-   HOME — NEW HERO
-========================================================= */
-
-.home-hero-new {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: stretch;
-    min-height: 560px;
-    background: #f7f4ec;
-}
-
-.home-hero-new .hero-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 80px max(6vw, 40px);
-}
-
-.home-hero-new .section-label {
-    margin: 0 0 18px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    color: #55745e;
-}
-
-.home-hero-new h1 {
-    margin: 0;
-    max-width: 620px;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: clamp(3.2rem, 6vw, 5.7rem);
-    line-height: 0.98;
-    font-weight: 500;
-    letter-spacing: -0.045em;
-    color: #163f2c;
-}
-
-.home-hero-new .hero-intro {
-    max-width: 570px;
-    margin: 28px 0 0;
-    font-size: 1.08rem;
-    line-height: 1.75;
-    color: #4d5d53;
-}
-
-.hero-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 34px;
-}
-
-.hero-actions a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 52px;
-    padding: 0 25px;
-    border-radius: 999px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition:
-        transform 0.2s ease,
-        background-color 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.hero-actions a:hover {
-    transform: translateY(-2px);
-}
-
-.hero-primary-button {
-    background: #163f2c;
-    color: #ffffff;
-    border: 1px solid #163f2c;
-}
-
-.hero-primary-button:hover {
-    background: #0f3222;
-}
-
-.hero-secondary-button {
-    background: transparent;
-    color: #163f2c;
-    border: 1px solid #9aae9f;
-}
-
-.hero-secondary-button:hover {
-    border-color: #163f2c;
-    background: rgba(255, 255, 255, 0.55);
-}
-
-.home-hero-new .hero-visual {
-    min-height: 560px;
-    overflow: hidden;
-}
-
-.home-hero-new .hero-visual img {
-    width: 100%;
-    height: 100%;
-    min-height: 560px;
-    display: block;
-    object-fit: cover;
-}
-
-
-/* =========================================================
-   HOME — START WITH YOU
-========================================================= */
-
-.home-tools-section {
-    padding: 76px 0 82px;
-    overflow: hidden;
-    background: #ffffff;
-}
-
-.home-tools-heading {
-    width: min(1180px, calc(100% - 48px));
-    margin: 0 auto 34px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 30px;
-}
-
-.home-tools-heading > div:first-child {
-    max-width: 680px;
-}
-
-.home-tools-heading .section-label {
-    margin: 0 0 10px;
-    color: #6b876f;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-}
-
-.home-tools-heading h2 {
-    margin: 0;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 1.1;
-    font-weight: 500;
-    color: #173f2d;
-}
-
-.home-tools-heading p:not(.section-label) {
-    margin: 14px 0 0;
-    max-width: 600px;
-    color: #66736a;
-    line-height: 1.65;
-}
-
-.home-tools-controls {
-    display: flex;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-.home-tools-controls button {
-    width: 46px;
-    height: 46px;
-    border: 1px solid #cdd8cf;
-    border-radius: 50%;
-    background: #ffffff;
-    color: #173f2d;
-    font-size: 1.65rem;
-    line-height: 1;
-    cursor: pointer;
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.home-tools-controls button:hover {
-    background: #eef4ef;
-    border-color: #8da391;
-    transform: translateY(-1px);
-}
-
-
-/* =========================================================
-   HOME — TOOL CAROUSEL
-========================================================= */
-
-.home-tools-carousel {
-    display: flex;
-    gap: 18px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-
-    padding:
-        4px
-        max(24px, calc((100vw - 1180px) / 2))
-        20px;
-
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.home-tools-carousel::-webkit-scrollbar {
-    display: none;
-}
-
-.home-tool-card {
-    flex: 0 0 270px;
-    min-height: 330px;
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 28px;
-
-    border: 1px solid #dfe6df;
-    border-radius: 18px;
-
-    background: #fbfaf6;
-    color: #26372e;
-
-    text-decoration: none;
-
-    scroll-snap-align: start;
-
-    transition:
-        transform 0.22s ease,
-        box-shadow 0.22s ease,
-        border-color 0.22s ease;
-}
-
-.home-tool-card:hover {
-    transform: translateY(-5px);
-    border-color: #b8c9bb;
-    box-shadow: 0 14px 32px rgba(22, 63, 44, 0.08);
-}
-
-.home-tool-card-featured {
-    background: #173f2d;
-    border-color: #173f2d;
-    color: #ffffff;
-}
-
-.home-tool-icon {
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 28px;
-
-    border-radius: 50%;
-
-    background: #e8efe9;
-    color: #173f2d;
-
-    font-size: 1.15rem;
-}
-
-.home-tool-card-featured .home-tool-icon {
-    background: rgba(255, 255, 255, 0.13);
-    color: #ffffff;
-}
-
-.home-tool-card > span {
-    margin-bottom: 9px;
-
-    font-size: 0.67rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-
-    color: #718276;
-}
-
-.home-tool-card-featured > span {
-    color: #c9d8cd;
-}
-
-.home-tool-card h3 {
-    margin: 0 0 13px;
-
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.55rem;
-    font-weight: 500;
-
-    color: #173f2d;
-}
-
-.home-tool-card-featured h3 {
-    color: #ffffff;
-}
-
-.home-tool-card p {
-    margin: 0 0 24px;
-
-    font-size: 0.93rem;
-    line-height: 1.65;
-
-    color: #657168;
-}
-
-.home-tool-card-featured p {
-    color: #e0e8e2;
-}
-
-.home-tool-card strong {
-    margin-top: auto;
-
-    font-size: 0.82rem;
-    font-weight: 700;
-
-    color: #386348;
-}
-
-.home-tool-card-featured strong {
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 900px) {
-
-    .home-hero-new {
-        grid-template-columns: 1fr;
-        min-height: auto;
-    }
-
-    .home-hero-new .hero-text {
-        padding: 64px 28px;
-    }
-
-    .home-hero-new h1 {
-        font-size: clamp(3rem, 12vw, 4.8rem);
-    }
-
-    .home-hero-new .hero-visual {
-        min-height: 380px;
-    }
-
-    .home-hero-new .hero-visual img {
-        min-height: 380px;
-    }
-
-    .home-tools-heading {
-        width: calc(100% - 48px);
-    }
-
-}
-
-
-@media (max-width: 600px) {
-
-    .home-hero-new .hero-text {
-        padding: 52px 22px;
-    }
-
-    .home-hero-new h1 {
-        font-size: clamp(2.8rem, 14vw, 4rem);
-    }
-
-    .home-hero-new .hero-intro {
-        font-size: 1rem;
-    }
-
-    .hero-actions {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .hero-actions a {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .home-hero-new .hero-visual {
-        min-height: 300px;
-    }
-
-    .home-hero-new .hero-visual img {
-        min-height: 300px;
-    }
-
-    .home-tools-section {
-        padding: 58px 0 64px;
-    }
-
-    .home-tools-heading {
-        width: calc(100% - 36px);
-        align-items: flex-start;
-    }
-
-    .home-tools-controls {
-        display: none;
-    }
-
-    .home-tools-carousel {
-        gap: 14px;
-        padding-left: 18px;
-        padding-right: 18px;
-    }
-
-    .home-tool-card {
-        flex-basis: 82vw;
-        min-height: 310px;
-    }
-
-}
-</script>
-
+  <script src="js/msh-homepage.js"></script>
 </body>
 </html>

@@ -16,7 +16,10 @@
         content="Hello is the interactive health education and wellness guide from My Simple Health."
     >
 
+    <script src="js/msh-theme.js"></script>
+    <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('msh-hello-embedded');</script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/msh-app.css">
 
     <link
         rel="stylesheet"
@@ -940,67 +943,19 @@ body {
 }
 
     </style>
+    <link rel="stylesheet" href="css/msh-hello.css">
 
 </head>
 
 
-<body>
+<body class="msh-app-page" data-msh-page="hello">
 
 
 <!-- =========================================
      SITE HEADER
 ========================================== -->
 
-<header class="site-header">
-
-    <a
-        class="site-logo"
-        href="index.html"
-    >
-        My Simple Health
-    </a>
-
-    <button
-        class="menu-button"
-        aria-label="Open menu"
-        onclick="toggleMenu()"
-    >
-        <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <nav class="site-nav">
-
-        <a href="index.html">
-            Home
-        </a>
-
-        <a href="about.html">
-            About
-        </a>
-
-        <a href="topics.html">
-            Topics
-        </a>
-
-        <a href="assessments.html">
-            Assessments
-        </a>
-
-        <a href="recipes.html">
-            Recipes
-        </a>
-
-        <a href="blog.html">
-            Blog
-        </a>
-
-        <a href="contact.html">
-            Contact
-        </a>
-
-    </nav>
-
-</header>
+<div data-msh-header></div>
 
 
 
@@ -1044,7 +999,7 @@ body {
                 id="guidedModeButton"
                 onclick="switchMode('guided')"
             >
-                Guided Reflection
+                Help Me Move Forward
             </button>
 
             <button
@@ -1053,7 +1008,7 @@ body {
                 id="askModeButton"
                 onclick="switchMode('ask')"
             >
-                Ask Hello
+                Reflect / Understand
             </button>
 
         </div>
@@ -1116,10 +1071,10 @@ body {
         <div class="hello-actions">
 
             <a
-                href="wellness-wheel.html"
+                href="my-health.html"
                 class="hello-secondary-btn"
             >
-                ← RETURN TO WELLNESS WHEEL
+                ← RETURN TO MY HEALTH
             </a>
 
             <button
@@ -1127,7 +1082,7 @@ body {
                 class="hello-secondary-btn"
                 onclick="restartReflection()"
             >
-                RESTART REFLECTION
+                START A FRESH REFLECTION
             </button>
 
         </div>
@@ -1150,7 +1105,17 @@ body {
 </main>
 
 
+<div data-msh-mobile-nav></div>
 
+
+
+<script src="js/msh-storage.js"></script>
+<script src="js/msh-cycle.js"></script>
+<script src="js/msh-intelligence.js"></script>
+<script src="js/msh-guided-reflection.js"></script>
+<script src="js/msh-conversation-renderer.js"></script>
+<script src="js/msh-shell.js"></script>
+<script src="js/msh-hello-embed.js"></script>
 <script>
 
 /* =========================================================
@@ -1158,6 +1123,19 @@ body {
 ========================================================= */
 
 let currentMode = "guided";
+
+let currentIntelligenceRole = "HELLO";
+
+function setIntelligenceRole(role) {
+    currentIntelligenceRole = role === "PAL" ? "PAL" : "HELLO";
+    return currentIntelligenceRole;
+}
+
+window.MSHIntelligenceRoles = {
+    getRole: function() { return currentIntelligenceRole; },
+    setRole: setIntelligenceRole,
+    roles: ["HELLO", "PAL"]
+};
 
 let state = null;
 
@@ -1245,8 +1223,46 @@ function loadState() {
 
     if (!saved) {
 
-        state = null;
+        const journeyData = window.MSHStorage
+            ? window.MSHStorage.getState()
+            : null;
 
+        const remembered = journeyData &&
+            journeyData.settings &&
+            journeyData.settings.memory &&
+            journeyData.settings.memory.guidedReflection;
+
+        if (remembered) {
+            state = remembered;
+            return;
+        }
+
+        const wheel = journeyData && journeyData.wellnessWheel
+            ? journeyData.wellnessWheel.current
+            : null;
+        const focus = journeyData
+            ? journeyData.focuses.find(function(item) { return item.status === "active"; })
+            : null;
+        const project = journeyData && window.MSHStorage
+            ? window.MSHStorage.getActiveProject(journeyData)
+            : null;
+
+        if (wheel || focus || project) {
+            state = {
+                mode: "journey_reflection",
+                source: wheel ? "wellness-wheel" : "my-health",
+                selectedDimension: wheel && wheel.selectedDimension || focus && focus.label || project && project.title || "My Health journey",
+                selectedDimensionKey: wheel && wheel.selectedDimensionKey || null,
+                selectedScore: wheel && wheel.selectedDimensionKey ? wheel.scores[wheel.selectedDimensionKey] : null,
+                wheelScores: wheel ? { ...wheel.scores } : {},
+                currentStep: 0,
+                answers: { workingWell:"", desiredChange:"", whyMatters:"", strengths:"", barriers:"", goal:"", actionStep:"", confidence:"" }
+            };
+            saveState();
+            return;
+        }
+
+        state = null;
         return;
 
     }
@@ -1286,6 +1302,13 @@ function saveState() {
         JSON.stringify(state)
     );
 
+    if (window.MSHStorage) {
+        window.MSHStorage.updateState(function(data) {
+            data.settings.memory.guidedReflection = state;
+            return data;
+        });
+    }
+
 }
 
 
@@ -1305,6 +1328,24 @@ function clearChat() {
     lastAssistantSender =
         null;
 
+}
+
+function getStoredConversation() {
+    return window.MSHStorage && window.MSHStorage.getHelloConversation
+        ? window.MSHStorage.getHelloConversation()
+        : [];
+}
+
+function rememberConversationTurn(role, content, assistantRole) {
+    if (window.MSHStorage && window.MSHStorage.appendHelloTurn) {
+        window.MSHStorage.appendHelloTurn(role, content, assistantRole);
+    }
+}
+
+function renderStoredConversation() {
+    getStoredConversation().forEach(function(turn) {
+        addMessage(turn.content, turn.role === "assistant" ? "assistant" : "user");
+    });
 }
 
 
@@ -1408,8 +1449,15 @@ function addMessage(
         );
 
 
-    textElement.textContent =
-        text;
+    if (
+        sender === "assistant" &&
+        window.MSHConversationRenderer
+    ) {
+        window.MSHConversationRenderer.render(textElement, text);
+    }
+    else {
+        textElement.textContent = text;
+    }
 
 
     bubble.appendChild(
@@ -1931,6 +1979,8 @@ function switchMode(mode) {
 
 function startGuidedReflection() {
 
+    renderStoredConversation();
+
     const context =
         document.getElementById(
             "helloContext"
@@ -1946,7 +1996,7 @@ function startGuidedReflection() {
 
         addMessage(
 
-            "Complete the Wellness Wheel first, choose an area you would like to explore, and then return here for a guided reflection.",
+            "You can begin from My Health, your Wellness Wheel, or simply what matters to you now. Map your Landscape first if you want more context, or choose Reflect / Understand to talk with Hello without starting a plan.",
 
             "assistant"
 
@@ -1968,11 +2018,7 @@ function startGuidedReflection() {
 
         &nbsp;•&nbsp;
 
-        ${escapeHTML(
-            String(
-                state.selectedScore
-            )
-        )}/10
+        ${state.selectedScore == null ? "Your chosen context" : escapeHTML(String(state.selectedScore)) + "/10"}
 
     `;
 
@@ -1984,7 +2030,7 @@ function startGuidedReflection() {
 
     addMessage(
 
-        `You chose ${state.selectedDimension}. Let's explore that area one step at a time.`,
+        `You chose ${state.selectedDimension}. We can move forward one gentle question at a time, using what you have actually shared rather than assumptions.`,
 
         "assistant"
 
@@ -2003,17 +2049,20 @@ function startGuidedReflection() {
     }
 
 
-    askGuidedQuestion();
+    renderCurrentActivityStep();
 
 }
 
 
 
 /* =========================================================
-   ASK GUIDED QUESTION
+   RENDER CURRENT ACTIVITY STEP
+
+   This renders the activity's initial structured state. It does not
+   generate or append a follow-up after a Hello response.
 ========================================================= */
 
-function askGuidedQuestion() {
+function renderCurrentActivityStep() {
 
     if (!state) {
         return;
@@ -2048,7 +2097,7 @@ function askGuidedQuestion() {
    GUIDED RESPONSE
 ========================================================= */
 
-function handleGuidedResponse(
+async function handleGuidedResponse(
     value
 ) {
 
@@ -2067,83 +2116,53 @@ function handleGuidedResponse(
         return;
     }
 
+    const localDisposition =
+        window.MSHGuidedReflection &&
+        window.MSHGuidedReflection.classify
+            ? window.MSHGuidedReflection.classify(value, step.key)
+            : { advances: true };
+
+    const activityContext = getHelloActivityContext(localDisposition);
+    const data = await requestHelloResponse(value, {
+        deferAssistant: true,
+        activityContext
+    });
+    if (
+        !data
+    ) return;
 
     if (
-        step.key === "confidence"
+        data.disposition !== "ANSWER" ||
+        !["ADVANCE", "COMPLETE"].includes(data.activity_step_status) ||
+        localDisposition.advances !== true
     ) {
-
-        const number =
-            Number(value);
-
-
-        if (
-            !Number.isInteger(number) ||
-            number < 1 ||
-            number > 10
-        ) {
-
-            addMessage(
-
-                "Enter a whole number from 1 to 10 for this confidence reflection.",
-
-                "assistant"
-
-            );
-
-
-            return;
-
-        }
-
+        renderHelloResponse(data, data.message);
+        return;
     }
 
+    if (step.key === "confidence") {
+        const number = Number(value);
+        if (!Number.isInteger(number) || number < 1 || number > 10) {
+            renderHelloResponse(data, data.message);
+            return;
+        }
+    }
 
-    addMessage(
-        value,
-        "user"
-    );
-
-
-    state.answers[
-        step.key
-    ] =
-        value;
-
-
+    state.answers[step.key] = value;
     state.currentStep++;
-
-
     saveState();
 
 
-    if (
-        state.currentStep >=
-        reflectionSteps.length
-    ) {
+    persistHelloKnowledgeEvent(data.knowledge_event);
+    renderHelloResponse(data, data.message);
 
-        setTimeout(
-            showSummary,
-            250
-        );
-
-    }
-
-    else {
-
-        setTimeout(
-            askGuidedQuestion,
-            250
-        );
-
+    if (state.currentStep >= reflectionSteps.length) {
+        document.getElementById("helloInputWrap").style.display = "none";
     }
 
 }
 
 
-
-/* =========================================================
-   SUMMARY
-========================================================= */
 
 function showSummary() {
 
@@ -2159,42 +2178,6 @@ function showSummary() {
         .style.display =
         "none";
 
-
-    addMessage(
-
-        `Your goal: ${state.answers.goal}`,
-
-        "assistant"
-
-    );
-
-
-    addMessage(
-
-        `Your next step: ${state.answers.actionStep}`,
-
-        "assistant"
-
-    );
-
-
-    addMessage(
-
-        `Confidence: ${state.answers.confidence}/10`,
-
-        "assistant"
-
-    );
-
-
-    addMessage(
-
-        "You chose this goal and next step based on what matters to you. You can revisit and adjust it as your circumstances change.",
-
-        "assistant"
-
-    );
-
 }
 
 
@@ -2207,10 +2190,16 @@ function restartReflection() {
 
     if (!state) {
 
-        window.location.href =
-            "wellness-wheel.html";
-
-        return;
+        state = {
+            mode: "journey_reflection",
+            source: "hello",
+            selectedDimension: "what matters now",
+            selectedDimensionKey: null,
+            selectedScore: null,
+            wheelScores: {},
+            currentStep: 0,
+            answers: { workingWell:"", desiredChange:"", whyMatters:"", strengths:"", barriers:"", goal:"", actionStep:"", confidence:"" }
+        };
 
     }
 
@@ -2271,9 +2260,15 @@ function startAskMode() {
         );
 
 
+    renderStoredConversation();
+
+    const journeyBrief = getHelloJourneyBrief();
+
     addMessage(
 
-        "Ask me a general health or wellness question. This prototype will classify the request before responding.",
+        journeyBrief && journeyBrief.hasJourneyData
+            ? journeyBrief.message
+            : "Ask me a general health or wellness question. This prototype will classify the request before responding.",
 
         "assistant"
 
@@ -2282,12 +2277,78 @@ function startAskMode() {
 
     addMessage(
 
-        "Try something like: “What does fiber do?”, “I have diabetes, what is fiber?”, or “Interpret my lab results and tell me what disease I have.”",
+        journeyBrief && journeyBrief.hasJourneyData
+            ? "You can ask about what this means, think through what fits next, or tell me where the current picture does not match your experience."
+            : "Try something like: “What does fiber do?”, “I have diabetes, what is fiber?”, or “Interpret my lab results and tell me what disease I have.”",
 
         "assistant"
 
     );
 
+}
+
+
+
+/* =========================================================
+   MY HEALTH JOURNEY CONTEXT
+========================================================= */
+
+function getHelloJourneyBrief() {
+
+    if (
+        !window.MSHStorage ||
+        !window.MSHIntelligence
+    ) {
+        return null;
+    }
+
+    return window.MSHIntelligence.getHelloBrief(
+        window.MSHStorage.getState()
+    );
+
+}
+
+
+function getHelloJourneyContext() {
+
+    const brief = getHelloJourneyBrief();
+    return brief ? brief.context : null;
+
+}
+
+function getHelloActivityContext(classification) {
+    const stored = window.MSHStorage && window.MSHStorage.getHelloActivity
+        ? window.MSHStorage.getHelloActivity()
+        : null;
+    if (!state || state.currentStep >= reflectionSteps.length) return stored;
+    const step = reflectionSteps[state.currentStep];
+    const nextStep = reflectionSteps[state.currentStep + 1] || null;
+    const signals = window.MSHGuidedReflection && window.MSHGuidedReflection.activitySignals
+        ? window.MSHGuidedReflection.activitySignals(classification)
+        : {
+            directlyAnsweredCurrentStep: false,
+            interactionState: "conversation",
+            allowedDispositions: ["CONVERSATION"]
+        };
+    return {
+        ...(stored || {}),
+        page: stored && stored.page || "hello",
+        activity: "guided_reflection",
+        dimension: state.selectedDimensionKey || state.selectedDimension || "",
+        questionId: step.key,
+        questionText: step.question,
+        nextQuestionId: nextStep ? nextStep.key : null,
+        nextQuestionText: nextStep ? nextStep.question : null,
+        currentResponse: state.answers && state.answers[step.key] || null,
+        construct: step.key,
+        priorActivityAnswers: { ...(state.answers || {}) },
+        directlyAnsweredCurrentStep: signals.directlyAnsweredCurrentStep,
+        interactionState: signals.interactionState,
+        allowedDispositions: signals.allowedDispositions,
+        confirmationOccurred: false,
+        contextId: state.source || "hello",
+        contextLabel: state.selectedDimension || "Guided reflection"
+    };
 }
 
 
@@ -2459,19 +2520,86 @@ function classifyRequest(message) {
    LOCAL ROUTER RESPONSE
 ========================================================= */
 
-async function handleAskHello(value) {
+function renderHelloResponse(data, responseText) {
+
+    const text = String(responseText || data && (data.message || data.response) || "").trim();
+    if (text) {
+        addMessage(text, "assistant");
+        rememberConversationTurn("assistant", text, currentIntelligenceRole);
+    }
+
+    addEvidenceDetails(data);
+
+    if (data && data.route === "YELLOW") {
+        addCareOptions();
+    }
+
+}
+
+function persistHelloKnowledgeEvent(event) {
+    if (
+        !event ||
+        event.type !== "USER_CONFIRMED_LEARNING" ||
+        event.provenance !== "USER_CONFIRMED" ||
+        !window.MSHStorage ||
+        typeof window.MSHStorage.updateState !== "function"
+    ) return;
+
+    window.MSHStorage.updateState(function(sharedState) {
+        const statement = String(event.statement || "").trim();
+        if (!statement) return sharedState;
+        const sourceInferenceId = event.sourceInferenceId || null;
+        const duplicate = sharedState.learningEntries.some(function(entry) {
+            return entry.sourceInferenceId === sourceInferenceId && sourceInferenceId;
+        });
+        if (duplicate) return sharedState;
+        sharedState.learningEntries.push({
+            id: window.MSHStorage.uid("learning"),
+            statement,
+            stage: "Noticing",
+            currentStatus: "current",
+            sourceInferenceId,
+            provenance: window.MSHStorage.createProvenance("USER_CONFIRMED", {
+                sourceType: "hello_confirmation"
+            }),
+            createdAt: new Date().toISOString()
+        });
+        return sharedState;
+    });
+}
+
+async function requestHelloResponse(value, options) {
+
+    const requestOptions = options || {};
+
+    const conversation = getStoredConversation();
 
     addMessage(
         value,
         "user"
     );
+    rememberConversationTurn("user", value);
+
+    const cycleAction = window.MSHCycle && window.MSHCycle.proposeControlledAction
+        ? window.MSHCycle.proposeControlledAction(value)
+        : null;
+    if (cycleAction) {
+        const result = window.MSHCycle.executeControlledAction(cycleAction);
+        const message = result.ok
+            ? `${result.message} You can review or change it in Calendar.`
+            : result.reason === "HELLO_ACCESS_DISABLED"
+                ? "Cycle access for Hello is currently off. You can enable it under Cycle privacy in Calendar, then ask me again."
+                : "I couldn't validate that cycle entry, so I did not change your Calendar.";
+        renderHelloResponse({ message, disposition:"CONVERSATION", activity_step_status:"HOLD" }, message);
+        return { ...result, message };
+    }
 
     try {
         showLoadingMessage();
 
         const response =
             await fetch(
-             "https://my-simple-health.vercel.app/api/hello",
+             "/api/hello",
                 {
                     method: "POST",
 
@@ -2480,13 +2608,21 @@ async function handleAskHello(value) {
                     },
 
                     body: JSON.stringify({
-                        message: value
+                        message: value,
+                        conversation,
+                        assistantRole: currentIntelligenceRole,
+                        journeyContext: getHelloJourneyContext(),
+                        activityContext: requestOptions.activityContext || getHelloActivityContext()
                     })
                 }
             );
 
-        const data =
-            await response.json();
+        const responseType = response.headers.get("content-type") || "";
+        if (!responseType.includes("application/json")) {
+            throw new Error("HELLO_ENDPOINT_UNAVAILABLE");
+        }
+
+        const data = await response.json();
         removeLoadingMessage();
 
         if (!response.ok) {
@@ -2500,32 +2636,29 @@ async function handleAskHello(value) {
             return;
         }
 
-        addMessage(
-            data.response,
-            "assistant"
-         );
-        
-        addEvidenceDetails(data);
-        
-        if (
-            data.route === "YELLOW"
-        ) {
-
-            addCareOptions();
-
+        if (!requestOptions.deferAssistant) {
+            renderHelloResponse(data, data.message || data.response);
         }
+
+        return data;
 
     }
 
     catch (error) {
-removeLoadingMessage();
+        console.error("Hello request failed:", error && error.message ? error.message : "UNKNOWN_ERROR");
+        removeLoadingMessage();
         addMessage(
             "Hello is having trouble connecting right now. Please try again.",
             "assistant"
         );
+        return null;
 
     }
 
+}
+
+async function handleAskHello(value) {
+    return requestHelloResponse(value);
 }
 
 
