@@ -418,7 +418,7 @@
       const recent = cycleEvents.sort((a, b) => String(b.date).localeCompare(String(a.date)))[0] || null;
       if (segments.length) addItem(items, {
         epistemicStatus: PROVENANCE.SYSTEM_OBSERVED,
-        informationClass: 'ESTIMATED_PREDICTED',
+        informationClass: 'PERSONAL_OBSERVATION',
         source: 'cycle.recordedSummary',
         text: `${segments.length} period start${segments.length === 1 ? ' is' : 's are'} available from dates the person recorded. Predictions remain separate estimates and are not confirmations of ovulation or fertility.`,
         recordId: recent && recordId(recent), recordedAt: recent && timestamp(recent.updatedAt || recent.timestamp), priority: 86
