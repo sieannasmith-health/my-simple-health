@@ -6,6 +6,7 @@ import vm from 'node:vm';
 const shell = await readFile(new URL('../js/msh-shell.js', import.meta.url), 'utf8');
 const hello = await readFile(new URL('../hello.html', import.meta.url), 'utf8');
 const appCss = await readFile(new URL('../css/msh-app.css', import.meta.url), 'utf8');
+const foundationCss = await readFile(new URL('../css/msh-foundation.css', import.meta.url), 'utf8');
 const journeyCss = await readFile(new URL('../css/msh-journey.css', import.meta.url), 'utf8');
 
 test('Hello is a primary workspace destination with an active-state key', () => {
@@ -28,7 +29,8 @@ test('Horizon decorative line cannot overlap introductory text', () => {
 });
 
 test('buttons and action areas share explicit label centering', () => {
-  assert.match(appCss, /\.msh-card-actions :where\(a,button\).*text-align:center/);
+  assert.match(foundationCss, /\.msh-button,[\s\S]*text-align:\s*center/);
+  assert.match(foundationCss, /\.msh-card-actions/);
 });
 
 test('Journey removes latency-producing transitions and respects reduced motion', () => {

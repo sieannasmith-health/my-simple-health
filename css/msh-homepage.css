@@ -1,22 +1,22 @@
 /* My Simple Health — Homepage Journey V1 (isolated public-home system) */
 :root {
-  --home-forest-950:#102b20;
+  --home-forest-950:var(--msh-forest-deep);
   --home-forest-900:#15382a;
-  --home-forest-800:#1e4a37;
+  --home-forest-800:var(--msh-forest-mid);
   --home-sage-700:#62785d;
   --home-sage-500:#8fa486;
-  --home-sage-300:#c4d0ba;
+  --home-sage-300:var(--msh-sage-soft);
   --home-cream:#f3efe4;
   --home-cloud:#faf8f1;
   --home-paper:#fffdf7;
-  --home-charcoal:#253129;
+  --home-charcoal:var(--msh-charcoal-deep);
   --home-muted:#667168;
   --home-line:rgba(28,70,51,.17);
   --home-warm:#b58b5c;
   --home-gold:#caa76b;
   --home-clay:#a56f59;
   --home-blue-gray:#71868a;
-  --home-shadow:0 24px 70px rgba(19,52,38,.12);
+  --home-shadow:var(--msh-shadow-lg);
 }
 
 [data-theme="dark"] {
