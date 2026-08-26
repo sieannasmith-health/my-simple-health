@@ -109,7 +109,7 @@ test('saved observations are analytics-ready and legacy responses migrate safely
     landscapes:[{ id:'legacy', instrumentVersion:'WL-PROTOTYPE-1', responses:[{ itemId:'PHY-01', domain:'physical', construct:'energy', value:'somewhat', label:'Somewhat', signal:'mixed', answeredAt:'2026-08-23T12:00:00.000Z' }] }]
   });
   const migratedResponse = migrated.landscapes[0].responses[0];
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.equal(migratedResponse.provenance.status, 'USER_STATED');
   assert.equal(migratedResponse.missingness.status, 'OBSERVED');
   assert.equal(migratedResponse.source.instrument, 'dimensions_of_health');

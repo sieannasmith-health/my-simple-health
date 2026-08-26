@@ -33,7 +33,7 @@ test('normalizes every shared collection so cross-page reads cannot break', () =
   for (const key of ['landscapes','focuses','visionEntries','projects','practices','practiceAttempts','reflections','learningEntries','progressEvents','returnPoints']) {
     assert.equal(Array.isArray(normalized[key]), true, key);
   }
-  assert.equal(normalized.schemaVersion, 6);
+  assert.equal(normalized.schemaVersion, 7);
   assert.deepEqual(Array.from(normalized.calendar.events), []);
   assert.equal(normalized.calendar.privacy.cycleCalendar, true);
 });

@@ -6,20 +6,11 @@ const dashboard = await readFile(new URL('../js/msh-dashboard.js', import.meta.u
 const progress = await readFile(new URL('../js/msh-progress.js', import.meta.url), 'utf8');
 const healthHtml = await readFile(new URL('../my-health.html', import.meta.url), 'utf8');
 
-test('My Health preserves the approved workspace hierarchy in order', () => {
-  const headings = [
-    'Where I am',
-    'What I’m working on',
-    'What I’m practicing and learning',
-    'What has changed',
-    'Where I can go next'
-  ];
-  let last = -1;
-  for (const heading of headings) {
-    const index = dashboard.indexOf(heading);
-    assert.ok(index > last, `${heading} follows the preceding workspace section`);
-    last = index;
-  }
+test('My Health preserves the journey architecture without rendering it as a dashboard summary', () => {
+  assert.match(dashboard,/Landscape, Horizon, Path, Practice, Discovery, Journey, and Calendar/);
+  assert.match(dashboard,/msh-home-orientation/);
+  assert.match(dashboard,/msh-home-context/);
+  assert.doesNotMatch(dashboard,/msh-dashboard-three-column/);
 });
 
 test('My Health no longer renders the decorative arch or oversized hero', () => {
@@ -29,7 +20,7 @@ test('My Health no longer renders the decorative arch or oversized hero', () => 
 });
 
 test('Hello is described as connective intelligence, not a next-step recommender', () => {
-  assert.match(dashboard, /work across the health information, questions, choices, experiences, and learning/i);
+  assert.match(dashboard, /connect your health information and experience/i);
   assert.doesNotMatch(dashboard, /reflect or find a next step/i);
 });
 

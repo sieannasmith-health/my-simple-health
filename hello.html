@@ -1113,6 +1113,7 @@ body {
 <script src="js/msh-storage.js"></script>
 <script src="js/msh-cycle.js"></script>
 <script src="js/msh-intelligence.js"></script>
+<script src="js/msh-first-door.js"></script>
 <script src="js/msh-guided-reflection.js"></script>
 <script src="js/msh-conversation-renderer.js"></script>
 <script src="js/msh-shell.js"></script>
@@ -2288,6 +2289,15 @@ function startAskMode() {
 
 }
 
+function applyFirstDoorDraft() {
+    if (new URLSearchParams(location.search).get("from") !== "first-door" || !window.MSHStorage || !window.MSHFirstDoor) return;
+    const entry = window.MSHStorage.getFirstDoor();
+    if (!entry) return;
+    const draft = window.MSHFirstDoor.helloDraft(entry.intent, entry.context);
+    const input = document.getElementById("helloInput");
+    if (draft && input && !input.value) input.value = draft;
+}
+
 
 
 /* =========================================================
@@ -3296,6 +3306,7 @@ else {
 
 
     startAskMode();
+    applyFirstDoorDraft();
 
 }
 

@@ -1,0 +1,68 @@
+/* My Simple Health — reusable Glass Workspace vertical slice */
+.msh-glass-world .msh-home-world-content{display:grid;width:min(92%,1440px);place-items:center;padding:112px 0 64px}
+.msh-glass-world .msh-home-cinematic{filter:brightness(.68) saturate(.78) contrast(1.06)}
+.msh-glass-world .msh-home-atmosphere{background:linear-gradient(110deg,rgba(5,17,14,.56),rgba(9,23,19,.16) 58%,rgba(4,13,11,.38)),linear-gradient(180deg,rgba(4,12,10,.15),transparent 52%,rgba(3,10,9,.3))}
+.msh-glass-workspace{position:relative;width:min(100%,1240px);min-height:min(720px,calc(100svh - 176px));overflow:hidden;border:1px solid rgba(246,241,222,.32);border-radius:32px;background:linear-gradient(135deg,rgba(242,239,224,.16),rgba(222,230,215,.08)),rgba(12,29,23,.62);box-shadow:0 36px 100px rgba(2,12,9,.3),inset 0 1px 0 rgba(255,255,255,.18);color:#f4f0e5;backdrop-filter:blur(18px) saturate(1.08);-webkit-backdrop-filter:blur(18px) saturate(1.08)}
+.msh-glass-workspace::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 82% 12%,rgba(231,209,151,.12),transparent 28%),linear-gradient(90deg,rgba(255,255,255,.035),transparent 24%)}
+.msh-glass-edge{position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),inset 0 18px 42px rgba(255,255,255,.025)}
+.msh-glass-content{position:relative;z-index:1;display:grid;min-height:inherit;grid-template-columns:minmax(280px,.78fr) minmax(480px,1.22fr);gap:64px;padding:clamp(48px,6vw,88px)}
+.msh-glass-heading{align-self:start;max-width:510px}
+.msh-glass-eyebrow{margin:0 0 24px;color:#d9dfd4;font:700 11px/1.4 var(--msh-font-functional);letter-spacing:.17em;text-transform:uppercase}
+.msh-glass-context{display:inline-flex;margin:0 0 16px;padding:7px 12px;border:1px solid rgba(239,231,205,.28);border-radius:999px;color:#ece4cf;font-size:12px;letter-spacing:.04em}
+.msh-glass-heading h1{max-width:10ch;margin:0;color:#faf6eb;font:400 clamp(48px,5.7vw,82px)/.96 var(--msh-font-editorial);letter-spacing:-.04em;text-wrap:balance;text-shadow:0 2px 26px rgba(1,10,7,.2)}
+.msh-glass-heading h1:focus{outline:none}
+.msh-glass-heading>p:last-child{max-width:46ch;margin:24px 0 0;color:#d5dbd2;font-size:16px;line-height:1.7}
+.msh-glass-choices{align-self:center;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid rgba(246,241,222,.2);border-left:1px solid rgba(246,241,222,.2)}
+.msh-glass-choice-region{display:flex;min-width:0;border-right:1px solid rgba(246,241,222,.2);border-bottom:1px solid rgba(246,241,222,.2)}
+.msh-glass-choice{position:relative;display:grid;width:100%;min-height:144px;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;padding:24px;border:0;background:rgba(7,23,18,.08);color:#f8f3e8;text-align:left;cursor:pointer;transition:background 240ms cubic-bezier(.2,.7,.2,1),opacity 240ms ease,transform 240ms cubic-bezier(.2,.7,.2,1),box-shadow 240ms ease}
+.msh-glass-choice-mark{padding-top:4px;color:#c5cdbf;font-size:10px;font-weight:700;letter-spacing:.12em}
+.msh-glass-choice strong{display:block;color:inherit;font:400 clamp(19px,1.8vw,27px)/1.2 var(--msh-font-editorial)}
+.msh-glass-choice small{display:block;margin-top:10px;color:#c9d0c8;font-size:12px;line-height:1.5}
+.msh-glass-choice-arrow{align-self:center;color:#e3d3a4;font-size:17px;opacity:.66;transform:translateX(-4px);transition:transform 220ms ease,opacity 220ms ease}
+.msh-glass-choices:has(.msh-glass-choice:hover) .msh-glass-choice:not(:hover),.msh-glass-choices:has(.msh-glass-choice:focus-visible) .msh-glass-choice:not(:focus-visible){opacity:.72}
+.msh-glass-choice:hover,.msh-glass-choice:focus-visible{z-index:1;background:rgba(224,232,213,.13);box-shadow:inset 0 0 30px rgba(224,208,157,.055);transform:translateY(-2px)}
+.msh-glass-choice:hover .msh-glass-choice-arrow,.msh-glass-choice:focus-visible .msh-glass-choice-arrow{opacity:1;transform:translateX(2px)}
+.msh-glass-choice:focus-visible{outline:3px solid #f1dd9e;outline-offset:-4px}
+.msh-glass-status{position:absolute;right:32px;bottom:20px;z-index:2;margin:0;color:#bbc4ba;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+.msh-glass-answer{align-self:center;max-width:650px}
+.msh-glass-answer .msh-glass-answer-lead{margin:0;color:#faf6eb;font:400 clamp(25px,3vw,38px)/1.3 var(--msh-font-editorial)}
+.msh-glass-answer>p:not(.msh-glass-answer-lead){max-width:61ch;margin:24px 0 0;color:#d5dbd2;font-size:15px;line-height:1.75}
+.msh-glass-answer-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:32px;padding-top:24px;border-top:1px solid rgba(246,241,222,.2)}
+.msh-glass-answer-tools>span,.msh-glass-answer-tools summary{display:inline-flex;min-height:48px;align-items:center;padding:0 18px;border:1px solid rgba(246,241,222,.27);border-radius:999px;color:#f4efe3;font-size:12px;font-weight:700;letter-spacing:.04em}
+.msh-glass-answer-tools>span{background:rgba(236,230,207,.12)}
+.msh-glass-answer-tools details{position:relative}.msh-glass-answer-tools summary{cursor:pointer;list-style:none}.msh-glass-answer-tools summary::-webkit-details-marker{display:none}
+.msh-glass-answer-tools details p{position:absolute;right:0;top:56px;z-index:4;width:min(420px,78vw);margin:0;padding:20px;border:1px solid rgba(246,241,222,.24);border-radius:16px;background:rgba(12,27,22,.96);box-shadow:0 18px 50px rgba(1,9,7,.3);color:#d7ddd5;font-size:13px;line-height:1.65}
+.msh-glass-next{grid-column:1/-1;align-self:end;display:grid;grid-template-columns:repeat(4,1fr);margin-top:8px;border-top:1px solid rgba(246,241,222,.2)}
+.msh-glass-next a,.msh-glass-next button,.msh-glass-next details{min-width:0}
+.msh-glass-next a,.msh-glass-next button,.msh-glass-next summary{display:flex;min-height:72px;align-items:center;justify-content:space-between;padding:16px 20px;border:0;border-right:1px solid rgba(246,241,222,.2);background:transparent;color:#f4efe3;font:600 12px/1.35 var(--msh-font-functional);text-align:left;text-decoration:none;cursor:pointer;transition:background 200ms ease}
+.msh-glass-next a:hover,.msh-glass-next button:hover,.msh-glass-next summary:hover{background:rgba(236,230,207,.1)}
+.msh-glass-next a:focus-visible,.msh-glass-next button:focus-visible,.msh-glass-next summary:focus-visible{outline:3px solid #f1dd9e;outline-offset:-4px}
+.msh-glass-next details{position:relative}.msh-glass-next summary{list-style:none}.msh-glass-next summary::-webkit-details-marker{display:none}.msh-glass-next details p{position:absolute;right:0;bottom:80px;z-index:5;width:min(430px,82vw);padding:20px;border:1px solid rgba(246,241,222,.24);border-radius:16px;background:rgba(12,27,22,.97);box-shadow:0 18px 50px rgba(1,9,7,.3);color:#d7ddd5;font-size:13px;line-height:1.65}
+.msh-glass-back{position:absolute;left:32px;bottom:18px;z-index:3;min-height:36px;border:0;background:transparent;color:#d5dbd2;font-size:12px;cursor:pointer}
+.msh-glass-back:hover{text-decoration:underline}.msh-glass-back:focus-visible{outline:2px solid #f1dd9e;outline-offset:3px}
+
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.msh-glass-workspace{background:rgba(20,39,32,.96)}}
+@media(max-width:900px){
+  .msh-glass-world .msh-home-world-content{width:100%;min-height:100svh;padding:80px 16px 78px}
+  .msh-glass-workspace{min-height:calc(100svh - 166px);border-radius:24px}
+  .msh-glass-content{grid-template-columns:1fr;align-content:start;gap:40px;padding:48px 40px 72px}
+  .msh-glass-heading{max-width:650px}.msh-glass-heading h1{max-width:13ch}
+  .msh-glass-next{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .msh-glass-world .msh-home-world-content{padding:68px 0 56px}
+  .msh-glass-world .msh-home-cinematic{background-position:64% center}
+  .msh-glass-workspace{width:100%;min-height:calc(100svh - 124px);border-right:0;border-left:0;border-radius:0;background:linear-gradient(160deg,rgba(14,35,28,.8),rgba(17,36,30,.64))}
+  .msh-glass-content{gap:32px;padding:40px 24px 80px}
+  .msh-glass-eyebrow{margin-bottom:16px}.msh-glass-heading h1{font-size:clamp(44px,13vw,64px)}.msh-glass-heading>p:last-child{font-size:15px}
+  .msh-glass-choices{grid-template-columns:1fr}.msh-glass-choice{min-height:96px;padding:18px 16px}.msh-glass-choice small{display:none}
+  .msh-glass-answer-tools{margin-top:24px}.msh-glass-answer-tools details p{right:auto;left:0}
+  .msh-glass-next{grid-template-columns:1fr}.msh-glass-next a,.msh-glass-next button,.msh-glass-next summary{min-height:60px;border-right:0;border-bottom:1px solid rgba(246,241,222,.16)}
+  .msh-glass-next details p{right:auto;left:0;bottom:68px}
+  .msh-glass-status{right:20px;bottom:14px}.msh-glass-back{left:20px;bottom:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .msh-glass-choice,.msh-glass-choice-arrow{transition:none!important}
+  .msh-glass-choice:hover,.msh-glass-choice:focus-visible{transform:none}
+}

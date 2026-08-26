@@ -3,7 +3,7 @@
   'use strict';
 
   const STORAGE_KEY = 'msh_data';
-  const SCHEMA_VERSION = 6;
+  const SCHEMA_VERSION = 7;
   const HELLO_HISTORY_LIMIT = 12;
   const PROVENANCE = Object.freeze({
     USER_STATED: 'USER_STATED',
@@ -27,7 +27,7 @@
   function createInitialState() {
     return {
       schemaVersion: SCHEMA_VERSION,
-      user: { createdAt: now() },
+      user: { createdAt: now(), firstDoor: null },
       landscapes: [], focuses: [], visionEntries: [], projects: [], practices: [],
       practiceAttempts: [], reflections: [], learningEntries: [], progressEvents: [],
       returnPoints: [],
@@ -112,7 +112,11 @@
       ...initial,
       ...state,
       schemaVersion: SCHEMA_VERSION,
-      user: { ...initial.user, ...(state.user || {}) },
+      user: {
+        ...initial.user,
+        ...(state.user || {}),
+        firstDoor: cleanFirstDoor(state.user && state.user.firstDoor)
+      },
       wellnessWheel: {
         current: state.wellnessWheel && state.wellnessWheel.current || null,
         history: list(state.wellnessWheel && state.wellnessWheel.history)
@@ -184,6 +188,40 @@
         if (item.role === 'assistant' && ['HELLO', 'PAL'].includes(item.assistantRole)) turn.assistantRole = item.assistantRole;
         return turn;
       });
+  }
+
+  function cleanFirstDoor(value) {
+    if (!value || typeof value !== 'object') return null;
+    const allowedIntents = ['health_question','not_working','work_on_something','care_support','clearer_picture','exploring'];
+    if (!allowedIntents.includes(value.intent)) return null;
+    const createdAt = value.createdAt || now();
+    return {
+      id: typeof value.id === 'string' && value.id ? value.id : uid('entry'),
+      intent: value.intent,
+      context: typeof value.context === 'string' ? value.context.trim().slice(0, 1200) : '',
+      status: ['intent_selected','context_added','routed'].includes(value.status) ? value.status : 'intent_selected',
+      route: typeof value.route === 'string' ? value.route.trim().slice(0, 240) : '',
+      createdAt,
+      updatedAt: value.updatedAt || createdAt,
+      provenance: value.provenance && typeof value.provenance === 'object'
+        ? createProvenance(value.provenance.status, value.provenance)
+        : createProvenance(PROVENANCE.USER_STATED, { sourceId:'first-door', recordedAt:createdAt })
+    };
+  }
+
+  function getFirstDoor(state) {
+    const source = state || getState();
+    return cleanFirstDoor(source.user && source.user.firstDoor);
+  }
+
+  function saveFirstDoor(value) {
+    const cleaned = cleanFirstDoor(value);
+    if (!cleaned) return null;
+    updateState(state => {
+      state.user.firstDoor = cleaned;
+      return state;
+    });
+    return cleaned;
   }
 
   function appendHelloTurn(role, content, assistantRole) {
@@ -363,6 +401,7 @@
     saveState, updateState, resetPrototypeData, getCurrentLandscape,
     getCurrentVision, getActiveProject, getActivePractice, getCurrentLearning,
     getHelloConversation, appendHelloTurn, clearHelloConversation,
+    getFirstDoor, saveFirstDoor,
     setHelloActivity, getHelloActivity,
     createProvenance, confirmInference, recordEvent, saveWellnessWheel, uid
   };

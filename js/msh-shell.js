@@ -14,6 +14,13 @@
     { key:'hello', label:'Hello', href:'hello.html?from=workspace' }
   ];
 
+  const simplifiedHealthNav = [
+    { key:'health', label:'My Health', href:'my-health.html' },
+    { key:'explore', label:'Explore', href:'topics.html' },
+    { key:'tools', label:'Tools', href:'assessments.html' },
+    { key:'hello', label:'Hello', href:'hello.html?from=workspace' }
+  ];
+
   const pageContexts = Object.freeze({
     health: { page:'my-health', activity:'workspace_overview', visibleActivity:'My Health workspace', allowedActions:['explain','navigate','reflect','plan'] },
     landscape: { page:'landscape', activity:'landscape', visibleActivity:'Landscape exploration', allowedActions:['explain','clarify','reflect','pause'] },
@@ -26,8 +33,8 @@
     assessments: { page:'assessments', activity:'assessment_selection', visibleActivity:'Assessment selection', allowedActions:['explain','navigate','pause'] }
   });
 
-  function renderNav(active, mobile) {
-    return navItems.map(item => {
+  function renderNav(active, mobile, items) {
+    return (items || navItems).map(item => {
       const label = mobile && item.key === 'health' ? 'Health' : item.label;
       if (item.key === 'hello' && active !== 'hello') {
         return `<button type="button" data-msh-hello-open aria-expanded="false">${label}</button>`;
@@ -169,12 +176,13 @@
 
   function mountShell() {
     const active = document.body.dataset.mshPage || 'health';
+    const shellNav = active === 'health' ? simplifiedHealthNav : navItems;
     rememberHelloActivity(active);
     const header = document.querySelector('[data-msh-header]');
     const mobile = document.querySelector('[data-msh-mobile-nav]');
-    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="index.html">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(active, false)}</nav><a class="msh-assessment-link" href="assessments.html">Assessments</a>${themeControl()}</div></header>`;
+    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="index.html">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(active, false, shellNav)}</nav>${active === 'health' ? '' : '<a class="msh-assessment-link" href="assessments.html">Assessments</a>'}${themeControl()}</div></header>`;
     if (mobile) {
-      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(active, true)}</nav>`;
+      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(active, true, shellNav)}</nav>`;
       const mobileNav = mobile.querySelector('.msh-mobile-nav');
       const currentLink = mobile.querySelector('[aria-current="page"]');
       if (mobileNav && currentLink) requestAnimationFrame(() => {

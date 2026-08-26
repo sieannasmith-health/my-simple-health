@@ -47,16 +47,16 @@
     return newestLandscape(item => item.status === 'in_progress' && item.instrumentVersion === config.version);
   }
 
-  function startNew() {
+  function startNew(startIndex) {
     const timestamp = new Date().toISOString();
     draft = {
       id: uid('landscape'), type: 'progressive', instrumentVersion: config.version,
       experienceVersion: dimensions.EXPERIENCE_VERSION,
       healthMapRole: 'canonical_measurement_record', selfMapRole: 'derived_visualization_only',
-      status: 'in_progress', startedAt: timestamp, updatedAt: timestamp, currentItemIndex: 0,
+      status: 'in_progress', startedAt: timestamp, updatedAt: timestamp, currentItemIndex: Number.isInteger(startIndex) ? startIndex : 0,
       responses: [], finalContext: '', confirmation: null, correction: ''
     };
-    currentIndex = 0;
+    currentIndex = Number.isInteger(startIndex) ? startIndex : 0;
     saveDraft();
     screen = 'question';
     render();
@@ -67,6 +67,18 @@
     const next = dimensions.nextUnexploredIndex(config, draft.responses, (existing.currentItemIndex || 0) - 1);
     currentIndex = next < 0 ? Math.min(existing.currentItemIndex || 0, config.items.length - 1) : next;
     screen = next < 0 ? 'summary' : 'question';
+    render();
+  }
+
+  function exploreDomain(startIndex) {
+    const existing = getInProgress();
+    if (!existing) { startNew(startIndex); return; }
+    draft = existing;
+    const domainId = config.items[startIndex] && config.items[startIndex].domain;
+    const nextInDomain = config.items.findIndex((item, index) => index >= startIndex && item.domain === domainId && !currentResponse(item.id));
+    currentIndex = nextInDomain < 0 ? startIndex : nextInDomain;
+    saveDraft();
+    screen = 'question';
     render();
   }
 
@@ -179,12 +191,17 @@
   function renderLanding() {
     const inProgress = getInProgress();
     const current = storage.getCurrentLandscape();
-    mount.innerHTML = `<section class="msh-landscape-landing msh-v2-landing"><p class="msh-eyebrow">Dimensions of Health</p><h1>Bring your picture into focus.</h1><p class="msh-landscape-lede">Explore one part of life at a time. Every response adds a signal to your Health Map and gives you something useful to notice now.</p>
-      <div class="msh-discovery-loop" aria-label="Explore, answer, discover, map, then choose whether to continue"><span>Explore</span><i></i><span>Answer</span><i></i><span>Discover</span><i></i><span>Map</span><i></i><span>Choose</span></div>
+    mount.innerHTML = `<section class="msh-landscape-landing msh-v2-landing">
+      <div class="msh-landscape-stage-header"><div><p class="msh-stage-name">Landscape · Where I am now</p><h1>Bring one part of your picture into focus.</h1><p>Choose an area that feels relevant today. One response is enough to reveal something useful, and you can decide whether to keep exploring.</p>
+        <div class="msh-landscape-entry-actions">${inProgress ? '<button class="msh-button" type="button" data-action="resume">Continue where I left off →</button><button class="msh-button-secondary" type="button" data-action="view-partial">See my picture so far</button>' : '<span class="msh-eyebrow">Choose an area on the map</span>'}${current ? '<button class="msh-text-button" type="button" data-action="view-results">View completed picture</button>' : ''}</div>
+        ${inProgress ? '<p class="msh-landscape-resume-note">Your partial picture is saved. Stopping was not a failure.</p>' : ''}</div>
+        <div class="msh-landscape-terrain" aria-label="Choose a health area to explore">${config.domains.map(domain => {
+          const firstIndex = config.items.findIndex(item => item.domain === domain.id);
+          return `<button class="msh-terrain-domain" type="button" data-action="start-domain" data-start-index="${firstIndex}">${escapeHtml(domain.label)}</button>`;
+        }).join('')}</div></div>
+      <details class="msh-landscape-explainer"><summary>How this exploration works</summary><div><section><strong>Understanding arrives as you go.</strong><p>You do not need to finish everything before this becomes useful.</p></section><section><strong>Uncertainty can stay visible.</strong><p>“Not sure” and skipping are recorded without filling in the blanks.</p></section><section><strong>Your meaning stays yours.</strong><p>A signal never automatically becomes an identity, problem, or goal.</p></section></div></details>
       ${wellnessWheelVisual()}
-      <div class="msh-landscape-principles"><article><strong>Understanding arrives as you go.</strong><span>You do not need to finish everything before this becomes useful.</span></article><article><strong>Uncertainty can stay visible.</strong><span>“Not sure” and skipping are recorded without filling in the blanks.</span></article><article><strong>Your meaning stays yours.</strong><span>A signal never automatically becomes an identity, problem, or goal.</span></article></div>
-      <div class="msh-card-actions">${inProgress ? '<button class="msh-button" type="button" data-action="resume">Continue exploring</button><button class="msh-button-secondary" type="button" data-action="view-partial">See my picture so far</button>' : '<button class="msh-button" type="button" data-action="start">Explore my dimensions</button>'}${current ? '<button class="msh-button-secondary" type="button" data-action="view-results">View completed picture</button>' : ''}</div>
-      ${inProgress ? '<p class="msh-landscape-resume-note">Your partial picture is saved. Stopping was not a failure.</p>' : ''}<p class="msh-local-note">For this prototype, your My Health information is stored in this browser on this device. Clearing site data may remove it.</p></section>`;
+      <p class="msh-local-note">For this prototype, your My Health information is stored in this browser on this device. Clearing site data may remove it.</p></section>`;
   }
 
   function renderQuestion() {
@@ -268,6 +285,7 @@
     if (!actionTarget) return;
     const action = actionTarget.dataset.action;
     if (action === 'start') startNew();
+    if (action === 'start-domain') exploreDomain(Number(actionTarget.dataset.startIndex));
     if (action === 'resume') resume(getInProgress());
     if (action === 'resume-current') resume(draft);
     if (action === 'view-partial') { draft = getInProgress(); showPartialSummary(); }
@@ -280,5 +298,9 @@
     if (action === 'save-confirmation') saveConfirmation(draft.confirmation);
     if (action === 'landing') { screen = 'landing'; render(); }
   });
-  render();
+  if (new URLSearchParams(location.search).get('start') === 'dimensions' && !getInProgress() && !storage.getCurrentLandscape()) {
+    startNew();
+  } else {
+    render();
+  }
 })();
