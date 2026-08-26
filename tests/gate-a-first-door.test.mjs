@@ -95,7 +95,8 @@ test('the empty Home has a dedicated first door while populated journey access r
   assert.match(dashboardSource, /What brings you here today\?/);
   assert.match(dashboardSource, /MSHFirstDoor\.hasMeaningfulContext\(state\)/);
   assert.match(dashboardSource, /MSHGlassWorkspace\.markup/);
-  assert.match(dashboardSource, /Landscape, Horizon, Path, Practice, Discovery, Journey, and Calendar/);
+  assert.match(dashboardSource, /function healthMapLayers/);
+  assert.match(dashboardSource, /label:'Landscape'.*label:'Horizon'.*label:'Path'.*label:'Practice'.*label:'Discovery'/s);
 });
 
 test('first-door routing carries context without putting personal text in the URL', () => {

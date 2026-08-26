@@ -7,9 +7,12 @@ const progress = await readFile(new URL('../js/msh-progress.js', import.meta.url
 const healthHtml = await readFile(new URL('../my-health.html', import.meta.url), 'utf8');
 
 test('My Health preserves the journey architecture without rendering it as a dashboard summary', () => {
-  assert.match(dashboard,/Landscape, Horizon, Path, Practice, Discovery, Journey, and Calendar/);
-  assert.match(dashboard,/msh-home-orientation/);
-  assert.match(dashboard,/msh-home-context/);
+  assert.match(dashboard,/Landscape/);
+  assert.match(dashboard,/Horizon/);
+  assert.match(dashboard,/Path/);
+  assert.match(dashboard,/Practice/);
+  assert.match(dashboard,/Discovery/);
+  assert.match(dashboard,/msh-health-map-board/);
   assert.doesNotMatch(dashboard,/msh-dashboard-three-column/);
 });
 
@@ -20,7 +23,7 @@ test('My Health no longer renders the decorative arch or oversized hero', () => 
 });
 
 test('Hello is described as connective intelligence, not a next-step recommender', () => {
-  assert.match(dashboard, /connect your health information and experience/i);
+  assert.match(dashboard, /Your context, held together/i);
   assert.doesNotMatch(dashboard, /reflect or find a next step/i);
 });
 

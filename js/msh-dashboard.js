@@ -7,6 +7,7 @@
   let showWorkspace = requestedView === 'workspace';
   const showTools = requestedView === 'tools';
   let selectedIntent = null;
+  let selectedHealthLayer = null;
   let firstDoorStep = 'intent';
   let firstDoorInitialized = false;
 
@@ -28,33 +29,6 @@
 
   function worldMarkup(content, firstDoor) {
     return `<section class="msh-home-world${firstDoor ? ' is-first-door msh-glass-world' : ''}">${environmentMarkup()}<div class="msh-home-world-content">${content}</div></section>`;
-  }
-
-  function daypart() {
-    return window.MSHEnvironment ? MSHEnvironment.getCurrent() : { greeting:'Hello', label:'Today' };
-  }
-
-  function arrow() { return '<span class="msh-action-arrow" aria-hidden="true">→</span>'; }
-  function daypartLine(moment) {
-    if (moment.id === 'morning') return 'A clear place to notice what is emerging and choose what matters today.';
-    if (moment.id === 'afternoon') return 'A clear place to see what is happening and choose what matters now.';
-    if (moment.id === 'evening') return 'A quieter place to see what is happening and decide what matters now.';
-    return 'A quiet place to see what is happening and decide what matters tonight.';
-  }
-
-  function wheelSvg(wheel) {
-    if (!wheel || !wheel.scores) return '';
-    const keys = ['physical','emotional','social','occupational','financial','environmental','intellectual','spiritual'];
-    const points = keys.map((key, index) => {
-      const angle = -Math.PI / 2 + index * Math.PI / 4;
-      const radius = 15 + (Number(wheel.scores[key]) || 0) * 3.4;
-      return `${55 + Math.cos(angle) * radius},${55 + Math.sin(angle) * radius}`;
-    }).join(' ');
-    return `<svg class="msh-dashboard-wheel" viewBox="0 0 110 110" role="img" aria-label="Your populated Wellness Wheel"><g><circle cx="55" cy="55" r="42"></circle><circle cx="55" cy="55" r="27"></circle><circle cx="55" cy="55" r="12"></circle></g><polygon points="${points}"></polygon></svg>`;
-  }
-
-  function sectionHeading(title, action, href) {
-    return `<header class="msh-dashboard-section-heading"><h2>${esc(title)}</h2>${action && href ? `<a href="${href}">${esc(action)} <span aria-hidden="true">→</span></a>` : ''}</header>`;
   }
 
   function initializeFirstDoor(state) {
@@ -224,73 +198,104 @@
     });
   }
 
+  function healthMapLayers(state) {
+    const landscape = MSHStorage.getCurrentLandscape(state);
+    const landscapeDraft = newest(state.landscapes.filter(item => item.status === 'in_progress'));
+    const wheel = state.wellnessWheel.current;
+    const vision = MSHStorage.getCurrentVision(state);
+    const visionDraft = newest(state.visionEntries.filter(item => item.status === 'draft'));
+    const project = MSHStorage.getActiveProject(state);
+    const practice = MSHStorage.getActivePractice(state);
+    const learning = MSHStorage.getCurrentLearning(state)[0] || null;
+    return [
+      {
+        id:'landscape', label:'Landscape', meaning:'Where I am', href:'my-landscape.html', action:'Explore my Landscape',
+        present:Boolean(landscape || landscapeDraft || wheel),
+        preview:wheel ? 'Your Wellness Wheel is in view.' : landscape ? 'A saved view of where things stand.' : landscapeDraft ? 'An exploration is waiting for you.' : 'Open when you want to notice where things stand.',
+        detail:wheel ? 'Your saved Wellness Wheel offers one view of where things stand across the areas you explored.' : landscape ? 'You have a saved Landscape to return to and revise when it is useful.' : landscapeDraft ? 'You began exploring your current Landscape. It is available whenever you want to continue.' : 'This space is available when you want a clearer view of where things stand. It does not need to be completed first.'
+      },
+      {
+        id:'horizon', label:'Horizon', meaning:'Where I want to go', href:'my-vision.html', action:vision ? 'Open my Horizon' : 'Shape a direction',
+        present:Boolean(vision || visionDraft),
+        preview:vision ? vision.synthesis.statement : visionDraft ? 'A direction is beginning to take shape.' : 'Open when a direction feels useful.',
+        detail:vision ? `You confirmed this direction: “${vision.synthesis.statement}”` : visionDraft ? 'You have words saved toward a direction, without needing to confirm them yet.' : 'This space is available when you want to name a direction. Not knowing yet is also a valid place to be.'
+      },
+      {
+        id:'path', label:'Path', meaning:'What matters now / what I’ve chosen', href:'my-project.html', action:project ? 'Open my Path' : 'Consider what matters now',
+        present:Boolean(project),
+        preview:project ? project.title : 'Open when something feels worth working on.',
+        detail:project ? `Your active Project is “${project.title}.” It connects where you are now with what you want to make different.` : 'This space is available when something feels worth actively working on. Understanding, preserving, or leaving something alone do not require a Project.'
+      },
+      {
+        id:'practice', label:'Practice', meaning:'What I’m trying', href:'my-practice.html', action:practice ? 'Open my Practice' : 'Explore a small experiment',
+        present:Boolean(practice),
+        preview:practice ? practice.title : 'Open when you want to try something.',
+        detail:practice ? `You are currently trying “${practice.title}.” Your engagement and reflections remain connected to it.` : 'This space is available when a small, realistic experiment would help you learn. Nothing needs to become a routine automatically.'
+      },
+      {
+        id:'discovery', label:'Discovery', meaning:'What I’m learning', href:'my-learning.html', action:learning ? 'Open my Discovery' : 'Notice what I’m learning',
+        present:Boolean(learning),
+        preview:learning ? learning.statement : 'Open when something becomes worth noticing.',
+        detail:learning ? `A current learning says: “${learning.statement}”` : 'This space remains open for what you notice through experience. A possibility does not become established learning unless the evidence and your confirmation support it.'
+      }
+    ];
+  }
+
+  function healthMapMarkup(layers) {
+    const connections = layers.map(layer => `<path class="msh-health-map-connection${layer.present ? ' has-context' : ''}" data-map-connection="${layer.id}" d="${({landscape:'M50 50 C38 45 28 30 18 20',horizon:'M50 50 C62 43 72 27 82 18',path:'M50 50 C67 50 77 50 89 50',practice:'M50 50 C60 61 67 75 65 88',discovery:'M50 50 C39 61 29 74 25 86'})[layer.id]}"></path>`).join('');
+    const nodes = layers.map(layer => `<button class="msh-health-map-layer is-${layer.id}${layer.present ? ' has-context' : ''}" type="button" data-health-map-layer="${layer.id}" aria-describedby="health-map-preview-${layer.id}"><span class="msh-health-map-point" aria-hidden="true"></span><span class="msh-health-map-label"><strong>${esc(layer.label)}</strong><small>${esc(layer.meaning)}</small></span><span class="msh-health-map-preview" id="health-map-preview-${layer.id}">${esc(layer.preview)}</span><span class="msh-health-map-state">${layer.present ? 'Context in view' : 'Open to explore'}</span></button>`).join('');
+    return `<div class="msh-health-map-board" data-health-map-board><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${connections}</svg><div class="msh-health-map-you"><span>YOU</span><small>Your context, held together</small></div>${nodes}</div>`;
+  }
+
+  function renderHealthMap(layers) {
+    renderGlass({
+      state:'health-map', manifestation:'workspace', eyebrow:'My Health / Health Map',
+      title:'Your health, in view.',
+      intro:'Five connected ways to understand where you are, what matters, what you are trying, and what you are learning. Open any part without following a required sequence.',
+      body:healthMapMarkup(layers),
+      status:'Select any part of your map'
+    });
+  }
+
+  function renderHealthLayer(layer) {
+    renderGlass({
+      state:`health-map-${layer.id}`, manifestation:'workspace', eyebrow:`My Health / ${layer.label}`,
+      context:layer.meaning, title:layer.label, intro:layer.detail,
+      body:`<div class="msh-health-layer-context ${layer.present ? 'has-context' : 'is-open'}"><span aria-hidden="true"></span><p>${layer.present ? 'This part of your Health Map is connected to context you have chosen to save.' : 'This part of your Health Map is open. You can leave it open or explore it when it becomes relevant.'}</p></div>`,
+      footer:`<button class="msh-glass-back" type="button" data-health-map-back>← Back to the whole map</button><a class="msh-health-layer-action" href="${layer.href}">${esc(layer.action)} <span aria-hidden="true">→</span></a>`,
+      status:layer.present ? 'Current context / Available to revisit' : 'Open / No action required'
+    });
+  }
+
   function render() {
     const state = MSHStorage.getState();
     if (showTools) {
       renderTools();
       return;
     }
-    const landscape = MSHStorage.getCurrentLandscape(state);
-    const wheel = state.wellnessWheel.current;
-    const vision = MSHStorage.getCurrentVision(state);
-    const project = MSHStorage.getActiveProject(state);
-    const practice = MSHStorage.getActivePractice(state);
-    const learning = MSHStorage.getCurrentLearning(state);
-    const latestLearning = learning[0];
-    const latestReflection = newest(state.reflections);
-    const events = [...state.progressEvents].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    const latestEvent = events[0];
-    const focus = state.focuses.find(item => item.status === 'active') || null;
-    const cycleStatus = window.MSHCycle && state.calendar.privacy.workspace
-      ? MSHCycle.estimatedStatus(state, MSHCycle.toDateKey(new Date())) : null;
-    const projectHistory = state.projects.filter(item => item.status !== 'active');
-    const started = MSHFirstDoor.hasMeaningfulContext(state);
     if (!MSHFirstDoor.hasMeaningfulContext(state) && !showWorkspace) {
       renderFirstDoor(state);
       return;
     }
 
-    const landscapeDraft = [...state.landscapes].filter(item => item.status === 'in_progress').sort((a,b) => new Date(b.updatedAt||0)-new Date(a.updatedAt||0))[0] || null;
-    const visionDraft = [...state.visionEntries].filter(item => item.status === 'draft').sort((a,b) => new Date(b.updatedAt||0)-new Date(a.updatedAt||0))[0] || null;
-    const entry = MSHStorage.getFirstDoor(state);
-    const primary = practice
-      ? { label:'Continue my Practice', href:'my-practice.html', context:practice.title }
-      : project
-        ? { label:'Continue my Path', href:'my-project.html', context:project.title }
-        : visionDraft
-          ? { label:'Continue shaping my direction', href:'my-vision.html', context:'Your Horizon is saved as a draft.' }
-          : landscapeDraft
-            ? { label:'Continue exploring my Landscape', href:'my-landscape.html', context:'Your partial picture is waiting.' }
-            : entry && entry.route
-              ? { label:'Continue where I left off', href:entry.route, context:entry.context || 'Return to your last chosen starting point.' }
-              : { label:'Explore my health', href:'my-landscape.html', context:'Begin with one area that feels relevant now.' };
-    const moments = [];
-    if (practice) moments.push({ label:'What I’m trying', title:practice.title, text:practice.description || 'Your active Practice is ready when it fits.', href:'my-practice.html', action:'Open Practice' });
-    if (cycleStatus && cycleStatus.cycleDay) moments.push({ label:'Today', title:`Cycle day ${cycleStatus.cycleDay}`, text:cycleStatus.phase ? `Estimated ${cycleStatus.phase} phase, based on recorded dates.` : 'Cycle context is available in Calendar.', href:'calendar.html', action:'Open Calendar' });
-    if (!moments.length && latestEvent) moments.push({ label:'Recent movement', title:latestEvent.statement, text:new Date(latestEvent.createdAt).toLocaleDateString(undefined,{month:'long',day:'numeric'}), href:'my-progress.html', action:'See the Journey' });
-    const momentMarkup = moments.slice(0,2).map(moment => `<article class="msh-home-moment msh-reveal"><span>${esc(moment.label)}</span><div><h3>${esc(moment.title)}</h3><p>${esc(moment.text)}</p></div><a class="msh-premium-action" href="${moment.href}">${esc(moment.action)} ${arrow()}</a></article>`).join('');
-    const signals = [
-      { label:'Landscape', present:Boolean(landscape || landscapeDraft) },
-      { label:'Horizon', present:Boolean(vision || visionDraft) },
-      { label:'Path', present:Boolean(project) },
-      { label:'Practice', present:Boolean(practice) },
-      { label:'Discovery', present:Boolean(latestLearning) }
-    ];
-    const signalCount = signals.filter(signal => signal.present).length;
-    const dots = `<div class="msh-kinetic-dots" role="img" aria-label="${signalCount} of 5 current parts of your health picture have saved context">${signals.map(signal => `<i class="${signal.present ? 'is-resolved' : 'is-open'}" title="${signal.label}"></i>`).join('')}</div>`;
-    const orbit = `<div class="msh-orbit" aria-hidden="true"><i></i><i></i><i></i><span></span></div>`;
-    const moment = daypart();
-    root.innerHTML = `${worldMarkup(`<div class="msh-home-orientation msh-reveal"><p class="msh-home-time">${esc(moment.label)} / My Health</p><h1>${esc(moment.greeting)}.</h1><p>${esc(primary.context)}</p><div class="msh-home-primary"><a class="msh-button msh-premium-action" href="${esc(primary.href)}">${esc(primary.label)} ${arrow()}</a><a class="msh-text-button" href="my-landscape.html">Explore my health</a></div><p class="msh-home-presence">Hello is nearby to help connect your health information and experience when you want it.</p></div><span class="msh-home-scroll-cue">A little context below</span>`, false)}
-      <section class="msh-home-context"><div class="msh-home-context-inner">
-        <header class="msh-reveal"><p class="msh-stage-name">What is in view</p><h2>${signalCount ? 'Your current picture is resolving.' : 'Your picture can stay open.'}</h2><p>${signalCount ? 'This shows where current information exists—not whether anything is good, complete, or successful.' : 'Nothing has to be filled in before My Simple Health can be useful.'}</p></header>
-        <section class="msh-information-composition" aria-labelledby="msh-context-resolution"><div class="msh-constellation">${orbit}${dots}</div><div class="msh-editorial-metric"><strong>${signalCount}<span>/5</span></strong><p id="msh-context-resolution">current parts of your picture have saved context</p></div><p class="msh-information-note">Resolved points contain information you chose to save. Open points remain unknown—not negative.</p></section>
-        <div class="msh-section-transition" aria-hidden="true"><span></span></div>
-        <section class="msh-insight-statement"><p class="msh-stage-name">What may matter now</p><h2>${moments.length ? 'A small view of today.' : 'Nothing needs your attention here.'}</h2><p>${moments.length ? 'Only current, useful context is surfaced. Everything else stays available deeper in My Health.' : 'You can explore when something becomes relevant. The environment does not measure success or demand action.'}</p></section>
-        ${momentMarkup}<div class="msh-home-quiet-end"><p>Your full Landscape, Horizon, Path, Practice, Discovery, Journey, and Calendar remain available through navigation.</p></div><p class="msh-local-note"><strong>Prototype privacy:</strong> My Health data is stored in this browser on this device. Clearing site data may remove it.</p>
-      </div></section>`;
+    const layers = healthMapLayers(state);
+    const selected = layers.find(layer => layer.id === selectedHealthLayer);
+    if (selected) renderHealthLayer(selected);
+    else renderHealthMap(layers);
   }
 
   root.addEventListener('click', event => {
+    const mapLayer = event.target.closest('[data-health-map-layer]');
+    if (mapLayer) {
+      selectedHealthLayer = mapLayer.dataset.healthMapLayer;
+      render();
+      return;
+    }
+    if (event.target.closest('[data-health-map-back]')) {
+      selectedHealthLayer = null;
+      render();
+      return;
+    }
     const glassBack = event.target.closest('[data-glass-back]');
     if (glassBack) {
       firstDoorStep = glassBack.dataset.glassBack;

@@ -44,11 +44,11 @@ test('Home loads the environment before content and exposes one ambient Hello pr
   assert.doesNotMatch(dashboardSource,/msh-dashboard-hello-panel/);
 });
 
-test('Home orientation uses one dominant action and progressively reveals relevant context',() => {
-  assert.match(dashboardSource,/msh-home-orientation/);
-  assert.match(dashboardSource,/msh-home-primary/);
-  assert.match(dashboardSource,/msh-home-context/);
-  assert.match(dashboardSource,/moments\.slice\(0,2\)/);
+test('Home uses one Glass Health Map instead of a dashboard summary',() => {
+  assert.match(dashboardSource,/msh-health-map-board/);
+  assert.match(dashboardSource,/msh-health-map-you/);
+  assert.match(dashboardSource,/renderHealthLayer/);
+  assert.doesNotMatch(dashboardSource,/signalCount|current parts of your picture/);
   assert.doesNotMatch(dashboardSource,/msh-dashboard-three-column/);
 });
 
@@ -67,11 +67,11 @@ test('Home uses a photographic environmental plate rather than CSS-drawn landsca
   assert.doesNotMatch(environmentCss,/clip-path:polygon/);
 });
 
-test('visual prototype includes the signature kinetic primitives and North Star behavior',() => {
+test('visual system retains reusable kinetic primitives and North Star behavior',() => {
   assert.match(healthHtml,/msh-system-loader/);
-  assert.match(dashboardSource,/msh-kinetic-dots/);
-  assert.match(dashboardSource,/msh-orbit/);
-  assert.match(dashboardSource,/msh-editorial-metric/);
+  assert.match(environmentCss,/msh-kinetic-dots/);
+  assert.match(environmentCss,/msh-orbit/);
+  assert.match(environmentCss,/msh-editorial-metric/);
   assert.match(environmentSource,/mountNorthStar/);
   assert.match(environmentCss,/\.msh-north-star/);
 });
