@@ -3,14 +3,13 @@
   --msh-env-8:8px;--msh-env-16:16px;--msh-env-24:24px;--msh-env-32:32px;
   --msh-env-48:48px;--msh-env-64:64px;--msh-env-96:96px;--msh-env-128:128px;
   --msh-world-ink:#f3f0e6;--msh-world-muted:#d2d4ca;--msh-world-line:rgba(244,240,225,.22);
-  --msh-world-glow:rgba(218,190,116,.28);--msh-world-scrim:rgba(8,19,16,.58)
+  --msh-world-glow:rgba(218,190,116,.28);--msh-world-scrim:rgba(8,19,16,.58);
+  --msh-environment-light:.08;--msh-environment-warmth:.1;--msh-environment-haze:.2;--msh-glass-opacity:.7
 }
 
 /* Time grades the same photographic world; it does not judge health state. */
-[data-daypart="dawn"]{--msh-world-ink:#202b25;--msh-world-muted:#48554d;--msh-world-line:rgba(29,52,41,.22);--msh-world-scrim:rgba(244,226,192,.22)}
 [data-daypart="morning"]{--msh-world-ink:#1e2b24;--msh-world-muted:#46554c;--msh-world-line:rgba(29,52,41,.2);--msh-world-scrim:rgba(244,237,215,.2)}
-[data-daypart="day"]{--msh-world-ink:#1b2821;--msh-world-muted:#3d4d44;--msh-world-line:rgba(24,47,35,.2);--msh-world-scrim:rgba(248,242,222,.18)}
-[data-daypart="golden"]{--msh-world-ink:#20291f;--msh-world-muted:#485148;--msh-world-line:rgba(51,53,35,.22);--msh-world-scrim:rgba(235,204,147,.22)}
+[data-daypart="afternoon"]{--msh-world-ink:#1b2821;--msh-world-muted:#3d4d44;--msh-world-line:rgba(24,47,35,.2);--msh-world-scrim:rgba(248,242,222,.18)}
 [data-daypart="evening"]{--msh-world-ink:#f3eee1;--msh-world-muted:#d0d0c7;--msh-world-line:rgba(244,234,214,.22);--msh-world-scrim:rgba(18,28,25,.42)}
 [data-daypart="night"]{--msh-world-ink:#f3f0e6;--msh-world-muted:#c9cec5;--msh-world-line:rgba(244,240,225,.2);--msh-world-scrim:rgba(5,14,13,.62)}
 
@@ -18,16 +17,9 @@
 .msh-environment-home .msh-app-main{width:100%;max-width:none;margin:0;padding:0}
 .msh-home-world{position:relative;min-height:100svh;overflow:hidden;isolation:isolate;background:#17231f;color:var(--msh-world-ink)}
 .msh-home-environment{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:#17231f}
-.msh-home-cinematic{position:absolute;inset:-3%;background-image:url('../assets/images/environment/my-health-world-v1.jpg');background-position:center;background-size:cover;filter:brightness(.72) saturate(.88) contrast(1.04);transform:scale(1.025);transition:filter 1600ms cubic-bezier(.2,.7,.2,1),transform 12s ease-out}
+.msh-home-cinematic{position:absolute;inset:-3%;background-image:url('../assets/images/environment/my-health-world-v1.jpg');background-position:center;background-size:cover;filter:brightness(calc(.58 + var(--msh-environment-light) * .76)) saturate(calc(.72 + var(--msh-environment-light) * .2)) sepia(calc(var(--msh-environment-warmth) * .16)) contrast(calc(1.1 - var(--msh-environment-light) * .14));transform:scale(1.025);transition:filter 60s linear,transform 12s ease-out}
 .msh-home-world:hover .msh-home-cinematic{transform:scale(1.035)}
-[data-daypart="dawn"] .msh-home-cinematic{filter:brightness(1.12) saturate(.78) sepia(.12) contrast(.94)}
-[data-daypart="morning"] .msh-home-cinematic{filter:brightness(1.27) saturate(.82) sepia(.05) contrast(.91)}
-[data-daypart="day"] .msh-home-cinematic{filter:brightness(1.4) saturate(.9) contrast(.9)}
-[data-daypart="golden"] .msh-home-cinematic{filter:brightness(1.16) saturate(.9) sepia(.17) contrast(.98)}
-[data-daypart="evening"] .msh-home-cinematic{filter:brightness(.86) saturate(.88) contrast(1.02)}
-[data-daypart="night"] .msh-home-cinematic{filter:brightness(.63) saturate(.76) contrast(1.1)}
-.msh-home-atmosphere{position:absolute;inset:0;background:linear-gradient(90deg,var(--msh-world-scrim) 0,rgba(6,17,14,.36) 36%,transparent 67%),linear-gradient(180deg,rgba(4,12,11,.28),transparent 34%,rgba(3,10,9,.28));transition:background 1400ms ease}
-[data-daypart="dawn"] .msh-home-atmosphere,[data-daypart="morning"] .msh-home-atmosphere,[data-daypart="day"] .msh-home-atmosphere,[data-daypart="golden"] .msh-home-atmosphere{background:linear-gradient(90deg,rgba(250,244,226,.74),rgba(249,241,218,.38) 38%,transparent 68%),linear-gradient(180deg,rgba(244,236,212,.16),transparent 55%)}
+.msh-home-atmosphere{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,20,16,calc(.66 - var(--msh-environment-light) * .42)) 0,rgba(7,20,16,calc(.4 - var(--msh-environment-light) * .24)) 42%,transparent 72%),linear-gradient(180deg,rgba(242,220,169,calc(var(--msh-environment-warmth) * .18)),transparent 46%),linear-gradient(0deg,rgba(230,237,227,calc(var(--msh-environment-haze) * .16)),transparent 48%);transition:background 60s linear}
 
 /* Editorial hero */
 .msh-home-world-content{position:relative;z-index:2;display:flex;width:min(88%,1280px);min-height:100svh;margin:0 auto;align-items:center;padding:var(--msh-env-128) 0 var(--msh-env-96)}
@@ -118,7 +110,6 @@
   .msh-home-world-content{width:100%;align-items:flex-end;padding:var(--msh-env-128) var(--msh-env-24) var(--msh-env-96)}
   .msh-home-cinematic{background-position:63% center}
   .msh-home-atmosphere{background:linear-gradient(180deg,rgba(4,12,10,.08) 20%,rgba(4,12,10,.18) 42%,rgba(4,12,10,.86) 86%,rgba(4,12,10,.94))}
-  [data-daypart="dawn"] .msh-home-atmosphere,[data-daypart="morning"] .msh-home-atmosphere,[data-daypart="day"] .msh-home-atmosphere,[data-daypart="golden"] .msh-home-atmosphere{background:linear-gradient(180deg,rgba(249,241,218,.04) 20%,rgba(249,241,218,.12) 44%,rgba(249,241,218,.84) 88%,rgba(249,241,218,.94))}
   .msh-home-orientation{padding-left:0;border-left:0}.msh-home-orientation h1{font-size:clamp(64px,16vw,88px)}.msh-home-scroll-cue{display:none}
   .msh-home-context{padding:var(--msh-env-96) var(--msh-env-24)}.msh-home-moment{grid-template-columns:1fr;gap:var(--msh-env-8)}.msh-home-moment a{margin-top:var(--msh-env-8)}
   .msh-home-world.is-first-door .msh-home-world-content{padding:var(--msh-env-96) var(--msh-env-24)}

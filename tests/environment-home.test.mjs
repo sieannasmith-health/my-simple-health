@@ -15,22 +15,25 @@ function loadEnvironment() {
   return sandbox.MSHEnvironment;
 }
 
-test('daypart engine resolves six local-time environmental states',() => {
+test('daypart engine resolves four atmospheric states in one persistent world',() => {
   const environment = loadEnvironment();
-  assert.equal(environment.resolve(new Date(2026,0,1,5,30)).id,'dawn');
+  assert.equal(environment.resolve(new Date(2026,0,1,5,30)).id,'morning');
   assert.equal(environment.resolve(new Date(2026,0,1,8,30)).id,'morning');
-  assert.equal(environment.resolve(new Date(2026,0,1,12,0)).id,'day');
-  assert.equal(environment.resolve(new Date(2026,0,1,16,30)).id,'golden');
+  assert.equal(environment.resolve(new Date(2026,0,1,12,0)).id,'afternoon');
+  assert.equal(environment.resolve(new Date(2026,0,1,16,30)).id,'afternoon');
   assert.equal(environment.resolve(new Date(2026,0,1,19,30)).id,'evening');
   assert.equal(environment.resolve(new Date(2026,0,1,23,0)).id,'night');
 });
 
-test('daypart progress stays bounded for smooth environmental interpolation',() => {
+test('environmental light, warmth, haze, and Glass values interpolate continuously',() => {
   const environment = loadEnvironment();
   for (const hour of [0,4,5,8,9,16,17,20,21,23]) {
-    const progress = environment.resolve(new Date(2026,0,1,hour,30)).progress;
-    assert.ok(progress >= 0 && progress <= 1);
+    const state = environment.resolve(new Date(2026,0,1,hour,30));
+    for (const key of ['progress','light','warmth','haze','glass']) assert.ok(state[key] >= 0 && state[key] <= 1,`${key} must stay bounded`);
   }
+  const before = environment.resolve(new Date(2026,0,1,11,59));
+  const after = environment.resolve(new Date(2026,0,1,12,1));
+  assert.ok(Math.abs(before.light - after.light) < .03,'crossing a named state must not visually jump');
 });
 
 test('Home loads the environment before content and exposes one ambient Hello presence',() => {
@@ -54,6 +57,8 @@ test('environment includes responsive and reduced-motion static fallbacks',() =>
   assert.match(environmentCss,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(environmentCss,/animation:none!important/);
   assert.match(environmentCss,/\[data-daypart="night"\]/);
+  assert.match(environmentCss,/--msh-environment-light/);
+  assert.match(environmentCss,/transition:filter 60s linear/);
 });
 
 test('Home uses a photographic environmental plate rather than CSS-drawn landscape geometry',() => {

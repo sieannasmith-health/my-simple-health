@@ -3,7 +3,9 @@
   'use strict';
   const root = document.querySelector('[data-msh-dashboard]');
   if (!root || !window.MSHStorage || !window.MSHFirstDoor) return;
-  let showWorkspace = new URLSearchParams(location.search).get('view') === 'workspace';
+  const requestedView = new URLSearchParams(location.search).get('view');
+  let showWorkspace = requestedView === 'workspace';
+  const showTools = requestedView === 'tools';
   let selectedIntent = null;
   let firstDoorStep = 'intent';
   let firstDoorInitialized = false;
@@ -34,9 +36,9 @@
 
   function arrow() { return '<span class="msh-action-arrow" aria-hidden="true">→</span>'; }
   function daypartLine(moment) {
-    if (moment.id === 'dawn' || moment.id === 'morning') return 'A clear place to notice what is emerging and choose what matters this morning.';
-    if (moment.id === 'day') return 'A clear place to see what is happening and choose what matters today.';
-    if (moment.id === 'golden' || moment.id === 'evening') return 'A quieter place to see what is happening and decide what matters this evening.';
+    if (moment.id === 'morning') return 'A clear place to notice what is emerging and choose what matters today.';
+    if (moment.id === 'afternoon') return 'A clear place to see what is happening and choose what matters now.';
+    if (moment.id === 'evening') return 'A quieter place to see what is happening and decide what matters now.';
     return 'A quiet place to see what is happening and decide what matters tonight.';
   }
 
@@ -88,6 +90,20 @@
 
   function backButton(step, label) {
     return `<button class="msh-glass-back" type="button" data-glass-back="${esc(step)}">← ${esc(label)}</button>`;
+  }
+
+  function renderTools() {
+    renderGlass({
+      state:'tools', manifestation:'workspace', eyebrow:'My Health / Tools',
+      title:'Tools, when they are useful.',
+      intro:'My Simple Health can support many kinds of health work. You choose what belongs in your experience; a capability does not become relevant merely because it exists.',
+      body:`<div class="msh-tools-directory">
+        <section aria-labelledby="womens-health-tools"><p class="msh-glass-category">Women’s Health</p><h2 id="womens-health-tools">Period Tracker</h2><p>Track your period, symptoms, and cycle patterns over time.</p><a href="calendar.html?from=tools">Open Period Tracker <span aria-hidden="true">→</span></a><small>This tool appears here for intentional exploration. My Simple Health does not assume it is relevant to you.</small></section>
+        <section aria-labelledby="health-picture-tools"><p class="msh-glass-category">Health picture</p><h2 id="health-picture-tools">Assessments</h2><p>Explore a specific area or add measured context when it would help bring your Health Map into focus.</p><a href="assessments.html">Explore assessments <span aria-hidden="true">→</span></a></section>
+      </div>`,
+      footer:`<a class="msh-glass-back" href="my-health.html">← Back to My Health</a>`,
+      status:'Broad platform / Personally relevant experience'
+    });
   }
 
   function renderFirstDoor(state) {
@@ -142,8 +158,8 @@
       renderGlass({
         state:'answer', eyebrow:'My Health / Understanding', context:'Sleep · Waking during the night', title:'Waking during the night',
         intro:'A first explanation, with more depth only when you want it.',
-        body:`<div class="msh-glass-answer"><p class="msh-glass-answer-lead">Sleep naturally becomes lighter several times overnight. Waking at a similar time can happen when that lighter sleep meets something else—such as stress, temperature, noise, alcohol, medication timing, pain, breathing symptoms, or the need to use the bathroom.</p><p>A repeated 3 AM wake-up does not point to one cause by itself. The useful next step is noticing what surrounds it and whether it is occasional, persistent, or affecting how you function during the day.</p><div class="msh-glass-answer-tools" aria-label="Answer comprehension"><span aria-current="true">Read</span><details><summary>Sources</summary><p>General orientation draws on established sleep physiology and common contributors to sleep-maintenance difficulty. It is education, not a conclusion about your body. Persistent sleep disruption, breathing concerns, severe symptoms, or safety concerns deserve discussion with a qualified clinician.</p></details></div></div>`,
-        footer:`<div class="msh-glass-next" aria-label="Optional next directions"><button type="button" data-msh-hello-open>What can I try? <span aria-hidden="true">→</span></button><button type="button" data-msh-hello-open>Could something medical cause this? <span aria-hidden="true">→</span></button><a href="calendar.html">Help me track it <span aria-hidden="true">→</span></a><details><summary>Go deeper <span aria-hidden="true">＋</span></summary><p>Useful details can include when the waking began, how often it happens, how long you stay awake, what changed around the same time, and whether you notice snoring, breathing pauses, pain, hot flashes, mood changes, or medication effects.</p></details></div>${backButton('sleep','Back to sleep experiences')}`,
+        body:`<div class="msh-glass-answer"><p class="msh-glass-answer-lead">Sleep naturally becomes lighter several times overnight. Waking at a similar time can happen when that lighter sleep meets something else—such as stress, temperature, noise, alcohol, medication timing, pain, breathing symptoms, or the need to use the bathroom.</p><p>A repeated 3 AM wake-up does not point to one cause by itself. The useful next step is noticing what surrounds it and whether it is occasional, persistent, or affecting how you function during the day.</p><div class="msh-glass-answer-tools" aria-label="Answer comprehension"><span aria-current="true">Read</span><details class="msh-contextual-glass"><summary>Sources</summary><p>General orientation draws on established sleep physiology and common contributors to sleep-maintenance difficulty. It is education, not a conclusion about your body. Persistent sleep disruption, breathing concerns, severe symptoms, or safety concerns deserve discussion with a qualified clinician.</p></details></div></div>`,
+        footer:`<div class="msh-glass-next" aria-label="Optional next directions"><button type="button" data-msh-hello-open>What can I try? <span aria-hidden="true">→</span></button><button type="button" data-msh-hello-open>Could something medical cause this? <span aria-hidden="true">→</span></button><a href="calendar.html">Help me track it <span aria-hidden="true">→</span></a><details class="msh-contextual-glass"><summary>Go deeper <span aria-hidden="true">＋</span></summary><p>Useful details can include when the waking began, how often it happens, how long you stay awake, what changed around the same time, and whether you notice snoring, breathing pauses, pain, hot flashes, mood changes, or medication effects.</p></details></div>${backButton('sleep','Back to sleep experiences')}`,
         status:'Answer / Depth on demand'
       });
       return;
@@ -210,6 +226,10 @@
 
   function render() {
     const state = MSHStorage.getState();
+    if (showTools) {
+      renderTools();
+      return;
+    }
     const landscape = MSHStorage.getCurrentLandscape(state);
     const wheel = state.wellnessWheel.current;
     const vision = MSHStorage.getCurrentVision(state);

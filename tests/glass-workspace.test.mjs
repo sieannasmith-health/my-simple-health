@@ -21,6 +21,8 @@ test('Glass Workspace is a reusable labelled surface with selectable regions',()
   const glass = loadComponent();
   const output = glass.markup({ state:'test', title:'A question', intro:'Some context', choices:[{id:'one',label:'One choice',detail:'Useful detail'}] });
   assert.match(output,/data-msh-glass/);
+  assert.match(output,/data-glass-manifestation="workspace"/);
+  assert.match(output,/msh-ambient-glass/);
   assert.match(output,/aria-labelledby="msh-glass-title"/);
   assert.match(output,/data-glass-choice="one"/);
   assert.match(output,/role="listitem"/);
@@ -50,6 +52,16 @@ test('simplified My Health shell does not remove the underlying journey navigati
   assert.match(shellSource,/simplifiedHealthNav/);
   for (const label of ['My Health','Explore','Tools','Hello']) assert.match(shellSource,new RegExp(`label:'${label}'`));
   for (const label of ['Landscape','Horizon','Path','Practice','Discovery','Journey','Calendar']) assert.match(shellSource,new RegExp(`label:'${label}'`));
+  assert.match(shellSource,/my-health\.html\?view=tools/);
+});
+
+test('Glass manifestations and personally relevant Tools remain presentation architecture',() => {
+  for (const name of ['msh-ambient-glass','msh-workspace-glass','msh-contextual-glass']) assert.match(css,new RegExp(`\\.${name}`));
+  assert.match(dashboardSource,/Women’s Health/);
+  assert.match(dashboardSource,/Period Tracker/);
+  assert.match(dashboardSource,/Track your period, symptoms, and cycle patterns over time\./);
+  assert.match(dashboardSource,/calendar\.html\?from=tools/);
+  assert.doesNotMatch(dashboardSource,/personalization engine/i);
 });
 
 test('Glass Workspace supports contrast, focus, touch, mobile, fallback, and reduced motion',() => {

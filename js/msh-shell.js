@@ -17,7 +17,7 @@
   const simplifiedHealthNav = [
     { key:'health', label:'My Health', href:'my-health.html' },
     { key:'explore', label:'Explore', href:'topics.html' },
-    { key:'tools', label:'Tools', href:'assessments.html' },
+    { key:'tools', label:'Tools', href:'my-health.html?view=tools' },
     { key:'hello', label:'Hello', href:'hello.html?from=workspace' }
   ];
 
@@ -176,13 +176,14 @@
 
   function mountShell() {
     const active = document.body.dataset.mshPage || 'health';
+    const navActive = active === 'health' && new URLSearchParams(location.search).get('view') === 'tools' ? 'tools' : active;
     const shellNav = active === 'health' ? simplifiedHealthNav : navItems;
     rememberHelloActivity(active);
     const header = document.querySelector('[data-msh-header]');
     const mobile = document.querySelector('[data-msh-mobile-nav]');
-    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="index.html">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(active, false, shellNav)}</nav>${active === 'health' ? '' : '<a class="msh-assessment-link" href="assessments.html">Assessments</a>'}${themeControl()}</div></header>`;
+    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="index.html">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, shellNav)}</nav>${active === 'health' ? '' : '<a class="msh-assessment-link" href="assessments.html">Assessments</a>'}${themeControl()}</div></header>`;
     if (mobile) {
-      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(active, true, shellNav)}</nav>`;
+      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(navActive, true, shellNav)}</nav>`;
       const mobileNav = mobile.querySelector('.msh-mobile-nav');
       const currentLink = mobile.querySelector('[aria-current="page"]');
       if (mobileNav && currentLink) requestAnimationFrame(() => {

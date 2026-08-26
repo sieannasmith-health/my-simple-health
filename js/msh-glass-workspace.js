@@ -14,8 +14,11 @@
 
   function markup(config) {
     const choiceMarkup = config.choices && config.choices.length ? choices(config.choices) : '';
-    return `<section class="msh-glass-workspace" data-msh-glass data-glass-state="${esc(config.state || 'default')}" aria-labelledby="msh-glass-title" aria-describedby="msh-glass-intro">
+    const manifestation = config.manifestation || 'workspace';
+    const ambient = config.ambient === false ? '' : `<aside class="msh-ambient-glass" aria-label="Hello alongside this workspace"><button type="button" data-msh-hello-open aria-label="Open Hello alongside this view"><span aria-hidden="true">✦</span><strong>Hello</strong><small>Ask about this view</small></button></aside>`;
+    return `<section class="msh-glass-workspace msh-${esc(manifestation)}-glass" data-msh-glass data-glass-manifestation="${esc(manifestation)}" data-glass-state="${esc(config.state || 'default')}" aria-labelledby="msh-glass-title" aria-describedby="msh-glass-intro">
       <div class="msh-glass-edge" aria-hidden="true"></div>
+      ${ambient}
       <div class="msh-glass-content" data-msh-glass-content>
         <header class="msh-glass-heading">
           <p class="msh-glass-eyebrow">${esc(config.eyebrow || 'My Health')}</p>
