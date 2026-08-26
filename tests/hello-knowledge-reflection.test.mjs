@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import handler from '../api/hello.js';
-import { sanitizeJourneyContext } from '../api/sanitizeJourneyContext.js';
+import { sanitizeJourneyContext } from '../server/hello/sanitizeJourneyContext.js';
 
 function responseRecorder() {
   const result = { statusCode:200, headers:{}, body:null };

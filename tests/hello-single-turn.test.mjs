@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import handler from '../api/hello.js';
-import { parseHelloIntelligenceOutput, validateHelloActivityResponse } from '../api/helloActivityContract.js';
-import { sanitizeActivityContext } from '../api/sanitizeJourneyContext.js';
+import { parseHelloIntelligenceOutput, validateHelloActivityResponse } from '../server/hello/helloActivityContract.js';
+import { sanitizeActivityContext } from '../server/hello/sanitizeJourneyContext.js';
 
 const guardSource = await readFile(new URL('../js/msh-guided-reflection.js', import.meta.url), 'utf8');
 const helloSource = await readFile(new URL('../hello.html', import.meta.url), 'utf8');

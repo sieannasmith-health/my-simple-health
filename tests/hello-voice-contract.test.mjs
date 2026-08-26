@@ -5,7 +5,7 @@ import {
   HELLO_VOICE_AND_HUMANIZATION_CONTRACT_V1,
   evaluateHelloVoice,
   refineHelloConversationalSurface
-} from '../api/helloVoiceContract.js';
+} from '../server/hello/helloVoiceContract.js';
 
 function responseRecorder() {
   const result = { statusCode:200, body:null };

@@ -9,7 +9,7 @@ const storageSource = await readFile(new URL('../js/msh-storage.js', import.meta
 const paneCss = await readFile(new URL('../css/msh-hello-pane.css', import.meta.url), 'utf8');
 const helloHtml = await readFile(new URL('../hello.html', import.meta.url), 'utf8');
 const embedSource = await readFile(new URL('../js/msh-hello-embed.js', import.meta.url), 'utf8');
-const { sanitizeActivityContext } = await import('../api/sanitizeJourneyContext.js');
+const { sanitizeActivityContext } = await import('../server/hello/sanitizeJourneyContext.js');
 
 function memoryStorage() {
   const values = new Map();

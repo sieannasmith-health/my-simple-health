@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import handler from '../api/hello.js';
-import { sanitizeJourneyContext } from '../api/sanitizeJourneyContext.js';
+import { sanitizeJourneyContext } from '../server/hello/sanitizeJourneyContext.js';
 
 const rendererSource = await readFile(new URL('../js/msh-conversation-renderer.js', import.meta.url), 'utf8');
 const helloSource = await readFile(new URL('../hello.html', import.meta.url), 'utf8');

@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import {
   buildJourneyPromptContext,
   sanitizeJourneyContext
-} from '../api/sanitizeJourneyContext.js';
+} from '../server/hello/sanitizeJourneyContext.js';
 
 const source = await readFile(new URL('../js/msh-intelligence.js', import.meta.url), 'utf8');
 const sandbox = { console };

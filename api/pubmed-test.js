@@ -1,11 +1,11 @@
 import {
     searchPubMed
-} from "./pubmed.js";
+} from "../server/hello/pubmed.js";
 
 import {
     rankEvidence,
     getEvidenceStrength
-} from "./rankEvidence.js";
+} from "../server/hello/rankEvidence.js";
 
 
 export default async function handler(

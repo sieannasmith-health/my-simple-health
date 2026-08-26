@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
-import { sanitizeJourneyContext } from '../api/sanitizeJourneyContext.js';
+import { sanitizeJourneyContext } from '../server/hello/sanitizeJourneyContext.js';
 
 const storageSource = await readFile(new URL('../js/msh-storage.js', import.meta.url), 'utf8');
 const cycleSource = await readFile(new URL('../js/msh-cycle.js', import.meta.url), 'utf8');
