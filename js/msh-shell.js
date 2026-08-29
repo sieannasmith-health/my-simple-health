@@ -136,15 +136,20 @@
     rememberHelloActivity(active);
     const header = document.querySelector('[data-msh-header]');
     const mobile = document.querySelector('[data-msh-mobile-nav]');
-    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, navItems)}</nav>${soundControl()}${themeControl()}</div></header>`;
-    if (mobile) {
-      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(navActive, true, navItems)}</nav>`;
-      const mobileNav = mobile.querySelector('.msh-mobile-nav');
-      const currentLink = mobile.querySelector('[aria-current="page"]');
-      if (mobileNav && currentLink) requestAnimationFrame(() => {
-        mobileNav.scrollLeft = currentLink.offsetLeft - (mobileNav.clientWidth - currentLink.clientWidth) / 2;
-      });
+
+    if (header) {
+      header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, navItems)}</nav><div class="msh-app-header-actions" aria-label="Workspace controls">${soundControl()}${themeControl()}</div></div></header>`;
     }
+
+    /* The primary header already carries workspace navigation. Keeping a second
+       injected nav created the raw HealthExploreToolsCalendar text at the page
+       bottom on routes that did not load legacy mobile-nav styling. */
+    if (mobile) {
+      mobile.replaceChildren();
+      mobile.hidden = true;
+      mobile.setAttribute('aria-hidden', 'true');
+    }
+
     syncThemeControl();
     if (window.MSHSound) MSHSound.mountControl();
     if (window.MSHRoutes) MSHRoutes.decorate(document);
