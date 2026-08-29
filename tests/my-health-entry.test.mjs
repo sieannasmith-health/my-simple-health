@@ -9,7 +9,7 @@ const healthHtml = await readFile(new URL('../my-health.html', import.meta.url),
 
 function renderEntry({ meaningful = true, search = '?view=workspace', state } = {}) {
   let ready;
-  const content = { innerHTML:'' };
+  const content = { innerHTML:'', querySelector:() => null };
   const classes = new Set(['msh-home-world', 'is-first-door', 'msh-glass-world']);
   const world = {
     classList: {
@@ -41,7 +41,8 @@ function renderEntry({ meaningful = true, search = '?view=workspace', state } = 
     console, Date, URLSearchParams, location:{ search }, document,
     MSHStorage:storage,
     MSHFirstDoor:{ hasMeaningfulContext:() => meaningful },
-    MSHEnvironment:{ getCurrent:() => ({ label:'Afternoon' }) }
+    MSHEnvironment:{ getCurrent:() => ({ label:'Afternoon' }) },
+    requestAnimationFrame:callback => callback()
   };
   sandbox.window = sandbox;
   vm.runInNewContext(entrySource, sandbox, { filename:'msh-my-health-entry.js' });
@@ -75,13 +76,24 @@ test('future Calendar plans are not presented as completed latest activity', () 
   assert.doesNotMatch(rendered.content, /Future appointment|Latest activity/);
 });
 
-test('returning entry keeps one dominant feature and four valid doors', () => {
-  for (const route of ['calendar.html', 'health-landscape.html', 'my-practice.html', 'my-project.html', 'my-vision.html', 'my-learning.html']) {
+test('returning entry keeps one dominant feature and a connected story carousel', () => {
+  for (const route of ['calendar.html', 'my-landscape.html', 'my-practice.html', 'my-project.html', 'my-vision.html', 'my-learning.html', 'my-progress.html']) {
     assert.match(entrySource, new RegExp(route.replace('.', '\\.')));
   }
   assert.match(entrySource, /class="msh-feature-board"/);
-  assert.match(entrySource, /title:'Today'.*title:'Your Landscape'.*title:'Continue'.*title:'Discover'/s);
-  assert.doesNotMatch(entrySource, /Strength|streak|completion ring/i);
+  assert.match(entrySource, /data-story-carousel/);
+  assert.match(entrySource, /title:'Today'.*title:'Landscape'.*title:'Horizon'.*title:'Path'.*title:'Practice'.*title:'Discovery'.*title:'Journey'/s);
+  assert.doesNotMatch(entrySource, /Strength score|streak count|completion ring/i);
+});
+
+test('story carousel is swipeable, keyboard navigable, and visually focused', () => {
+  assert.match(entryCss, /scroll-snap-type: x mandatory/);
+  assert.match(entryCss, /grid-auto-columns: minmax\(300px, 42%\)/);
+  assert.match(entryCss, /\.msh-story-card\.is-current/);
+  assert.match(entrySource, /event\.key === 'ArrowRight'/);
+  assert.match(entrySource, /event\.key === 'ArrowLeft'/);
+  assert.match(entrySource, /data-carousel-prev/);
+  assert.match(entrySource, /data-carousel-next/);
 });
 
 test('My Health loads the returning entry after the canonical dashboard and preserves responsive safeguards', () => {

@@ -8,7 +8,8 @@ test('main preserves the current storytelling homepage and canonical Health Land
   const [home, landscape, wheel] = await Promise.all([
     read('index.html'), read('health-landscape.html'), read('wellness-wheel.html')
   ]);
-  assert.match(home, /Make peace with<br>your health\./);
+  assert.match(home, /Your health, in context\./);
+  assert.match(home, /Make peace with your health\./);
   assert.match(home, /css\/msh-public-story\.css/);
   assert.match(landscape, /Your Health Landscape/);
   assert.match(landscape, /js\/msh-storage\.js/);

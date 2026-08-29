@@ -1,0 +1,7 @@
+/* Mobile stabilization pass 1: remove the duplicate bottom workspace nav.
+   The primary app header already exposes My Health / Explore / Tools. */
+@media (max-width: 900px) {
+  [data-msh-mobile-nav] {
+    display: none !important;
+  }
+}
