@@ -1,0 +1,81 @@
+/* My Simple Health — focused mobile navigation refinement.
+   Intentionally scoped to the public positioning homepage. */
+
+@media (max-width: 800px) {
+    .positioning-header.site-header {
+        position: relative;
+        z-index: 100;
+    }
+
+    .positioning-header .site-nav {
+        position: absolute;
+        z-index: 110;
+        top: 100%;
+        right: 16px;
+        left: auto;
+        width: min(78vw, 320px);
+        height: auto;
+        max-height: none;
+        margin: 0;
+        padding: 8px 18px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0 !important;
+        overflow: hidden;
+        border: 1px solid rgba(248, 243, 232, 0.18);
+        border-top-color: rgba(248, 243, 232, 0.34);
+        border-radius: 0 0 18px 18px;
+        background: rgba(15, 45, 32, 0.98);
+        box-shadow: 0 20px 48px rgba(4, 18, 12, 0.28);
+    }
+
+    .positioning-header .site-nav.active {
+        display: flex;
+    }
+
+    .positioning-header .site-nav a {
+        width: 100%;
+        min-height: 52px;
+        padding: 15px 4px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(248, 243, 232, 0.12);
+        color: rgba(255, 250, 240, 0.92);
+        font-size: 0.98rem;
+        font-weight: 500;
+        line-height: 1.25;
+        text-decoration: none;
+    }
+
+    .positioning-header .site-nav a:last-child {
+        border-bottom: 0;
+    }
+
+    .positioning-header .site-nav a:hover,
+    .positioning-header .site-nav a:focus-visible {
+        color: #fffdf7;
+        background: rgba(255, 255, 255, 0.055);
+    }
+
+    .positioning-header .menu-button,
+    .positioning-header .search-button {
+        position: relative;
+        z-index: 120;
+    }
+}
+
+@media (max-width: 420px) {
+    .positioning-header .site-nav {
+        right: 12px;
+        width: min(82vw, 300px);
+        padding-inline: 16px;
+    }
+
+    .positioning-header .site-nav a {
+        min-height: 50px;
+        padding-block: 14px;
+        font-size: 0.94rem;
+    }
+}
