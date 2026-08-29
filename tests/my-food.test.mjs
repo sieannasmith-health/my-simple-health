@@ -37,3 +37,13 @@ test('on-hand state supports location, quantity, use-soon, and used-up transitio
   assert.match(js, /useSoon/);
   assert.match(js, /Used up/);
 });
+
+test('Your Food is an editable directory with non-destructive archive and restore', () => {
+  assert.match(js, /Your editable food directory/);
+  assert.match(js, /data-edit-food/);
+  assert.match(js, /data-archive-food/);
+  assert.match(js, /data-restore-food/);
+  assert.match(js, /status:'archived'/);
+  assert.match(js, /status='active'/);
+  assert.match(js, /Historical meals and recipes stay connected/);
+});
