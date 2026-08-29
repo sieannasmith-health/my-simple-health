@@ -34,11 +34,17 @@
     try {
       const response = await fetch('/api/explore', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ question })
       });
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Explore is not connected to its evidence service on this deployment yet.');
+      }
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Explore could not answer that right now.');
+      if (!response.ok) throw new Error(data.error || data.message || 'Explore could not answer that right now.');
 
       main.textContent = data.plainLanguageAnswer || data.summary || 'I found research, but could not create a clear answer.';
       strength.textContent = `Evidence: ${formatLabel(data.evidenceStrength || 'unknown')}`;
@@ -62,11 +68,11 @@
         sources.append(item);
       });
     } catch (error) {
-      main.textContent = error.message || 'I couldn’t complete the evidence search right now. Please try again.';
-      strength.textContent = 'Evidence search unavailable';
+      main.textContent = error.message || 'Explore is temporarily unavailable.';
+      strength.textContent = 'Evidence service unavailable';
       count.textContent = '';
-      known.textContent = 'No answer was generated without completing the evidence search.';
-      unknown.textContent = 'Try the question again in a moment.';
+      known.textContent = 'MSH will not generate a health answer when the evidence service has not completed successfully.';
+      unknown.textContent = 'The question is fine. The connection to the evidence service needs to be restored.';
       sourceLabel.textContent = 'Research sources';
     } finally {
       submit.disabled = false;
