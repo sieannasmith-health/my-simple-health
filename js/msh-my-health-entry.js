@@ -104,8 +104,55 @@
     return item ? textOf(item, 'A recent observation is available.') : 'A place for what becomes worth noticing.';
   }
 
-  function door(config) {
-    return `<a class="msh-dashboard-door" href="${esc(config.href)}"><div><span class="msh-dashboard-door__icon" aria-hidden="true">${config.icon}</span><h3>${esc(config.title)}</h3><p>${esc(config.detail)}</p><p class="msh-dashboard-door__preview">${esc(config.preview)}</p></div><span class="msh-dashboard-door__action">${esc(config.action)} <span aria-hidden="true">→</span></span></a>`;
+  function storyCard(config, index) {
+    return `<a class="msh-story-card" href="${esc(config.href)}" data-carousel-card role="listitem" aria-label="${esc(config.title)}: ${esc(config.action)}">
+      <div class="msh-story-card__topline"><span class="msh-story-card__step">${String(index + 1).padStart(2, '0')}</span><span class="msh-story-card__icon" aria-hidden="true">${config.icon}</span></div>
+      <div class="msh-story-card__body"><p class="msh-story-card__eyebrow">${esc(config.eyebrow)}</p><h3>${esc(config.title)}</h3><p>${esc(config.detail)}</p><p class="msh-story-card__preview">${esc(config.preview)}</p></div>
+      <span class="msh-story-card__action">${esc(config.action)} <span aria-hidden="true">→</span></span>
+    </a>`;
+  }
+
+  function initStoryCarousel(root) {
+    const viewport = root.querySelector('[data-story-carousel]');
+    if (!viewport) return;
+    const cards = Array.from(viewport.querySelectorAll('[data-carousel-card]'));
+    const prev = root.querySelector('[data-carousel-prev]');
+    const next = root.querySelector('[data-carousel-next]');
+    const status = root.querySelector('[data-carousel-status]');
+    if (!cards.length) return;
+
+    function activeIndex() {
+      const left = viewport.scrollLeft;
+      let winner = 0;
+      let distance = Infinity;
+      cards.forEach((card, index) => {
+        const delta = Math.abs(card.offsetLeft - left);
+        if (delta < distance) { distance = delta; winner = index; }
+      });
+      return winner;
+    }
+
+    function updateControls() {
+      const index = activeIndex();
+      cards.forEach((card, cardIndex) => card.classList.toggle('is-current', cardIndex === index));
+      if (status) status.textContent = `${index + 1} / ${cards.length}`;
+      if (prev) prev.disabled = index === 0;
+      if (next) next.disabled = index === cards.length - 1;
+    }
+
+    function move(direction) {
+      const index = Math.max(0, Math.min(cards.length - 1, activeIndex() + direction));
+      cards[index].scrollIntoView({ behavior:'smooth', block:'nearest', inline:'start' });
+    }
+
+    if (prev) prev.addEventListener('click', () => move(-1));
+    if (next) next.addEventListener('click', () => move(1));
+    viewport.addEventListener('scroll', () => window.requestAnimationFrame(updateControls), { passive:true });
+    viewport.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
+    });
+    updateControls();
   }
 
   function renderReturningEntry() {
@@ -120,6 +167,15 @@
     const feature = chooseFeature(state);
     const resume = continueDoor(state);
     const signals = feature.signals.map(signal => `<span class="msh-feature-board__signal">${esc(signal)}</span>`).join('');
+    const story = [
+      { icon:'◫', eyebrow:'Health in time', title:'Today', detail:'Start with what is happening now.', preview:todayDoor(state), href:'calendar.html', action:'Open Calendar' },
+      { icon:'△', eyebrow:'See the whole', title:'Landscape', detail:'Your health makes more sense in context.', preview:state.wellnessWheel && state.wellnessWheel.current ? 'Your current picture is ready to revisit.' : 'Notice where things stand without turning your life into a score.', href:'my-landscape.html', action:'See your Landscape' },
+      { icon:'○', eyebrow:'Choose direction', title:'Horizon', detail:'Name what better could look like for you.', preview:'Direction can exist without becoming pressure.', href:'my-vision.html', action:'Open Horizon' },
+      { icon:'↗', eyebrow:'Make it workable', title:'Path', detail:'Turn what matters into something you can move toward.', preview:resume.href === 'my-project.html' ? resume.preview : 'A path connects where you are with where you want to go.', href:'my-project.html', action:'Open Path' },
+      { icon:'◇', eyebrow:'Live it', title:'Practice', detail:'Try something in real life and see how it fits.', preview:resume.href === 'my-practice.html' ? resume.preview : 'Small experiments can become useful personal knowledge.', href:'my-practice.html', action:'Open Practice' },
+      { icon:'✦', eyebrow:'Learn from experience', title:'Discovery', detail:'Notice patterns without forcing conclusions.', preview:discoveryDoor(state), href:'my-learning.html', action:'Open Discovery' },
+      { icon:'⌁', eyebrow:'See change', title:'Journey', detail:'Look back at what has shifted over time.', preview:'Your history can show movement without reducing progress to a streak.', href:'my-progress.html', action:'Open Journey' }
+    ];
 
     const dashboardMarkup = `<section class="msh-my-health-dashboard" aria-labelledby="my-health-title">
       <header class="msh-my-health-dashboard__intro">
@@ -142,12 +198,15 @@
         <div class="msh-feature-board__visual" aria-hidden="true"><span class="msh-feature-board__orb"></span></div>
       </a>
 
-      <nav class="msh-dashboard-doors" aria-label="My Health open doors">
-        ${door({ icon:'◫', title:'Today', detail:'Your day at a glance', preview:todayDoor(state), href:'calendar.html', action:'Open Calendar' })}
-        ${door({ icon:'△', title:'Your Landscape', detail:'See your health as a whole', preview:state.wellnessWheel && state.wellnessWheel.current ? 'Your Wellness Wheel is in view.' : 'See where things stand without needing to score your health.', href:'my-landscape.html', action:'Open Landscape' })}
-        ${door({ icon:'◷', title:'Continue', detail:'Pick up where you left off', preview:resume.preview, href:resume.href, action:resume.action })}
-        ${door({ icon:'◇', title:'Discover', detail:'Recent observations and learning', preview:discoveryDoor(state), href:'my-learning.html', action:'Open Discovery' })}
-      </nav>
+      <section class="msh-story-carousel" aria-labelledby="my-health-story-title">
+        <div class="msh-story-carousel__header">
+          <div><p class="msh-story-carousel__eyebrow">Your health, connected</p><h2 id="my-health-story-title">Move through what matters.</h2></div>
+          <div class="msh-story-carousel__controls" aria-label="Carousel controls"><button type="button" data-carousel-prev aria-label="Previous">←</button><span data-carousel-status aria-live="polite">1 / ${story.length}</span><button type="button" data-carousel-next aria-label="Next">→</button></div>
+        </div>
+        <div class="msh-story-carousel__viewport" data-story-carousel role="list" tabindex="0" aria-label="My Health journey">
+          ${story.map(storyCard).join('')}
+        </div>
+      </section>
 
       <p class="msh-my-health-dashboard__quiet"><span aria-hidden="true">⌁</span>Understand patterns. Explore what matters. Make choices that fit your life.</p>
     </section>`;
@@ -158,8 +217,10 @@
       world.classList.remove('is-first-door', 'msh-glass-world');
       world.classList.add('msh-returning-dashboard-world');
       worldContent.innerHTML = dashboardMarkup;
+      initStoryCarousel(worldContent);
     } else {
       root.innerHTML = dashboardMarkup;
+      initStoryCarousel(root);
     }
   }
 
