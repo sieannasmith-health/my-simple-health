@@ -31,8 +31,9 @@
 
   function themeControl() {
     return `<details class="msh-theme-control">
-      <summary aria-label="Theme settings" title="Theme settings"><span aria-hidden="true">◐</span><span class="msh-theme-label">Theme</span></summary>
-      <div class="msh-theme-menu" role="group" aria-label="Choose theme">
+      <summary class="msh-theme-trigger" aria-label="Appearance" title="Appearance"><span class="msh-theme-icon" aria-hidden="true">◐</span><span class="msh-visually-hidden">Appearance</span></summary>
+      <div class="msh-theme-menu" role="group" aria-label="Appearance">
+        <span class="msh-theme-menu-label">Appearance</span>
         <button type="button" data-theme-choice="light">Light</button>
         <button type="button" data-theme-choice="dark">Dark</button>
         <button type="button" data-theme-choice="system">System</button>
