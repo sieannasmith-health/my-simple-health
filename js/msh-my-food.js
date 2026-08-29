@@ -37,7 +37,7 @@
         ${door('groceries','Grocery List','What you need next, and why.')}
       </div>
     </section>
-    ${food.meals.length ? recentMeals(food) : `<section class="msh-food-panel"><h2>Start with a meal.</h2><p>Photograph something you made or add it in your own words. A meal can stay a meal or become a recipe later.</p><button class="msh-food-secondary" data-add-meal>Capture a meal</button></section>`}`;
+    ${food.meals.length ? recentMeals(food) : `<section class="msh-food-panel"><h2>Start with a meal.</h2><p>Take a photo, upload one you already have, or add the meal in your own words. A meal can stay a meal or become a recipe later.</p><button class="msh-food-secondary" data-add-meal>Capture a meal</button></section>`}`;
   }
 
   function door(id,title,detail) { return `<button class="msh-food-door" type="button" data-view="${id}"><span>Open</span><strong>${title}</strong><small>${detail}</small></button>`; }
@@ -86,11 +86,11 @@
   const dialogHead = (title,copy) => `<div class="msh-food-dialog-head"><div><h2>${title}</h2>${copy ? `<p>${copy}</p>` : ''}</div><button class="msh-food-close" type="button" data-close-dialog aria-label="Close">×</button></div>`;
 
   function addMenu() {
-    openDialog(`${dialogHead('Add to My Food','Choose the smallest thing that matches what happened.')}<div class="msh-food-actions"><button class="msh-food-action" data-add-meal>📷 <strong>Photograph a meal</strong><br><small>Capture what you made, then confirm what is in it.</small></button><button class="msh-food-action" data-add-food>＋ <strong>Add food</strong><br><small>Add something to the foods you use.</small></button><button class="msh-food-action" data-add-grocery>🛒 <strong>Add grocery</strong><br><small>Remember what you need next.</small></button></div>`);
+    openDialog(`${dialogHead('Add to My Food','Choose the smallest thing that matches what happened.')}<div class="msh-food-actions"><button class="msh-food-action" data-add-meal>📷 <strong>Capture a meal</strong><br><small>Take a photo, upload one, or add the meal in your own words.</small></button><button class="msh-food-action" data-add-food>＋ <strong>Add food</strong><br><small>Add something to the foods you use.</small></button><button class="msh-food-action" data-add-grocery>🛒 <strong>Add grocery</strong><br><small>Remember what you need next.</small></button></div>`);
   }
 
   function mealForm() {
-    openDialog(`${dialogHead('Capture a meal','The photo is a memory aid, not a nutrition measurement. You confirm the ingredients.')}<form class="msh-food-form" data-meal-form><label>Meal photo<input type="file" name="photo" accept="image/*" capture="environment"></label><img class="msh-food-photo-preview" data-photo-preview hidden alt="Meal preview"><label>Name<input name="name" placeholder="Lemon butter salmon"></label><label>What was in it?<textarea name="ingredients" rows="4" placeholder="salmon, lemon, butter, thyme"></textarea></label><label>Anything worth remembering?<textarea name="notes" rows="3" placeholder="Broiled about 7 minutes..."></textarea></label><label><input type="checkbox" name="recipe"> Save this to Your Recipes too</label><button class="msh-food-primary" type="submit">Save meal</button></form>`);
+    openDialog(`${dialogHead('Capture a meal','Use your camera or choose a photo you already have. The image is a memory aid, not a nutrition measurement, and you confirm the ingredients.')}<form class="msh-food-form" data-meal-form><fieldset><legend>Meal photo</legend><label>Take a photo<input type="file" name="cameraPhoto" accept="image/*" capture="environment" data-meal-photo></label><label>Upload a photo<input type="file" name="uploadedPhoto" accept="image/*" data-meal-photo></label></fieldset><img class="msh-food-photo-preview" data-photo-preview hidden alt="Meal preview"><label>Name<input name="name" placeholder="Lemon butter salmon"></label><label>What was in it?<textarea name="ingredients" rows="4" placeholder="salmon, lemon, butter, thyme"></textarea></label><label>Anything worth remembering?<textarea name="notes" rows="3" placeholder="Broiled about 7 minutes..."></textarea></label><label><input type="checkbox" name="recipe"> Save this to Your Recipes too</label><button class="msh-food-primary" type="submit">Save meal</button></form>`);
   }
 
   function foodForm() { openDialog(`${dialogHead('Add food')}<form class="msh-food-form" data-food-form><label>Food<input name="name" required></label><label>Category<input name="category" placeholder="Vegetables"></label><button class="msh-food-primary" type="submit">Add to Your Food</button></form>`); }
@@ -134,7 +134,13 @@
 
   root.addEventListener('input', event => {
     if (event.target.matches('[data-food-search]')) { search=event.target.value; const cursor=event.target.selectionStart; render(); const next=root.querySelector('[data-food-search]'); if(next){next.focus();next.setSelectionRange(cursor,cursor);} }
-    if (event.target.name === 'photo' && event.target.files && event.target.files[0]) { const preview=root.querySelector('[data-photo-preview]'); const reader=new FileReader(); reader.onload=()=>{preview.src=reader.result;preview.hidden=false;}; reader.readAsDataURL(event.target.files[0]); }
+    if (event.target.matches('[data-meal-photo]') && event.target.files && event.target.files[0]) {
+      root.querySelectorAll('[data-meal-photo]').forEach(input => { if (input !== event.target) input.value = ''; });
+      const preview=root.querySelector('[data-photo-preview]');
+      const reader=new FileReader();
+      reader.onload=()=>{preview.src=reader.result;preview.hidden=false;};
+      reader.readAsDataURL(event.target.files[0]);
+    }
   });
 
   root.addEventListener('submit', event => {
