@@ -6,6 +6,7 @@
   const seed = Array.isArray(window.MSHFoodSeed) ? window.MSHFoodSeed : [];
   let view = 'home';
   let search = '';
+  let showArchived = false;
 
   const esc = value => String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   const now = () => new Date().toISOString();
@@ -14,19 +15,21 @@
   function ensureSeed() {
     MSHStorage.updateState(state => {
       state.food = foodState(state);
-      if (!state.food.foods.length) state.food.foods = seed.map(item => ({ ...item, source:'prototype_seed', createdAt:now() }));
+      if (!state.food.foods.length) state.food.foods = seed.map(item => ({ ...item, status:'active', source:'prototype_seed', createdAt:now() }));
+      else state.food.foods = state.food.foods.map(item => ({ status:'active', ...item }));
       return state;
     });
   }
 
   function getFood() { return foodState(MSHStorage.getState()); }
   function titleCase(value) { return String(value || '').replace(/\b\w/g, letter => letter.toUpperCase()); }
+  function activeFoods(food) { return food.foods.filter(item => item.status !== 'archived'); }
 
   function home(food) {
     const useSoon = food.onHand.filter(item => item.useSoon).length;
     return `<section class="msh-food-board">
       <div class="msh-food-board-top"><div><h2>Your food, becoming useful knowledge.</h2><p>Remember what you make, know what is home, and make the next meal easier.</p></div>
-      <div class="msh-food-stats"><div class="msh-food-stat"><strong>${food.foods.length}</strong><span>foods you use</span></div><div class="msh-food-stat"><strong>${food.recipes.length}</strong><span>your recipes</span></div><div class="msh-food-stat"><strong>${useSoon}</strong><span>use soon</span></div></div></div>
+      <div class="msh-food-stats"><div class="msh-food-stat"><strong>${activeFoods(food).length}</strong><span>foods you use</span></div><div class="msh-food-stat"><strong>${food.recipes.length}</strong><span>your recipes</span></div><div class="msh-food-stat"><strong>${useSoon}</strong><span>use soon</span></div></div></div>
       <div class="msh-food-doors">
         ${door('foods','Your Food','Foods that belong in your food world.')}
         ${door('recipes','Your Recipes','Meals worth remembering and making again.')}
@@ -41,14 +44,18 @@
 
   function foodsView(food) {
     const q = search.trim().toLowerCase();
-    const matches = food.foods.filter(item => !q || item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q));
+    const visibleFoods = food.foods.filter(item => showArchived || item.status !== 'archived');
+    const matches = visibleFoods.filter(item => !q || item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q));
     const groups = matches.reduce((map,item) => { (map[item.category] ||= []).push(item); return map; },{});
-    return panel('Your Food','Foods that are part of how you cook and eat.', `<div class="msh-food-chips">${Object.entries(groups).map(([category,items]) => `<span class="msh-food-chip">${esc(category)} · ${items.length}</span>`).join('')}</div><div class="msh-food-list">${Object.entries(groups).map(([category,items]) => `<div><h3>${esc(category)}</h3>${items.map(item => `<div class="msh-food-row"><div><strong>${esc(titleCase(item.name))}</strong><small>In My Foods</small></div><button class="msh-food-secondary" data-stock-food="${esc(item.id)}">Add on hand</button></div>`).join('')}</div>`).join('') || '<div class="msh-food-empty">No foods match that search.</div>'}</div>`, true);
+    const archivedCount = food.foods.filter(item => item.status === 'archived').length;
+    const controls = `<div class="msh-food-chips"><button class="msh-food-chip" type="button" data-toggle-archived>${showArchived ? 'Hide archived' : `Show archived${archivedCount ? ` · ${archivedCount}` : ''}`}</button>${Object.entries(groups).map(([category,items]) => `<span class="msh-food-chip">${esc(category)} · ${items.length}</span>`).join('')}</div>`;
+    const rows = Object.entries(groups).map(([category,items]) => `<div><h3>${esc(category)}</h3>${items.map(item => `<div class="msh-food-row"><div><strong>${esc(titleCase(item.name))}</strong><small>${item.status === 'archived' ? 'Archived from everyday use' : 'In My Foods'}</small></div><div><button class="msh-food-secondary" data-edit-food="${esc(item.id)}">Edit</button> ${item.status === 'archived' ? `<button class="msh-food-secondary" data-restore-food="${esc(item.id)}">Restore</button>` : `<button class="msh-food-secondary" data-stock-food="${esc(item.id)}">Add on hand</button> <button class="msh-food-secondary" data-archive-food="${esc(item.id)}">Archive</button>`}</div></div>`).join('')}</div>`).join('');
+    return panel('Your Food','Your editable food directory. Add what fits your life now, change it when your preferences change, and archive foods without erasing your history.', `${controls}<div class="msh-food-list">${rows || '<div class="msh-food-empty">No foods match that search.</div>'}</div><button class="msh-food-secondary" data-add-food>Add food</button>`, true);
   }
 
   function onHandView(food) {
     const items = food.onHand.map(item => ({...item, food:food.foods.find(f => f.id === item.foodId)})).filter(item => item.food);
-    return panel('On Hand','What is physically in your kitchen right now.', `<div class="msh-food-list">${items.map(item => `<div class="msh-food-row"><div><strong>${esc(titleCase(item.food.name))}</strong><small>${esc(item.location)}${item.quantity ? ` · ${esc(item.quantity)}` : ''}${item.useSoon ? ' · Use soon' : ''}</small></div><div><button class="msh-food-secondary" data-toggle-soon="${esc(item.id)}">${item.useSoon ? 'Not urgent' : 'Use soon'}</button> <button class="msh-food-secondary" data-remove-stock="${esc(item.id)}">Used up</button></div></div>`).join('') || '<div class="msh-food-empty">Nothing marked on hand yet. Add foods from Your Food.</div>'}</div>`);
+    return panel('On Hand','What is physically in your kitchen right now.', `<div class="msh-food-list">${items.map(item => `<div class="msh-food-row"><div><strong>${esc(titleCase(item.food.name))}</strong><small>${esc(item.location)}${item.quantity ? ` · ${esc(item.quantity)}` : ''}${item.useSoon ? ' · Use soon' : ''}${item.food.status === 'archived' ? ' · Archived from Your Food' : ''}</small></div><div><button class="msh-food-secondary" data-toggle-soon="${esc(item.id)}">${item.useSoon ? 'Not urgent' : 'Use soon'}</button> <button class="msh-food-secondary" data-remove-stock="${esc(item.id)}">Used up</button></div></div>`).join('') || '<div class="msh-food-empty">Nothing marked on hand yet. Add foods from Your Food.</div>'}</div>`);
   }
 
   function groceriesView(food) {
@@ -87,8 +94,9 @@
   }
 
   function foodForm() { openDialog(`${dialogHead('Add food')}<form class="msh-food-form" data-food-form><label>Food<input name="name" required></label><label>Category<input name="category" placeholder="Vegetables"></label><button class="msh-food-primary" type="submit">Add to Your Food</button></form>`); }
+  function editFoodForm(foodId) { const item=getFood().foods.find(food=>food.id===foodId); if(!item)return; openDialog(`${dialogHead('Edit food','Change how this food appears in your current directory. Historical meals and recipes stay connected.')}<form class="msh-food-form" data-edit-food-form><input type="hidden" name="foodId" value="${esc(item.id)}"><label>Food<input name="name" required value="${esc(item.name)}"></label><label>Category<input name="category" value="${esc(item.category)}"></label><button class="msh-food-primary" type="submit">Save changes</button></form>`); }
   function groceryForm() { openDialog(`${dialogHead('Add grocery')}<form class="msh-food-form" data-grocery-form><label>Item<input name="name" required></label><label>Why is it here?<input name="reason" placeholder="For lemon butter salmon"></label><button class="msh-food-primary" type="submit">Add to grocery list</button></form>`); }
-  function stockForm(foodId) { const item = getFood().foods.find(f => f.id === foodId); if (!item) return; openDialog(`${dialogHead(`Add ${esc(titleCase(item.name))} on hand`)}<form class="msh-food-form" data-stock-form><input type="hidden" name="foodId" value="${esc(foodId)}"><label>Where?<select name="location"><option>Fridge</option><option>Freezer</option><option>Pantry</option></select></label><label>Quantity <input name="quantity" placeholder="2 portions"></label><label><input type="checkbox" name="useSoon"> Use soon</label><button class="msh-food-primary" type="submit">Add on hand</button></form>`); }
+  function stockForm(foodId) { const item = getFood().foods.find(f => f.id === foodId); if (!item || item.status === 'archived') return; openDialog(`${dialogHead(`Add ${esc(titleCase(item.name))} on hand`)}<form class="msh-food-form" data-stock-form><input type="hidden" name="foodId" value="${esc(foodId)}"><label>Where?<select name="location"><option>Fridge</option><option>Freezer</option><option>Pantry</option></select></label><label>Quantity <input name="quantity" placeholder="2 portions"></label><label><input type="checkbox" name="useSoon"> Use soon</label><button class="msh-food-primary" type="submit">Add on hand</button></form>`); }
 
   function addIngredients(names) {
     const clean = names.map(name => name.trim()).filter(Boolean);
@@ -97,7 +105,7 @@
       state.food = foodState(state);
       clean.forEach(name => {
         let item = state.food.foods.find(food => food.name.toLowerCase() === name.toLowerCase());
-        if (!item) { item = { id:MSHStorage.uid('food'), name, category:'Other', source:'user', createdAt:now() }; state.food.foods.push(item); }
+        if (!item) { item = { id:MSHStorage.uid('food'), name, category:'Other', status:'active', source:'user', createdAt:now() }; state.food.foods.push(item); }
         ids.push(item.id);
       });
       return state;
@@ -113,6 +121,10 @@
     if (target.matches('[data-add-meal]')) return mealForm();
     if (target.matches('[data-add-food]')) return foodForm();
     if (target.matches('[data-add-grocery]')) return groceryForm();
+    if (target.dataset.editFood) return editFoodForm(target.dataset.editFood);
+    if (target.matches('[data-toggle-archived]')) { showArchived=!showArchived; render(); return; }
+    if (target.dataset.archiveFood) { MSHStorage.updateState(state => { const item=state.food.foods.find(food=>food.id===target.dataset.archiveFood); if(item){item.status='archived';item.archivedAt=now();} return state; }); render(); return; }
+    if (target.dataset.restoreFood) { MSHStorage.updateState(state => { const item=state.food.foods.find(food=>food.id===target.dataset.restoreFood); if(item){item.status='active';delete item.archivedAt;} return state; }); render(); return; }
     if (target.dataset.stockFood) return stockForm(target.dataset.stockFood);
     if (target.dataset.toggleSoon) { MSHStorage.updateState(state => { const item=state.food.onHand.find(i=>i.id===target.dataset.toggleSoon); if(item)item.useSoon=!item.useSoon; return state; }); render(); }
     if (target.dataset.removeStock) { MSHStorage.updateState(state => { state.food.onHand=state.food.onHand.filter(i=>i.id!==target.dataset.removeStock); return state; }); render(); }
@@ -127,7 +139,8 @@
 
   root.addEventListener('submit', event => {
     event.preventDefault(); const form=event.target; const data=new FormData(form);
-    if (form.matches('[data-food-form]')) { MSHStorage.updateState(state => { state.food.foods.push({id:MSHStorage.uid('food'),name:String(data.get('name')).trim(),category:String(data.get('category')||'Other').trim()||'Other',source:'user',createdAt:now()}); return state; }); closeDialog(); view='foods'; render(); }
+    if (form.matches('[data-food-form]')) { MSHStorage.updateState(state => { state.food.foods.push({id:MSHStorage.uid('food'),name:String(data.get('name')).trim(),category:String(data.get('category')||'Other').trim()||'Other',status:'active',source:'user',createdAt:now()}); return state; }); closeDialog(); view='foods'; render(); }
+    if (form.matches('[data-edit-food-form]')) { MSHStorage.updateState(state => { const item=state.food.foods.find(food=>food.id===String(data.get('foodId'))); if(item){item.name=String(data.get('name')).trim();item.category=String(data.get('category')||'Other').trim()||'Other';item.updatedAt=now();} return state; }); closeDialog(); view='foods'; render(); }
     if (form.matches('[data-grocery-form]')) { MSHStorage.updateState(state => { state.food.groceries.push({id:MSHStorage.uid('grocery'),name:String(data.get('name')).trim(),reason:String(data.get('reason')||'').trim(),createdAt:now()}); return state; }); closeDialog(); view='groceries'; render(); }
     if (form.matches('[data-stock-form]')) { MSHStorage.updateState(state => { state.food.onHand.push({id:MSHStorage.uid('stock'),foodId:String(data.get('foodId')),location:String(data.get('location')),quantity:String(data.get('quantity')||'').trim(),useSoon:data.get('useSoon')==='on',createdAt:now()}); return state; }); closeDialog(); view='onhand'; render(); }
     if (form.matches('[data-meal-form]')) {
