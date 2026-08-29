@@ -82,9 +82,7 @@
     element.classList.toggle(className);
   }
 
-  if (lens) {
-    lens.addEventListener('click', () => toggleMomentaryState(lens, 'is-active'));
-  }
+  if (lens) lens.addEventListener('click', () => toggleMomentaryState(lens, 'is-active'));
 
   if (door) {
     door.addEventListener('pointerdown', () => door.classList.add('is-open'));
@@ -100,14 +98,11 @@
     });
   }
 
-  /* Production kinetic demo: information visibly interconnects before the whole picture appears. */
+  /* Information visibly interconnects before the whole picture appears. */
   const landscapeArt = document.querySelector('.story-landscape-art');
   const firstDemo = landscapeArt ? landscapeArt.closest('.product-demo') : null;
 
   if (landscapeArt && firstDemo) {
-    const heading = firstDemo.querySelector('.product-demo-copy h2');
-    if (heading) heading.innerHTML = 'Your whole<br>Health';
-
     const oldWhole = landscapeArt.querySelector('.landscape-whole');
     if (oldWhole) {
       oldWhole.innerHTML = `
@@ -140,24 +135,15 @@
         <div class="network-node node-mental"><i>●</i><span>Mental engagement</span></div>
         <div class="network-node node-work"><i>●</i><span>Work & responsibilities</span></div>
         <div class="network-knot" aria-hidden="true"></div>
-        <div class="network-core" aria-label="Your whole Health">
-          <span>your</span><span>whole</span><strong>Health</strong>
-        </div>
+        <div class="network-core" aria-label="Your whole Health"><span>your</span><span>whole</span><strong>Health</strong></div>
         <div class="network-status" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><span>Building your picture…</span></div>
       `;
     }
 
-    const assessmentDoor = firstDemo.querySelector('a[href="assessments.html"] strong');
-    if (assessmentDoor) assessmentDoor.textContent = 'Self-Insight →';
-
     if (!reduced && canObserve) {
       const kineticObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            landscapeArt.classList.add('is-running');
-          } else {
-            landscapeArt.classList.remove('is-running');
-          }
+          landscapeArt.classList.toggle('is-running', entry.isIntersecting);
         });
       }, { threshold:.25 });
       kineticObserver.observe(landscapeArt);
@@ -168,35 +154,6 @@
 
   /* Subtle staggered word-wave reveals for high-value storytelling moments. */
   if (!reduced) {
-    const waveStyle = document.createElement('style');
-    waveStyle.textContent = `
-      .msh-wave-text .msh-wave-word {
-        display: inline-block;
-        opacity: 0;
-        filter: blur(2px);
-        transform: translateY(var(--msh-wave-y, 12px));
-        transition:
-          opacity .55s ease var(--msh-wave-delay, 0ms),
-          transform .78s cubic-bezier(.2,.72,.22,1) var(--msh-wave-delay, 0ms),
-          filter .62s ease var(--msh-wave-delay, 0ms);
-        will-change: opacity, transform, filter;
-      }
-      .msh-wave-text.is-wave-visible .msh-wave-word {
-        opacity: 1;
-        filter: blur(0);
-        transform: translateY(0);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .msh-wave-text .msh-wave-word {
-          opacity: 1;
-          filter: none;
-          transform: none;
-          transition: none;
-        }
-      }
-    `;
-    document.head.appendChild(waveStyle);
-
     const waveTargets = [
       document.querySelector('.context-copy h1'),
       document.querySelector('.journey-deck-heading h2'),
@@ -246,7 +203,6 @@
           waveObserver.unobserve(entry.target);
         });
       }, { rootMargin:'0px 0px -8% 0px', threshold:.18 });
-
       waveTargets.forEach(target => waveObserver.observe(target));
     } else {
       waveTargets.forEach(target => target.classList.add('is-wave-visible'));
