@@ -1,66 +1,81 @@
 /* Mobile geometry corrections for the production whole-health kinetic demo. */
 @media (max-width: 520px) {
   .product-demo:first-child {
-    padding: 24px 16px 20px;
+    padding: 22px 14px 18px;
   }
 
   .product-demo:first-child .product-demo-head {
-    gap: 20px;
+    gap: 18px;
   }
 
   .product-demo:first-child .product-demo-copy h2 {
-    margin: 8px 0 6px;
-    font-size: clamp(48px, 15vw, 66px);
+    margin: 8px 0 4px;
+    font-size: clamp(46px, 14vw, 62px);
     line-height: .94;
     letter-spacing: -.04em;
   }
 
+  /* Give mobile a purpose-built stage instead of scaling the desktop canvas. */
   .product-demo:first-child .story-landscape-art {
     min-height: 0;
     height: auto;
-    padding: 8px 0 18px;
+    padding: 0;
     overflow: hidden;
     border-radius: 24px;
   }
 
   .product-demo:first-child .landscape-whole {
     width: 100%;
-    aspect-ratio: 1 / 1.08;
-    transform: none;
-    overflow: visible;
+    height: clamp(360px, 103vw, 430px);
+    aspect-ratio: auto;
+    transform: none !important;
+    transform-origin: center;
+    overflow: hidden;
   }
 
+  /* The vector paths stay inside a safe mobile inset. */
   .product-demo:first-child .landscape-network {
-    inset: 8% 7% 10%;
-    width: 86%;
-    height: 82%;
+    inset: 11% 10% 12%;
+    width: 80%;
+    height: 77%;
+    overflow: hidden;
   }
 
   .product-demo:first-child .network-node {
-    max-width: 35%;
+    width: 31%;
+    max-width: 31%;
+    min-width: 0;
     gap: 5px;
-    font-size: 9px;
-    line-height: 1.05;
+    font-size: 8.5px;
+    line-height: 1.08;
     white-space: normal;
+    box-sizing: border-box;
+  }
+
+  .product-demo:first-child .network-node span {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .product-demo:first-child .network-node i {
-    flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
     border-width: 1px;
-    box-shadow: 0 5px 12px rgba(23,61,43,.09), inset 0 0 0 3px rgba(255,255,255,.72);
+    box-shadow: 0 5px 12px rgba(23,61,43,.08), inset 0 0 0 3px rgba(255,255,255,.74);
   }
 
-  .product-demo:first-child .node-physical { left: 2%; top: 13%; }
-  .product-demo:first-child .node-emotional { left: 0; top: 31%; }
-  .product-demo:first-child .node-social { left: 1%; top: 49%; }
-  .product-demo:first-child .node-environment { left: 3%; top: 68%; }
+  /* Pull all labels well inside the viewport. */
+  .product-demo:first-child .node-physical { left: 5%; top: 13%; }
+  .product-demo:first-child .node-emotional { left: 4%; top: 31%; }
+  .product-demo:first-child .node-social { left: 5%; top: 49%; }
+  .product-demo:first-child .node-environment { left: 6%; top: 67%; }
 
-  .product-demo:first-child .node-meaning { right: 1%; top: 13%; }
-  .product-demo:first-child .node-financial { right: 0; top: 31%; }
-  .product-demo:first-child .node-mental { right: 0; top: 49%; }
-  .product-demo:first-child .node-work { right: 1%; top: 68%; }
+  .product-demo:first-child .node-meaning { right: 5%; top: 13%; }
+  .product-demo:first-child .node-financial { right: 4%; top: 31%; }
+  .product-demo:first-child .node-mental { right: 4%; top: 49%; }
+  .product-demo:first-child .node-work { right: 5%; top: 67%; }
 
   .product-demo:first-child .node-meaning,
   .product-demo:first-child .node-financial,
@@ -70,27 +85,42 @@
     text-align: right;
   }
 
+  /* Locked three-line center typography: your / whole / Health. */
   .product-demo:first-child .network-core {
-    width: 37%;
-    min-width: 118px;
-    max-width: 138px;
-    box-shadow: 0 16px 28px rgba(37,40,34,.16), 0 5px 10px rgba(37,40,34,.07), inset 0 0 0 7px rgba(255,255,255,.78);
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+    height: 128px;
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    box-sizing: border-box;
+    box-shadow: 0 15px 26px rgba(37,40,34,.15), 0 4px 9px rgba(37,40,34,.07), inset 0 0 0 7px rgba(255,255,255,.8);
   }
 
   .product-demo:first-child .network-core::before {
-    inset: -9px;
+    inset: -8px;
   }
 
   .product-demo:first-child .network-core span,
   .product-demo:first-child .network-core strong {
-    font-size: clamp(23px, 7vw, 29px);
-    line-height: .9;
+    display: block;
+    margin: 0;
+    padding: 0;
+    font-size: 25px;
+    line-height: .92;
+    letter-spacing: -.02em;
+    white-space: nowrap;
   }
 
   .product-demo:first-child .network-status {
-    bottom: 1.5%;
+    bottom: 2.5%;
     gap: 5px;
-    grid-template-columns: repeat(6, 6px);
+    grid-template-columns: repeat(6, 5px);
     font-size: 8px;
   }
 
@@ -100,7 +130,37 @@
   }
 
   .product-demo:first-child .demo-doorways {
-    margin-top: 18px;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .product-demo:first-child .landscape-whole {
+    height: 350px;
+  }
+
+  .product-demo:first-child .network-node {
+    width: 32%;
+    max-width: 32%;
+    font-size: 8px;
+  }
+
+  .product-demo:first-child .network-node i {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .product-demo:first-child .network-core {
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    height: 116px;
+  }
+
+  .product-demo:first-child .network-core span,
+  .product-demo:first-child .network-core strong {
+    font-size: 22px;
   }
 }
 
