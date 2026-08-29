@@ -20,9 +20,17 @@ test('food model keeps foods, on-hand items, meals, recipes, and groceries separ
 });
 
 test('meal capture requires user-entered ingredient confirmation rather than claiming photo certainty', () => {
-  assert.match(js, /The photo is a memory aid, not a nutrition measurement\. You confirm the ingredients\./);
+  assert.match(js, /image is a memory aid, not a nutrition measurement, and you confirm the ingredients/);
   assert.match(js, /What was in it\?/);
   assert.doesNotMatch(js, /calorie score|meal score|good food|bad food/i);
+});
+
+test('meal capture supports both camera capture and existing photo upload', () => {
+  assert.match(js, /name="cameraPhoto" accept="image\/\*" capture="environment" data-meal-photo/);
+  assert.match(js, /name="uploadedPhoto" accept="image\/\*" data-meal-photo/);
+  assert.match(js, /Take a photo/);
+  assert.match(js, /Upload a photo/);
+  assert.match(js, /data-photo-preview/);
 });
 
 test('master inventory seed contains supplied food categories and representative ingredients', () => {
