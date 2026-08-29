@@ -22,7 +22,7 @@
   function esc(value) {
     return String(value == null ? '' : value)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      .replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   function selectedDate() {
@@ -55,9 +55,10 @@
       inspector.appendChild(actions);
     }
     const keys = enabledLayers();
-    actions.innerHTML = keys.length
+    const markup = keys.length
       ? keys.map(actionMarkup).join('')
       : '<p class="msh-date-action-empty">Choose what you want to use in Customize.</p>';
+    if (actions.innerHTML !== markup) actions.innerHTML = markup;
   }
 
   function openGenericSheet(layerKey) {
@@ -142,7 +143,7 @@
   const observer = new MutationObserver(() => {
     if (!genericSheet) syncDayActions();
   });
-  observer.observe(root, { childList: true, subtree: true });
+  observer.observe(root, { childList: true });
 
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && genericSheet) {
