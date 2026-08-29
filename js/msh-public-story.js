@@ -152,6 +152,53 @@
     }
   }
 
+  /* Restore the fuller editorial footer used by the earlier MSH site. */
+  const storyFooter = document.querySelector('.story-footer');
+  if (storyFooter) {
+    storyFooter.innerHTML = `
+      <div class="msh-footer-grid">
+        <section class="msh-footer-intro">
+          <a class="msh-footer-name" href="index.html">My Simple Health</a>
+          <p>Practical, evidence-informed<br>health education for everyday life.</p>
+          <div class="msh-footer-social" aria-label="Social links">
+            <a href="contact.html" aria-label="Instagram">◎</a>
+            <a href="contact.html" aria-label="LinkedIn">in</a>
+            <a href="contact.html" aria-label="Pinterest">p</a>
+            <a href="contact.html" aria-label="Email">✉</a>
+          </div>
+        </section>
+        <nav class="msh-footer-column" aria-label="Explore">
+          <h2>Explore</h2>
+          <a href="resources.html">Resources</a>
+          <a href="recipes.html">Recipes</a>
+          <a href="calendar.html">Calendar</a>
+          <a href="my-health.html">My Health</a>
+        </nav>
+        <nav class="msh-footer-column" aria-label="About">
+          <h2>About</h2>
+          <a href="about.html">About My Simple Health</a>
+          <a href="support.html">Help & Support</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <section class="msh-footer-connect">
+          <h2>Let's stay connected</h2>
+          <p>Stay close to new articles, resources, and updates from My Simple Health.</p>
+          <form class="msh-footer-signup" action="contact.html" method="get">
+            <label class="sr-only" for="footer-email">Email address</label>
+            <input id="footer-email" name="email" type="email" autocomplete="email" placeholder="Email address">
+            <button type="submit" aria-label="Continue">→</button>
+          </form>
+        </section>
+      </div>
+      <div class="msh-footer-bottom">
+        <span></span>
+        <a href="index.html">mysimplehealth.org</a>
+        <span></span>
+      </div>
+      <p class="msh-footer-disclaimer">Educational support, not diagnosis or medical care.</p>
+    `;
+  }
+
   /* Subtle staggered word-wave reveals for high-value storytelling moments. */
   if (!reduced) {
     const waveTargets = [
