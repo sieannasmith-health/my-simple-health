@@ -1,98 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resources | My Simple Health</title>
-  <meta name="description" content="Explore evidence-informed articles, activities, assessments, practical tools, and health resources from My Simple Health.">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <style>
-    .resources-format-grid,.resources-feature-grid,.resources-topic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:36px}.resources-format-card,.resources-feature-card,.resources-topic-card{display:block;border:1px solid #d8d3c7;border-radius:24px;padding:28px;background:#fcfbf7;color:#252822;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}.resources-format-card:hover,.resources-feature-card:hover,.resources-topic-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(23,61,43,.08)}.resources-format-card span,.resources-feature-card span,.resources-topic-card span{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#6f805d;font-weight:700}.resources-format-card h3,.resources-feature-card h3,.resources-topic-card h3{font-family:Georgia,serif;font-size:1.55rem;line-height:1.15;margin:12px 0}.resources-format-card p,.resources-feature-card p,.resources-topic-card p{line-height:1.65;margin:0}.resources-feature-card img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:16px;margin-bottom:20px}.resources-section{padding:72px max(5vw,32px)}.resources-section-inner{max-width:1180px;margin:0 auto}.resources-section-heading{max-width:720px}.resources-section-heading h2{font-family:Georgia,serif;font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:10px 0 16px}.resources-section-heading p{font-size:1.08rem;line-height:1.7}.resources-small-link{display:inline-block;margin-top:18px;font-weight:700;color:#173d2b;text-decoration:none}.resources-small-link:hover{text-decoration:underline}.resources-topic-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.resources-topic-card{padding:22px}.resources-topic-card h3{font-size:1.2rem}.resources-note{margin-top:28px;color:#5c625b;font-size:.95rem}@media(max-width:900px){.resources-format-grid,.resources-feature-grid{grid-template-columns:1fr 1fr}.resources-topic-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.resources-format-grid,.resources-feature-grid,.resources-topic-grid{grid-template-columns:1fr}.resources-section{padding:52px 20px}}
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Explore | My Simple Health</title>
+<meta name="description" content="Ask health questions naturally and get clear, evidence-informed answers grounded in scholarly research.">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="css/msh-explore-library.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="site-logo" href="index.html">My Simple Health</a>
-  <button class="menu-button" aria-label="Open menu" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
-  <nav class="site-nav">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="resources.html" aria-current="page">Resources</a>
-    <a href="recipes.html">Recipes</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-</header>
-<main>
-  <section class="resources-new-hero">
-    <div class="resources-new-hero-copy">
-      <p class="resources-eyebrow">RESOURCES</p>
-      <h1>Learn, explore,<br>and use what helps.</h1>
-      <p class="resources-new-hero-description">Evidence-informed health education, practical tools, activities, and self-exploration in one place. Start with what you need right now.</p>
-      <a href="#start" class="resources-primary-button">EXPLORE RESOURCES ↓</a>
-    </div>
-    <div class="resources-new-hero-image"><img src="resources-hero.jpg" alt="Books, lemon water, and greenery on a calm workspace"></div>
-  </section>
-
-  <section class="resources-section" id="start">
-    <div class="resources-section-inner">
-      <div class="resources-section-heading">
-        <p class="resources-eyebrow">CHOOSE A WAY IN</p>
-        <h2>Resources are more than articles.</h2>
-        <p>Read when you want to understand something, try an activity when you want to interact with an idea, or use a practical tool when you need something concrete.</p>
-      </div>
-      <div class="resources-format-grid">
-        <a class="resources-format-card" href="#learn"><span>Learn</span><h3>Understand the science</h3><p>Articles and explainers that make health information easier to understand without flattening the evidence.</p></a>
-        <a class="resources-format-card" href="assessments.html"><span>Explore</span><h3>Look at your own health</h3><p>Assessments and self-exploration activities that help you notice what matters to you.</p></a>
-        <a class="resources-format-card" href="#use"><span>Use</span><h3>Put something into practice</h3><p>Recipes, guides, practical examples, and other resources you can actually use.</p></a>
-      </div>
-    </div>
-  </section>
-
-  <section class="resources-section" id="learn">
-    <div class="resources-section-inner">
-      <div class="resources-section-heading">
-        <p class="resources-eyebrow">FEATURED</p>
-        <h2>Start with something useful.</h2>
-        <p>These are real resources already available on My Simple Health, not placeholder cards.</p>
-      </div>
-      <div class="resources-feature-grid">
-        <a class="resources-feature-card" href="balanced-eating.html"><img src="thai-chicken-burgers.png" alt="Balanced meal example"><span>Nutrition · Learn</span><h3>Balanced Eating</h3><p>A practical look at balance, variety, adequacy, and moderation without turning eating into rigid rules.</p></a>
-        <a class="resources-feature-card" href="sleep-hygiene.html"><img src="sleep-hygiene.jpg" alt="Calm bedroom at night"><span>Sleep · Learn</span><h3>Sleep Hygiene</h3><p>Simple, evidence-informed habits that can support sleep quality, consistency, and restorative rest.</p></a>
-        <a class="resources-feature-card" href="small-steps-big-impact.html"><img src="small-steps-big-impact.jpg" alt="Person walking outdoors"><span>Movement · Learn</span><h3>Small Steps, Big Impact</h3><p>Explore how everyday movement can support health without requiring an all-or-nothing exercise plan.</p></a>
-        <a class="resources-feature-card" href="preventive-health.html"><img src="topic-prevention.png" alt="Preventive health illustration"><span>Prevention · Learn</span><h3>Preventive Health</h3><p>Understand screening, prevention, and the role of routine care in long-term health.</p></a>
-        <a class="resources-feature-card" href="small-ways-to-support-wellbeing.html"><img src="topic-wellbeing.png" alt="Wellbeing illustration"><span>Wellbeing · Learn</span><h3>Small Ways to Support Wellbeing</h3><p>Realistic ways to support how you feel, function, recover, and move through everyday life.</p></a>
-        <a class="resources-feature-card" href="recipes.html"><img src="harvest-salmon-bowl.jpg" alt="Salmon harvest bowl"><span>Nutrition · Use</span><h3>Everyday Recipes</h3><p>Browse practical meals designed for normal life, not a perfect eating routine.</p></a>
-      </div>
-    </div>
-  </section>
-
-  <section class="resources-section" id="use">
-    <div class="resources-section-inner">
-      <div class="resources-section-heading">
-        <p class="resources-eyebrow">BROWSE BY TOPIC</p>
-        <h2>Find the area you are curious about.</h2>
-        <p>Topics organize the library. They no longer need to be a separate destination from Resources.</p>
-      </div>
-      <div class="resources-topic-grid">
-        <a class="resources-topic-card" href="nutrition.html"><span>Topic</span><h3>Nutrition</h3></a>
-        <a class="resources-topic-card" href="movement.html"><span>Topic</span><h3>Movement</h3></a>
-        <a class="resources-topic-card" href="sleep.html"><span>Topic</span><h3>Sleep</h3></a>
-        <a class="resources-topic-card" href="wellbeing.html"><span>Topic</span><h3>Wellbeing</h3></a>
-        <a class="resources-topic-card" href="preventive-health.html"><span>Topic</span><h3>Prevention</h3></a>
-      </div>
-      <p class="resources-note">More activities, reflections, and practical tools can be added here as they are built. They do not need new top-level navigation items.</p>
-    </div>
-  </section>
+<header class="site-header"><a class="site-logo" href="index.html">My Simple Health</a><button class="menu-button" aria-label="Open menu" onclick="toggleMenu()">☰</button><nav class="site-nav"><a href="index.html">Home</a><a href="about.html">About</a><a href="resources.html" aria-current="page">Explore</a><a href="recipes.html">Recipes</a><a href="my-health.html">My Health</a></nav></header>
+<main class="explore-library">
+<section class="explore-hero"><div class="explore-inner">
+<p class="explore-eyebrow">EXPLORE · AI HEALTH LIBRARY</p>
+<h1>What do you want to understand?</h1>
+<p class="explore-intro">Ask naturally. MSH looks through scholarly health research, weighs what the evidence supports, and translates it into a clear answer without making you read an article first.</p>
+<form class="explore-ask" data-explore-form><textarea data-explore-question maxlength="1000" aria-label="Ask a health question" placeholder="Why am I hungrier when I don't sleep well?"></textarea><div class="explore-ask-row"><span class="explore-ask-note">Health education grounded in scholarly evidence. Not diagnosis or medical care.</span><button class="explore-submit" data-explore-submit type="submit">Ask Explore →</button></div></form>
+<div class="explore-prompts" aria-label="Example questions"><button type="button" data-prompt="Does creatine cause water weight?">Creatine + water weight</button><button type="button" data-prompt="Why can poor sleep make exercise feel harder?">Sleep + exercise</button><button type="button" data-prompt="How does dietary fiber support health?">Fiber + health</button><button type="button" data-prompt="What does resistance training do for health?">Strength training</button></div>
+</div></section>
+<section class="explore-answer" data-explore-answer aria-live="polite"><div class="answer-shell"><p class="answer-label">A CLEAR ANSWER</p><div class="answer-main" data-answer-main></div><div class="answer-meta"><span class="answer-chip" data-answer-strength>Evidence</span><span class="answer-chip" data-answer-count>Scholarly sources</span></div><div class="answer-details"><article class="answer-detail"><h2>WHAT WE KNOW</h2><p data-answer-known></p></article><article class="answer-detail"><h2>WHAT WE DON'T KNOW YET</h2><p data-answer-unknown></p></article></div><details class="answer-sources"><summary data-source-label>See the research</summary><div class="source-list" data-answer-sources></div></details></div></section>
+<section class="explore-library-below"><div class="library-below-inner"><p class="explore-eyebrow">GO DEEPER WHEN YOU WANT TO</p><h2>The library is still here.</h2><p>You don't have to start by reading. Articles, activities, assessments, and practical tools become deeper layers you can enter when they are useful.</p><div class="library-doorways"><a href="assessments.html"><strong>Explore yourself →</strong><small>Use assessments and activities to look more closely at something in your own life.</small></a><a href="recipes.html"><strong>Use something →</strong><small>Move from information into practical recipes and everyday tools.</small></a><a href="my-health.html"><strong>Understand your health →</strong><small>Bring what matters into the context of your own health journey.</small></a></div></div></section>
 </main>
-<footer class="site-footer">
-  <div class="footer-main">
-    <div class="footer-brand"><h2>MY SIMPLE HEALTH</h2><p>Practical, evidence-informed<br>health education for everyday life.</p></div>
-    <div class="footer-column"><h3>EXPLORE</h3><a href="resources.html">Resources</a><a href="recipes.html">Recipes</a><a href="assessments.html">Assessments</a></div>
-    <div class="footer-column"><h3>ABOUT</h3><a href="about.html">About My Simple Health</a><a href="about.html#mission">Mission &amp; Values</a><a href="contact.html">Contact</a></div>
-  </div>
-  <div class="footer-bottom"><p>© 2026 My Simple Health. All rights reserved.</p><div class="footer-legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="disclaimer.html">Disclaimer</a></div></div>
-</footer>
-<script>function toggleMenu(){document.querySelector('.site-nav').classList.toggle('active')}</script>
-</body>
-</html>
+<footer class="site-footer"><div class="footer-main"><div class="footer-brand"><h2>MY SIMPLE HEALTH</h2><p>Understand health without turning your life into a health project.</p></div><div class="footer-column"><h3>EXPLORE</h3><a href="resources.html">AI Health Library</a><a href="recipes.html">Recipes</a><a href="assessments.html">Assessments</a></div><div class="footer-column"><h3>ABOUT</h3><a href="about.html">About My Simple Health</a><a href="contact.html">Contact</a></div></div><div class="footer-bottom"><p>© 2026 My Simple Health.</p><div class="footer-legal"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="disclaimer.html">Disclaimer</a></div></div></footer>
+<script>function toggleMenu(){document.querySelector('.site-nav').classList.toggle('active')}</script><script src="js/msh-explore-library.js"></script>
+</body></html>
