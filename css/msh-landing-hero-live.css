@@ -5,6 +5,11 @@
   background-position:center top!important;
 }
 
+/* Keep a single primary My Health CTA in the header. */
+.context-actions{
+  display:none!important;
+}
+
 @media(max-width:800px){
   .context-hero{
     background-position:58% top!important;
