@@ -76,7 +76,7 @@ test('future Calendar plans are not presented as completed latest activity', () 
 });
 
 test('returning entry keeps one dominant feature and four valid doors', () => {
-  for (const route of ['calendar.html', 'my-landscape.html', 'my-practice.html', 'my-project.html', 'my-vision.html', 'my-learning.html']) {
+  for (const route of ['calendar.html', 'health-landscape.html', 'my-practice.html', 'my-project.html', 'my-vision.html', 'my-learning.html']) {
     assert.match(entrySource, new RegExp(route.replace('.', '\\.')));
   }
   assert.match(entrySource, /class="msh-feature-board"/);

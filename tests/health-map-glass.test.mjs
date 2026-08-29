@@ -47,9 +47,10 @@ test('selecting a layer transforms the same Glass and back restores the map', ()
 });
 
 test('existing destinations remain available without stacked forms', () => {
-  for (const route of ['my-landscape.html', 'my-vision.html', 'my-project.html', 'my-practice.html', 'my-learning.html']) {
+  for (const route of ['health-landscape.html', 'my-vision.html', 'my-project.html', 'my-practice.html', 'my-learning.html']) {
     assert.match(dashboard, new RegExp(route.replace('.', '\\.')));
   }
+  assert.doesNotMatch(dashboard, /id:'landscape'.*href:'my-landscape\.html'/);
   const mapStart = dashboard.indexOf('function healthMapLayers');
   const mapEnd = dashboard.indexOf('function render()', mapStart);
   assert.doesNotMatch(dashboard.slice(mapStart, mapEnd), /<form|<textarea|<input/);

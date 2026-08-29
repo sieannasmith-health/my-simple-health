@@ -2,6 +2,11 @@
 (function (root) {
   'use strict';
 
+  const href = (key, parameters) => root.MSHRoutes ? root.MSHRoutes.href(key, parameters) : ({
+    health:'my-health.html', landscape:'health-landscape.html', path:'my-project.html',
+    science:'topics.html', publicResources:'resources.html'
+  })[key];
+
   const intents = Object.freeze([
     {
       id: 'health_question',
@@ -10,7 +15,7 @@
       placeholder: 'Ask the question in your own words…',
       optional: false,
       orientation: 'Explore evidence-informed health information and choose the depth that is useful to you. General education does not diagnose you or decide what your question means for your life.',
-      primary: { label: 'Explore health information', href: 'topics.html' }
+      primary: { label: 'Explore health information', href: href('science') }
     },
     {
       id: 'not_working',
@@ -19,8 +24,8 @@
       placeholder: 'Share only what feels useful to begin…',
       optional: true,
       orientation: 'You do not need to decide whether this is a problem, goal, or something to fix. You can look at what is happening in context before choosing what—if anything—you want to do.',
-      primary: { label: 'Look at my broader picture', href: 'my-landscape.html' },
-      secondary: { label: 'Explore health information', href: 'topics.html' }
+      primary: { label: 'Look at my broader picture', href: href('landscape',{from:'first-door'}) },
+      secondary: { label: 'Explore health information', href: href('science') }
     },
     {
       id: 'work_on_something',
@@ -29,7 +34,7 @@
       placeholder: 'For example, something you want to change, build, protect, or make more workable…',
       optional: false,
       orientation: 'You can begin with what matters now without completing a broad assessment first. My Project will help you describe where things are, what you want to be different, and a realistic first sign of movement.',
-      primary: { label: 'Start with a Project', href: 'my-project.html' }
+      primary: { label: 'Start with a Project', href: href('path') }
     },
     {
       id: 'care_support',
@@ -38,7 +43,7 @@
       placeholder: 'You can name the concern, the kind of visit, or what you need help finding…',
       optional: true,
       orientation: 'You can explore existing resources or use this space to organize what you want to ask during a future visit. My Simple Health does not currently provide a verified provider directory.',
-      primary: { label: 'Explore available resources', href: 'resources.html' }
+      primary: { label: 'Explore available resources', href: href('publicResources') }
     },
     {
       id: 'clearer_picture',
@@ -47,7 +52,7 @@
       placeholder: '',
       optional: true,
       orientation: 'Landscape can begin with one question and return something useful after each answer. You can stop with a partial picture, say you are not sure, or leave an area open.',
-      primary: { label: 'Begin with one question', href: 'my-landscape.html?start=dimensions' }
+      primary: { label: 'Begin with one question', href: href('landscape',{from:'first-door'}) }
     },
     {
       id: 'exploring',
@@ -56,8 +61,8 @@
       placeholder: '',
       optional: true,
       orientation: 'You can look around without sharing personal information. See how the personal workspace works, explore a broader health picture, or browse general health topics.',
-      primary: { label: 'See the broader workspace', href: 'my-health.html?view=workspace' },
-      secondary: { label: 'Browse health topics', href: 'topics.html' }
+      primary: { label: 'See the broader workspace', href: href('health',{view:'workspace'}) },
+      secondary: { label: 'Browse health topics', href: href('science') }
     }
   ]);
 

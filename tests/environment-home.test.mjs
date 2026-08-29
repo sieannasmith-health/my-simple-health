@@ -59,13 +59,30 @@ test('environment includes responsive and reduced-motion static fallbacks',() =>
   assert.match(environmentCss,/animation:none!important/);
   assert.match(environmentCss,/\[data-daypart="night"\]/);
   assert.match(environmentCss,/--msh-environment-light/);
-  assert.match(environmentCss,/transition:filter 60s linear/);
+  assert.match(environmentCss,/transition:opacity 1800ms linear,filter 60s linear/);
+  assert.match(environmentCss,/\.msh-environment-sun/);
+  assert.match(environmentCss,/\.msh-environment-moon/);
+  assert.match(environmentCss,/--msh-stars-visibility/);
 });
 
-test('Home uses a photographic environmental plate rather than CSS-drawn landscape geometry',() => {
+test('Home uses photographic anchor scenes rather than CSS-drawn landscape geometry',() => {
+  assert.match(environmentSource,/msh-world-morning\.webp/);
+  assert.match(environmentSource,/msh-world-afternoon\.webp/);
+  assert.match(environmentSource,/msh-world-sundown\.webp/);
+  assert.match(environmentSource,/msh-world-night\.webp/);
   assert.match(environmentCss,/my-health-world-v1\.jpg/);
   assert.doesNotMatch(dashboardSource,/msh-home-ridge|msh-home-water|msh-home-field|msh-home-sun/);
   assert.doesNotMatch(environmentCss,/clip-path:polygon/);
+});
+
+test('scene artwork is progressively mounted as two crossfade layers with a legacy fallback',() => {
+  assert.match(environmentSource,/querySelectorAll\('\.msh-home-environment'\)/);
+  assert.match(environmentSource,/data-msh-scene-layer/);
+  assert.match(environmentSource,/loadScene\(scene\)/);
+  assert.match(environmentSource,/LEGACY_SCENE/);
+  assert.match(environmentSource,/msh:environment-change/);
+  assert.match(environmentCss,/\.msh-home-scene\.is-ready\{opacity:var\(--msh-scene-opacity\)\}/);
+  assert.match(environmentCss,/data-environment-asset="fallback"/);
 });
 
 test('visual system retains reusable kinetic primitives and North Star behavior',() => {

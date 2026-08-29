@@ -39,7 +39,8 @@
         events: [],
         predictions: [],
         settings: {
-          layers: { cycle:true, movement:true, life:true, appointments:true, workSchool:true, practices:true, projects:true, routines:true },
+          visibilityVersion: 2,
+          layers: { movement:true, cycle:false, symptoms:true, medications:true, sexualHealth:false, care:true, measurements:true, life:true, observations:true, practices:false, projects:false },
           appearance: { accentId:'default', customColor:null },
           cycle: { enabled:true, dischargeTracking:false, reproductiveHealthTracking:false, mixHealthTimeline:false }
         },
@@ -157,9 +158,31 @@
         events: list(state.calendar && state.calendar.events),
         predictions: list(state.calendar && state.calendar.predictions),
         settings: {
+          visibilityVersion: 2,
           layers: {
             ...initial.calendar.settings.layers,
-            ...(state.calendar && state.calendar.settings && state.calendar.settings.layers || {})
+            ...(() => {
+              const settings=state.calendar && state.calendar.settings || {};
+              const legacy=settings.layers && typeof settings.layers==='object' ? settings.layers : {};
+              if(Number(settings.visibilityVersion)>=2)return legacy;
+              const hasRecordedCycle=list(state.calendar && state.calendar.events).some(event => {
+                const value=String(event && (event.category || event.type || '')).toLowerCase();
+                return /cycle|period|menstrual/.test(value);
+              });
+              return {
+                movement: legacy.movement !== false,
+                cycle: legacy.cycle !== false && hasRecordedCycle,
+                symptoms: legacy.life !== false,
+                medications: legacy.appointments !== false,
+                sexualHealth: false,
+                care: legacy.appointments !== false,
+                measurements: legacy.life !== false,
+                life: legacy.life !== false,
+                observations: legacy.life !== false,
+                practices: false,
+                projects: false
+              };
+            })()
           },
           appearance: state.calendar && state.calendar.settings && state.calendar.settings.appearance && typeof state.calendar.settings.appearance === 'object'
             ? {

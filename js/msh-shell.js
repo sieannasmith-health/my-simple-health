@@ -2,22 +2,13 @@
 (function () {
   'use strict';
 
-  const navItems = [
-    { key:'health', label:'My Health', href:'my-health.html' },
-    { key:'landscape', label:'Landscape', href:'my-landscape.html' },
-    { key:'vision', label:'Horizon', href:'my-vision.html' },
-    { key:'project', label:'Path', href:'my-project.html' },
-    { key:'practice', label:'Practice', href:'my-practice.html' },
-    { key:'learning', label:'Discovery', href:'my-learning.html' },
-    { key:'progress', label:'Journey', href:'my-progress.html' },
-    { key:'calendar', label:'Calendar', href:'calendar.html' }
-  ];
-
-  const simplifiedHealthNav = [
-    { key:'health', label:'My Health', href:'my-health.html' },
-    { key:'explore', label:'Explore', href:'topics.html' },
-    { key:'tools', label:'Tools', href:'my-health.html?view=tools' }
-  ];
+  const route = key => window.MSHRoutes && MSHRoutes.get(key) || ({
+    health:{ key:'health', label:'My Health', href:'my-health.html' },
+    explore:{ key:'explore', label:'Explore', href:'my-health.html?view=explore' },
+    tools:{ key:'tools', label:'Tools', href:'my-health.html?view=tools' },
+    calendar:{ key:'calendar', label:'Calendar', href:'calendar.html' }
+  })[key];
+  const navItems = ['health','explore','tools','calendar'].map(route);
 
   const pageContexts = Object.freeze({
     health: { page:'my-health', activity:'workspace_overview', visibleActivity:'My Health workspace', allowedActions:['explain','navigate','reflect','plan'] },
@@ -27,14 +18,14 @@
     practice: { page:'practice', activity:'practice', visibleActivity:'Practice experience', allowedActions:['explain','reflect','adapt','pause'] },
     learning: { page:'learning', activity:'learning', visibleActivity:'Learning and discovery', allowedActions:['explain','reflect','clarify','confirm_learning'] },
     progress: { page:'progress', activity:'progress', visibleActivity:'Progress over time', allowedActions:['explain','reflect','compare','navigate'] },
-    calendar: { page:'calendar', activity:'cycle_calendar', visibleActivity:'Calendar with Cycle layer', allowedActions:['explain','navigate','review_cycle','record_cycle'] },
+    calendar: { page:'calendar', activity:'health_calendar', visibleActivity:'Calendar · Health in time', allowedActions:['explain','navigate','review_cycle','record_cycle'] },
     assessments: { page:'assessments', activity:'assessment_selection', visibleActivity:'Assessment selection', allowedActions:['explain','navigate','pause'] }
   });
 
   function renderNav(active, mobile, items) {
     return (items || navItems).map(item => {
       const label = mobile && item.key === 'health' ? 'Health' : item.label;
-      return `<a href="${item.href}"${item.key === active ? ' aria-current="page"' : ''}>${label}</a>`;
+      return `<a href="${item.href}" data-msh-route="${item.key}"${item.key === active ? ' aria-current="page"' : ''}>${label}</a>`;
     }).join('');
   }
 
@@ -47,6 +38,11 @@
         <button type="button" data-theme-choice="system">System</button>
       </div>
     </details>`;
+  }
+
+  function soundControl() {
+    if (!window.MSHSound) return '';
+    return `<button class="msh-sound-control" type="button" data-msh-sound-toggle aria-pressed="false" aria-label="Sound off. Turn environmental sound on"><span data-msh-sound-label>Sound off</span></button>`;
   }
 
   function syncThemeControl() {
@@ -135,14 +131,13 @@
 
   function mountShell() {
     const active = document.body.dataset.mshPage || 'health';
-    const navActive = active === 'health' && new URLSearchParams(location.search).get('view') === 'tools' ? 'tools' : active;
-    const shellNav = active === 'health' ? simplifiedHealthNav : navItems;
+    const navActive = window.MSHRoutes ? MSHRoutes.currentKey() : active;
     rememberHelloActivity(active);
     const header = document.querySelector('[data-msh-header]');
     const mobile = document.querySelector('[data-msh-mobile-nav]');
-    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="index.html">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, shellNav)}</nav>${active === 'health' ? '' : '<a class="msh-assessment-link" href="assessments.html">Assessments</a>'}${themeControl()}</div></header>`;
+    if (header) header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, navItems)}</nav>${soundControl()}${themeControl()}</div></header>`;
     if (mobile) {
-      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(navActive, true, shellNav)}</nav>`;
+      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(navActive, true, navItems)}</nav>`;
       const mobileNav = mobile.querySelector('.msh-mobile-nav');
       const currentLink = mobile.querySelector('[aria-current="page"]');
       if (mobileNav && currentLink) requestAnimationFrame(() => {
@@ -150,6 +145,8 @@
       });
     }
     syncThemeControl();
+    if (window.MSHSound) MSHSound.mountControl();
+    if (window.MSHRoutes) MSHRoutes.decorate(document);
     watchPageContext(active);
   }
 

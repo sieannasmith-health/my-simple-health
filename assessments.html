@@ -6,14 +6,34 @@
   <meta name="description" content="Explore your health with My Simple Health. Start with Your Health Landscape to notice what matters across your health and life.">
   <title>Explore | My Simple Health</title>
   <script src="js/msh-theme.js"></script>
+  <script src="js/msh-routes.js"></script>
+  <script src="js/msh-environment.js"></script>
+  <script src="js/msh-feedback.js"></script>
+  <script src="js/msh-sound.js"></script>
   <link rel="stylesheet" href="css/msh-foundation.css">
+  <link rel="stylesheet" href="css/msh-app.css">
+  <link rel="stylesheet" href="css/msh-sensory.css">
   <style>
     body{margin:0;background:var(--msh-page,#f7f4ec);color:var(--msh-text,#252822);font-family:Arial,sans-serif}.explore-header{height:72px;padding:0 max(5vw,28px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(23,61,43,.1)}.brand{font:500 20px Georgia,serif;color:var(--msh-forest,#173d2b);text-decoration:none}.nav{display:flex;gap:26px;align-items:center}.nav a{font-size:13px;text-decoration:none;color:inherit}.nav .enter{padding:10px 15px;border:1px solid var(--msh-forest,#173d2b);border-radius:999px}.hero{min-height:calc(100vh - 72px);padding:70px max(5vw,28px);box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.85fr);gap:clamp(40px,8vw,110px);align-items:center;background:linear-gradient(145deg,#f7f4ec,#eef1e8)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--msh-sage,#6f8656)}h1,h2{font-family:Georgia,serif;font-weight:400;color:var(--msh-forest,#173d2b)}h1{font-size:clamp(58px,8vw,110px);line-height:.92;letter-spacing:-.05em;margin:18px 0 28px}.lede{font:clamp(22px,2.5vw,32px)/1.4 Georgia,serif;max-width:650px}.copy{max-width:650px;line-height:1.75}.landscape-door{display:block;padding:clamp(32px,5vw,58px);border-radius:34px;border:1px solid rgba(23,61,43,.15);background:rgba(255,255,255,.62);box-shadow:0 35px 90px rgba(30,50,38,.09);backdrop-filter:blur(18px);text-decoration:none;color:inherit;transition:transform .25s ease}.landscape-door:hover{transform:translateY(-5px)}.landscape-door h2{font-size:clamp(40px,5vw,62px);margin:12px 0}.landscape-door p{line-height:1.7}.landscape-door .question{font:24px Georgia,serif;color:var(--msh-forest,#173d2b)}.landscape-door .action{display:inline-flex;margin-top:24px;padding:14px 20px;border-radius:999px;background:var(--msh-forest,#173d2b);color:#fff;font-size:13px}.footer{padding:42px max(5vw,28px);display:flex;justify-content:space-between;gap:20px;font-size:12px}@media(max-width:800px){.nav a:not(.enter){display:none}.hero{grid-template-columns:1fr;min-height:auto;padding-top:90px;padding-bottom:100px}.footer{flex-direction:column}}
   </style>
+  <style>
+    /* Protected foreground layer: atmosphere may shift, functional copy may not fade. */
+    body{color:var(--msh-text-primary,#252822)}
+    .explore-header,.footer{color:var(--msh-text-primary,#252822);background:var(--msh-page,#f7f4ec)}
+    .hero{color:var(--msh-text-primary,#252822)}
+    .hero .lede,.hero .copy,.landscape-door>p:not(.eyebrow):not(.question){color:var(--msh-text-secondary,#484d47)}
+    .landscape-door{color:var(--msh-text-primary,#252822)}
+    .landscape-door .action{color:var(--msh-page,#f7f4ec)}
+    [data-theme="dark"] .hero{background:linear-gradient(145deg,var(--msh-page),var(--msh-surface-alt))}
+    [data-theme="dark"] .landscape-door{border-color:var(--msh-border);background:color-mix(in srgb,var(--msh-surface-elevated) 92%,transparent);box-shadow:0 35px 90px rgba(0,0,0,.22)}
+    [data-theme="dark"] .landscape-door .action{color:#182019}
+  </style>
 </head>
-<body>
-<header class="explore-header"><a class="brand" href="index.html">My Simple Health</a><nav class="nav"><a href="about.html">About</a><a href="topics.html">Learn</a><a href="recipes.html">Recipes</a><a class="enter" href="my-health.html">Enter My Health →</a></nav></header>
+<body class="msh-app-page" data-msh-page="assessments">
+<div data-msh-header></div>
 <main class="hero"><div><p class="eyebrow">EXPLORE YOUR HEALTH</p><h1>Start with<br>where you are.</h1><p class="lede">You don't need to know what needs fixing before you begin.</p><p class="copy">My Simple Health activities are places to notice, reflect, ask questions, and understand your health in context. Nothing you find has to become a goal.</p></div><a class="landscape-door" href="health-landscape.html"><p class="eyebrow">A GOOD PLACE TO BEGIN</p><h2>Your Health Landscape</h2><p class="question">Where am I?</p><p>Step back and see the parts of health and life that make up your current picture. Notice what feels steady, what wants attention, and what you would rather leave alone.</p><span class="action">OPEN YOUR LANDSCAPE →</span></a></main>
+<div data-msh-mobile-nav></div>
 <footer class="footer"><a class="brand" href="index.html">My Simple Health</a><span>Structure when it helps. Freedom when it doesn't.</span><span>© 2026 My Simple Health</span></footer>
+<script src="js/msh-shell.js"></script>
 </body>
 </html>

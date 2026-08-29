@@ -1,4 +1,4 @@
-/* My Simple Health — Calendar-only accent personalization */
+/* My Simple Health — Calendar accent preference, shared as the personal sensory accent */
 (function (root) {
   'use strict';
 
@@ -37,11 +37,12 @@
     const next=normalizePreference(preference),target=root.document?.querySelector('[data-msh-calendar]');
     if(!target)return next;
     const color=chosenColor(next);
-    if(!color){target.classList.remove('has-calendar-accent');target.style.removeProperty('--msh-calendar-accent-base');target.style.removeProperty('--msh-calendar-accent');return next;}
+    if(!color){target.classList.remove('has-calendar-accent');target.style.removeProperty('--msh-calendar-accent-base');target.style.removeProperty('--msh-calendar-accent');root.MSHFeedback?.setAccent(null);return next;}
     const theme=root.document.documentElement.dataset.theme==='dark'?'dark':'light';
     target.classList.add('has-calendar-accent');
     target.style.setProperty('--msh-calendar-accent-base',color);
     target.style.setProperty('--msh-calendar-accent',readableAccent(color,theme));
+    root.MSHFeedback?.setAccent(color);
     return next;
   }
   function savePreference(value){

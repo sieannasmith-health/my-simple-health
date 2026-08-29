@@ -9,18 +9,21 @@ const storage=await readFile(new URL('../js/msh-storage.js',import.meta.url),'ut
 test('Calendar is framed as health in time rather than a period tracker',()=>{
   assert.match(ui,/Calendar · Health in time/);
   assert.match(ui,/What is happening when\?/);
-  assert.match(ui,/Month[\s\S]*Timeline[\s\S]*Cycle layer/);
+  assert.match(ui,/tabButton\('calendar','Month'\)/);
+  assert.match(ui,/tabButton\('timeline','Timeline'\)/);
+  assert.doesNotMatch(ui,/tabButton\('cycle','Cycle layer'\)/);
   assert.doesNotMatch(ui,/Calendar · Cycle layer/);
 });
 
 test('Calendar derives dated context from existing records without a competing data store',()=>{
   for(const source of ['calendar.events','progressEvents','practiceAttempts','practices','projects'])assert.match(ui,new RegExp(source.replace('.','\\.')));
-  assert.match(ui,/shown from their original records rather than copied into Calendar/);
+  assert.match(ui,/from its original records without changing their meaning/);
   assert.doesNotMatch(ui,/calendar\.events\.push/);
 });
 
 test('existing storage layers remain the source of visibility preferences',()=>{
-  for(const layer of ['cycle','life','appointments','practices','projects','routines'])assert.match(storage,new RegExp(`${layer}:true`));
+  for(const layer of ['movement','symptoms','medications','care','measurements','life','observations'])assert.match(storage,new RegExp(`${layer}:true`));
+  for(const layer of ['cycle','sexualHealth','practices','projects'])assert.match(storage,new RegExp(`${layer}:false`));
   assert.match(ui,/data-calendar-layer/);
   assert.match(ui,/calendar\.settings\.layers/);
 });
@@ -33,7 +36,7 @@ test('a selected date has an inspectable, nonjudgmental health-time view',()=>{
 });
 
 test('cycle remains a distinct layer with recorded and predicted boundaries intact',()=>{
-  assert.match(ui,/Cycle layer/);
+  assert.match(ui,/\['cycle','Cycle'\]/);
   assert.match(ui,/Estimated, not recorded/);
   assert.match(ui,/should not be relied upon as contraception/);
   assert.match(ui,/data-cycle-form/);
@@ -42,6 +45,7 @@ test('cycle remains a distinct layer with recorded and predicted boundaries inta
 
 test('responsive, focus, and reduced-motion treatments cover the new Calendar controls',()=>{
   assert.match(css,/msh-calendar-layers input:focus-visible/);
+  assert.match(css,/msh-calendar-customization/);
   assert.match(css,/@media\(max-width:920px\)/);
   assert.match(css,/@media\(max-width:600px\)/);
   assert.match(css,/prefers-reduced-motion:reduce/);

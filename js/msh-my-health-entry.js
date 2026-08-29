@@ -2,6 +2,12 @@
 (function () {
   'use strict';
 
+  const route = (key, parameters) => window.MSHRoutes ? MSHRoutes.href(key, parameters) : ({
+    health:'my-health.html', landscape:'health-landscape.html', horizon:'my-vision.html',
+    path:'my-project.html', practice:'my-practice.html', discovery:'my-learning.html',
+    journey:'my-progress.html', calendar:'calendar.html'
+  })[key];
+
   function esc(value) {
     return String(value == null ? '' : value)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -56,36 +62,37 @@
 
     if (latest) {
       const isCalendar = calendarEvents.includes(latest);
+      const isLandscape = !isCalendar && (latest.progressType === 'landscape_mapped' || latest.sourceType === 'health_landscape');
       return {
         kicker:'Latest activity',
         title:textOf(latest, 'Recent activity'),
         meta:displayDate(latest),
-        description:latest.notes || latest.description || (isCalendar ? 'This is part of your health in time.' : 'A recent part of your health journey.'),
+        description:latest.notes || latest.description || (isCalendar ? 'This is part of your health in time.' : isLandscape ? 'Your current Health Landscape is available to revisit or explore.' : 'A recent part of your health journey.'),
         signals:movementSignals(latest),
-        href:isCalendar ? 'calendar.html' : 'my-progress.html',
-        action:isCalendar ? 'View in Calendar' : 'Open Journey'
+        href:isCalendar ? route('calendar') : isLandscape ? route('landscape',{from:'my-health'}) : route('journey'),
+        action:isCalendar ? 'View in Calendar' : isLandscape ? 'Open Landscape' : 'Open Journey'
       };
     }
 
     const practice = window.MSHStorage.getActivePractice(state);
-    if (practice) return { kicker:'Continue', title:practice.title, meta:'Your current Practice', description:practice.description || 'Pick up what you are currently trying.', signals:[], href:'my-practice.html', action:'Continue Practice' };
+    if (practice) return { kicker:'Continue', title:practice.title, meta:'Your current Practice', description:practice.description || 'Pick up what you are currently trying.', signals:[], href:route('practice'), action:'Continue Practice' };
     const project = window.MSHStorage.getActiveProject(state);
-    if (project) return { kicker:'Current path', title:project.title, meta:'What matters now', description:project.description || 'Return to what you chose to work on.', signals:[], href:'my-project.html', action:'Open Path' };
+    if (project) return { kicker:'Current path', title:project.title, meta:'What matters now', description:project.description || 'Return to what you chose to work on.', signals:[], href:route('path'), action:'Open Path' };
     const landscape = window.MSHStorage.getCurrentLandscape(state);
-    if (landscape || state.wellnessWheel && state.wellnessWheel.current) return { kicker:'Your landscape', title:'Your current picture', meta:'Health as a whole', description:'Return to the context you have already chosen to save.', signals:[], href:'my-landscape.html', action:'Open Landscape' };
-    return { kicker:'My Health', title:'Your health, in view.', meta:'Start anywhere', description:'Explore one part of your health when it becomes relevant. Nothing has to become a goal.', signals:[], href:'my-landscape.html', action:'Explore my health' };
+    if (landscape || state.wellnessWheel && state.wellnessWheel.current) return { kicker:'Your landscape', title:'Your current picture', meta:'Health as a whole', description:'Return to the context you have already chosen to save.', signals:[], href:route('landscape',{from:'my-health'}), action:'Open Landscape' };
+    return { kicker:'My Health', title:'Your health, in view.', meta:'Start anywhere', description:'Explore one part of your health when it becomes relevant. Nothing has to become a goal.', signals:[], href:route('landscape',{from:'my-health'}), action:'Explore my health' };
   }
 
   function continueDoor(state) {
     const practice = window.MSHStorage.getActivePractice(state);
-    if (practice) return { href:'my-practice.html', preview:practice.title, action:'Continue Practice' };
+    if (practice) return { href:route('practice'), preview:practice.title, action:'Continue Practice' };
     const project = window.MSHStorage.getActiveProject(state);
-    if (project) return { href:'my-project.html', preview:project.title, action:'Continue Path' };
+    if (project) return { href:route('path'), preview:project.title, action:'Continue Path' };
     const visionDraft = newest((state.visionEntries || []).filter(item => item.status === 'draft'));
-    if (visionDraft) return { href:'my-vision.html', preview:'Your direction is saved as a draft.', action:'Continue Horizon' };
+    if (visionDraft) return { href:route('horizon'), preview:'Your direction is saved as a draft.', action:'Continue Horizon' };
     const landscapeDraft = newest((state.landscapes || []).filter(item => item.status === 'in_progress'));
-    if (landscapeDraft) return { href:'my-landscape.html', preview:'Your partial picture is waiting.', action:'Continue Landscape' };
-    return { href:'my-landscape.html', preview:'Explore whenever something feels relevant.', action:'Explore my health' };
+    if (landscapeDraft) return { href:route('landscape',{from:'my-health'}), preview:'Your partial picture is waiting.', action:'Continue Landscape' };
+    return { href:route('landscape',{from:'my-health'}), preview:'Explore whenever something feels relevant.', action:'Explore my health' };
   }
 
   function todayDoor(state) {
@@ -112,7 +119,7 @@
     const root = document.querySelector('[data-msh-dashboard]');
     if (!root || !window.MSHStorage || !window.MSHFirstDoor) return;
     const params = new URLSearchParams(location.search);
-    if (params.get('view') === 'tools') return;
+    if (['tools','explore'].includes(params.get('view'))) return;
     const state = MSHStorage.getState();
     if (!MSHFirstDoor.hasMeaningfulContext(state) && params.get('view') !== 'workspace') return;
 
@@ -143,10 +150,10 @@
       </a>
 
       <nav class="msh-dashboard-doors" aria-label="My Health open doors">
-        ${door({ icon:'◫', title:'Today', detail:'Your day at a glance', preview:todayDoor(state), href:'calendar.html', action:'Open Calendar' })}
-        ${door({ icon:'△', title:'Your Landscape', detail:'See your health as a whole', preview:state.wellnessWheel && state.wellnessWheel.current ? 'Your Wellness Wheel is in view.' : 'See where things stand without needing to score your health.', href:'my-landscape.html', action:'Open Landscape' })}
+        ${door({ icon:'◫', title:'Today', detail:'Your day at a glance', preview:todayDoor(state), href:route('calendar'), action:'Open Calendar' })}
+        ${door({ icon:'△', title:'Your Landscape', detail:'See your health as a whole', preview:state.wellnessWheel && state.wellnessWheel.current ? 'Your Wellness Wheel is in view.' : 'See where things stand without needing to score your health.', href:route('landscape',{from:'my-health'}), action:'Open Landscape' })}
         ${door({ icon:'◷', title:'Continue', detail:'Pick up where you left off', preview:resume.preview, href:resume.href, action:resume.action })}
-        ${door({ icon:'◇', title:'Discover', detail:'Recent observations and learning', preview:discoveryDoor(state), href:'my-learning.html', action:'Open Discovery' })}
+        ${door({ icon:'◇', title:'Discover', detail:'Recent observations and learning', preview:discoveryDoor(state), href:route('discovery'), action:'Open Discovery' })}
       </nav>
 
       <p class="msh-my-health-dashboard__quiet"><span aria-hidden="true">⌁</span>Understand patterns. Explore what matters. Make choices that fit your life.</p>

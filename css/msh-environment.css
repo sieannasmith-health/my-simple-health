@@ -4,7 +4,9 @@
   --msh-env-48:48px;--msh-env-64:64px;--msh-env-96:96px;--msh-env-128:128px;
   --msh-world-ink:#f3f0e6;--msh-world-muted:#d2d4ca;--msh-world-line:rgba(244,240,225,.22);
   --msh-world-glow:rgba(218,190,116,.28);--msh-world-scrim:rgba(8,19,16,.58);
-  --msh-environment-light:.08;--msh-environment-warmth:.1;--msh-environment-haze:.2;--msh-glass-opacity:.7
+  --msh-environment-light:.08;--msh-environment-warmth:.1;--msh-environment-haze:.2;--msh-glass-opacity:.7;
+  --msh-sun-visibility:0;--msh-moon-visibility:0;--msh-stars-visibility:0;
+  --msh-sun-x:50%;--msh-sun-y:20%;--msh-moon-x:72%;--msh-moon-y:16%
 }
 
 /* Time grades the same photographic world; it does not judge health state. */
@@ -16,10 +18,20 @@
 .msh-environment-home{background:var(--msh-page)}
 .msh-environment-home .msh-app-main{width:100%;max-width:none;margin:0;padding:0}
 .msh-home-world{position:relative;min-height:100svh;overflow:hidden;isolation:isolate;background:#17231f;color:var(--msh-world-ink)}
-.msh-home-environment{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:#17231f}
-.msh-home-cinematic{position:absolute;inset:-3%;background-image:url('../assets/images/environment/my-health-world-v1.jpg');background-position:center;background-size:cover;filter:brightness(calc(.58 + var(--msh-environment-light) * .76)) saturate(calc(.72 + var(--msh-environment-light) * .2)) sepia(calc(var(--msh-environment-warmth) * .16)) contrast(calc(1.1 - var(--msh-environment-light) * .14));transform:scale(1.025);transition:filter 60s linear,transform 12s ease-out}
-.msh-home-world:hover .msh-home-cinematic{transform:scale(1.035)}
-.msh-home-atmosphere{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,20,16,calc(.66 - var(--msh-environment-light) * .42)) 0,rgba(7,20,16,calc(.4 - var(--msh-environment-light) * .24)) 42%,transparent 72%),linear-gradient(180deg,rgba(242,220,169,calc(var(--msh-environment-warmth) * .18)),transparent 46%),linear-gradient(0deg,rgba(230,237,227,calc(var(--msh-environment-haze) * .16)),transparent 48%);transition:background 60s linear}
+.msh-home-environment{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:#17231f url('../assets/images/environment/my-health-world-v1.jpg') center/cover no-repeat}
+.msh-home-scene{--msh-scene-opacity:0;position:absolute;z-index:0;inset:-3%;opacity:0;background-position:center;background-size:cover;filter:brightness(calc(.58 + var(--msh-environment-light) * .76)) saturate(calc(.72 + var(--msh-environment-light) * .28)) sepia(calc(var(--msh-environment-warmth) * .16)) contrast(calc(1.1 - var(--msh-environment-light) * .14));transform:scale(1.025);transition:opacity 1800ms linear,filter 60s linear,transform 12s ease-out;will-change:opacity}
+.msh-home-scene.is-ready{opacity:var(--msh-scene-opacity)}
+.msh-home-world:hover .msh-home-scene{transform:scale(1.035)}
+.msh-environment-daylight{position:absolute;z-index:1;inset:0;opacity:clamp(0,calc((var(--msh-environment-light) - .42) * 1.5),.82);background:linear-gradient(180deg,rgba(112,173,211,.82) 0,rgba(176,205,211,.46) 36%,rgba(232,226,194,.12) 66%,transparent 82%);transition:opacity 60s linear}
+/* The temporary legacy plate contains a moon. This localized daylight wash keeps it from reading as a 1 PM moon while approved matched anchors are pending. */
+.msh-home-environment[data-environment-asset="fallback"]::after{content:"";position:absolute;z-index:1;inset:0 0 auto;height:34%;opacity:var(--msh-sun-visibility);background:linear-gradient(180deg,#71abd1,#7eb5d5 58%,rgba(149,194,216,.18));-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.msh-environment-sun,.msh-environment-moon{position:absolute;z-index:2;left:var(--msh-sun-x);top:var(--msh-sun-y);width:clamp(24px,3vw,46px);aspect-ratio:1;border-radius:50%;opacity:var(--msh-sun-visibility);transform:translate(-50%,-50%);transition:left 60s linear,top 60s linear,opacity 60s linear}
+.msh-environment-sun{background:radial-gradient(circle,rgba(255,250,218,.94) 0 20%,rgba(247,220,149,.45) 38%,rgba(247,211,130,.12) 58%,transparent 72%);filter:blur(.2px);box-shadow:0 0 42px rgba(246,216,145,.22)}
+.msh-environment-moon{left:var(--msh-moon-x);top:var(--msh-moon-y);width:clamp(12px,1.4vw,22px);opacity:var(--msh-moon-visibility);background:radial-gradient(circle at 38% 38%,#f5f1df 0 42%,#b9c3be 68%,#8a9a97 100%);box-shadow:0 0 20px rgba(223,232,221,.24)}
+/* Avoid a second moon while the one available fallback photograph still contains a baked celestial object. */
+.msh-home-environment[data-environment-asset="fallback"] .msh-environment-moon{opacity:0}
+.msh-home-atmosphere{position:absolute;z-index:3;inset:0;background:linear-gradient(90deg,rgba(7,20,16,calc(.66 - var(--msh-environment-light) * .42)) 0,rgba(7,20,16,calc(.4 - var(--msh-environment-light) * .24)) 42%,transparent 72%),linear-gradient(180deg,rgba(242,220,169,calc(var(--msh-environment-warmth) * .18)),transparent 46%),linear-gradient(0deg,rgba(230,237,227,calc(var(--msh-environment-haze) * .16)),transparent 48%);transition:background 60s linear}
+.msh-home-environment .msh-sensory-constellation{z-index:2;opacity:1;transition:opacity 60s linear}
 
 /* Editorial hero */
 .msh-home-world-content{position:relative;z-index:2;display:flex;width:min(88%,1280px);min-height:100svh;margin:0 auto;align-items:center;padding:var(--msh-env-128) 0 var(--msh-env-96)}
@@ -74,21 +86,33 @@
 .msh-insight-statement h2{max-width:16ch}
 .msh-home-moment{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:var(--msh-env-32);align-items:center;padding:var(--msh-env-32) 0;border-top:1px solid var(--msh-border)}.msh-home-moment:last-of-type{border-bottom:1px solid var(--msh-border)}.msh-home-moment>span{color:var(--msh-accent);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.msh-home-moment h3{margin:0 0 var(--msh-env-8);font-size:clamp(24px,3vw,36px)}.msh-home-moment p{margin:0;color:var(--msh-text-muted)}.msh-home-moment a{color:var(--msh-forest);font-weight:650;text-decoration:none;white-space:nowrap}.msh-home-quiet-end{margin-top:var(--msh-env-64)}.msh-home-quiet-end p{max-width:62ch;color:var(--msh-text-muted)}
 
-/* First Door uses the same cinematic frame without turning into a hero card. */
+/* First Door uses one editorial reading plane within the cinematic frame. */
 .msh-home-world.is-first-door .msh-home-world-content{display:block;padding-top:var(--msh-env-96)}
-.msh-home-world.is-first-door .msh-first-door{position:relative;margin:0;padding:var(--msh-env-64) 0;color:var(--msh-world-ink)}
-.msh-home-world.is-first-door .msh-first-door h1,.msh-home-world.is-first-door .msh-first-door strong{color:var(--msh-world-ink)}
-.msh-home-world.is-first-door .msh-first-door header>p:last-child,.msh-home-world.is-first-door .msh-first-door-secondary p{color:var(--msh-world-muted)}
-.msh-home-world.is-first-door .msh-first-door-choices{border-color:var(--msh-world-line)}
-.msh-home-world.is-first-door .msh-first-door-choices button{border-color:var(--msh-world-line);background:rgba(10,24,20,.18);color:var(--msh-world-ink);backdrop-filter:blur(4px)}
-.msh-home-world.is-first-door .msh-first-door-choices button:hover{background:rgba(10,24,20,.4)}
+.msh-home-world.is-first-door .msh-first-door{position:relative;width:min(100%,1180px);margin:0 auto;padding:clamp(40px,6vw,72px);border:1px solid var(--msh-glass-border);border-radius:32px;background:var(--msh-glass-reading-bg);box-shadow:var(--msh-glass-shadow);color:var(--msh-glass-ink);-webkit-backdrop-filter:blur(var(--msh-glass-blur)) saturate(var(--msh-glass-saturation));backdrop-filter:blur(var(--msh-glass-blur)) saturate(var(--msh-glass-saturation));isolation:isolate}
+.msh-home-world.is-first-door .msh-first-door h1,.msh-home-world.is-first-door .msh-first-door strong,.msh-home-world.is-first-door .msh-first-door-progress .is-current{color:var(--msh-glass-ink)}
+.msh-home-world.is-first-door .msh-first-door .msh-stage-name{color:var(--msh-glass-brand)}
+.msh-home-world.is-first-door .msh-first-door header>p:last-child,.msh-home-world.is-first-door .msh-first-door-secondary p,.msh-home-world.is-first-door .msh-first-door-progress{color:var(--msh-glass-ink-secondary)}
+.msh-home-world.is-first-door .msh-first-door-choices{border-color:color-mix(in srgb,var(--msh-glass-ink) 18%,transparent)}
+.msh-home-world.is-first-door .msh-first-door-choices::after{background:color-mix(in srgb,var(--msh-glass-ink) 18%,transparent)}
+.msh-home-world.is-first-door .msh-first-door-choices button{border-color:color-mix(in srgb,var(--msh-glass-ink) 18%,transparent);background:transparent;color:var(--msh-glass-ink);-webkit-backdrop-filter:none;backdrop-filter:none}
+.msh-home-world.is-first-door .msh-first-door-choices span{color:var(--msh-glass-ink-secondary)}
+.msh-home-world.is-first-door .msh-first-door-choices button:hover{background:color-mix(in srgb,var(--msh-glass-ink) 7%,transparent)}
+.msh-home-world.is-first-door .msh-first-door-context,.msh-home-world.is-first-door .msh-first-door-orientation{border-left-color:var(--msh-glass-brand);background:color-mix(in srgb,var(--msh-glass-ink) 5%,transparent);color:var(--msh-glass-ink)}
+.msh-home-world.is-first-door .msh-first-door-orientation>p:last-child,.msh-home-world.is-first-door .msh-first-door-context details{color:var(--msh-glass-ink-secondary)}
 
-/* Quiet navigation over the environmental frame. */
-.msh-environment-home .msh-app-header{position:absolute;right:0;left:0;border-color:var(--msh-world-line);background:linear-gradient(180deg,rgba(5,15,13,.56),transparent);backdrop-filter:blur(4px)}
-.msh-environment-home .msh-app-logo,.msh-environment-home .msh-app-nav a,.msh-environment-home .msh-app-nav button,.msh-environment-home .msh-assessment-link{color:var(--msh-world-ink)}
+/* Stable glass navigation over the changing environmental frame. */
+.msh-environment-home .msh-app-header{position:absolute;z-index:50;right:0;left:0;border-color:rgba(23,61,43,.14);background:var(--msh-glass-soft-bg);box-shadow:0 4px 20px rgba(0,0,0,.05);-webkit-backdrop-filter:blur(18px) saturate(125%);backdrop-filter:blur(18px) saturate(125%)}
+.msh-environment-home .msh-app-logo{color:#173d2b}
+.msh-environment-home .msh-app-nav a,.msh-environment-home .msh-app-nav button,.msh-environment-home .msh-assessment-link{color:#26342c}
 .msh-environment-home .msh-hello-launcher,.msh-environment-home .msh-hello-dock{display:none}
-.msh-environment-home .msh-app-nav a[aria-current="page"]{background:rgba(248,244,230,.12);color:var(--msh-world-ink)}
-.msh-environment-home .msh-theme-control summary{border-color:var(--msh-world-line);background:rgba(10,24,20,.22);color:var(--msh-world-ink)}
+.msh-environment-home .msh-app-nav a:hover{background:rgba(255,253,249,.48);color:#173d2b}
+.msh-environment-home .msh-app-nav a[aria-current="page"]{background:rgba(255,253,249,.72);color:#173d2b;box-shadow:inset 0 0 0 1px rgba(23,61,43,.1)}
+.msh-environment-home .msh-theme-control summary{border-color:rgba(23,61,43,.16);background:rgba(255,253,249,.58);color:#26342c}
+[data-theme="dark"] .msh-environment-home .msh-app-header{border-color:rgba(245,241,231,.1);background:rgba(13,15,14,.82);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+[data-theme="dark"] .msh-environment-home .msh-app-logo,[data-theme="dark"] .msh-environment-home .msh-app-nav a,[data-theme="dark"] .msh-environment-home .msh-app-nav button,[data-theme="dark"] .msh-environment-home .msh-assessment-link{color:#f3f0e6}
+[data-theme="dark"] .msh-environment-home .msh-app-nav a:hover{background:rgba(245,241,231,.08);color:#f3f0e6}
+[data-theme="dark"] .msh-environment-home .msh-app-nav a[aria-current="page"]{background:rgba(245,241,231,.14);color:#f3f0e6;box-shadow:inset 0 0 0 1px rgba(232,238,226,.12)}
+[data-theme="dark"] .msh-environment-home .msh-theme-control summary{border-color:rgba(232,238,226,.16);background:rgba(245,241,231,.1);color:#f3f0e6}
 .msh-environment-home .msh-hello-launcher{border-color:rgba(229,207,145,.46);background:rgba(13,31,25,.7);color:#f1ede1;box-shadow:0 10px 32px rgba(4,14,11,.25);backdrop-filter:blur(10px)}
 
 /* Nighttime North Star pointer companion; the system cursor remains intact. */
@@ -110,7 +134,7 @@
 @media(max-width:860px){
   .msh-environment-home .msh-app-header-inner{width:90%}.msh-environment-home .msh-assessment-link{display:none}
   .msh-home-world-content{width:100%;align-items:flex-end;padding:var(--msh-env-128) var(--msh-env-24) var(--msh-env-96)}
-  .msh-home-cinematic{background-position:63% center}
+  .msh-home-scene{background-position:63% center}
   .msh-home-atmosphere{background:linear-gradient(180deg,rgba(4,12,10,.08) 20%,rgba(4,12,10,.18) 42%,rgba(4,12,10,.86) 86%,rgba(4,12,10,.94))}
   .msh-home-orientation{padding-left:0;border-left:0}.msh-home-orientation h1{font-size:clamp(64px,16vw,88px)}.msh-home-scroll-cue{display:none}
   .msh-home-context{padding:var(--msh-env-96) var(--msh-env-24)}.msh-home-moment{grid-template-columns:1fr;gap:var(--msh-env-8)}.msh-home-moment a{margin-top:var(--msh-env-8)}
@@ -125,12 +149,15 @@
   .msh-home-primary{align-items:stretch;flex-direction:column}.msh-home-primary>*{width:100%}.msh-home-primary .msh-text-button{justify-content:flex-start;padding-left:0}
   .msh-home-presence{margin-top:var(--msh-env-24)}.msh-home-orientation h1{font-size:clamp(56px,18vw,78px)}
   .msh-constellation{min-height:280px}.msh-orbit{width:260px}.msh-section-transition{height:var(--msh-env-96)}
-  .msh-home-world.is-first-door .msh-first-door-choices button{background:rgba(10,24,20,.3)}
+  .msh-home-world.is-first-door .msh-home-world-content{padding:74px 12px 72px}
+  .msh-home-world.is-first-door .msh-first-door{padding:32px 22px;border-radius:24px;-webkit-backdrop-filter:blur(16px) saturate(112%);backdrop-filter:blur(16px) saturate(112%)}
+  .msh-home-world.is-first-door .msh-first-door-choices button{background:transparent}
 }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.msh-home-world.is-first-door .msh-first-door{background:color-mix(in srgb,var(--msh-glass-reading-bg) 94%,var(--msh-page))}}
 @media(pointer:coarse){.msh-north-star{display:none}}
 @media(prefers-reduced-motion:reduce){
-  .msh-home-cinematic,.msh-premium-action,.msh-action-arrow,.msh-north-star{transition:none!important}
-  .msh-home-world:hover .msh-home-cinematic{transform:scale(1.025)}
+  .msh-home-scene,.msh-environment-daylight,.msh-environment-sun,.msh-environment-moon,.msh-home-environment .msh-sensory-constellation,.msh-premium-action,.msh-action-arrow,.msh-north-star{transition:none!important}
+  .msh-home-world:hover .msh-home-scene{transform:scale(1.025)}
   .msh-orbit,.msh-system-loader span,.msh-kinetic-dots i,.msh-section-transition span,.msh-reveal{animation:none!important;opacity:1;transform:none}
   .msh-north-star{display:none}
 }

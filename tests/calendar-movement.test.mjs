@@ -94,6 +94,9 @@ test('older Calendar state gains the movement visibility layer without changing 
   const seed={schemaVersion:7,calendar:{events:[{id:'old-note',category:'note',date:'2026-08-01'}],predictions:[],settings:{layers:{cycle:true}},privacy:{cycleCalendar:true}}};
   const app=runtime(seed),state=app.MSHStorage.getState();
   assert.equal(state.calendar.settings.layers.movement,true);
+  assert.equal(state.calendar.settings.layers.cycle,false);
+  assert.equal(state.calendar.settings.layers.practices,false);
+  assert.equal(state.calendar.settings.layers.projects,false);
   assert.equal(state.calendar.events.length,1);
   assert.equal(state.calendar.events[0].id,'old-note');
 });

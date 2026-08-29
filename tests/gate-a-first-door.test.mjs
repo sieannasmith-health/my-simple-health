@@ -50,10 +50,10 @@ test('offers the six approved ordinary-language first-use intents', () => {
 test('routes each need to an existing capability instead of enforcing framework order', () => {
   const firstDoor = loadFirstDoor();
   assert.equal(firstDoor.getIntent('health_question').primary.href, 'topics.html');
-  assert.equal(firstDoor.getIntent('not_working').primary.href, 'my-landscape.html');
+  assert.equal(firstDoor.getIntent('not_working').primary.href, 'health-landscape.html');
   assert.equal(firstDoor.getIntent('care_support').primary.href, 'resources.html');
   assert.equal(firstDoor.getIntent('work_on_something').primary.href, 'my-project.html');
-  assert.equal(firstDoor.getIntent('clearer_picture').primary.href, 'my-landscape.html?start=dimensions');
+  assert.equal(firstDoor.getIntent('clearer_picture').primary.href, 'health-landscape.html');
   assert.equal(firstDoor.getIntent('exploring').prompt, '');
 });
 
@@ -104,7 +104,7 @@ test('first-door routing carries context without putting personal text in the UR
   assert.match(helloSource, /getFirstDoor\(\)/);
   assert.match(helloSource, /get\("from"\) !== "first-door"/);
   assert.doesNotMatch(dashboardSource, /hello\.html\?[^"']*(prompt|context)=/);
-  assert.match(landscapeSource, /get\('start'\) === 'dimensions'/);
+  assert.doesNotMatch(firstDoorSource, /my-landscape\.html\?start=dimensions/);
 });
 
 test('care routing states the current prototype limitation honestly', () => {

@@ -48,12 +48,12 @@ test('answer surface exposes only functional comprehension and next-direction co
   assert.match(dashboardSource,/href="calendar\.html"/);
 });
 
-test('simplified My Health shell does not remove the underlying journey navigation',() => {
-  assert.match(shellSource,/simplifiedHealthNav/);
-  for (const label of ['My Health','Explore','Tools']) assert.match(shellSource,new RegExp(`label:'${label}'`));
+test('shared private shell keeps one stable primary navigation without exposing framework stages',() => {
+  for (const key of ['health','explore','tools','calendar']) assert.match(shellSource,new RegExp(`'${key}'`));
   assert.doesNotMatch(shellSource,/key:'hello', label:'Hello'/);
-  for (const label of ['Landscape','Horizon','Path','Practice','Discovery','Journey','Calendar']) assert.match(shellSource,new RegExp(`label:'${label}'`));
+  assert.doesNotMatch(shellSource,/simplifiedHealthNav|href:'topics\.html'/);
   assert.match(shellSource,/my-health\.html\?view=tools/);
+  assert.match(shellSource,/my-health\.html\?view=explore/);
 });
 
 test('Glass manifestations and personally relevant Tools remain presentation architecture',() => {
@@ -61,7 +61,8 @@ test('Glass manifestations and personally relevant Tools remain presentation arc
   assert.match(dashboardSource,/Women’s Health/);
   assert.match(dashboardSource,/Period Tracker/);
   assert.match(dashboardSource,/Track your period, symptoms, and cycle patterns over time\./);
-  assert.match(dashboardSource,/calendar\.html\?from=tools/);
+  assert.match(dashboardSource,/route\('cycle',\{from:'tools'\}\)/);
+  assert.match(dashboardSource,/route\('movement',\{from:'tools'\}\)/);
   assert.doesNotMatch(dashboardSource,/personalization engine/i);
 });
 

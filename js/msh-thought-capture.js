@@ -79,6 +79,7 @@
     });
 
     document.dispatchEvent(new CustomEvent('msh:thought-saved', { detail: thought }));
+    if (root.MSHFeedback) root.MSHFeedback.emit('record',{ source:'thought' });
     return thought;
   }
 
@@ -174,12 +175,14 @@
       document.body.classList.add('msh-thought-open');
       confirmation.textContent = '';
       requestAnimationFrame(() => textarea.focus());
+      if (root.MSHFeedback) root.MSHFeedback.emit('reveal',{ source:'thought', target:host.querySelector('.msh-thought-panel') });
     }
 
     function close() {
       layer.hidden = true;
       document.body.classList.remove('msh-thought-open');
       if (restoreFocus && typeof restoreFocus.focus === 'function') restoreFocus.focus();
+      if (root.MSHFeedback) root.MSHFeedback.emit('return',{ source:'thought' });
     }
 
     host.addEventListener('click', event => {

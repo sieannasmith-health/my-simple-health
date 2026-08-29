@@ -67,10 +67,13 @@ test('runtime accent derivation maintains non-text contrast in light and dark th
 
 test('Calendar control is accessible and semantic styling remains outside the personal accent layer',()=>{
   assert.match(calendarHtml,/js\/msh-calendar-appearance\.js/);
+  assert.match(calendarSource,/Customize/);
+  assert.match(calendarSource,/Appearance/);
   assert.match(calendarSource,/Calendar color/);
-  assert.match(calendarSource,/Choose a color that feels like yours/);
+  assert.match(calendarSource,/Choose a restrained accent for this Calendar view/);
   assert.match(calendarSource,/aria-pressed/);
   assert.match(calendarSource,/Reset to default/);
+  assert.match(css,/msh-calendar-customization-menu/);
   assert.match(css,/msh-calendar-custom-color/);
   assert.match(css,/\.msh-information-key \.recorded:before\{background:var\(--msh-cycle-clay\)/);
   assert.match(css,/\.msh-information-key \.estimated:before[\s\S]*var\(--msh-cycle-blue\)/);

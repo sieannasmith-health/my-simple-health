@@ -6,6 +6,7 @@
   const requestedView = new URLSearchParams(location.search).get('view');
   let showWorkspace = requestedView === 'workspace';
   const showTools = requestedView === 'tools';
+  const showExplore = requestedView === 'explore';
   let selectedIntent = null;
   let selectedHealthLayer = null;
   let firstDoorStep = 'intent';
@@ -23,8 +24,17 @@
     )[0] || null;
   }
 
+  function route(key, parameters) {
+    return window.MSHRoutes ? MSHRoutes.href(key, parameters) : ({
+      health:'my-health.html', landscape:'health-landscape.html', assessments:'assessments.html',
+      horizon:'my-vision.html', path:'my-project.html', practice:'my-practice.html',
+      discovery:'my-learning.html', journey:'my-progress.html', calendar:'calendar.html',
+      cycle:'calendar.html?view=cycle', movement:'calendar.html?view=movement', science:'topics.html'
+    })[key] || 'my-health.html';
+  }
+
   function environmentMarkup() {
-    return `<div class="msh-home-environment" aria-hidden="true"><span class="msh-home-cinematic"></span><span class="msh-home-atmosphere"></span></div>`;
+    return `<div class="msh-home-environment" aria-hidden="true"><span class="msh-home-cinematic"></span><span class="msh-home-atmosphere"></span><span class="msh-sensory-constellation"></span></div>`;
   }
 
   function worldMarkup(content, firstDoor) {
@@ -71,12 +81,29 @@
       state:'tools', manifestation:'workspace', eyebrow:'My Health / Tools',
       title:'Tools, when they are useful.',
       intro:'My Simple Health can support many kinds of health work. You choose what belongs in your experience; a capability does not become relevant merely because it exists.',
-      body:`<div class="msh-tools-directory">
-        <section aria-labelledby="womens-health-tools"><p class="msh-glass-category">Women’s Health</p><h2 id="womens-health-tools">Period Tracker</h2><p>Track your period, symptoms, and cycle patterns over time.</p><a href="calendar.html?from=tools">Open Period Tracker <span aria-hidden="true">→</span></a><small>This tool appears here for intentional exploration. My Simple Health does not assume it is relevant to you.</small></section>
-        <section aria-labelledby="health-picture-tools"><p class="msh-glass-category">Health picture</p><h2 id="health-picture-tools">Assessments</h2><p>Explore a specific area or add measured context when it would help bring your Health Map into focus.</p><a href="assessments.html">Explore assessments <span aria-hidden="true">→</span></a></section>
+      body:`<div class="msh-tools-directory msh-glide" data-msh-interaction="glide" data-msh-glide-label="Tools" data-msh-glide-item="tool">
+        <section aria-labelledby="womens-health-tools"><p class="msh-glass-category">Women’s Health</p><h2 id="womens-health-tools">Period Tracker</h2><p>Track your period, symptoms, and cycle patterns over time.</p><a href="${route('cycle',{from:'tools'})}" data-msh-route="cycle">Open Period Tracker <span aria-hidden="true">→</span></a><small>This tool appears here for intentional exploration. My Simple Health does not assume it is relevant to you.</small></section>
+        <section aria-labelledby="health-picture-tools"><p class="msh-glass-category">Health picture</p><h2 id="health-picture-tools">Assessments</h2><p>Explore a specific area or add measured context when it would help bring your Health Map into focus.</p><a href="${route('assessments')}" data-msh-route="assessments">Explore assessments <span aria-hidden="true">→</span></a></section>
+        <section aria-labelledby="movement-tools"><p class="msh-glass-category">Health in time</p><h2 id="movement-tools">Movement</h2><p>Plan movement or record what happened inside the same Calendar that holds the rest of your health in time.</p><a href="${route('movement',{from:'tools'})}" data-msh-route="movement">Open Movement <span aria-hidden="true">→</span></a></section>
       </div>`,
-      footer:`<a class="msh-glass-back" href="my-health.html">← Back to My Health</a>`,
+      footer:`<a class="msh-glass-back" href="${route('health')}" data-msh-route="health">← Back to My Health</a>`,
       status:'Broad platform / Personally relevant experience'
+    });
+  }
+
+  function renderExplore() {
+    renderGlass({
+      state:'explore', manifestation:'workspace', eyebrow:'My Health / Explore',
+      title:'Explore when something becomes relevant.',
+      intro:'Open a current My Health activity without following a required sequence. Public science and education remain available through a clearly separate doorway.',
+      body:`<div class="msh-tools-directory msh-glide" data-msh-interaction="glide" data-msh-glide-label="Explore My Health" data-msh-glide-item="activity">
+        <section aria-labelledby="explore-landscape"><p class="msh-glass-category">Where I am</p><h2 id="explore-landscape">Health Landscape</h2><p>Step back and notice the parts of health and life that make up your current picture.</p><a href="${route('landscape',{from:'explore'})}" data-msh-route="landscape">Open Health Landscape <span aria-hidden="true">→</span></a></section>
+        <section aria-labelledby="explore-assessments"><p class="msh-glass-category">Bring something into focus</p><h2 id="explore-assessments">Assessments</h2><p>Choose a structured self-reflection only when it would add useful context.</p><a href="${route('assessments',{from:'explore'})}" data-msh-route="assessments">Explore assessments <span aria-hidden="true">→</span></a></section>
+        <section aria-labelledby="explore-direction"><p class="msh-glass-category">Where I’m heading</p><h2 id="explore-direction">Horizon</h2><p>Name or revisit a direction without making it a prerequisite for action.</p><a href="${route('horizon',{from:'explore'})}" data-msh-route="horizon">Open Horizon <span aria-hidden="true">→</span></a></section>
+        <section aria-labelledby="explore-science"><p class="msh-glass-category">Public My Simple Health</p><h2 id="explore-science">Explore the science</h2><p>Read health education and evidence outside your private workspace.</p><a href="${route('science')}" data-msh-route="science">Go to the public science library <span aria-hidden="true">↗</span></a></section>
+      </div>`,
+      footer:`<a class="msh-glass-back" href="${route('health')}" data-msh-route="health">← Back to My Health</a>`,
+      status:'Private activities / Public education through a doorway'
     });
   }
 
@@ -217,33 +244,33 @@
     };
     return [
       {
-        id:'landscape', label:'Landscape', meaning:'Where I am', href:'my-landscape.html', action:'Explore my Landscape',
+        id:'landscape', label:'Landscape', meaning:'Where I am', href:route('landscape',{from:'my-health'}), action:'Explore my Landscape',
         present:Boolean(landscape || landscapeDraft || wheel),
         preview:wheel ? 'Your Wellness Wheel is in view.' : landscape ? 'A saved view of where things stand.' : landscapeDraft ? 'An exploration is waiting for you.' : 'Open when you want to notice where things stand.',
         detail:wheel ? 'Your saved Wellness Wheel offers one view of where things stand across the areas you explored.' : landscape ? 'You have a saved Landscape to return to and revise when it is useful.' : landscapeDraft ? 'You began exploring your current Landscape. It is available whenever you want to continue.' : 'This space is available when you want a clearer view of where things stand. It does not need to be completed first.'
       },
       {
-        id:'horizon', label:'Horizon', meaning:'Where I want to go', href:'my-vision.html', action:vision ? 'Open my Horizon' : 'Shape a direction',
+        id:'horizon', label:'Horizon', meaning:'Where I want to go', href:route('horizon',{from:'my-health'}), action:vision ? 'Open my Horizon' : 'Shape a direction',
         present:Boolean(vision || visionDraft),
         preview:vision ? vision.synthesis.statement : visionDraft ? 'A direction is beginning to take shape.' : 'Open when a direction feels useful.',
         detail:vision ? `You confirmed this direction: “${vision.synthesis.statement}”` : visionDraft ? 'You have words saved toward a direction, without needing to confirm them yet.' : 'This space is available when you want to name a direction. Not knowing yet is also a valid place to be.'
       },
       {
         id:'path', label:'Path', meaning:'What matters now / what I’ve chosen',
-        href:project ? 'my-project.html' : focus && focus.navigationState === 'develop' ? `my-project.html?focus=${encodeURIComponent(focus.id)}` : 'my-landscape.html',
+        href:project ? route('path') : focus && focus.navigationState === 'develop' ? route('path',{focus:focus.id}) : route('landscape',{from:'my-health'}),
         action:project ? 'Open my Path' : focus && focus.navigationState === 'develop' ? 'Consider shaping this change' : 'Consider what matters now',
         present:Boolean(project || currentFocuses.length),
         preview:project ? project.title : focus ? `${focus.label} · ${dispositionLabels[focus.navigationState] || 'Kept in My Health'}` : 'Open when something feels worth working on.',
         detail:project ? `Your active Project is “${project.title}.” It connects where you are now with what you want to make different.` : focus ? `You chose to keep “${focus.label}” in view as: “${dispositionLabels[focus.navigationState] || 'Kept in My Health'}.” This relationship remains visible without automatically creating a Project.` : 'This space is available when something feels worth actively working on. Understanding, preserving, or leaving something alone do not require a Project.'
       },
       {
-        id:'practice', label:'Practice', meaning:'What I’m trying', href:'my-practice.html', action:practice ? 'Open my Practice' : 'Explore a small experiment',
+        id:'practice', label:'Practice', meaning:'What I’m trying', href:route('practice'), action:practice ? 'Open my Practice' : 'Explore a small experiment',
         present:Boolean(practice),
         preview:practice ? practice.title : 'Open when you want to try something.',
         detail:practice ? `You are currently trying “${practice.title}.” Your engagement and reflections remain connected to it.` : 'This space is available when a small, realistic experiment would help you learn. Nothing needs to become a routine automatically.'
       },
       {
-        id:'discovery', label:'Discovery', meaning:'What I’m learning', href:'my-learning.html', action:learning ? 'Open my Discovery' : 'Notice what I’m learning',
+        id:'discovery', label:'Discovery', meaning:'What I’m learning', href:route('discovery'), action:learning ? 'Open my Discovery' : 'Notice what I’m learning',
         present:Boolean(learning),
         preview:learning ? learning.statement : 'Open when something becomes worth noticing.',
         detail:learning ? `A current learning says: “${learning.statement}”` : 'This space remains open for what you notice through experience. A possibility does not become established learning unless the evidence and your confirmation support it.'
@@ -279,6 +306,10 @@
 
   function render() {
     const state = MSHStorage.getState();
+    if (showExplore) {
+      renderExplore();
+      return;
+    }
     if (showTools) {
       renderTools();
       return;
@@ -295,6 +326,8 @@
   }
 
   root.addEventListener('click', event => {
+    const meaningful=event.target.closest('[data-health-map-layer],[data-glass-choice],[data-glass-back],[data-first-door-route]');
+    if(meaningful&&window.MSHFeedback)MSHFeedback.emit(meaningful.matches('[data-glass-back]')?'return':'reveal',{source:'my-health',target:meaningful});
     const mapLayer = event.target.closest('[data-health-map-layer]');
     if (mapLayer) {
       selectedHealthLayer = mapLayer.dataset.healthMapLayer;

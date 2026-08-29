@@ -1,15 +1,18 @@
-/* My Simple Health — Calendar: health in time, with Cycle as one layer */
+/* My Simple Health — Calendar: health in time, composed from user-selected layers */
 (function () {
   'use strict';
   const root = document.querySelector('[data-msh-calendar]');
   if (!root || !window.MSHStorage || !window.MSHCalendarAppearance || !window.MSHCycle || !window.MSHMovementDirectory || !window.MSHMovement) return;
   const today = MSHCycle.toDateKey(new Date());
-  const demoMode = new URLSearchParams(location.search).get('demo') === 'cycle-v2';
+  const routeParameters = new URLSearchParams(location.search);
+  const requestedView = routeParameters.get('view');
+  const demoMode = routeParameters.get('demo') === 'cycle-v2';
   let visibleMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   let selectedDate = today;
-  let activeView = 'calendar';
+  let activeView = requestedView==='timeline' ? 'timeline' : 'calendar';
+  let customizationOpen = requestedView==='cycle' || routeParameters.get('customize')==='layers';
   let sheetOpen = false;
-  let movementSheet = null;
+  let movementSheet = requestedView === 'movement' ? 'plan' : null;
   let movementEventId = null;
   let pointerStart = null;
 
@@ -21,16 +24,11 @@
     (state.calendar.predictions || []).forEach(prediction => datesInRange(prediction.startDate, prediction.endDate).forEach(date => { (result[date] ||= []).push(prediction.type); }));
     return result;
   }
-  function cycleOverview(state) {
-    const status=MSHCycle.getStatusViewModel(state,today);
-    const title=status.fertileEstimate?status.fertileEstimate.label:status.periodRecorded?'Period recorded today':status.cycleDay?`Cycle day ${status.cycleDay}`:'Bring your cycle picture into focus';
-    const details=[status.estimatedPhase?`Estimated ${status.estimatedPhase} phase`:'',status.periodEstimate?`Period estimated ${status.periodEstimate.daysAway===0?'today':`in ${status.periodEstimate.daysAway} days`}`:''].filter(Boolean).join(' · ');
-    return {label:status.periodRecorded?'Recorded today':status.cycleDay?`Cycle day ${status.cycleDay}`:'Cycle layer',title,detail:details||'Record a period to begin building your own timeline'};
-  }
   const EVENT_META = {
-    cycle:{label:'Cycle',layer:'cycle'}, movement:{label:'Movement',layer:'movement'}, symptom:{label:'Body & symptoms',layer:'life'}, care:{label:'Care',layer:'appointments'},
-    medication:{label:'Medication',layer:'appointments'}, practice:{label:'Practice',layer:'practices'}, project:{label:'Project',layer:'projects'},
-    prevention:{label:'Prevention',layer:'routines'}, life:{label:'Life context',layer:'life'}, note:{label:'Note',layer:'life'}
+    cycle:{label:'Cycle',layer:'cycle'}, movement:{label:'Movement',layer:'movement'}, symptom:{label:'Symptoms',layer:'symptoms'}, care:{label:'Care & appointments',layer:'care'},
+    medication:{label:'Medication',layer:'medications'}, sexualHealth:{label:'Sexual health',layer:'sexualHealth'}, measurement:{label:'Measurement',layer:'measurements'},
+    practice:{label:'Practice',layer:'practices'}, project:{label:'Project',layer:'projects'}, prevention:{label:'Preventive care',layer:'care'},
+    life:{label:'Life context',layer:'life'}, note:{label:'Observation',layer:'observations'}
   };
   function eventDate(value) {
     if (!value) return '';
@@ -39,16 +37,35 @@
   }
   function eventCategory(event) {
     const value=String(event.category||event.type||event.sourceType||event.progressType||'').toLowerCase();
+    if (/sexual|reproductive/.test(value)) return 'sexualHealth';
     if (/cycle|period|menstrual|fertil/.test(value)) return 'cycle';
     if (/movement|workout|walk|run|strength|cycling|swimming|mobility|yoga|sport/.test(value)) return 'movement';
     if (/symptom|body/.test(value)) return 'symptom';
     if (/appointment|screen|lab|care/.test(value)) return 'care';
     if (/medication|dose|refill|injection/.test(value)) return 'medication';
+    if (/measurement|weight|temperature|blood.pressure|glucose/.test(value)) return 'measurement';
     if (/practice|routine/.test(value)) return 'practice';
     if (/project|milestone/.test(value)) return 'project';
     if (/prevent|reminder/.test(value)) return 'prevention';
     if (/travel|school|work|life|disruption/.test(value)) return 'life';
     return 'note';
+  }
+  function cycleRelatedEvents(state) {
+    const items=[];
+    MSHCycle.recordedCycleEvents(state).filter(event=>event.type==='cycle_day_observation').forEach(event=>{
+      const value=event.value||{}, date=event.date, base=`cycle-related-${event.id||date}`;
+      if((value.symptoms||[]).length)items.push({id:`${base}-symptoms`,date,category:'symptom',sourceKind:'cycle',title:'Symptoms recorded',detail:value.symptoms.join(' · '),recordStatus:'recorded',informationClass:'RECORDED'});
+      const medication=value.care&&value.care.medication;
+      if(medication)items.push({id:`${base}-medication`,date,category:'medication',sourceKind:'cycle',title:'Medication or relief recorded',detail:medication,recordStatus:'recorded',informationClass:'RECORDED'});
+      const sexual=value.sexualReproductive||{};
+      const sexualDetail=[sexual.sexualActivity,sexual.contraception,sexual.context].filter(Boolean).join(' · ');
+      if(sexualDetail)items.push({id:`${base}-sexual`,date,category:'sexualHealth',sourceKind:'cycle',title:'Sexual-health information recorded',detail:sexualDetail,recordStatus:'recorded',informationClass:'RECORDED'});
+      const measurements=value.measurements||{};
+      const measurementDetail=[measurements.temperature?`Temperature ${measurements.temperature}`:'',measurements.weight?`Weight ${measurements.weight}`:''].filter(Boolean).join(' · ');
+      if(measurementDetail)items.push({id:`${base}-measurements`,date,category:'measurement',sourceKind:'cycle',title:'Measurement recorded',detail:measurementDetail,recordStatus:'recorded',informationClass:'RECORDED'});
+      if(value.note)items.push({id:`${base}-note`,date,category:'note',sourceKind:'cycle',title:'Personal observation',detail:value.note,recordStatus:'recorded',informationClass:'RECORDED'});
+    });
+    return items;
   }
   function deriveHealthEvents(state) {
     const items=[];
@@ -67,10 +84,10 @@
     return items.filter((item,index,list)=>list.findIndex(other=>other.id===item.id&&other.date===item.date&&other.category===item.category)===index);
   }
   function layerEnabled(state,category) { return state.calendar.settings.layers[EVENT_META[category]?.layer||'life']!==false; }
-  function visibleHealthEvents(state) { return deriveHealthEvents(state).filter(event=>layerEnabled(state,event.category)); }
+  function visibleHealthEvents(state) { return [...deriveHealthEvents(state),...cycleRelatedEvents(state)].filter(event=>layerEnabled(state,event.category)); }
   function layerControls(state) {
     const layers=state.calendar.settings.layers;
-    const options=[['movement','Movement'],['cycle','Cycle'],['practices','Practices'],['projects','Projects'],['appointments','Care & medication'],['life','Life context'],['routines','Routines & prevention']];
+    const options=[['movement','Movement'],['cycle','Cycle'],['symptoms','Symptoms'],['medications','Medications'],['sexualHealth','Sexual health'],['care','Care & appointments'],['measurements','Measurements'],['life','Life context'],['observations','Observations']];
     return `<fieldset class="msh-calendar-layers"><legend>Visible health layers</legend>${options.map(([key,label])=>`<label><input type="checkbox" data-calendar-layer="${key}" ${layers[key]!==false?'checked':''}><span>${label}</span></label>`).join('')}</fieldset>`;
   }
   function calendarGrid(state) {
@@ -91,9 +108,14 @@
     return `<div class="msh-calendar-weekdays" aria-hidden="true">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day=>`<span>${day}</span>`).join('')}</div><div class="msh-calendar-grid">${cells}</div>`;
   }
   function tabButton(view,label) { return `<button type="button" role="tab" data-view="${view}" aria-selected="${activeView===view}">${label}</button>`; }
-  function calendarColorControl(state) {
+  function timeSymbol() { return `<span class="msh-kinetic-symbol msh-kinetic-symbol--orbit" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="31" fill="none" stroke="currentColor" opacity=".24"/><circle cx="50" cy="50" r="4" fill="currentColor" opacity=".8"/><g class="msh-symbol-traveler"><circle cx="50" cy="19" r="4" fill="var(--msh-personal-accent)"/></g><path d="M50 29v21l15 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>`; }
+  function calendarAppearanceControl(state) {
     const preference=MSHCalendarAppearance.getPreference(state),customValue=preference.accentId==='custom'?preference.customColor:'#65717a';
-    return `<details class="msh-calendar-color-control"><summary><span class="msh-calendar-color-preview" style="--swatch:${esc(MSHCalendarAppearance.chosenColor(preference)||'#496b3c')}" aria-hidden="true"></span><span>Calendar color</span></summary><div class="msh-calendar-color-menu"><strong>Calendar color</strong><p>Choose a color that feels like yours.</p><div class="msh-calendar-color-presets" role="group" aria-label="Calendar color presets">${MSHCalendarAppearance.PRESETS.map(option=>`<button type="button" data-calendar-accent="${option.id}" aria-pressed="${preference.accentId===option.id}"><i style="--swatch:${option.color}" aria-hidden="true"></i><span>${option.label}</span></button>`).join('')}</div><label class="msh-calendar-custom-color"><input type="color" data-calendar-custom-color value="${customValue}" aria-label="Custom Calendar color"><span>Custom</span><small>${preference.accentId==='custom'?'Selected':'Choose a color'}</small></label><button type="button" class="msh-text-button" data-calendar-accent-reset ${preference.accentId==='default'?'disabled':''}>Reset to default</button></div></details>`;
+    return `<section class="msh-calendar-appearance"><p class="msh-calendar-customize-label">Appearance</p><h2>Calendar color</h2><p>Choose a restrained accent for this Calendar view.</p><div class="msh-calendar-color-presets" role="group" aria-label="Calendar color presets">${MSHCalendarAppearance.PRESETS.map(option=>`<button type="button" data-calendar-accent="${option.id}" aria-pressed="${preference.accentId===option.id}"><i style="--swatch:${option.color}" aria-hidden="true"></i><span>${option.label}</span></button>`).join('')}</div><label class="msh-calendar-custom-color"><input type="color" data-calendar-custom-color value="${customValue}" aria-label="Custom Calendar color"><span>Custom</span><small>${preference.accentId==='custom'?'Selected':'Choose a color'}</small></label><button type="button" class="msh-text-button" data-calendar-accent-reset ${preference.accentId==='default'?'disabled':''}>Reset to default</button></section>`;
+  }
+  function calendarCustomizationControl(state) {
+    const preference=MSHCalendarAppearance.getPreference(state),swatch=MSHCalendarAppearance.chosenColor(preference)||'#496b3c';
+    return `<details class="msh-calendar-customization" data-calendar-customize ${customizationOpen?'open':''}><summary><span class="msh-calendar-color-preview" style="--swatch:${esc(swatch)}" aria-hidden="true"></span><span>Customize</span></summary><div class="msh-calendar-customization-menu"><section class="msh-calendar-layer-settings"><p class="msh-calendar-customize-label">Visible layers</p><h2>What belongs in view?</h2><p>Visibility changes this Calendar only. It never changes or deletes the underlying records.</p>${layerControls(state)}</section>${calendarAppearanceControl(state)}</div></details>`;
   }
   function movementStatusLabel(status) { return ({planned:'Planned',completed:'Completed',skipped:'Skipped',modified:'Modified'})[status]||'Recorded'; }
   function movementExperienceDetail(item) {
@@ -121,14 +143,15 @@
     const cycleEvent=state.calendar.settings.layers.cycle!==false?MSHCycle.dailyObservation(state,selectedDate):null;
     const predicted=state.calendar.settings.layers.cycle!==false?(state.calendar.predictions||[]).filter(item=>selectedDate>=item.startDate&&selectedDate<=item.endDate):[];
     const cycleItems=[];
-    if(cycleEvent){const value=cycleEvent.value;cycleItems.push({category:'cycle',title:value.periodMarker==='start'?'Period started':value.bleeding!=='none'?`${value.bleeding} flow recorded`:'Cycle observation',detail:[...(value.symptoms||[]),value.note].filter(Boolean).join(' · '),recordStatus:'recorded'});}
+    if(cycleEvent){const value=cycleEvent.value;cycleItems.push({category:'cycle',title:value.periodMarker==='start'?'Period started':value.bleeding!=='none'?`${value.bleeding} flow recorded`:'Cycle observation',detail:'',recordStatus:'recorded'});}
     predicted.forEach(item=>cycleItems.push({category:'cycle',title:item.type==='predicted_period'?'Estimated period':'Estimated fertile window',detail:'Calculated from recorded period dates',recordStatus:'predicted'}));
     const items=[...cycleItems,...recorded];
     return `<aside class="msh-date-inspector" aria-live="polite"><p class="msh-eyebrow">${selectedDate===today?'Today · ':''}${prettyDate(selectedDate,{weekday:'long',month:'long',day:'numeric'})}</p><h2>What was happening around this time?</h2>${items.length?`<div class="msh-date-events">${items.map(item=>renderCalendarEvent(item)).join('')}</div>`:'<p class="msh-date-empty">Nothing is recorded here yet. An open day is still part of the picture.</p>'}<div class="msh-date-actions"><button type="button" class="msh-button" data-add-movement>Add movement</button><button type="button" class="msh-button-secondary" data-open-sheet>Add cycle information</button></div></aside>`;
   }
   function calendarView(state) {
     const month = visibleMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
-    return `${layerControls(state)}<section class="msh-calendar-workspace"><div class="msh-cycle-calendar-panel"><header class="msh-calendar-toolbar"><button type="button" data-month="-1" aria-label="Previous month">←</button><h2>${month}</h2><button type="button" data-month="1" aria-label="Next month">→</button></header><div class="msh-cycle-legend"><span class="recorded">Recorded cycle</span><span class="predicted">Estimated cycle</span><span class="health">Other health event</span><span class="today">Today</span></div><div class="msh-calendar-swipe" data-calendar-swipe>${calendarGrid(state)}</div><p class="msh-cycle-estimate-note">Cycle predictions stay visibly separate from recorded information. Dates from Practices, Projects, and Progress are shown from their original records rather than copied into Calendar.</p></div>${dateInspector(state)}</section>`;
+    const cycleVisible=state.calendar.settings.layers.cycle!==false;
+    return `<section class="msh-calendar-workspace"><div class="msh-cycle-calendar-panel"><header class="msh-calendar-toolbar"><button type="button" data-month="-1" aria-label="Previous month">←</button><h2>${month}</h2><button type="button" data-month="1" aria-label="Next month">→</button></header><div class="msh-cycle-legend">${cycleVisible?'<span class="recorded">Recorded cycle</span><span class="predicted">Estimated cycle</span>':''}<span class="health">Visible health event</span><span class="today">Today</span></div><div class="msh-calendar-swipe" data-calendar-swipe>${calendarGrid(state)}</div><p class="msh-cycle-estimate-note">Only the health layers you choose are shown. Calendar projects dated information from its original records without changing their meaning or copying them into a second history.${cycleVisible?' Cycle predictions remain estimated; fertile-window estimates should not be relied upon as contraception.':''}</p></div>${dateInspector(state)}</section>`;
   }
   function cycleIntelligence(state) {
     const status=MSHCycle.getStatusViewModel(state,today),education=MSHCycle.getPhaseEducation(status.estimatedPhase),avg=Math.round(MSHCycle.calculateStats(state).averageCycleLength||28),day=Math.max(1,Math.min(avg,status.cycleDay||1)),angle=(day/avg)*360;
@@ -136,9 +159,9 @@
   }
   function analyticsVisuals(state){const stats=MSHCycle.calculateStats(state),lengths=stats.cycleLengths||[],freq=Object.entries(stats.symptomFrequency||{}).sort((a,b)=>b[1]-a[1]).slice(0,6),max=Math.max(1,...freq.map(x=>x[1]));return `<section class="msh-cycle-charts"><article><h3>Recent cycle lengths</h3>${lengths.length?`<div class="msh-length-chart">${lengths.map((v,i)=>`<span style="--bar:${Math.max(20,v*2)}%"><i></i><small>Cycle ${i+1}<b>${v}d</b></small></span>`).join('')}</div>`:'<p>Record at least two period starts to compare cycle lengths.</p>'}</article><article><h3>Recorded symptom frequency</h3>${freq.length?`<div class="msh-frequency-chart">${freq.map(([name,count])=>`<p><span>${esc(name)}</span><i><b style="width:${count/max*100}%"></b></i><strong>${count}</strong></p>`).join('')}</div>`:'<p>Record symptoms on several days to see a frequency view.</p>'}</article></section>`}
   function timelineView(state) {
-    const cycleItems=state.calendar.settings.layers.cycle===false?[]:MSHCycle.recordedCycleEvents(state).map(event=>{const value=event.value;return{date:event.date,category:'cycle',title:value.periodMarker==='start'?'Period started':value.bleeding!=='none'?`${value.bleeding} flow recorded`:(value.symptoms||[]).length?'Cycle symptoms recorded':'Cycle observation',detail:[...(value.symptoms||[]),value.note].filter(Boolean).join(' · ')}});
+    const cycleItems=state.calendar.settings.layers.cycle===false?[]:MSHCycle.recordedCycleEvents(state).map(event=>{const value=event.value;return{date:event.date,category:'cycle',title:value.periodMarker==='start'?'Period started':value.bleeding!=='none'?`${value.bleeding} flow recorded`:'Cycle observation',detail:''}});
     const items=[...visibleHealthEvents(state),...cycleItems].sort((a,b)=>b.date.localeCompare(a.date));
-    return `${layerControls(state)}<section class="msh-cycle-content"><header><p class="msh-eyebrow">Health timeline</p><h2>What has unfolded through time.</h2><p>This view brings together dated records without grading them or claiming that one event caused another.</p></header><div class="msh-cycle-timeline">${items.length?items.map(event=>renderCalendarEvent(event,'timeline')).join(''):'<p>No dated health events are visible yet. Calendar becomes richer as records are added elsewhere in My Simple Health.</p>'}</div></section>`;
+    return `<section class="msh-cycle-content"><header><p class="msh-eyebrow">Health timeline</p><h2>What has unfolded through time.</h2><p>This view brings together dated records without grading them or claiming that one event caused another.</p></header><div class="msh-cycle-timeline">${items.length?items.map(event=>renderCalendarEvent(event,'timeline')).join(''):'<p>No dated health events are visible yet. Choose layers in Customize or add information when it is useful.</p>'}</div></section>`;
   }
   function statsView(state) {
     const stats=MSHCycle.calculateStats(state), patterns=state.calendar.privacy.patternAnalysis?MSHCycle.calculatePatterns(state):[];
@@ -189,9 +212,8 @@
       MSHStorage.updateState(next=>{next.calendar.predictions=MSHCycle.calculatePredictions(next);return next;});
       return render();
     }
-    const cycleView=activeView==='cycle'?`${cycleIntelligence(state)}<div class="msh-cycle-layer-actions"><button type="button" data-view="stats">Cycle statistics</button><button type="button" data-view="summary">Cycle summary</button></div>${privacyPanel(state)}`:activeView==='stats'?statsView(state):summaryView(state);
-    const view=activeView==='calendar'?calendarView(state):activeView==='timeline'?timelineView(state):cycleView;
-    root.innerHTML=`${demoMode?'<aside class="msh-demo-banner"><strong>Synthetic QA demo</strong><span>Five illustrative cycles · not saved to My Health</span><a href="calendar.html">Exit demo</a></aside>':''}<header class="msh-cycle-hero msh-calendar-hero"><div><p class="msh-eyebrow">Calendar · Health in time</p><h1>What is happening when?</h1><p>See health events and life context together through time. Calendar brings forward what you have already recorded without deciding what it means.</p></div><div class="msh-calendar-today"><span>${prettyDate(today,{weekday:'long',month:'long',day:'numeric'})}</span><strong>Health in time</strong><small>Choose a date to see what was happening around it.</small></div></header><div class="msh-information-key" aria-label="Information classes"><span class="recorded">Recorded</span><span class="estimated">Estimated / predicted</span><span class="education">General education</span><span class="observation">Personal observation</span></div><div class="msh-calendar-view-controls"><nav class="msh-cycle-tabs" role="tablist" aria-label="Calendar views">${tabButton('calendar','Month')}${tabButton('timeline','Timeline')}${tabButton('cycle','Cycle layer')}</nav>${calendarColorControl(state)}</div>${activeView==='stats'||activeView==='summary'?'<button type="button" class="msh-calendar-back" data-view="cycle">← Cycle layer</button>':''}${view}${loggingSheet(state)}${movementSheetView(state)}`;
+    const view=activeView==='timeline'?timelineView(state):calendarView(state);
+    root.innerHTML=`${demoMode?'<aside class="msh-demo-banner"><strong>Synthetic QA demo</strong><span>Five illustrative cycles · not saved to My Health</span><a href="calendar.html">Exit demo</a></aside>':''}<header class="msh-cycle-hero msh-calendar-hero"><div><p class="msh-eyebrow">Calendar · Health in time</p><h1>What is happening when?</h1><p>See health events and life context together through time. Calendar brings forward what you have already recorded without deciding what it means.</p></div>${timeSymbol()}<div class="msh-calendar-today"><span>${prettyDate(today,{weekday:'long',month:'long',day:'numeric'})}</span><strong>Health in time</strong><small>Choose a date to see what was happening around it.</small></div></header><div class="msh-information-key" aria-label="Information classes"><span class="recorded">Recorded</span><span class="estimated">Estimated / predicted</span><span class="education">General education</span><span class="observation">Personal observation</span></div><div class="msh-calendar-view-controls"><nav class="msh-cycle-tabs" role="tablist" aria-label="Calendar views">${tabButton('calendar','Month')}${tabButton('timeline','Timeline')}</nav>${calendarCustomizationControl(state)}</div>${view}${loggingSheet(state)}${movementSheetView(state)}`;
     if (sheetOpen) {
       const flowFieldset=root.querySelector('.msh-cycle-sheet fieldset');
       if(flowFieldset) flowFieldset.insertAdjacentHTML('beforeend',`<label class="msh-cycle-field">Record period through <span>(optional)</span><input type="date" name="endDate" min="${selectedDate}" max="${MSHCycle.addDays(selectedDate,14)}"></label>`);
@@ -204,8 +226,10 @@
   }
   function changeMonth(delta) { visibleMonth=new Date(visibleMonth.getFullYear(),visibleMonth.getMonth()+delta,1); render(); }
   root.addEventListener('click', event => {
-    const accentChoice=event.target.closest('[data-calendar-accent]');if(accentChoice){MSHCalendarAppearance.savePreference({accentId:accentChoice.dataset.calendarAccent});render();return;}
-    if(event.target.closest('[data-calendar-accent-reset]')){MSHCalendarAppearance.reset();render();return;}
+    const semantic=event.target.closest('[data-date],[data-view],[data-month],[data-open-sheet],[data-add-movement],[data-close-sheet],[data-close-movement]');
+    if(semantic&&window.MSHFeedback){const type=semantic.matches('[data-close-sheet],[data-close-movement]')?'return':semantic.matches('[data-date],[data-view]')?'select':'reveal';MSHFeedback.emit(type,{source:'calendar',target:semantic});}
+    const accentChoice=event.target.closest('[data-calendar-accent]');if(accentChoice){customizationOpen=true;MSHCalendarAppearance.savePreference({accentId:accentChoice.dataset.calendarAccent});render();return;}
+    if(event.target.closest('[data-calendar-accent-reset]')){customizationOpen=true;MSHCalendarAppearance.reset();render();return;}
     const directoryChoice=event.target.closest('[data-movement-directory-item]');if(directoryChoice){const item=MSHMovementDirectory.get(directoryChoice.dataset.movementDirectoryItem),form=root.querySelector('[data-movement-plan-form]');if(item&&form){form.elements.namedItem('movementLabel').value=item.label;form.dataset.directoryItemId=item.id;form.dataset.directoryCategory=item.categoryId;const results=form.querySelector('[data-movement-search-results]');if(results)results.innerHTML=`<p class="msh-movement-search-note">Selected from Movement Directory · ${esc(item.categoryLabel)}</p>`;}return;}
     const view=event.target.closest('[data-view]'); if(view){activeView=view.dataset.view;render();return;}
     const month=event.target.closest('[data-month]'); if(month){changeMonth(Number(month.dataset.month));return;}
@@ -219,23 +243,25 @@
     if(event.target.closest('[data-remove-entry]')){MSHCycle.removeDailyObservation(selectedDate);sheetOpen=false;render();}
   });
   root.addEventListener('change', event => {
-    if(event.target.matches('[data-calendar-custom-color]')){MSHCalendarAppearance.savePreference({accentId:'custom',customColor:event.target.value});render();return;}
-    if(event.target.matches('[data-calendar-layer]')){MSHStorage.updateState(state=>{state.calendar.settings.layers[event.target.dataset.calendarLayer]=event.target.checked;return state;});render();}
+    if(event.target.matches('[data-calendar-custom-color]')){customizationOpen=true;MSHCalendarAppearance.savePreference({accentId:'custom',customColor:event.target.value});render();return;}
+    if(event.target.matches('[data-calendar-layer]')){customizationOpen=true;MSHStorage.updateState(state=>{state.calendar.settings.layers[event.target.dataset.calendarLayer]=event.target.checked;return state;});render();}
     if(event.target.matches('[data-privacy]')){MSHCycle.updatePrivacy({[event.target.dataset.privacy]:event.target.checked});render();}
     if(event.target.matches('[data-setting="mixHealthTimeline"]')){MSHStorage.updateState(state=>{state.calendar.settings.cycle.mixHealthTimeline=event.target.checked;return state;});render();}
     if(event.target.name==='noSymptoms'&&event.target.checked) root.querySelectorAll('input[name="symptoms"]').forEach(input=>input.checked=false);
     if(event.target.name==='symptoms'&&event.target.checked){const no=root.querySelector('input[name="noSymptoms"]');if(no)no.checked=false;}
   });
   root.addEventListener('submit', event => {
-    if(event.target.matches('[data-movement-plan-form]')){event.preventDefault();const data=new FormData(event.target);const saved=MSHMovement.plan({movementLabel:data.get('movementLabel'),directoryItemId:event.target.dataset.directoryItemId||data.get('directoryItemId'),directoryCategory:event.target.dataset.directoryCategory||data.get('directoryCategory'),date:data.get('date'),time:data.get('time'),durationMinutes:data.get('durationMinutes'),notes:data.get('notes')});if(saved){selectedDate=saved.date;movementSheet=null;movementEventId=null;render();}return;}
+    if(event.target.matches('[data-movement-plan-form]')){event.preventDefault();const data=new FormData(event.target);const saved=MSHMovement.plan({movementLabel:data.get('movementLabel'),directoryItemId:event.target.dataset.directoryItemId||data.get('directoryItemId'),directoryCategory:event.target.dataset.directoryCategory||data.get('directoryCategory'),date:data.get('date'),time:data.get('time'),durationMinutes:data.get('durationMinutes'),notes:data.get('notes')});if(saved){window.MSHFeedback?.emit('record',{source:'calendar-movement'});selectedDate=saved.date;movementSheet=null;movementEventId=null;render();}return;}
     if(event.target.matches('[data-movement-experience-form]')){event.preventDefault();const data=new FormData(event.target);const saved=MSHMovement.recordExperience(data.get('eventId'),{status:data.get('status'),durationMinutes:data.get('durationMinutes'),rpe:data.get('rpe'),energy:data.get('energy'),attributions:data.getAll('attributions'),reflection:data.get('reflection')});if(saved){selectedDate=saved.date;movementSheet=null;movementEventId=null;render();}return;}
     if(!event.target.matches('[data-cycle-form]'))return; event.preventDefault(); const data=new FormData(event.target);
     const value={bleeding:data.get('bleeding'),symptoms:data.getAll('symptoms'),noSymptoms:data.get('noSymptoms')==='on',discharge:data.get('discharge'),moodExperience:{sleep:data.get('sleep')},sexualReproductive:{sexualActivity:data.get('sexualActivity'),contraception:data.get('contraception'),context:data.get('reproductiveHealth')},measurements:{temperature:data.get('temperature'),weight:data.get('weight')},care:{medication:data.get('medication')},note:data.get('note')};
     if(data.get('endDate')&&data.get('bleeding')!=='none') MSHCycle.recordPeriod(data.get('date'),data.get('endDate'),data.get('bleeding'));
     MSHCycle.saveDailyObservation(data.get('date'),value);
+    window.MSHFeedback?.emit('record',{source:'calendar-cycle'});
     sheetOpen=false;render();
   });
   root.addEventListener('input',event=>{if(event.target.name==='rpe'){const output=root.querySelector('[data-rpe-output]');if(output)output.textContent=`${event.target.value} / 10 · ${MSHMovement.rpeDescription(event.target.value)}`;}if(event.target.name==='movementLabel'){const form=event.target.form;if(form){form.elements.namedItem('directoryItemId').value='';form.elements.namedItem('directoryCategory').value='';delete form.dataset.directoryItemId;delete form.dataset.directoryCategory;const results=form.querySelector('[data-movement-search-results]');if(results)results.innerHTML=movementSearchResults(event.target.value);}}});
+  root.addEventListener('toggle',event=>{if(event.target.matches('[data-calendar-customize]'))customizationOpen=event.target.open;},true);
   root.addEventListener('pointerdown',event=>{if(event.target.closest('[data-calendar-swipe]'))pointerStart={x:event.clientX,id:event.pointerId};});
   root.addEventListener('pointerup',event=>{if(!pointerStart||pointerStart.id!==event.pointerId)return;const delta=event.clientX-pointerStart.x;pointerStart=null;if(Math.abs(delta)>55)changeMonth(delta<0?1:-1);});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&(sheetOpen||movementSheet)){sheetOpen=false;movementSheet=null;movementEventId=null;render();}});
