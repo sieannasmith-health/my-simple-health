@@ -3,6 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import helloHandler from './api/hello.js';
+import exploreHandler from './api/explore.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 
@@ -75,9 +76,14 @@ async function serveStatic(pathname, response) {
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url || '/', 'http://127.0.0.1');
   try {
-    if (url.pathname === '/api/hello') {
+    const apiHandlers = {
+      '/api/hello': helloHandler,
+      '/api/explore': exploreHandler
+    };
+    const handler = apiHandlers[url.pathname];
+    if (handler) {
       request.body = request.method === 'POST' ? await parseJson(request) : {};
-      await helloHandler(request, apiResponse(response));
+      await handler(request, apiResponse(response));
       return;
     }
     if (await serveStatic(url.pathname, response)) return;
@@ -93,7 +99,7 @@ const server = http.createServer(async (request, response) => {
 const port = Number(process.env.PORT) || 43127;
 server.listen(port, '127.0.0.1', () => {
   console.log(`[dev] My Simple Health: http://127.0.0.1:${port}`);
-  console.log(`[dev] /api/hello runtime: enabled`);
+  console.log(`[dev] API runtimes: /api/hello, /api/explore`);
   console.log(`[dev] OPENAI_API_KEY detected: ${Boolean(process.env.OPENAI_API_KEY) ? 'yes' : 'no'}`);
   console.log(`[dev] HELLO_MODEL: ${process.env.HELLO_MODEL || 'gpt-5.6-luna'}`);
 });
