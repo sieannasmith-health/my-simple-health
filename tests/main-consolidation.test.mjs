@@ -9,7 +9,7 @@ test('main preserves the current storytelling homepage and canonical Health Land
     read('index.html'), read('health-landscape.html'), read('wellness-wheel.html')
   ]);
   assert.match(home, /Your health, in context\./);
-  assert.match(home, /Make peace with your health\./);
+  assert.match(home, /Understand your health without turning your life into a health project\./);
   assert.match(home, /css\/msh-public-story\.css/);
   assert.match(landscape, /Your Health Landscape/);
   assert.match(landscape, /js\/msh-storage\.js/);
