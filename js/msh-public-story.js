@@ -99,4 +99,70 @@
       if (prompt) prompt.classList.toggle('is-active', freeform.classList.contains('is-active'));
     });
   }
+
+  /* Production kinetic demo: information visibly interconnects before the whole picture appears. */
+  const landscapeArt = document.querySelector('.story-landscape-art');
+  const firstDemo = landscapeArt ? landscapeArt.closest('.product-demo') : null;
+
+  if (landscapeArt && firstDemo) {
+    const heading = firstDemo.querySelector('.product-demo-copy h2');
+    if (heading) heading.innerHTML = 'Your whole<br>Health';
+
+    const oldWhole = landscapeArt.querySelector('.landscape-whole');
+    if (oldWhole) {
+      oldWhole.innerHTML = `
+        <svg class="landscape-network" viewBox="0 0 760 520" role="img" aria-label="Physical, emotional, social, environmental, work, financial, mental engagement and what matters information connecting into your whole Health">
+          <g class="network-routes" aria-hidden="true">
+            <path class="route route-1" d="M105 100 C250 108 300 214 380 260 S560 152 655 108" />
+            <path class="route route-2" d="M92 190 C230 188 286 232 380 260 S530 252 675 205" />
+            <path class="route route-3" d="M92 290 C230 298 290 280 380 260 S560 340 670 325" />
+            <path class="route route-4" d="M130 390 C250 390 305 302 380 260 S520 408 625 410" />
+            <path class="route route-5" d="M105 100 C230 180 270 330 380 260 S525 155 675 205" />
+            <path class="route route-6" d="M92 190 C235 220 302 372 380 260 S515 310 670 325" />
+            <path class="route route-7" d="M92 290 C230 300 310 135 380 260 S540 208 655 108" />
+            <path class="route route-8" d="M130 390 C230 340 295 150 380 260 S545 380 625 410" />
+          </g>
+          <g class="network-dots" aria-hidden="true">
+            <circle class="travel-dot dot-1" r="4" />
+            <circle class="travel-dot dot-2" r="4" />
+            <circle class="travel-dot dot-3" r="4" />
+            <circle class="travel-dot dot-4" r="4" />
+            <circle class="travel-dot dot-5" r="3" />
+            <circle class="travel-dot dot-6" r="3" />
+          </g>
+        </svg>
+        <div class="network-node node-physical"><i>●</i><span>Physical</span></div>
+        <div class="network-node node-emotional"><i>●</i><span>Emotional</span></div>
+        <div class="network-node node-social"><i>●</i><span>Social</span></div>
+        <div class="network-node node-environment"><i>●</i><span>Environment</span></div>
+        <div class="network-node node-meaning"><i>●</i><span>What matters</span></div>
+        <div class="network-node node-financial"><i>●</i><span>Financial</span></div>
+        <div class="network-node node-mental"><i>●</i><span>Mental engagement</span></div>
+        <div class="network-node node-work"><i>●</i><span>Work & responsibilities</span></div>
+        <div class="network-knot" aria-hidden="true"></div>
+        <div class="network-core" aria-label="Your whole Health">
+          <span>your</span><span>whole</span><strong>Health</strong>
+        </div>
+        <div class="network-status" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><span>Building your picture…</span></div>
+      `;
+    }
+
+    const assessmentDoor = firstDemo.querySelector('a[href="assessments.html"] strong');
+    if (assessmentDoor) assessmentDoor.textContent = 'Self-Insight →';
+
+    if (!reduced && canObserve) {
+      const kineticObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            landscapeArt.classList.add('is-running');
+          } else {
+            landscapeArt.classList.remove('is-running');
+          }
+        });
+      }, { threshold:.25 });
+      kineticObserver.observe(landscapeArt);
+    } else {
+      landscapeArt.classList.add('is-complete');
+    }
+  }
 })();
