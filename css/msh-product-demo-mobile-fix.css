@@ -1,0 +1,121 @@
+/* Mobile geometry corrections for the production whole-health kinetic demo. */
+@media (max-width: 520px) {
+  .product-demo:first-child {
+    padding: 24px 16px 20px;
+  }
+
+  .product-demo:first-child .product-demo-head {
+    gap: 20px;
+  }
+
+  .product-demo:first-child .product-demo-copy h2 {
+    margin: 8px 0 6px;
+    font-size: clamp(48px, 15vw, 66px);
+    line-height: .94;
+    letter-spacing: -.04em;
+  }
+
+  .product-demo:first-child .story-landscape-art {
+    min-height: 0;
+    height: auto;
+    padding: 8px 0 18px;
+    overflow: hidden;
+    border-radius: 24px;
+  }
+
+  .product-demo:first-child .landscape-whole {
+    width: 100%;
+    aspect-ratio: 1 / 1.08;
+    transform: none;
+    overflow: visible;
+  }
+
+  .product-demo:first-child .landscape-network {
+    inset: 8% 7% 10%;
+    width: 86%;
+    height: 82%;
+  }
+
+  .product-demo:first-child .network-node {
+    max-width: 35%;
+    gap: 5px;
+    font-size: 9px;
+    line-height: 1.05;
+    white-space: normal;
+  }
+
+  .product-demo:first-child .network-node i {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-width: 1px;
+    box-shadow: 0 5px 12px rgba(23,61,43,.09), inset 0 0 0 3px rgba(255,255,255,.72);
+  }
+
+  .product-demo:first-child .node-physical { left: 2%; top: 13%; }
+  .product-demo:first-child .node-emotional { left: 0; top: 31%; }
+  .product-demo:first-child .node-social { left: 1%; top: 49%; }
+  .product-demo:first-child .node-environment { left: 3%; top: 68%; }
+
+  .product-demo:first-child .node-meaning { right: 1%; top: 13%; }
+  .product-demo:first-child .node-financial { right: 0; top: 31%; }
+  .product-demo:first-child .node-mental { right: 0; top: 49%; }
+  .product-demo:first-child .node-work { right: 1%; top: 68%; }
+
+  .product-demo:first-child .node-meaning,
+  .product-demo:first-child .node-financial,
+  .product-demo:first-child .node-mental,
+  .product-demo:first-child .node-work {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .product-demo:first-child .network-core {
+    width: 37%;
+    min-width: 118px;
+    max-width: 138px;
+    box-shadow: 0 16px 28px rgba(37,40,34,.16), 0 5px 10px rgba(37,40,34,.07), inset 0 0 0 7px rgba(255,255,255,.78);
+  }
+
+  .product-demo:first-child .network-core::before {
+    inset: -9px;
+  }
+
+  .product-demo:first-child .network-core span,
+  .product-demo:first-child .network-core strong {
+    font-size: clamp(23px, 7vw, 29px);
+    line-height: .9;
+  }
+
+  .product-demo:first-child .network-status {
+    bottom: 1.5%;
+    gap: 5px;
+    grid-template-columns: repeat(6, 6px);
+    font-size: 8px;
+  }
+
+  .product-demo:first-child .network-status i {
+    width: 5px;
+    height: 5px;
+  }
+
+  .product-demo:first-child .demo-doorways {
+    margin-top: 18px;
+  }
+}
+
+@media (min-width: 521px) and (max-width: 800px) {
+  .product-demo:first-child .story-landscape-art {
+    min-height: 460px;
+  }
+
+  .product-demo:first-child .landscape-whole {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .product-demo:first-child .network-core {
+    width: 27%;
+    max-width: 176px;
+  }
+}
