@@ -165,4 +165,91 @@
       landscapeArt.classList.add('is-complete');
     }
   }
+
+  /* Subtle staggered word-wave reveals for high-value storytelling moments. */
+  if (!reduced) {
+    const waveStyle = document.createElement('style');
+    waveStyle.textContent = `
+      .msh-wave-text .msh-wave-word {
+        display: inline-block;
+        opacity: 0;
+        filter: blur(2px);
+        transform: translateY(var(--msh-wave-y, 12px));
+        transition:
+          opacity .55s ease var(--msh-wave-delay, 0ms),
+          transform .78s cubic-bezier(.2,.72,.22,1) var(--msh-wave-delay, 0ms),
+          filter .62s ease var(--msh-wave-delay, 0ms);
+        will-change: opacity, transform, filter;
+      }
+      .msh-wave-text.is-wave-visible .msh-wave-word {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .msh-wave-text .msh-wave-word {
+          opacity: 1;
+          filter: none;
+          transform: none;
+          transition: none;
+        }
+      }
+    `;
+    document.head.appendChild(waveStyle);
+
+    const waveTargets = [
+      document.querySelector('.context-copy h1'),
+      document.querySelector('.journey-deck-heading h2'),
+      document.querySelector('.trust-strip > div:first-child h2'),
+      document.querySelector('.story-ending h2')
+    ].filter(Boolean);
+
+    function wrapWaveWords(element) {
+      let wordIndex = 0;
+
+      function wrapTextNode(node) {
+        const parts = node.nodeValue.split(/(\s+)/);
+        const fragment = document.createDocumentFragment();
+
+        parts.forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) {
+            fragment.appendChild(document.createTextNode(part));
+            return;
+          }
+
+          const span = document.createElement('span');
+          span.className = 'msh-wave-word';
+          span.textContent = part;
+          span.style.setProperty('--msh-wave-delay', `${wordIndex * 58}ms`);
+          span.style.setProperty('--msh-wave-y', `${wordIndex % 2 === 0 ? 13 : 7}px`);
+          fragment.appendChild(span);
+          wordIndex += 1;
+        });
+
+        node.replaceWith(fragment);
+      }
+
+      Array.from(element.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) wrapTextNode(node);
+      });
+      element.classList.add('msh-wave-text');
+    }
+
+    waveTargets.forEach(wrapWaveWords);
+
+    if (canObserve) {
+      const waveObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-wave-visible');
+          waveObserver.unobserve(entry.target);
+        });
+      }, { rootMargin:'0px 0px -8% 0px', threshold:.18 });
+
+      waveTargets.forEach(target => waveObserver.observe(target));
+    } else {
+      waveTargets.forEach(target => target.classList.add('is-wave-visible'));
+    }
+  }
 })();
