@@ -1,0 +1,78 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import { readFile } from 'node:fs/promises';
+
+const componentSource = await readFile(new URL('../js/msh-glass-workspace.js',import.meta.url),'utf8');
+const dashboardSource = await readFile(new URL('../js/msh-dashboard.js',import.meta.url),'utf8');
+const shellSource = await readFile(new URL('../js/msh-shell.js',import.meta.url),'utf8');
+const css = await readFile(new URL('../css/msh-glass-workspace.css',import.meta.url),'utf8');
+const html = await readFile(new URL('../my-health.html',import.meta.url),'utf8');
+
+function loadComponent() {
+  const sandbox = {};
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.runInNewContext(componentSource,sandbox,{filename:'msh-glass-workspace.js'});
+  return sandbox.MSHGlassWorkspace;
+}
+
+test('Glass Workspace is a reusable labelled surface with selectable regions and no assistant launcher',() => {
+  const glass = loadComponent();
+  const output = glass.markup({ state:'test', title:'A question', intro:'Some context', choices:[{id:'one',label:'One choice',detail:'Useful detail'}] });
+  assert.match(output,/data-msh-glass/);
+  assert.match(output,/data-glass-manifestation="workspace"/);
+  assert.doesNotMatch(output,/msh-ambient-glass|data-msh-hello-open/);
+  assert.match(output,/aria-labelledby="msh-glass-title"/);
+  assert.match(output,/data-glass-choice="one"/);
+  assert.match(output,/role="listitem"/);
+  assert.match(output,/tabindex="-1"/);
+});
+
+test('My Health proves the complete Something is not working to Sleep answer branch',() => {
+  assert.match(dashboardSource,/value === 'not_working'/);
+  assert.match(dashboardSource,/What feels hardest right now\?/);
+  assert.match(dashboardSource,/What has your sleep been like\?/);
+  assert.match(dashboardSource,/Sleep — waking during the night/);
+  assert.match(dashboardSource,/Waking during the night/);
+  assert.match(dashboardSource,/Answer \/ Depth on demand/);
+  assert.match(dashboardSource,/saveEntry\('not_working', 'Sleep — waking during the night'/);
+});
+
+test('answer surface exposes only functional comprehension and next-direction controls',() => {
+  assert.match(dashboardSource,/aria-label="Answer comprehension"/);
+  assert.match(dashboardSource,/aria-current="true">Read/);
+  assert.match(dashboardSource,/<summary>Sources<\/summary>/);
+  assert.doesNotMatch(dashboardSource,/>Listen<|>Visual</);
+  assert.doesNotMatch(dashboardSource,/data-msh-hello-open/);
+  assert.match(dashboardSource,/href="calendar\.html"/);
+});
+
+test('simplified My Health shell does not remove the underlying journey navigation',() => {
+  assert.match(shellSource,/simplifiedHealthNav/);
+  for (const label of ['My Health','Explore','Tools']) assert.match(shellSource,new RegExp(`label:'${label}'`));
+  assert.doesNotMatch(shellSource,/key:'hello', label:'Hello'/);
+  for (const label of ['Landscape','Horizon','Path','Practice','Discovery','Journey','Calendar']) assert.match(shellSource,new RegExp(`label:'${label}'`));
+  assert.match(shellSource,/my-health\.html\?view=tools/);
+});
+
+test('Glass manifestations and personally relevant Tools remain presentation architecture',() => {
+  for (const name of ['msh-ambient-glass','msh-workspace-glass','msh-contextual-glass']) assert.match(css,new RegExp(`\\.${name}`));
+  assert.match(dashboardSource,/Women’s Health/);
+  assert.match(dashboardSource,/Period Tracker/);
+  assert.match(dashboardSource,/Track your period, symptoms, and cycle patterns over time\./);
+  assert.match(dashboardSource,/calendar\.html\?from=tools/);
+  assert.doesNotMatch(dashboardSource,/personalization engine/i);
+});
+
+test('Glass Workspace supports contrast, focus, touch, mobile, fallback, and reduced motion',() => {
+  assert.match(html,/msh-glass-workspace\.css/);
+  assert.match(html,/msh-glass-workspace\.js/);
+  assert.match(css,/backdrop-filter:blur\(18px\)/);
+  assert.match(css,/@supports not/);
+  assert.match(css,/:focus-visible/);
+  assert.match(css,/min-height:144px/);
+  assert.match(css,/@media\(max-width:600px\)/);
+  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(css,/transition:none!important/);
+});

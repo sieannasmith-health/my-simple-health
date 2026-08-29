@@ -1,0 +1,349 @@
+/* My Simple Health — Path layout refinement only */
+
+.msh-project-main {
+  width: min(92%, 1180px);
+  max-width: 1180px;
+  padding-top: 38px;
+}
+
+.msh-project-header {
+  max-width: 760px;
+  margin: 0 0 28px;
+}
+
+.msh-project-header .msh-eyebrow {
+  margin-bottom: 10px;
+}
+
+.msh-project-header h1 {
+  margin: 0 0 12px;
+  font-size: clamp(42px, 5vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -.025em;
+}
+
+.msh-project-header > p:last-child {
+  max-width: 680px;
+  margin: 0;
+  color: var(--msh-text-muted);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.msh-project-active {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.msh-project-active > .msh-project-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 22px;
+  margin-bottom: 16px;
+  padding: 0 2px;
+}
+
+.msh-project-title-row h2 {
+  max-width: 820px;
+  margin: 0;
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+}
+
+.msh-project-status {
+  align-self: center;
+  padding: 8px 13px;
+  border: 1px solid color-mix(in srgb, var(--msh-accent) 22%, transparent);
+  background: color-mix(in srgb, var(--msh-surface) 84%, transparent);
+  box-shadow: 0 8px 22px rgba(23, 61, 43, .06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.msh-active-path-canvas {
+  position: relative;
+  min-height: 520px;
+  margin: 0 0 24px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--msh-border) 70%, rgba(255,255,255,.55));
+  border-radius: var(--msh-radius-xl);
+  background:
+    radial-gradient(circle at 18% 82%, color-mix(in srgb, var(--msh-sage) 14%, transparent), transparent 30%),
+    radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--msh-sage) 12%, transparent), transparent 27%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--msh-surface-elevated) 78%, transparent),
+      color-mix(in srgb, var(--msh-surface) 66%, transparent));
+  box-shadow:
+    0 28px 70px rgba(23, 61, 43, .10),
+    inset 0 1px 0 rgba(255,255,255,.58);
+  backdrop-filter: blur(24px) saturate(118%);
+  -webkit-backdrop-filter: blur(24px) saturate(118%);
+  isolation: isolate;
+}
+
+.msh-active-path-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), transparent 30%),
+    radial-gradient(ellipse at 50% 105%, color-mix(in srgb, var(--msh-accent) 10%, transparent), transparent 58%);
+}
+
+.msh-active-path-canvas::after {
+  content: "";
+  position: absolute;
+  right: -4%;
+  bottom: -2%;
+  left: 32%;
+  z-index: -1;
+  height: 24%;
+  opacity: .72;
+  background:
+    linear-gradient(177deg,
+      transparent 42%,
+      color-mix(in srgb, var(--msh-accent) 8%, transparent) 43% 52%,
+      transparent 53%);
+  transform: rotate(-1deg);
+}
+
+.msh-active-path-art {
+  inset: 26px 22px 30px;
+  width: calc(100% - 44px);
+  height: calc(100% - 56px);
+}
+
+.msh-path-annotation {
+  max-width: 285px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--msh-surface) 12%, transparent);
+  transition:
+    transform var(--msh-motion-base) var(--msh-ease-standard),
+    background-color var(--msh-motion-base) var(--msh-ease-standard),
+    border-color var(--msh-motion-base) var(--msh-ease-standard),
+    opacity var(--msh-motion-base) var(--msh-ease-standard);
+}
+
+.msh-path-annotation span {
+  margin-bottom: 6px;
+}
+
+.msh-path-annotation p {
+  font-size: 18px;
+  line-height: 1.42;
+}
+
+.msh-path-annotation-here {
+  left: 3.5%;
+  top: 67%;
+  max-width: 285px;
+}
+
+.msh-path-annotation-milestone {
+  left: 37%;
+  top: 40%;
+  max-width: 260px;
+}
+
+.msh-path-annotation-direction {
+  right: 3.5%;
+  top: 8%;
+  max-width: 280px;
+}
+
+.msh-path-annotation:hover,
+.msh-path-annotation:focus-visible,
+.msh-active-path-canvas[data-highlight="here"] .msh-path-annotation-here,
+.msh-active-path-canvas[data-highlight="milestone"] .msh-path-annotation-milestone,
+.msh-active-path-canvas[data-highlight="direction"] .msh-path-annotation-direction {
+  border-color: color-mix(in srgb, var(--msh-border) 78%, transparent);
+  background: color-mix(in srgb, var(--msh-surface-elevated) 72%, transparent);
+  box-shadow: 0 12px 26px rgba(23, 61, 43, .06);
+  transform: translateY(-2px);
+}
+
+.msh-path-progress-note {
+  left: auto;
+  right: 4%;
+  bottom: 3.5%;
+  max-width: 360px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--msh-surface) 58%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.msh-project-detail {
+  margin: 18px 0 0;
+  padding: 20px 22px;
+  border: 1px solid var(--msh-border);
+  border-radius: var(--msh-radius-lg);
+  background: color-mix(in srgb, var(--msh-surface) 90%, transparent);
+}
+
+.msh-project-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  margin-top: 18px;
+  padding: 24px 26px;
+  border: 1px solid color-mix(in srgb, var(--msh-border) 78%, transparent);
+  border-radius: var(--msh-radius-lg);
+  background:
+    linear-gradient(140deg,
+      color-mix(in srgb, var(--msh-surface-elevated) 84%, transparent),
+      color-mix(in srgb, var(--msh-surface-soft) 72%, transparent));
+  box-shadow: var(--msh-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.msh-project-next .msh-eyebrow,
+.msh-project-next h3,
+.msh-project-next p {
+  grid-column: 1;
+}
+
+.msh-project-next h3 {
+  margin: -4px 0 4px;
+  font-size: clamp(26px, 2.5vw, 34px);
+}
+
+.msh-project-next p {
+  margin: 0;
+}
+
+.msh-project-next .msh-button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+}
+
+.msh-project-active > .msh-card-actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding: 0 2px;
+}
+
+.msh-project-history {
+  margin-top: 54px;
+}
+
+[data-theme="dark"] .msh-active-path-canvas,
+[data-theme="dark"] .msh-project-next,
+[data-theme="dark"] .msh-project-detail {
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .24);
+}
+
+@media (max-width: 860px) {
+  .msh-project-main {
+    padding-top: 28px;
+  }
+
+  .msh-project-active > .msh-project-title-row,
+  .msh-project-next {
+    grid-template-columns: 1fr;
+  }
+
+  .msh-project-status {
+    justify-self: start;
+  }
+
+  .msh-project-next .msh-button {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .msh-project-header h1 {
+    font-size: clamp(38px, 11vw, 52px);
+  }
+
+  .msh-active-path-canvas {
+    min-height: 590px;
+    border-radius: 26px;
+  }
+
+  .msh-active-path-art {
+    inset: 24px -10% 28px;
+    width: 120%;
+    height: calc(100% - 52px);
+    transform: none;
+  }
+
+  .msh-path-annotation-here {
+    left: 4%;
+    top: 72%;
+    max-width: 82%;
+  }
+
+  .msh-path-annotation-milestone {
+    left: 8%;
+    top: 42%;
+    max-width: 76%;
+  }
+
+  .msh-path-annotation-direction {
+    right: 4%;
+    top: 7%;
+    max-width: 76%;
+  }
+
+  .msh-path-progress-note {
+    right: 4%;
+    bottom: 2.5%;
+    left: 4%;
+    max-width: none;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .msh-project-main {
+    width: min(94%, 1180px);
+  }
+
+  .msh-project-header {
+    margin-bottom: 24px;
+  }
+
+  .msh-project-header > p:last-child {
+    font-size: 15px;
+  }
+
+  .msh-project-title-row h2 {
+    font-size: 30px;
+  }
+
+  .msh-active-path-canvas {
+    min-height: 620px;
+  }
+
+  .msh-project-next,
+  .msh-project-detail {
+    padding: 20px;
+  }
+
+  .msh-project-active > .msh-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msh-path-annotation {
+    transition: none;
+  }
+}
