@@ -87,6 +87,19 @@
     catch (_) {}
     return pathIndex[file] || { key:'unregistered', label:anchor.textContent.trim(), href:value, type, role:type === TYPES.PRIVATE ? 'activity' : 'doorway' };
   }
+  function carryFirstDoorQuestion(anchor) {
+    if (!anchor.matches || !anchor.matches('[data-first-door-route]') || !root.MSHStorage) return;
+    let entry;
+    try { entry = root.MSHStorage.getFirstDoor(root.MSHStorage.getState()); }
+    catch (_) { return; }
+    if (!entry || entry.intent !== 'health_question' || !entry.context) return;
+    let url;
+    try { url = new URL(anchor.getAttribute('href'), root.location && root.location.href || 'https://msh.local/'); }
+    catch (_) { return; }
+    if (url.pathname.split('/').pop() !== 'resources.html') return;
+    url.searchParams.set('q', entry.context);
+    anchor.href = `${url.pathname.split('/').pop()}${url.search}${url.hash}`;
+  }
   function decorate(scope) {
     const container = scope || root.document;
     if (!container || !container.querySelectorAll) return;
@@ -109,6 +122,7 @@
     root.document.addEventListener('click', event => {
       const anchor = event.target.closest && event.target.closest('a[href]');
       if (!anchor) return;
+      carryFirstDoorQuestion(anchor);
       const route = routeForAnchor(anchor);
       if (!route) return;
       const source = currentKey();
