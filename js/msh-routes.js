@@ -8,8 +8,8 @@
     explore: Object.freeze({ key:'explore', label:'Explore', href:'my-health.html?view=explore', type:TYPES.PRIVATE, role:'directory' }),
     tools: Object.freeze({ key:'tools', label:'Tools', href:'my-health.html?view=tools', type:TYPES.PRIVATE, role:'directory' }),
     calendar: Object.freeze({ key:'calendar', label:'Calendar', href:'calendar.html', type:TYPES.PRIVATE, role:'activity' }),
-    landscape: Object.freeze({ key:'landscape', label:'Health Landscape', href:'health-landscape.html', type:TYPES.PRIVATE, role:'activity' }),
-    assessments: Object.freeze({ key:'assessments', label:'Assessments', href:'assessments.html', type:TYPES.PRIVATE, role:'activity' }),
+    landscape: Object.freeze({ key:'landscape', label:'Landscape', href:'health-landscape.html', type:TYPES.PRIVATE, role:'activity' }),
+    assessments: Object.freeze({ key:'assessments', label:'Self-Insight', href:'assessments.html', type:TYPES.PRIVATE, role:'activity' }),
     horizon: Object.freeze({ key:'horizon', label:'Horizon', href:'my-vision.html', type:TYPES.PRIVATE, role:'activity' }),
     path: Object.freeze({ key:'path', label:'Path', href:'my-project.html', type:TYPES.PRIVATE, role:'activity' }),
     practice: Object.freeze({ key:'practice', label:'Practice', href:'my-practice.html', type:TYPES.PRIVATE, role:'activity' }),
@@ -17,11 +17,14 @@
     journey: Object.freeze({ key:'journey', label:'Journey', href:'my-progress.html', type:TYPES.PRIVATE, role:'activity' }),
     cycle: Object.freeze({ key:'cycle', label:'Cycle', href:'calendar.html?view=cycle', type:TYPES.PRIVATE, role:'activity' }),
     movement: Object.freeze({ key:'movement', label:'Movement', href:'calendar.html?view=movement', type:TYPES.PRIVATE, role:'activity' }),
-    hello: Object.freeze({ key:'hello', label:'Hello', href:'hello.html', type:TYPES.PRIVATE, role:'activity' }),
-    publicHome: Object.freeze({ key:'publicHome', label:'Public My Simple Health', href:'index.html', type:TYPES.PUBLIC, role:'doorway' }),
-    science: Object.freeze({ key:'science', label:'Explore the science', href:'topics.html', type:TYPES.PUBLIC, role:'doorway' }),
-    publicResources: Object.freeze({ key:'publicResources', label:'Public resources', href:'resources.html', type:TYPES.PUBLIC, role:'doorway' }),
-    recipes: Object.freeze({ key:'recipes', label:'Recipes', href:'recipes.html', type:TYPES.PUBLIC, role:'doorway' })
+    publicHome: Object.freeze({ key:'publicHome', label:'My Simple Health', href:'index.html', type:TYPES.PUBLIC, role:'doorway' }),
+    publicResources: Object.freeze({ key:'publicResources', label:'Resources', href:'resources.html', type:TYPES.PUBLIC, role:'doorway' }),
+    science: Object.freeze({ key:'science', label:'Explore the science', href:'resources.html', type:TYPES.PUBLIC, role:'doorway' }),
+    recipes: Object.freeze({ key:'recipes', label:'Recipes', href:'recipes.html', type:TYPES.PUBLIC, role:'doorway' }),
+    about: Object.freeze({ key:'about', label:'About', href:'about.html', type:TYPES.PUBLIC, role:'doorway' }),
+    support: Object.freeze({ key:'support', label:'Help & Support', href:'support.html', type:TYPES.PUBLIC, role:'doorway' }),
+    privacy: Object.freeze({ key:'privacy', label:'Privacy', href:'privacy.html', type:TYPES.PUBLIC, role:'doorway' }),
+    contact: Object.freeze({ key:'contact', label:'Contact', href:'contact.html', type:TYPES.PUBLIC, role:'doorway' })
   });
 
   const pathIndex = Object.freeze(Object.values(routes).reduce((index, route) => {
@@ -61,7 +64,7 @@
     if (page === 'health' && view === 'tools') return 'tools';
     if (page === 'calendar') return 'calendar';
     if (page === 'landscape' || page === 'assessments') return 'explore';
-    return ({ health:'health', vision:'horizon', project:'path', practice:'practice', learning:'discovery', progress:'journey', hello:'hello' })[page] || 'health';
+    return ({ health:'health', vision:'horizon', project:'path', practice:'practice', learning:'discovery', progress:'journey' })[page] || 'health';
   }
   function transition(sourceKey, destination) {
     const source = get(sourceKey) || get('health');
@@ -93,7 +96,7 @@
       if (!route) return;
       anchor.dataset.mshRouteKind = route.type;
       anchor.dataset.mshTransition = transition(source, route);
-      if (route.type === TYPES.PUBLIC && !anchor.title) anchor.title = 'Open public My Simple Health';
+      if (route.type === TYPES.PUBLIC && !anchor.title) anchor.title = `Open ${route.label}`;
       if (route.type === TYPES.EXTERNAL) {
         anchor.rel = [anchor.rel, 'external'].filter(Boolean).join(' ');
         if (!anchor.title) anchor.title = 'Leave My Simple Health';
