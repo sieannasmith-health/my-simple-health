@@ -179,3 +179,119 @@
     max-width: 176px;
   }
 }
+
+/*
+ * The whole-health graphic lives in the second column of a two-column demo on
+ * larger screens. Viewport media queries therefore do not describe the space
+ * the graphic actually has. A laptop can be wider than 800px while this stage
+ * is only ~600px wide. Size the composition from its own container so labels,
+ * center type and nodes stay proportional at every intermediate width.
+ */
+.product-demo:first-child .story-landscape-art {
+  container-name: whole-health-stage;
+  container-type: inline-size;
+}
+
+/* Keep the center message on three intentional lines at every width. */
+.product-demo:first-child .network-core {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+.product-demo:first-child .network-core span,
+.product-demo:first-child .network-core strong {
+  margin: 0;
+  padding: 0;
+  line-height: .92;
+  white-space: nowrap;
+}
+
+@container whole-health-stage (max-width: 720px) {
+  .product-demo:first-child .landscape-whole {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .product-demo:first-child .network-node {
+    width: 29%;
+    max-width: 29%;
+    min-width: 0;
+    gap: 6px;
+    box-sizing: border-box;
+    font-size: clamp(8.5px, 1.65cqw, 10px);
+    line-height: 1.08;
+    white-space: normal;
+  }
+
+  .product-demo:first-child .network-node span {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .product-demo:first-child .network-node i {
+    flex: 0 0 clamp(32px, 6.2cqw, 39px);
+    width: clamp(32px, 6.2cqw, 39px);
+    height: clamp(32px, 6.2cqw, 39px);
+  }
+
+  .product-demo:first-child .node-physical { left: 4%; }
+  .product-demo:first-child .node-emotional { left: 3%; }
+  .product-demo:first-child .node-social { left: 3%; }
+  .product-demo:first-child .node-environment { left: 5%; }
+  .product-demo:first-child .node-meaning { right: 4%; }
+  .product-demo:first-child .node-financial { right: 3%; }
+  .product-demo:first-child .node-mental { right: 3%; }
+  .product-demo:first-child .node-work { right: 4%; }
+
+  .product-demo:first-child .node-meaning,
+  .product-demo:first-child .node-financial,
+  .product-demo:first-child .node-mental,
+  .product-demo:first-child .node-work {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .product-demo:first-child .network-core {
+    width: clamp(138px, 25cqw, 176px);
+    min-width: 0;
+    max-width: 176px;
+    aspect-ratio: 1;
+  }
+
+  .product-demo:first-child .network-core span,
+  .product-demo:first-child .network-core strong {
+    font-size: clamp(24px, 4.8cqw, 31px);
+  }
+
+  .product-demo:first-child .network-status {
+    bottom: 0;
+  }
+}
+
+@container whole-health-stage (max-width: 560px) {
+  .product-demo:first-child .network-node {
+    width: 31%;
+    max-width: 31%;
+    font-size: clamp(8px, 1.8cqw, 9px);
+  }
+
+  .product-demo:first-child .network-node i {
+    flex-basis: clamp(29px, 6.4cqw, 34px);
+    width: clamp(29px, 6.4cqw, 34px);
+    height: clamp(29px, 6.4cqw, 34px);
+  }
+
+  .product-demo:first-child .network-core {
+    width: clamp(124px, 27cqw, 148px);
+  }
+
+  .product-demo:first-child .network-core span,
+  .product-demo:first-child .network-core strong {
+    font-size: clamp(22px, 5.1cqw, 27px);
+  }
+}
