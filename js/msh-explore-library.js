@@ -12,6 +12,11 @@
   const sourceLabel = document.querySelector('[data-source-label]');
   let answering = false;
 
+  const API_BASE = /(^|\.)mysimplehealth\.org$/i.test(window.location.hostname)
+    ? 'https://my-simple-health.vercel.app'
+    : '';
+  const EXPLORE_ENDPOINT = `${API_BASE}/api/explore`;
+
   document.querySelectorAll('[data-prompt]').forEach(button => {
     button.addEventListener('click', () => {
       input.value = button.dataset.prompt || button.textContent.trim();
@@ -31,7 +36,7 @@
     sources.innerHTML = '';
 
     try {
-      const response = await fetch('/api/explore', {
+      const response = await fetch(EXPLORE_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ question })
