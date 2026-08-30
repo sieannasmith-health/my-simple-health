@@ -1,0 +1,80 @@
+/* My Simple Health — stable shared carousel controls */
+.msh-glide-shell{
+  position:relative;
+  width:100%;
+  min-width:0;
+  padding-bottom:58px;
+}
+
+.msh-glide-controls{
+  position:absolute;
+  right:0;
+  bottom:0;
+  z-index:6;
+  display:inline-flex;
+  min-height:44px;
+  align-items:center;
+  gap:8px;
+  padding:4px;
+  border:1px solid color-mix(in srgb,var(--msh-glass-ink) 16%,transparent);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--msh-glass-reading-bg) 88%,transparent);
+  box-shadow:0 8px 26px color-mix(in srgb,var(--msh-shadow-color) 72%,transparent),inset 0 1px 0 rgba(255,255,255,.18);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+  backdrop-filter:blur(18px) saturate(120%);
+}
+
+.msh-glide-arrow{
+  display:grid;
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  place-items:center;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:var(--msh-glass-brand);
+  cursor:pointer;
+  transition:background var(--msh-motion-fast) var(--msh-ease-standard),opacity var(--msh-motion-fast) var(--msh-ease-standard),transform var(--msh-motion-fast) var(--msh-ease-standard);
+}
+
+.msh-glide-arrow svg{
+  display:block;
+  width:18px;
+  height:18px;
+  max-width:none;
+  pointer-events:none;
+}
+
+.msh-glide-arrow:hover:not(:disabled){
+  background:color-mix(in srgb,var(--msh-glass-ink) 7%,transparent);
+  transform:translateY(-1px);
+}
+
+.msh-glide-arrow:disabled{
+  opacity:.32;
+  cursor:default;
+}
+
+.msh-glide-position{
+  min-width:48px;
+  padding:0 4px;
+  color:var(--msh-glass-ink-secondary);
+  font:600 11px/1 var(--msh-font-functional);
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+  white-space:nowrap;
+}
+
+@media (max-width:700px){
+  .msh-glide-shell{padding-bottom:54px}
+  .msh-glide-controls{
+    right:4px;
+    bottom:0;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .msh-glide-arrow{transition:none}
+}
