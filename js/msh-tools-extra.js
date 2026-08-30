@@ -11,18 +11,19 @@
     if (!directory || directory.dataset.extendedTools === 'true') return;
     directory.dataset.extendedTools = 'true';
     directory.insertAdjacentHTML('beforeend', `
-      <section aria-labelledby="food-tools">
+      <section aria-labelledby="food-tools" data-msh-tool-id="food">
         <p class="msh-glass-category">Food & nutrition</p>
         <h2 id="food-tools">My Food</h2>
         <p>Keep your foods, meals, recipes, what you have on hand, and what you need in one personal food workspace.</p>
-        <a href="my-health.html?view=tools&tool=food">Open My Food <span aria-hidden="true">→</span></a>
+        <a href="my-health.html?view=tools&tool=food" data-msh-route="food">Open My Food <span aria-hidden="true">→</span></a>
       </section>
-      <section aria-labelledby="finance-tools">
+      <section aria-labelledby="finance-tools" data-msh-tool-id="finances">
         <p class="msh-glass-category">Life context</p>
         <h2 id="finance-tools">Finances</h2>
         <p>Bring financial context into view when it matters to your health, choices, resources, or everyday life.</p>
-        <a href="my-health.html?view=tools&tool=finances">Open Finances <span aria-hidden="true">→</span></a>
+        <a href="my-health.html?view=tools&tool=finances" data-msh-route="finances">Open Finances <span aria-hidden="true">→</span></a>
       </section>`);
+    directory.dispatchEvent(new CustomEvent('msh:tools-changed', { bubbles:true }));
   }
 
   function renderToolPage(kind) {
@@ -52,7 +53,7 @@
       footer:'<a class="msh-glass-back" href="my-health.html?view=tools">← Back to Tools</a>',
       status:isFood ? 'Personal food workspace' : 'Financial context / User controlled'
     })}</div></section>`;
-    if (window.MSHGlide) MSHGlide.mount?.(root);
+    if (window.MSHGlide) MSHGlide.mountAll?.(root);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
