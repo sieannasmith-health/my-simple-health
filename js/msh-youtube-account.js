@@ -11,7 +11,11 @@
 
   const esc = value => String(value == null ? '' : value)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    .replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
+
+  function savedPlaylist() {
+    return root.MSHStorage?.getState()?.settings?.memory?.[STORAGE_KEY] || null;
+  }
 
   function parseDuration(value) {
     const match = String(value || '').match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
@@ -62,7 +66,7 @@
     return gisPromise;
   }
 
-  async function requestToken() {
+  async function requestToken(options) {
     const cfg = await config();
     if (!cfg.enabled || !cfg.clientId) throw new Error('YouTube account connection still needs the Google OAuth client ID configured for MSH.');
     await loadGIS();
@@ -78,7 +82,7 @@
         },
         error_callback: () => reject(new Error('YouTube authorization was closed or could not be completed.'))
       });
-      tokenClient.requestAccessToken({prompt:'consent'});
+      tokenClient.requestAccessToken({prompt:options?.prompt === false ? '' : 'consent'});
     });
   }
 
@@ -143,23 +147,50 @@
     }).filter(video => video.videoId);
   }
 
-  function savePlaylist(playlist, videos) {
-    if (!root.MSHStorage) return;
+  function savePlaylist(playlist, videos, existing) {
+    if (!root.MSHStorage) return null;
+    let saved = null;
     root.MSHStorage.updateState(state => {
       state.settings ||= {};
       state.settings.memory ||= {};
-      state.settings.memory[STORAGE_KEY] = {
+      saved = {
         playlistId:playlist.id,
-        title:playlist.title,
+        title:playlist.title || existing?.title || 'Fitness playlist',
         url:`https://www.youtube.com/playlist?list=${playlist.id}`,
         source:'youtube_oauth',
         limited:false,
-        note:`Connected from your YouTube account · ${playlist.privacy || 'playlist'}`,
+        note:`Connected from your YouTube account · ${playlist.privacy || existing?.privacy || 'playlist'}`,
+        privacy:playlist.privacy || existing?.privacy || '',
         videos:videos.slice(0,500),
-        connectedAt:new Date().toISOString()
+        connectedAt:existing?.connectedAt || new Date().toISOString(),
+        lastSyncedAt:new Date().toISOString()
       };
+      state.settings.memory[STORAGE_KEY] = saved;
       return state;
     });
+    return saved;
+  }
+
+  async function syncSelectedPlaylist(options) {
+    const current = savedPlaylist();
+    if (!current?.playlistId || current.source !== 'youtube_oauth') throw new Error('Choose a YouTube fitness playlist first.');
+    if (!accessToken) await requestToken({prompt:options?.prompt !== false});
+
+    let playlistMeta = null;
+    try {
+      const playlists = await accountPlaylists();
+      playlistMeta = playlists.find(item => item.id === current.playlistId) || null;
+    } catch (_) {
+      playlistMeta = null;
+    }
+
+    const videos = await playlistVideos(current.playlistId);
+    if (!videos.length) throw new Error('No playable videos were found in your saved fitness playlist.');
+    return savePlaylist(playlistMeta || {
+      id:current.playlistId,
+      title:current.title,
+      privacy:current.privacy
+    }, videos, current);
   }
 
   function modal() { return document.querySelector('.msh-youtube-modal .msh-youtube-card'); }
@@ -171,6 +202,20 @@
       <div class="msh-youtube-results">${playlists.map(item => `<button type="button" class="msh-youtube-result" data-youtube-account-playlist="${esc(item.id)}"><span style="display:block;min-width:0"><strong>${esc(item.title)}</strong><small>${esc(item.count)} videos · ${esc(item.privacy || 'playlist')}</small></span></button>`).join('')}</div>
       ${playlists.length ? '' : '<p>No YouTube playlists were found in this account.</p>'}
       <p data-youtube-account-status role="status" aria-live="polite"></p>
+    </section>`;
+  }
+
+  function connectedPanelMarkup(saved) {
+    const lastSync = saved?.lastSyncedAt
+      ? new Date(saved.lastSyncedAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+      : 'Not refreshed yet';
+    return `<section data-youtube-saved-connection style="margin-top:18px;padding-top:18px;border-top:1px solid var(--msh-border,rgba(23,61,43,.14))">
+      <p class="msh-eyebrow">Connected Movement library</p>
+      <h3 style="margin:.25rem 0 .35rem;font:400 24px Georgia,serif">${esc(saved.title || 'YouTube fitness playlist')}</h3>
+      <p style="margin:.25rem 0">${esc((saved.videos || []).length)} workouts saved in MSH · Last synced ${esc(lastSync)}</p>
+      <p><small>Your saved workouts remain available even after the temporary Google access token expires.</small></p>
+      <div class="msh-card-actions"><button type="button" class="msh-button-secondary" data-youtube-sync-saved>Sync playlist</button></div>
+      <p data-youtube-sync-status role="status" aria-live="polite"></p>
     </section>`;
   }
 
@@ -212,9 +257,34 @@
     }
   }
 
+  async function syncSaved(button) {
+    const host = modal();
+    const status = host?.querySelector('[data-youtube-sync-status]');
+    button.disabled = true;
+    button.textContent = 'Syncing…';
+    if (status) status.textContent = accessToken ? 'Checking your playlist for changes…' : 'Authorize YouTube to refresh this saved playlist…';
+    try {
+      const synced = await syncSelectedPlaylist({prompt:true});
+      if (status) status.textContent = `${synced.videos.length} workouts synced.`;
+      setTimeout(() => root.MSHYouTubeMovement?.openPlanner(false), 450);
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Sync playlist';
+    }
+  }
+
   async function enhancePlanner() {
     const host = modal();
-    if (!host || host.querySelector('[data-youtube-account-connect]')) return;
+    if (!host) return;
+
+    const saved = savedPlaylist();
+    if (saved?.source === 'youtube_oauth' && saved.playlistId && !host.querySelector('[data-youtube-saved-connection]')) {
+      host.insertAdjacentHTML('beforeend', connectedPanelMarkup(saved));
+    }
+
+    if (host.querySelector('[data-youtube-account-connect]')) return;
     const connectForm = host.querySelector('[data-youtube-connect-form]');
     if (!connectForm) return;
     const cfg = await config();
@@ -239,12 +309,14 @@
     const connect = event.target.closest('[data-youtube-account-connect]');
     if (connect) { event.preventDefault(); openAccountPicker(connect); return; }
     const choice = event.target.closest('[data-youtube-account-playlist]');
-    if (choice) { event.preventDefault(); choosePlaylist(choice); }
+    if (choice) { event.preventDefault(); choosePlaylist(choice); return; }
+    const sync = event.target.closest('[data-youtube-sync-saved]');
+    if (sync) { event.preventDefault(); syncSaved(sync); }
   });
 
   const observer = new MutationObserver(() => enhancePlanner());
   observer.observe(document.body, {childList:true, subtree:true});
   enhancePlanner();
 
-  root.MSHYouTubeAccount = Object.freeze({requestToken,accountPlaylists,playlistVideos});
+  root.MSHYouTubeAccount = Object.freeze({requestToken,accountPlaylists,playlistVideos,syncSelectedPlaylist,savedPlaylist});
 })(typeof window !== 'undefined' ? window : globalThis);
