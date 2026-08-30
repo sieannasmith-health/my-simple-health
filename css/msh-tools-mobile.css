@@ -1,0 +1,201 @@
+/* My Simple Health — Tools mobile layout stabilization */
+@media (max-width: 600px) {
+  /* Tools is a browsing surface, so let its content establish its own height. */
+  .msh-glass-workspace[data-glass-state="tools"] {
+    min-height: auto;
+    overflow: hidden;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+    padding: 38px 20px 116px;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-heading,
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-shell,
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tool-shelf-controls {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-heading h1 {
+    max-width: 11ch;
+  }
+
+  /* Native horizontal touch browsing, with one clear card at a time. */
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, calc(100% - 28px));
+    gap: 14px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory::-webkit-scrollbar {
+    display: none;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory > section {
+    width: 100%;
+    min-width: 0;
+    min-height: 390px;
+    padding: 28px 24px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory h2 {
+    max-width: 100%;
+    font-size: clamp(36px, 11vw, 48px);
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory section > p:not(.msh-glass-category) {
+    font-size: 15px;
+  }
+
+  /* Keep carousel controls reachable by thumb without covering the cards. */
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-shell {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    grid-template-areas:
+      "track track track"
+      "previous position next";
+    gap: 14px 10px;
+    align-items: center;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-shell > .msh-tools-directory {
+    grid-area: track;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-arrow {
+    position: static;
+    display: inline-grid;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--msh-glass-ink) 22%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--msh-glass-ink) 5%, transparent);
+    color: var(--msh-glass-ink);
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-arrow--previous {
+    grid-area: previous;
+    justify-self: start;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-arrow--next {
+    grid-area: next;
+    justify-self: end;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-position {
+    grid-area: position;
+    position: static;
+    justify-self: center;
+    margin: 0;
+    color: var(--msh-glass-ink-secondary);
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glide-arrow:disabled {
+    opacity: .32;
+  }
+
+  /* Manager sits in normal document flow rather than fighting footer controls. */
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tool-shelf-controls {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tool-shelf-controls > .msh-text-button {
+    min-height: 48px;
+    padding: 0;
+  }
+
+  /* The back action is a real mobile control, not an absolutely positioned text link. */
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-back {
+    position: static;
+    grid-column: 1;
+    display: inline-flex;
+    width: fit-content;
+    min-height: 52px;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 0;
+    padding: 0 18px;
+    border: 1px solid color-mix(in srgb, var(--msh-personal-accent) 56%, var(--msh-glass-border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--msh-glass-panel-bg) 86%, transparent);
+    color: var(--msh-glass-ink);
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-back:active {
+    transform: translateY(1px);
+  }
+
+  /* Status gets its own line at the bottom, clear of Back and the floating Thought control. */
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-status {
+    right: 20px;
+    bottom: 28px;
+    left: 20px;
+    max-width: calc(100% - 40px);
+    overflow-wrap: anywhere;
+    font-size: 10px;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  /* Dialog must fit the visual viewport and remain scrollable on iOS. */
+  .msh-tool-manager-dialog {
+    width: min(calc(100vw - 24px), 520px);
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+  }
+
+  .msh-tool-manager-card {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 390px) {
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-content {
+    padding-inline: 16px;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory {
+    grid-auto-columns: calc(100% - 18px);
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory > section {
+    padding-inline: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory {
+    scroll-behavior: auto;
+  }
+}
