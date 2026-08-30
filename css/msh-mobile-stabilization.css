@@ -1,7 +1,49 @@
-/* Mobile stabilization pass 1: remove the duplicate bottom workspace nav.
-   The primary app header already exposes My Health / Explore / Tools. */
+/* Mobile stabilization pass 2: keep mobile navigation and Tools controls usable. */
 @media (max-width: 900px) {
   [data-msh-mobile-nav] {
     display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .msh-glass-workspace[data-glass-state="tools"] {
+    min-height: auto !important;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-content {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding-bottom: 116px !important;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-back {
+    position: static !important;
+    left: auto !important;
+    bottom: auto !important;
+    display: inline-flex !important;
+    width: fit-content;
+    min-height: 52px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    padding: 0 18px;
+    border: 1px solid color-mix(in srgb, var(--msh-personal-accent) 56%, var(--msh-glass-border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--msh-glass-panel-bg) 86%, transparent);
+    color: var(--msh-glass-ink);
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .msh-glass-workspace[data-glass-state="tools"] .msh-glass-status {
+    right: 20px !important;
+    bottom: 28px !important;
+    left: 20px !important;
+    max-width: calc(100% - 40px);
+    overflow-wrap: anywhere;
+    font-size: 10px;
+    line-height: 1.35;
+    text-align: center;
   }
 }
