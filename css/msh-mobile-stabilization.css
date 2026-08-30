@@ -1,4 +1,4 @@
-/* Mobile stabilization pass 3: keep mobile navigation and Tools controls usable. */
+/* Mobile stabilization pass 4: keep mobile navigation and Tools controls usable. */
 @media (max-width: 900px) {
   /* The desktop header is sticky, but on mobile it becomes a tall multi-row
      header. Keeping that entire stack sticky lets page content scroll beneath
@@ -7,6 +7,44 @@
   .msh-app-header {
     position: relative;
     top: auto;
+  }
+
+  /* Mobile header composition:
+     row 1 = brand
+     row 2 = workspace navigation + compact appearance utility.
+     The appearance control no longer reserves its own column beside the logo. */
+  .msh-app-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+
+  .msh-app-logo {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .msh-app-nav {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    min-width: 0;
+    padding: 0 0 10px;
+  }
+
+  .msh-app-header-actions {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    padding-bottom: 10px;
+  }
+
+  .msh-theme-control {
+    align-self: auto;
+  }
+
+  .msh-theme-trigger {
+    width: 38px;
+    height: 38px;
   }
 
   [data-msh-mobile-nav] {
