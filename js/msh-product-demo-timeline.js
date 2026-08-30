@@ -5,6 +5,15 @@
   const demos = Array.from(document.querySelectorAll('.product-demo'));
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = window.matchMedia('(max-width: 560px)');
+
+  function ensureKineticStyles() {
+    if (document.querySelector('link[data-msh-kinetic-styles]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'css/msh-product-story-kinetic.css';
+    link.dataset.mshKineticStyles = 'true';
+    document.head.appendChild(link);
+  }
   let discoveryTimeline = null;
   let discoveryObserver = null;
   let discoveryMode = null;
@@ -207,6 +216,7 @@
   }
 
   function boot() {
+    ensureKineticStyles();
     renderTimeStory();
     renderDiscovery();
     if (typeof mobile.addEventListener === 'function') mobile.addEventListener('change', renderDiscovery);
