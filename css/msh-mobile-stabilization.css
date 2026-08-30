@@ -1,5 +1,14 @@
-/* Mobile stabilization pass 2: keep mobile navigation and Tools controls usable. */
+/* Mobile stabilization pass 3: keep mobile navigation and Tools controls usable. */
 @media (max-width: 900px) {
+  /* The desktop header is sticky, but on mobile it becomes a tall multi-row
+     header. Keeping that entire stack sticky lets page content scroll beneath
+     the navigation and visually collide with headings. Let the full mobile
+     header remain in normal document flow instead. */
+  .msh-app-header {
+    position: relative;
+    top: auto;
+  }
+
   [data-msh-mobile-nav] {
     display: none !important;
   }
