@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/youtube-config",
+      "destination": "/youtube-config.json"
+    }
+  ]
+}
