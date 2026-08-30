@@ -6,9 +6,10 @@
     health:{ key:'health', label:'My Health', href:'my-health.html' },
     explore:{ key:'explore', label:'Explore', href:'my-health.html?view=explore' },
     tools:{ key:'tools', label:'Tools', href:'my-health.html?view=tools' },
-    calendar:{ key:'calendar', label:'Calendar', href:'calendar.html' }
+    calendar:{ key:'calendar', label:'Calendar', href:'calendar.html' },
+    financial:{ key:'financial', label:'Financial Health', href:'financial-health.html' }
   })[key];
-  const navItems = ['health','explore','tools','calendar'].map(route);
+  const navItems = ['health','explore','tools','calendar','financial'].map(route);
 
   const pageContexts = Object.freeze({
     health: { page:'my-health', activity:'workspace_overview', visibleActivity:'My Health workspace', allowedActions:['explain','navigate','reflect','plan'] },
@@ -19,6 +20,7 @@
     learning: { page:'learning', activity:'learning', visibleActivity:'Learning and discovery', allowedActions:['explain','reflect','clarify','confirm_learning'] },
     progress: { page:'progress', activity:'progress', visibleActivity:'Progress over time', allowedActions:['explain','reflect','compare','navigate'] },
     calendar: { page:'calendar', activity:'health_calendar', visibleActivity:'Calendar · Health in time', allowedActions:['explain','navigate','review_cycle','record_cycle'] },
+    financial: { page:'financial-health', activity:'financial_health', visibleActivity:'Financial Health', allowedActions:['explain','review','plan','reflect'] },
     assessments: { page:'assessments', activity:'assessment_selection', visibleActivity:'Assessment selection', allowedActions:['explain','navigate','pause'] }
   });
 
@@ -30,151 +32,23 @@
   }
 
   function themeControl() {
-    return `<details class="msh-theme-control">
-      <summary class="msh-theme-trigger" aria-label="Appearance" title="Appearance"><span class="msh-theme-icon" aria-hidden="true">◐</span><span class="msh-visually-hidden">Appearance</span></summary>
-      <div class="msh-theme-menu" role="group" aria-label="Appearance">
-        <span class="msh-theme-menu-label">Appearance</span>
-        <button type="button" data-theme-choice="light">Light</button>
-        <button type="button" data-theme-choice="dark">Dark</button>
-        <button type="button" data-theme-choice="system">System</button>
-      </div>
-    </details>`;
+    return `<details class="msh-theme-control"><summary class="msh-theme-trigger" aria-label="Appearance" title="Appearance"><span class="msh-theme-icon" aria-hidden="true">◐</span><span class="msh-visually-hidden">Appearance</span></summary><div class="msh-theme-menu" role="group" aria-label="Appearance"><span class="msh-theme-menu-label">Appearance</span><button type="button" data-theme-choice="light">Light</button><button type="button" data-theme-choice="dark">Dark</button><button type="button" data-theme-choice="system">System</button></div></details>`;
   }
-
-  function soundControl() {
-    if (!window.MSHSound) return '';
-    return `<button class="msh-sound-control" type="button" data-msh-sound-toggle aria-pressed="false" aria-label="Sound off. Turn environmental sound on"><span data-msh-sound-label>Sound off</span></button>`;
-  }
-
-  function syncThemeControl() {
-    if (!window.MSHTheme) return;
-    const preference = MSHTheme.getPreference();
-    document.querySelectorAll('[data-theme-choice]').forEach(button => {
-      const selected = button.dataset.themeChoice === preference;
-      button.setAttribute('aria-pressed', String(selected));
-      button.classList.toggle('selected', selected);
-    });
-  }
+  function soundControl() { if (!window.MSHSound) return ''; return `<button class="msh-sound-control" type="button" data-msh-sound-toggle aria-pressed="false" aria-label="Sound off. Turn environmental sound on"><span data-msh-sound-label>Sound off</span></button>`; }
+  function syncThemeControl() { if (!window.MSHTheme) return; const preference=MSHTheme.getPreference(); document.querySelectorAll('[data-theme-choice]').forEach(button=>{const selected=button.dataset.themeChoice===preference;button.setAttribute('aria-pressed',String(selected));button.classList.toggle('selected',selected);}); }
 
   function buildHelloActivity(page, patch) {
-    const base = pageContexts[page];
-    if (!base) return null;
-    const extra = patch && typeof patch === 'object' ? patch : {};
-    const state = window.MSHStorage ? MSHStorage.getState() : null;
-    const project = state ? MSHStorage.getActiveProject(state) : null;
-    const practice = state ? MSHStorage.getActivePractice(state) : null;
-    const vision = state ? MSHStorage.getCurrentVision(state) : null;
-    const learning = state ? MSHStorage.getCurrentLearning(state)[0] || null : null;
-    const latestProgress = state ? [...state.progressEvents].sort((a,b) => new Date(b.createdAt||0)-new Date(a.createdAt||0))[0] || null : null;
-    const landscape = state ? MSHStorage.getCurrentLandscape(state) : null;
-    const objectByPage = {
-      landscape: landscape && { selectedObjectType:'landscape', selectedObjectId:landscape.id, selectedObjectLabel:'Current Landscape' },
-      vision: vision && { selectedObjectType:'vision', selectedObjectId:vision.id, selectedObjectLabel:'Current Vision' },
-      project: project && { selectedObjectType:'project', selectedObjectId:project.id, selectedObjectLabel:project.title },
-      practice: practice && { selectedObjectType:'practice', selectedObjectId:practice.id, selectedObjectLabel:practice.title },
-      learning: learning && { selectedObjectType:'learning', selectedObjectId:learning.id, selectedObjectLabel:learning.statement },
-      progress: latestProgress && { selectedObjectType:'progress_event', selectedObjectId:latestProgress.id, selectedObjectLabel:latestProgress.title || 'Recent progress' }
-    };
-    return {
-      ...base,
-      route: `${location.pathname}${location.search}`,
-      contextId: base.page,
-      contextLabel: base.visibleActivity,
-      projectId: project && project.id || '',
-      projectLabel: project && project.title || '',
-      practiceId: practice && practice.id || '',
-      practiceLabel: practice && practice.title || '',
-      ...(objectByPage[page] || {}),
-      provenance: 'SYSTEM_OBSERVED',
-      recordable: false,
-      ...extra
-    };
+    const base=pageContexts[page]; if(!base)return null; const extra=patch&&typeof patch==='object'?patch:{}; const state=window.MSHStorage?MSHStorage.getState():null;
+    const project=state?MSHStorage.getActiveProject(state):null, practice=state?MSHStorage.getActivePractice(state):null, vision=state?MSHStorage.getCurrentVision(state):null, learning=state?MSHStorage.getCurrentLearning(state)[0]||null:null, latestProgress=state?[...state.progressEvents].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0]||null:null, landscape=state?MSHStorage.getCurrentLandscape(state):null;
+    const objectByPage={landscape:landscape&&{selectedObjectType:'landscape',selectedObjectId:landscape.id,selectedObjectLabel:'Current Landscape'},vision:vision&&{selectedObjectType:'vision',selectedObjectId:vision.id,selectedObjectLabel:'Current Vision'},project:project&&{selectedObjectType:'project',selectedObjectId:project.id,selectedObjectLabel:project.title},practice:practice&&{selectedObjectType:'practice',selectedObjectId:practice.id,selectedObjectLabel:practice.title},learning:learning&&{selectedObjectType:'learning',selectedObjectId:learning.id,selectedObjectLabel:learning.statement},progress:latestProgress&&{selectedObjectType:'progress_event',selectedObjectId:latestProgress.id,selectedObjectLabel:latestProgress.title||'Recent progress'}};
+    return {...base,route:`${location.pathname}${location.search}`,contextId:base.page,contextLabel:base.visibleActivity,projectId:project&&project.id||'',projectLabel:project&&project.title||'',practiceId:practice&&practice.id||'',practiceLabel:practice&&practice.title||'',...(objectByPage[page]||{}),provenance:'SYSTEM_OBSERVED',recordable:false,...extra};
   }
-
-  function rememberHelloActivity(page, patch) {
-    if (!window.MSHStorage || page === 'hello') return;
-    const context = buildHelloActivity(page, patch);
-    if (context) MSHStorage.setHelloActivity(context);
-  }
-
-  function visiblePagePatch() {
-    const promptSelectors = [
-      '[data-msh-reflection-prompt]', '.msh-v2-question-stage h1',
-      '.msh-landscape-question-shell .msh-question-domain h1',
-      '.msh-reflection-form legend strong', '.msh-vision-prompt:focus-within strong'
-    ];
-    const prompt = promptSelectors.map(selector => [...document.querySelectorAll(selector)])
-      .flat().find(element => element.offsetParent !== null && element.textContent.trim());
-    const selected = document.querySelector('input:checked');
-    const selectedLabel = selected && selected.closest('label');
-    return {
-      questionText: prompt ? prompt.textContent.trim() : '',
-      userSelectedState: selectedLabel ? selectedLabel.textContent.trim() : ''
-    };
-  }
-
-  function watchPageContext(active) {
-    if (!window.MSHStorage || active === 'hello') return;
-    let pending = 0;
-    const refresh = () => {
-      window.clearTimeout(pending);
-      pending = window.setTimeout(() => rememberHelloActivity(active, visiblePagePatch()), 60);
-    };
-    document.addEventListener('focusin', refresh);
-    document.addEventListener('change', refresh);
-    const main = document.querySelector('main');
-    if (main && window.MutationObserver) {
-      const observer = new MutationObserver(refresh);
-      observer.observe(main, { childList:true, subtree:true, characterData:true });
-    }
-    refresh();
-  }
-
-  function mountShell() {
-    const active = document.body.dataset.mshPage || 'health';
-    const navActive = window.MSHRoutes ? MSHRoutes.currentKey() : active;
-    rememberHelloActivity(active);
-    const header = document.querySelector('[data-msh-header]');
-    const mobile = document.querySelector('[data-msh-mobile-nav]');
-
-    if (header) {
-      header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive, false, navItems)}</nav><div class="msh-app-header-actions" aria-label="Workspace controls">${soundControl()}${themeControl()}</div></div></header>`;
-    }
-
-    /* The primary header already carries workspace navigation. Keeping a second
-       injected nav created the raw HealthExploreToolsCalendar text at the page
-       bottom on routes that did not load legacy mobile-nav styling. */
-    if (mobile) {
-      mobile.replaceChildren();
-      mobile.hidden = true;
-      mobile.setAttribute('aria-hidden', 'true');
-    }
-
-    syncThemeControl();
-    if (window.MSHSound) MSHSound.mountControl();
-    if (window.MSHRoutes) MSHRoutes.decorate(document);
-    watchPageContext(active);
-  }
-
-  window.MSHHelloContext = Object.freeze({
-    get: () => window.MSHStorage && MSHStorage.getHelloActivity ? MSHStorage.getHelloActivity() : null,
-    update: patch => rememberHelloActivity(document.body.dataset.mshPage || 'health', patch),
-    refresh: () => rememberHelloActivity(document.body.dataset.mshPage || 'health')
-  });
-
-  document.addEventListener('msh:hello-context', event => {
-    rememberHelloActivity(document.body.dataset.mshPage || 'health', event.detail || {});
-  });
-
-  document.addEventListener('click', event => {
-    const choice = event.target.closest('[data-theme-choice]');
-    if (!choice || !window.MSHTheme) return;
-    MSHTheme.setPreference(choice.dataset.themeChoice);
-    syncThemeControl();
-    const control = choice.closest('details');
-    if (control) control.open = false;
-  });
-
-  document.addEventListener('DOMContentLoaded', mountShell);
-  if (window.MSHTheme) MSHTheme.onChange(syncThemeControl);
+  function rememberHelloActivity(page,patch){if(!window.MSHStorage||page==='hello')return;const context=buildHelloActivity(page,patch);if(context)MSHStorage.setHelloActivity(context);}
+  function visiblePagePatch(){const promptSelectors=['[data-msh-reflection-prompt]','.msh-v2-question-stage h1','.msh-landscape-question-shell .msh-question-domain h1','.msh-reflection-form legend strong','.msh-vision-prompt:focus-within strong'];const prompt=promptSelectors.map(selector=>[...document.querySelectorAll(selector)]).flat().find(element=>element.offsetParent!==null&&element.textContent.trim());const selected=document.querySelector('input:checked');const selectedLabel=selected&&selected.closest('label');return{questionText:prompt?prompt.textContent.trim():'',userSelectedState:selectedLabel?selectedLabel.textContent.trim():''};}
+  function watchPageContext(active){if(!window.MSHStorage||active==='hello')return;let pending=0;const refresh=()=>{window.clearTimeout(pending);pending=window.setTimeout(()=>rememberHelloActivity(active,visiblePagePatch()),60);};document.addEventListener('focusin',refresh);document.addEventListener('change',refresh);const main=document.querySelector('main');if(main&&window.MutationObserver){const observer=new MutationObserver(refresh);observer.observe(main,{childList:true,subtree:true,characterData:true});}refresh();}
+  function mountShell(){const active=document.body.dataset.mshPage||'health';const navActive=window.MSHRoutes?MSHRoutes.currentKey():active;rememberHelloActivity(active);const header=document.querySelector('[data-msh-header]');const mobile=document.querySelector('[data-msh-mobile-nav]');if(header){header.innerHTML=`<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive,false,navItems)}</nav><div class="msh-app-header-actions" aria-label="Workspace controls">${soundControl()}${themeControl()}</div></div></header>`;}if(mobile){mobile.replaceChildren();mobile.hidden=true;mobile.setAttribute('aria-hidden','true');}syncThemeControl();if(window.MSHSound)MSHSound.mountControl();if(window.MSHRoutes)MSHRoutes.decorate(document);watchPageContext(active);}
+  window.MSHHelloContext=Object.freeze({get:()=>window.MSHStorage&&MSHStorage.getHelloActivity?MSHStorage.getHelloActivity():null,update:patch=>rememberHelloActivity(document.body.dataset.mshPage||'health',patch),refresh:()=>rememberHelloActivity(document.body.dataset.mshPage||'health')});
+  document.addEventListener('msh:hello-context',event=>rememberHelloActivity(document.body.dataset.mshPage||'health',event.detail||{}));
+  document.addEventListener('click',event=>{const choice=event.target.closest('[data-theme-choice]');if(!choice||!window.MSHTheme)return;MSHTheme.setPreference(choice.dataset.themeChoice);syncThemeControl();const control=choice.closest('details');if(control)control.open=false;});
+  document.addEventListener('DOMContentLoaded',mountShell);if(window.MSHTheme)MSHTheme.onChange(syncThemeControl);
 })();
