@@ -8,6 +8,10 @@
     return typeof root.matchMedia === 'function' && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  function visibleItems(track) {
+    return Array.from(track.children).filter(item => !item.hidden);
+  }
+
   function currentIndex(track, items) {
     const position = track.scrollLeft;
     let closest = 0;
@@ -23,9 +27,16 @@
     return closest;
   }
 
+  function arrowIcon(direction) {
+    const path = direction === 'previous'
+      ? '<path d="M15 18l-6-6 6-6"/><path d="M9 12h10"/>'
+      : '<path d="M9 18l6-6-6-6"/><path d="M5 12h10"/>';
+    return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  }
+
   function mount(track) {
     if (!track || track.dataset.mshGlideBound === 'true') return null;
-    let items = Array.from(track.children);
+    let items = visibleItems(track);
     if (items.length < 2) return null;
 
     track.dataset.mshGlideBound = 'true';
@@ -44,13 +55,13 @@
     previous.type = 'button';
     previous.className = 'msh-glide-arrow msh-glide-arrow--previous';
     previous.setAttribute('aria-label', `Previous ${itemName}`);
-    previous.textContent = '←';
+    previous.innerHTML = arrowIcon('previous');
 
     const next = document.createElement('button');
     next.type = 'button';
     next.className = 'msh-glide-arrow msh-glide-arrow--next';
     next.setAttribute('aria-label', `Next ${itemName}`);
-    next.textContent = '→';
+    next.innerHTML = arrowIcon('next');
 
     const position = document.createElement('output');
     const positionId = `msh-glide-position-${++instanceCount}`;
@@ -65,14 +76,19 @@
     position.append(visiblePosition, spokenPosition);
     track.setAttribute('aria-describedby', positionId);
 
+    const controls = document.createElement('div');
+    controls.className = 'msh-glide-controls';
+    controls.setAttribute('aria-label', `${label} carousel controls`);
+    controls.append(previous, position, next);
+
     track.parentNode.insertBefore(shell, track);
-    shell.append(previous, track, next, position);
+    shell.append(track, controls);
 
     let active = 0;
     let settleTimer = 0;
 
     function refreshItems() {
-      items = Array.from(track.children);
+      items = visibleItems(track);
       items.forEach((item, index) => {
         item.setAttribute('aria-posinset', String(index + 1));
         item.setAttribute('aria-setsize', String(items.length));
@@ -82,22 +98,31 @@
 
     function update(index) {
       refreshItems();
+      if (!items.length) {
+        previous.disabled = true;
+        next.disabled = true;
+        visiblePosition.textContent = '0 / 0';
+        spokenPosition.textContent = `No ${itemName}s available`;
+        return;
+      }
       active = Math.max(0, Math.min(items.length - 1, index));
       previous.disabled = active === 0;
       next.disabled = active === items.length - 1;
-      items.forEach((item, itemIndex) => item.classList.toggle('is-current', itemIndex === active));
+      Array.from(track.children).forEach(item => item.classList.toggle('is-current', items[active] === item));
       visiblePosition.textContent = `${active + 1} / ${items.length}`;
       spokenPosition.textContent = `${itemName[0].toUpperCase()}${itemName.slice(1)} ${active + 1} of ${items.length}`;
     }
 
     function settle() {
       refreshItems();
+      if (!items.length) return;
       update(currentIndex(track, items));
       if (root.MSHFeedback) MSHFeedback.emit('settle', { source:'glide', target:items[active] });
     }
 
     function goTo(index, source) {
       refreshItems();
+      if (!items.length) return;
       const targetIndex = Math.max(0, Math.min(items.length - 1, index));
       if (targetIndex === active && source !== 'initial') return;
       if (root.MSHFeedback && source !== 'initial') MSHFeedback.emit('select', { source:'glide', target:source === 'previous' ? previous : next });
@@ -119,26 +144,31 @@
     });
     track.addEventListener('scroll', () => {
       refreshItems();
+      if (!items.length) return;
       update(currentIndex(track, items));
       root.clearTimeout(settleTimer);
       settleTimer = root.setTimeout(settle, reducedMotion() ? 0 : 140);
     }, { passive:true });
+    track.addEventListener('msh:tools-changed', () => {
+      refreshItems();
+      update(items.length ? currentIndex(track, items) : 0);
+    });
     root.addEventListener('resize', () => {
       refreshItems();
-      update(currentIndex(track, items));
+      if (items.length) update(currentIndex(track, items));
     }, { passive:true });
 
     if (typeof root.MutationObserver === 'function') {
       const itemObserver = new MutationObserver(records => {
-        if (!records.some(record => record.type === 'childList')) return;
+        if (!records.some(record => record.type === 'childList' || record.type === 'attributes')) return;
         refreshItems();
-        update(currentIndex(track, items));
+        update(items.length ? currentIndex(track, items) : 0);
       });
-      itemObserver.observe(track, { childList:true });
+      itemObserver.observe(track, { childList:true, attributes:true, attributeFilter:['hidden'] });
     }
 
     update(0);
-    return Object.freeze({ track, previous, next, position, goTo, getIndex:() => active, getCount:() => items.length });
+    return Object.freeze({ track, previous, next, position, controls, goTo, getIndex:() => active, getCount:() => items.length });
   }
 
   function mountAll(scope) {
