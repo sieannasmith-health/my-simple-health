@@ -8,6 +8,7 @@
     explore: Object.freeze({ key:'explore', label:'Explore', href:'my-health.html?view=explore', type:TYPES.PRIVATE, role:'directory' }),
     tools: Object.freeze({ key:'tools', label:'Tools', href:'my-health.html?view=tools', type:TYPES.PRIVATE, role:'directory' }),
     calendar: Object.freeze({ key:'calendar', label:'Calendar', href:'calendar.html', type:TYPES.PRIVATE, role:'activity' }),
+    financial: Object.freeze({ key:'financial', label:'Financial Health', href:'financial-health.html', type:TYPES.PRIVATE, role:'activity' }),
     landscape: Object.freeze({ key:'landscape', label:'Health Landscape', href:'health-landscape.html', type:TYPES.PRIVATE, role:'activity' }),
     assessments: Object.freeze({ key:'assessments', label:'Assessments', href:'assessments.html', type:TYPES.PRIVATE, role:'activity' }),
     horizon: Object.freeze({ key:'horizon', label:'Horizon', href:'my-vision.html', type:TYPES.PRIVATE, role:'activity' }),
@@ -60,6 +61,7 @@
     if (page === 'health' && view === 'explore') return 'explore';
     if (page === 'health' && view === 'tools') return 'tools';
     if (page === 'calendar') return 'calendar';
+    if (page === 'financial') return 'financial';
     if (page === 'landscape' || page === 'assessments') return 'explore';
     return ({ health:'health', vision:'horizon', project:'path', practice:'practice', learning:'discovery', progress:'journey', hello:'hello' })[page] || 'health';
   }
