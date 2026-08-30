@@ -1,0 +1,40 @@
+name: One-time landing image fallback wiring
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-landing-image-fallback.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  wire-fallback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Wire landing image fallback
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          script = '<script src="js/msh-landing-image-fallback.js"></script>'
+          if script not in s:
+              marker = '<script src="js/msh-public-story.js"></script>'
+              if marker not in s:
+                  raise SystemExit('public story script marker not found')
+              s = s.replace(marker, script + marker, 1)
+              p.write_text(s)
+          PY
+      - name: Commit wiring
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Wire landing showcase image fallback" || exit 0
+          git push origin HEAD:main
