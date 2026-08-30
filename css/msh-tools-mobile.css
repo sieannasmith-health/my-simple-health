@@ -1,6 +1,5 @@
 /* My Simple Health — Tools mobile layout stabilization */
 @media (max-width: 600px) {
-  /* Tools is a browsing surface, so let its content establish its own height. */
   .msh-glass-workspace[data-glass-state="tools"] {
     min-height: auto;
     overflow: hidden;
@@ -24,14 +23,14 @@
     max-width: 11ch;
   }
 
-  /* Native horizontal touch browsing, with one clear card at a time. */
+  /* Preserve the glide controller's horizontal model: one full card per viewport. */
   .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, calc(100% - 28px));
+    display: flex;
+    flex-wrap: nowrap;
     gap: 14px;
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
@@ -39,7 +38,7 @@
     overscroll-behavior-inline: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    touch-action: pan-x pan-y;
+    touch-action: pan-x;
   }
 
   .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory::-webkit-scrollbar {
@@ -47,9 +46,12 @@
   }
 
   .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory > section {
-    width: 100%;
-    min-width: 0;
+    flex: 0 0 calc(100% - 28px);
+    width: calc(100% - 28px);
+    min-width: calc(100% - 28px);
+    max-width: calc(100% - 28px);
     min-height: 390px;
+    box-sizing: border-box;
     padding: 28px 24px;
     scroll-snap-align: start;
     scroll-snap-stop: always;
@@ -64,7 +66,6 @@
     font-size: 15px;
   }
 
-  /* Keep carousel controls reachable by thumb without covering the cards. */
   .msh-glass-workspace[data-glass-state="tools"] .msh-glide-shell {
     display: grid;
     grid-template-columns: 48px 1fr 48px;
@@ -73,6 +74,7 @@
       "previous position next";
     gap: 14px 10px;
     align-items: center;
+    overflow: hidden;
   }
 
   .msh-glass-workspace[data-glass-state="tools"] .msh-glide-shell > .msh-tools-directory {
@@ -116,7 +118,6 @@
     opacity: .32;
   }
 
-  /* Manager sits in normal document flow rather than fighting footer controls. */
   .msh-glass-workspace[data-glass-state="tools"] .msh-tool-shelf-controls {
     grid-column: 1;
     margin: 0;
@@ -127,7 +128,6 @@
     padding: 0;
   }
 
-  /* The back action is a real mobile control, not an absolutely positioned text link. */
   .msh-glass-workspace[data-glass-state="tools"] .msh-glass-back {
     position: static;
     grid-column: 1;
@@ -153,7 +153,6 @@
     transform: translateY(1px);
   }
 
-  /* Status gets its own line at the bottom, clear of Back and the floating Thought control. */
   .msh-glass-workspace[data-glass-state="tools"] .msh-glass-status {
     right: 20px;
     bottom: 28px;
@@ -165,7 +164,6 @@
     text-align: center;
   }
 
-  /* Dialog must fit the visual viewport and remain scrollable on iOS. */
   .msh-tool-manager-dialog {
     width: min(calc(100vw - 24px), 520px);
     max-height: calc(100dvh - 32px);
@@ -185,11 +183,11 @@
     padding-inline: 16px;
   }
 
-  .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory {
-    grid-auto-columns: calc(100% - 18px);
-  }
-
   .msh-glass-workspace[data-glass-state="tools"] .msh-tools-directory > section {
+    flex-basis: calc(100% - 18px);
+    width: calc(100% - 18px);
+    min-width: calc(100% - 18px);
+    max-width: calc(100% - 18px);
     padding-inline: 20px;
   }
 }
