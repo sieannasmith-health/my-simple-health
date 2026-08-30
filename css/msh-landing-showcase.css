@@ -1,1 +1,253 @@
 .landing-health-life-showcase{background:#f7f4ec;padding:clamp(28px,5vw,72px) max(16px,4vw)}.landing-health-life-showcase__frame{width:min(1480px,100%);margin:0 auto;border-radius:clamp(18px,2vw,30px);overflow:hidden;box-shadow:0 28px 80px rgba(35,55,42,.10);background:#f7f4ec}.landing-health-life-showcase img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}.landing-health-life-showcase__actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px}.landing-health-life-showcase__actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid rgba(23,61,43,.14);background:rgba(255,255,255,.72);color:#173d2b;text-decoration:none;font:600 13px/1 Arial,sans-serif}.landing-health-life-showcase__actions a:first-child{background:#173d2b;color:#fff;border-color:#173d2b}@media(max-width:720px){.landing-health-life-showcase{padding:24px 0}.landing-health-life-showcase__frame{width:100%;border-radius:0;overflow-x:auto;overscroll-behavior-inline:contain}.landing-health-life-showcase img{width:max(860px,150vw);max-width:none;aspect-ratio:auto}.landing-health-life-showcase__actions{padding:0 16px}.landing-health-life-showcase__actions a{flex:1 1 150px}}@media(prefers-reduced-motion:reduce){.landing-health-life-showcase__frame{scroll-behavior:auto}}
+
+/* Landing page theme contrast contract. Loaded last so every public landing surface
+   uses readable text against the surface it is actually rendered on. */
+html[data-theme='light'] .msh-story-home,
+html:not([data-theme]) .msh-story-home{
+  --landing-text:#252822;
+  --landing-heading:#173d2b;
+  --landing-muted:#4d574f;
+  --landing-surface:#fcfbf7;
+  --landing-surface-soft:#f7f4ec;
+  --landing-border:rgba(23,61,43,.14);
+  color:var(--landing-text)!important;
+  background:var(--landing-surface-soft)!important;
+}
+
+html[data-theme='light'] .story-header,
+html:not([data-theme]) .story-header{
+  color:var(--landing-text)!important;
+  background:rgba(247,244,236,.92)!important;
+  border-bottom-color:var(--landing-border)!important;
+}
+
+html[data-theme='light'] .story-brand,
+html[data-theme='light'] .story-nav a:not(.story-nav-enter),
+html[data-theme='light'] .context-copy h1,
+html[data-theme='light'] .context-lede,
+html[data-theme='light'] .journey-deck-heading h2,
+html[data-theme='light'] .journey-deck-heading p,
+html[data-theme='light'] .journey-deck-card h3,
+html[data-theme='light'] .journey-card-support,
+html[data-theme='light'] .journey-deck-card>a,
+html[data-theme='light'] .product-demo-copy h2,
+html[data-theme='light'] .demo-event,
+html[data-theme='light'] .discovery-lines span,
+html[data-theme='light'] .discovery-insight,
+html[data-theme='light'] .practice-step,
+html[data-theme='light'] .journey-sources span,
+html[data-theme='light'] .journey-rings b,
+html[data-theme='light'] .demo-doorways a,
+html[data-theme='light'] .demo-doorways small,
+html[data-theme='light'] .trust-strip,
+html[data-theme='light'] .trust-strip h2,
+html[data-theme='light'] .trust-strip strong,
+html[data-theme='light'] .trust-strip p,
+html[data-theme='light'] .story-ending,
+html[data-theme='light'] .story-ending h2,
+html[data-theme='light'] .story-ending p,
+html[data-theme='light'] .story-footer,
+html[data-theme='light'] .story-footer a{
+  color:var(--landing-text)!important;
+}
+
+html[data-theme='light'] .context-copy h1,
+html[data-theme='light'] .journey-deck-heading h2,
+html[data-theme='light'] .journey-deck-card h3,
+html[data-theme='light'] .product-demo-copy h2,
+html[data-theme='light'] .trust-strip h2,
+html[data-theme='light'] .story-ending h2,
+html[data-theme='light'] .story-brand{
+  color:var(--landing-heading)!important;
+}
+
+html[data-theme='light'] .context-lede,
+html[data-theme='light'] .journey-deck-heading>div:first-child>p:last-child,
+html[data-theme='light'] .journey-card-support,
+html[data-theme='light'] .demo-doorways small,
+html[data-theme='light'] .trust-strip p,
+html[data-theme='light'] .story-ending p{
+  color:var(--landing-muted)!important;
+}
+
+html[data-theme='dark'] .msh-story-home{
+  --landing-text:#f5f1e7;
+  --landing-heading:#f7f4ec;
+  --landing-muted:rgba(245,241,231,.76);
+  --landing-surface:#151917;
+  --landing-surface-soft:#0d0f0e;
+  --landing-surface-raised:#1b201d;
+  --landing-border:rgba(245,241,231,.14);
+  color:var(--landing-text)!important;
+  background:var(--landing-surface-soft)!important;
+}
+
+html[data-theme='dark'] .story-header{
+  color:var(--landing-text)!important;
+  background:rgba(13,15,14,.94)!important;
+  border-bottom-color:var(--landing-border)!important;
+}
+
+html[data-theme='dark'] .story-brand,
+html[data-theme='dark'] .story-nav a:not(.story-nav-enter),
+html[data-theme='dark'] .context-copy h1,
+html[data-theme='dark'] .context-lede,
+html[data-theme='dark'] .journey-deck-heading h2,
+html[data-theme='dark'] .journey-deck-heading p,
+html[data-theme='dark'] .journey-deck-card h3,
+html[data-theme='dark'] .journey-card-support,
+html[data-theme='dark'] .journey-deck-card>a,
+html[data-theme='dark'] .product-demo-copy h2,
+html[data-theme='dark'] .demo-event,
+html[data-theme='dark'] .discovery-lines span,
+html[data-theme='dark'] .discovery-insight,
+html[data-theme='dark'] .discovery-insight p,
+html[data-theme='dark'] .practice-step,
+html[data-theme='dark'] .practice-step strong,
+html[data-theme='dark'] .journey-sources span,
+html[data-theme='dark'] .journey-rings b,
+html[data-theme='dark'] .demo-doorways a,
+html[data-theme='dark'] .demo-doorways strong,
+html[data-theme='dark'] .demo-doorways small,
+html[data-theme='dark'] .trust-strip,
+html[data-theme='dark'] .trust-strip h2,
+html[data-theme='dark'] .trust-strip strong,
+html[data-theme='dark'] .trust-strip p,
+html[data-theme='dark'] .story-ending,
+html[data-theme='dark'] .story-ending h2,
+html[data-theme='dark'] .story-ending p,
+html[data-theme='dark'] .story-footer,
+html[data-theme='dark'] .story-footer a,
+html[data-theme='dark'] .network-node,
+html[data-theme='dark'] .network-status{
+  color:var(--landing-text)!important;
+}
+
+html[data-theme='dark'] .context-lede,
+html[data-theme='dark'] .journey-deck-heading>div:first-child>p:last-child,
+html[data-theme='dark'] .journey-card-support,
+html[data-theme='dark'] .demo-doorways small,
+html[data-theme='dark'] .trust-strip p,
+html[data-theme='dark'] .story-ending p{
+  color:var(--landing-muted)!important;
+}
+
+html[data-theme='dark'] .context-hero{
+  background-image:linear-gradient(180deg,rgba(5,8,7,.56),rgba(5,8,7,.72)),url('../msh-landing-hero.png')!important;
+}
+
+html[data-theme='dark'] .context-feature-rail a{
+  color:var(--landing-text)!important;
+  border-color:var(--landing-border)!important;
+  background:rgba(18,22,19,.82)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 18px 46px rgba(0,0,0,.28)!important;
+}
+html[data-theme='dark'] .context-feature-rail span,
+html[data-theme='dark'] .context-feature-rail small{
+  color:var(--landing-text)!important;
+}
+html[data-theme='dark'] .context-feature-rail small{color:var(--landing-muted)!important}
+html[data-theme='dark'] .context-principles{color:rgba(245,241,231,.82)!important}
+
+html[data-theme='dark'] .landing-health-life-showcase,
+html[data-theme='dark'] .product-demo-stack,
+html[data-theme='dark'] .story-ending{
+  background:var(--landing-surface-soft)!important;
+}
+html[data-theme='dark'] .landing-health-life-showcase__frame{
+  background:#111411!important;
+  box-shadow:0 28px 80px rgba(0,0,0,.34)!important;
+}
+html[data-theme='dark'] .landing-health-life-showcase__actions a{
+  color:var(--landing-text)!important;
+  border-color:var(--landing-border)!important;
+  background:var(--landing-surface-raised)!important;
+}
+html[data-theme='dark'] .landing-health-life-showcase__actions a:first-child{
+  color:#102d20!important;
+  background:#d9ead0!important;
+  border-color:#d9ead0!important;
+}
+
+html[data-theme='dark'] .journey-deck{
+  --deck-paper:#151917;
+  --deck-ink:#f5f1e7;
+  --deck-muted:rgba(245,241,231,.76);
+  --deck-atmosphere:#111512;
+  background:linear-gradient(180deg,#0d0f0e,#131814)!important;
+}
+html[data-theme='dark'] .journey-deck-card{
+  border-color:var(--landing-border)!important;
+  background:rgba(21,25,23,.94)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.28)!important;
+}
+html[data-theme='dark'] .journey-deck-card h3,
+html[data-theme='dark'] .journey-deck-card>a{
+  color:var(--landing-heading)!important;
+}
+html[data-theme='dark'] .journey-deck-controls button{
+  color:var(--landing-text)!important;
+  border-color:var(--landing-border)!important;
+  background:var(--landing-surface-raised)!important;
+}
+html[data-theme='dark'] .journey-deck-controls p{color:var(--landing-muted)!important}
+
+html[data-theme='dark'] .product-demo,
+html[data-theme='dark'] .product-demo:first-child{
+  color:var(--landing-text)!important;
+  border-color:var(--landing-border)!important;
+  background:var(--landing-surface)!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.26)!important;
+}
+html[data-theme='dark'] .demo-visual,
+html[data-theme='dark'] .product-demo:nth-of-type(2) .demo-visual,
+html[data-theme='dark'] .product-demo:nth-of-type(3) .demo-visual,
+html[data-theme='dark'] .product-demo:nth-of-type(4) .demo-visual,
+html[data-theme='dark'] .product-demo:nth-of-type(5) .demo-visual,
+html[data-theme='dark'] .story-landscape-art{
+  color:var(--landing-text)!important;
+  background:#111512!important;
+  box-shadow:inset 0 0 0 1px rgba(245,241,231,.08)!important;
+}
+html[data-theme='dark'] .demo-event,
+html[data-theme='dark'] .discovery-insight,
+html[data-theme='dark'] .demo-doorways a{
+  border-color:var(--landing-border)!important;
+  background:var(--landing-surface-raised)!important;
+}
+html[data-theme='dark'] .network-core{
+  border-color:var(--landing-border)!important;
+  background:linear-gradient(145deg,#202621,#141815)!important;
+  box-shadow:0 24px 42px rgba(0,0,0,.35),0 7px 14px rgba(0,0,0,.22),inset 0 0 0 9px rgba(255,255,255,.025)!important;
+}
+html[data-theme='dark'] .network-core span,
+html[data-theme='dark'] .network-core strong{color:var(--landing-heading)!important}
+
+html[data-theme='dark'] .trust-strip{
+  border-color:var(--landing-border)!important;
+  background:rgba(245,241,231,.08)!important;
+}
+html[data-theme='dark'] .trust-strip>div{
+  color:var(--landing-text)!important;
+  background:var(--landing-surface)!important;
+}
+
+html[data-theme='dark'] .story-footer{
+  color:var(--landing-text)!important;
+  border-top-color:var(--landing-border)!important;
+  background:#0d0f0e!important;
+}
+
+/* Interactive elements retain clear contrast in both themes. */
+html[data-theme='light'] .story-button,
+html[data-theme='light'] .story-nav-enter{
+  background:#173d2b!important;
+  color:#fff!important;
+}
+html[data-theme='dark'] .story-button,
+html[data-theme='dark'] .story-nav-enter{
+  background:#d9ead0!important;
+  color:#102d20!important;
+}
+html[data-theme='light'] :focus-visible{outline:3px solid #173d2b;outline-offset:3px}
+html[data-theme='dark'] :focus-visible{outline:3px solid #d9ead0;outline-offset:3px}
