@@ -15,12 +15,19 @@
   const point = root.querySelector('[data-journey-point]');
   const desktop = window.matchMedia('(min-width: 901px)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const heroDeck = !!(root.previousElementSibling && root.previousElementSibling.classList.contains('context-hero'));
   let activeIndex = 0;
   let frame = 0;
   let mobileTimer = 0;
 
+  if (heroDeck) root.classList.add('journey-deck--hero');
+
   function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
+  }
+
+  function usesScrollDrivenDesktop() {
+    return desktop.matches && !reducedMotion.matches && !heroDeck;
   }
 
   function setActive(index, continuousProgress) {
@@ -55,18 +62,18 @@
 
   function updateDesktop() {
     frame = 0;
-    if (!desktop.matches || reducedMotion.matches) return;
+    if (!usesScrollDrivenDesktop()) return;
     const value = desktopProgress();
     track.style.transform = `translate3d(${-maximumTrackOffset() * value}px, 0, 0)`;
     setActive(Math.round(value * (cards.length - 1)), value);
   }
 
   function requestDesktopUpdate() {
-    if (frame) return;
+    if (frame || !usesScrollDrivenDesktop()) return;
     frame = window.requestAnimationFrame(updateDesktop);
   }
 
-  function closestMobileCard() {
+  function closestCarouselCard() {
     const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
     let closestIndex = 0;
     let closestDistance = Infinity;
@@ -83,7 +90,7 @@
 
   function goTo(index, moveFocus) {
     const targetIndex = clamp(index, 0, cards.length - 1);
-    if (desktop.matches && !reducedMotion.matches) {
+    if (usesScrollDrivenDesktop()) {
       const rootTop = window.scrollY + root.getBoundingClientRect().top;
       const travel = Math.max(1, root.offsetHeight - window.innerHeight);
       window.scrollTo({
@@ -105,9 +112,9 @@
   next.addEventListener('click', function () { goTo(activeIndex + 1, false); });
 
   viewport.addEventListener('scroll', function () {
-    if (desktop.matches && !reducedMotion.matches) return;
+    if (usesScrollDrivenDesktop()) return;
     window.clearTimeout(mobileTimer);
-    mobileTimer = window.setTimeout(closestMobileCard, 60);
+    mobileTimer = window.setTimeout(closestCarouselCard, 60);
   }, { passive: true });
 
   cards.forEach(function (card, index) {
@@ -126,11 +133,15 @@
   window.addEventListener('scroll', requestDesktopUpdate, { passive: true });
   window.addEventListener('resize', function () {
     track.style.transform = '';
-    if (desktop.matches && !reducedMotion.matches) requestDesktopUpdate();
-    else closestMobileCard();
+    if (usesScrollDrivenDesktop()) requestDesktopUpdate();
+    else closestCarouselCard();
   }, { passive: true });
 
-  if (typeof desktop.addEventListener === 'function') desktop.addEventListener('change', requestDesktopUpdate);
+  if (typeof desktop.addEventListener === 'function') desktop.addEventListener('change', function () {
+    track.style.transform = '';
+    if (usesScrollDrivenDesktop()) requestDesktopUpdate();
+    else closestCarouselCard();
+  });
   if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', requestDesktopUpdate);
 
   setActive(0, 0);
