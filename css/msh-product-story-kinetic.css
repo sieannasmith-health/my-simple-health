@@ -1,0 +1,29 @@
+/* My Simple Health — shared kinetic SVG story language */
+.demo-visual--history-svg{display:grid;place-items:center;min-height:360px;padding:10px;overflow:hidden;background:radial-gradient(circle at 18% 14%,rgba(125,148,96,.10),transparent 34%),linear-gradient(135deg,rgba(255,255,255,.64),rgba(245,241,231,.34));}
+.history-story-svg{display:block;width:100%;height:auto;overflow:visible;color:#173d2b}
+.history-glass-panel{fill:rgba(255,255,255,.46);stroke:rgba(255,255,255,.82);stroke-width:1;filter:drop-shadow(0 18px 30px rgba(23,61,43,.07))}
+.history-stage-track path{fill:none;stroke:rgba(23,61,43,.10);stroke-width:1}
+.history-stage-track circle:first-child{fill:rgba(125,148,96,.14)}
+.history-stage-dot{fill:#7d9460}
+.history-stage-labels text{font:600 10px Arial,sans-serif;fill:#596159;text-anchor:middle;letter-spacing:.015em}
+.history-axis path{fill:none;stroke:rgba(23,61,43,.22);stroke-width:1.2;stroke-linecap:round}
+.history-axis text{font:9px Arial,sans-serif;fill:#6a716c;text-anchor:middle;letter-spacing:.08em}
+.history-stems path{fill:none;stroke:rgba(23,61,43,.15);stroke-width:1;stroke-dasharray:3 5}
+.history-chip{transform-box:fill-box;transform-origin:center}
+.history-chip-card{fill:rgba(255,255,255,.92);stroke:rgba(23,61,43,.10);stroke-width:1}
+.history-chip-dot{fill:#7d9460}.history-chip-dot.is-sleep{fill:#9a84c7}.history-chip-dot.is-stress{fill:#d58b91}.history-chip-dot.is-workout{fill:#7d9460}.history-chip-dot.is-headache{fill:#d7aa55}.history-chip-dot.is-medication{fill:#8ea9c0}
+.history-chip-label{font:600 10.5px Arial,sans-serif;fill:#252822}
+.history-connection{fill:none;stroke:#9a84c7;stroke-width:2;stroke-linecap:round;opacity:.62}
+.history-repeat-point{stroke:#fff;stroke-width:3;fill:#9a84c7;filter:drop-shadow(0 0 8px rgba(154,132,199,.32))}.history-repeat-point.is-workout{fill:#7d9460;filter:drop-shadow(0 0 8px rgba(125,148,96,.32))}
+.history-repeat-badge rect{fill:rgba(247,249,243,.94);stroke:rgba(23,61,43,.09);stroke-width:1;filter:drop-shadow(0 8px 16px rgba(23,61,43,.07))}.history-repeat-badge text{font:700 9px Arial,sans-serif;fill:#4e644e;text-anchor:middle}
+.history-insight-card,.history-question-card{fill:rgba(255,255,255,.82);stroke:rgba(255,255,255,.88);stroke-width:1;filter:drop-shadow(0 20px 34px rgba(23,61,43,.10))}
+.history-insight-card{fill:rgba(248,249,243,.88)}
+.history-question-card{fill:rgba(255,251,246,.88)}
+.history-eyebrow{font:700 9px Arial,sans-serif;fill:#6f8656;letter-spacing:.08em}
+.history-insight-copy{font:20px/1.25 Georgia,serif;fill:#173d2b}.history-insight-copy--mobile{font-size:17px}
+.history-uncertainty{font:10px Arial,sans-serif;fill:#596159}
+.history-question-copy{font:600 11px Arial,sans-serif;fill:#252822}.history-question-arrow{font:20px Arial,sans-serif;fill:#6f8656;text-anchor:end}
+.product-demo:nth-of-type(3) .demo-doorways a{background:rgba(255,255,255,.66);border-color:rgba(255,255,255,.75);box-shadow:inset 0 1px 0 rgba(255,255,255,.86),0 18px 42px rgba(23,61,43,.11),0 5px 14px rgba(23,61,43,.06)}
+@media(max-width:800px){.demo-visual--history-svg{min-height:440px}}
+@media(max-width:560px){.demo-visual--history-svg{min-height:570px;padding:4px;border-radius:22px}.history-story-svg--mobile{width:100%;min-height:560px}.history-stage-labels--mobile text{font-size:8px}.history-chip-label{font-size:10px}.history-insight-copy--mobile{font-size:16px}.history-question-copy{font-size:10px}.product-demo:nth-of-type(3) .product-demo-copy>p{max-width:34ch}}
+@media(prefers-reduced-motion:reduce){.history-story-svg *{animation:none!important;transition:none!important}}
