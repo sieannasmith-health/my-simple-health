@@ -1,0 +1,22 @@
+/* My Simple Health — YouTube planned-workout modal polish */
+
+#msh-youtube-workout-title {
+  max-width: 24ch;
+  margin-top: .45rem;
+  font-size: clamp(28px, 3.6vw, 40px);
+  line-height: 1.08;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+#msh-youtube-workout-title + * {
+  min-width: 0;
+}
+
+@media (max-width: 680px) {
+  #msh-youtube-workout-title {
+    max-width: 20ch;
+    font-size: clamp(26px, 8vw, 34px);
+    line-height: 1.08;
+  }
+}
