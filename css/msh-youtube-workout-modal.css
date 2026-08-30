@@ -1,5 +1,23 @@
 /* My Simple Health — YouTube planned-workout modal polish */
 
+/*
+  Calendar month cells are an index of the day, not a content card.
+  A connected YouTube workout participates in the existing Movement layer
+  and is represented by Calendar's event indicator. The video thumbnail stays
+  in the selected-day detail surface, where it can coexist with other events.
+*/
+.msh-calendar-day.has-youtube-workout {
+  background-image: none !important;
+}
+
+.msh-calendar-day.has-youtube-workout::after {
+  content: none !important;
+}
+
+[data-theme="dark"] .msh-calendar-day.has-youtube-workout {
+  background-image: none !important;
+}
+
 #msh-youtube-workout-title {
   max-width: 24ch;
   margin-top: .45rem;
