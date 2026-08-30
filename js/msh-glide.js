@@ -25,7 +25,7 @@
 
   function mount(track) {
     if (!track || track.dataset.mshGlideBound === 'true') return null;
-    const items = Array.from(track.children);
+    let items = Array.from(track.children);
     if (items.length < 2) return null;
 
     track.dataset.mshGlideBound = 'true';
@@ -68,15 +68,20 @@
     track.parentNode.insertBefore(shell, track);
     shell.append(previous, track, next, position);
 
-    items.forEach((item, index) => {
-      item.setAttribute('aria-posinset', String(index + 1));
-      item.setAttribute('aria-setsize', String(items.length));
-    });
-
     let active = 0;
     let settleTimer = 0;
 
+    function refreshItems() {
+      items = Array.from(track.children);
+      items.forEach((item, index) => {
+        item.setAttribute('aria-posinset', String(index + 1));
+        item.setAttribute('aria-setsize', String(items.length));
+      });
+      active = Math.max(0, Math.min(items.length - 1, active));
+    }
+
     function update(index) {
+      refreshItems();
       active = Math.max(0, Math.min(items.length - 1, index));
       previous.disabled = active === 0;
       next.disabled = active === items.length - 1;
@@ -86,11 +91,13 @@
     }
 
     function settle() {
+      refreshItems();
       update(currentIndex(track, items));
       if (root.MSHFeedback) MSHFeedback.emit('settle', { source:'glide', target:items[active] });
     }
 
     function goTo(index, source) {
+      refreshItems();
       const targetIndex = Math.max(0, Math.min(items.length - 1, index));
       if (targetIndex === active && source !== 'initial') return;
       if (root.MSHFeedback && source !== 'initial') MSHFeedback.emit('select', { source:'glide', target:source === 'previous' ? previous : next });
@@ -111,14 +118,27 @@
       goTo(active + (event.key === 'ArrowRight' ? 1 : -1), event.key === 'ArrowRight' ? 'next' : 'previous');
     });
     track.addEventListener('scroll', () => {
+      refreshItems();
       update(currentIndex(track, items));
       root.clearTimeout(settleTimer);
       settleTimer = root.setTimeout(settle, reducedMotion() ? 0 : 140);
     }, { passive:true });
-    root.addEventListener('resize', () => update(currentIndex(track, items)), { passive:true });
+    root.addEventListener('resize', () => {
+      refreshItems();
+      update(currentIndex(track, items));
+    }, { passive:true });
+
+    if (typeof root.MutationObserver === 'function') {
+      const itemObserver = new MutationObserver(records => {
+        if (!records.some(record => record.type === 'childList')) return;
+        refreshItems();
+        update(currentIndex(track, items));
+      });
+      itemObserver.observe(track, { childList:true });
+    }
 
     update(0);
-    return Object.freeze({ track, previous, next, position, goTo, getIndex:() => active });
+    return Object.freeze({ track, previous, next, position, goTo, getIndex:() => active, getCount:() => items.length });
   }
 
   function mountAll(scope) {
