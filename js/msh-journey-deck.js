@@ -35,6 +35,7 @@
     cards.forEach(function (card, cardIndex) {
       const active = cardIndex === activeIndex;
       card.classList.toggle('is-active', active);
+      card.setAttribute('aria-hidden', String(!active && heroDeck));
       if (active) card.setAttribute('aria-current', 'step');
       else card.removeAttribute('aria-current');
     });
@@ -74,6 +75,7 @@
   }
 
   function closestCarouselCard() {
+    if (heroDeck) return;
     const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
     let closestIndex = 0;
     let closestDistance = Infinity;
@@ -90,7 +92,10 @@
 
   function goTo(index, moveFocus) {
     const targetIndex = clamp(index, 0, cards.length - 1);
-    if (usesScrollDrivenDesktop()) {
+
+    if (heroDeck) {
+      setActive(targetIndex);
+    } else if (usesScrollDrivenDesktop()) {
       const rootTop = window.scrollY + root.getBoundingClientRect().top;
       const travel = Math.max(1, root.offsetHeight - window.innerHeight);
       window.scrollTo({
@@ -105,28 +110,29 @@
       });
       setActive(targetIndex);
     }
-    if (moveFocus) cards[targetIndex].focus({ preventScroll: true });
+
+    if (moveFocus && !heroDeck) cards[targetIndex].focus({ preventScroll: true });
   }
 
   previous.addEventListener('click', function () { goTo(activeIndex - 1, false); });
   next.addEventListener('click', function () { goTo(activeIndex + 1, false); });
 
   viewport.addEventListener('scroll', function () {
-    if (usesScrollDrivenDesktop()) return;
+    if (usesScrollDrivenDesktop() || heroDeck) return;
     window.clearTimeout(mobileTimer);
     mobileTimer = window.setTimeout(closestCarouselCard, 60);
   }, { passive: true });
 
   cards.forEach(function (card, index) {
-    card.addEventListener('focus', function () { setActive(index); });
+    card.addEventListener('focus', function () { if (!heroDeck) setActive(index); });
     card.addEventListener('click', function (event) {
       if (event.target.closest('a')) return;
-      goTo(index, false);
+      if (!heroDeck) goTo(index, false);
     });
     card.addEventListener('keydown', function (event) {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
-      goTo(index + (event.key === 'ArrowRight' ? 1 : -1), true);
+      goTo(index + (event.key === 'ArrowRight' ? 1 : -1), !heroDeck);
     });
   });
 
@@ -134,13 +140,13 @@
   window.addEventListener('resize', function () {
     track.style.transform = '';
     if (usesScrollDrivenDesktop()) requestDesktopUpdate();
-    else closestCarouselCard();
+    else if (!heroDeck) closestCarouselCard();
   }, { passive: true });
 
   if (typeof desktop.addEventListener === 'function') desktop.addEventListener('change', function () {
     track.style.transform = '';
     if (usesScrollDrivenDesktop()) requestDesktopUpdate();
-    else closestCarouselCard();
+    else if (!heroDeck) closestCarouselCard();
   });
   if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', requestDesktopUpdate);
 
