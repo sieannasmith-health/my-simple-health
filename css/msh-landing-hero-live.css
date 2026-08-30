@@ -10,6 +10,57 @@
   display:none!important;
 }
 
+/* Dark mode keeps the MSH palette neutral and readable. Forest/sage are accents,
+   not the primary text color. The hero image remains visible with a dark veil. */
+html[data-theme='dark'] .msh-story-home{
+  background:#0d0f0e!important;
+  color:#f5f1e7!important;
+}
+html[data-theme='dark'] .context-hero{
+  background-image:linear-gradient(180deg,rgba(8,12,10,.34),rgba(8,12,10,.56)),url('../msh-landing-hero.png')!important;
+}
+html[data-theme='dark'] .context-copy h1,
+html[data-theme='dark'] .context-lede,
+html[data-theme='dark'] .story-brand,
+html[data-theme='dark'] .story-section h1,
+html[data-theme='dark'] .story-section h2,
+html[data-theme='dark'] .story-section h3,
+html[data-theme='dark'] .story-emphasis,
+html[data-theme='dark'] .story-center-line,
+html[data-theme='dark'] .story-ending h3,
+html[data-theme='dark'] .story-ending-lines{
+  color:#f5f1e7!important;
+}
+html[data-theme='dark'] .story-kicker,
+html[data-theme='dark'] .story-product-label{
+  color:#a8bc9b!important;
+}
+html[data-theme='dark'] .story-turn,
+html[data-theme='dark'] .story-ending{
+  background:#0d0f0e!important;
+  color:#f5f1e7!important;
+}
+html[data-theme='dark'] .story-product,
+html[data-theme='dark'] .story-world-map a:not(.world-center){
+  border-color:rgba(245,241,231,.12)!important;
+  background:rgba(255,255,255,.045)!important;
+  color:#f5f1e7!important;
+  box-shadow:none!important;
+}
+html[data-theme='dark'] .story-product p,
+html[data-theme='dark'] .story-narrow>p,
+html[data-theme='dark'] .story-evidence-grid p,
+html[data-theme='dark'] .story-world-map strong{
+  color:rgba(245,241,231,.74)!important;
+}
+html[data-theme='dark'] .story-world-map span,
+html[data-theme='dark'] .story-evidence-grid h3{
+  color:#f5f1e7!important;
+}
+html[data-theme='dark'] .story-theme-menu button[aria-pressed='true']{
+  color:#f5f1e7!important;
+}
+
 @media(max-width:800px){
   .context-hero{
     background-position:58% top!important;
