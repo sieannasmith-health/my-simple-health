@@ -38,6 +38,18 @@
     return Number.isFinite(parsed.getTime())?parsed.toISOString():'';
   }
 
+  function cleanVideo(value) {
+    if(!value||typeof value!=='object')return null;
+    const provider=clean(value.provider,40), videoId=clean(value.videoId,120), youtubeUrl=clean(value.youtubeUrl,600), thumbnailUrl=clean(value.thumbnailUrl,600);
+    if(provider!=='youtube'||!videoId||!youtubeUrl)return null;
+    return {
+      provider:'youtube', videoId, title:clean(value.title,220), youtubeUrl, thumbnailUrl,
+      playlistId:clean(value.playlistId,160)||null,
+      durationMinutes:Number.isFinite(Number(value.durationMinutes))?Number(value.durationMinutes):null,
+      focusTags:Array.isArray(value.focusTags)?value.focusTags.map(item=>clean(item,60)).filter(Boolean).slice(0,12):[]
+    };
+  }
+
   function movementEvents(state) {
     const source=state||root.MSHStorage.getState();
     return (source.calendar?.events||[]).filter(event=>event?.category==='movement'&&event?.type==='movement');
@@ -52,17 +64,17 @@
     const date=dateKey(input.date), requestedType=allowed(input.movementType,MOVEMENT_TYPES,''), directoryItem=root.MSHMovementDirectory?.get(clean(input.directoryItemId,80));
     const movementLabel=clean(input.movementLabel||input.title||(directoryItem&&directoryItem.label)||TYPE_LABELS[requestedType],160);
     if(!date||!movementLabel)return null;
-    const movementType=requestedType||'other', entryMode=directoryItem&&directoryItem.label===movementLabel?'directory':'custom';
+    const movementType=requestedType||'other', entryMode=directoryItem&&directoryItem.label===movementLabel?'directory':cleanVideo(input.video)?'connected_resource':'custom';
     const duration=number(input.durationMinutes);
     if(duration!=null&&(!Number.isFinite(duration)||duration<1||duration>1440))return null;
-    const timestamp=new Date().toISOString(), id=root.MSHStorage.uid('calendar_movement');
+    const timestamp=new Date().toISOString(), id=root.MSHStorage.uid('calendar_movement'), video=cleanVideo(input.video);
     const event={
       id, category:'movement', type:'movement', date,
       startAt:startAt(date,input.time), timestamp,
       title:movementLabel,
       detail:clean(input.notes,500), recordStatus:'recorded', informationClass:'RECORDED',
-      source:{type:'USER_ENTRY',channel:'calendar'}, prediction:null,
-      movement:{status:'planned',movementType,movementLabel,entryMode,directoryItemId:entryMode==='directory'?directoryItem.id:null,directoryCategory:entryMode==='directory'?directoryItem.categoryId:null,durationMinutes:duration},
+      source:video?{type:'CONNECTED_RESOURCE',channel:'youtube',provider:'youtube',playlistId:video.playlistId,videoId:video.videoId}:{type:'USER_ENTRY',channel:'calendar'}, prediction:null,
+      movement:{status:'planned',movementType,movementLabel,entryMode,directoryItemId:entryMode==='directory'?directoryItem.id:null,directoryCategory:entryMode==='directory'?directoryItem.categoryId:null,durationMinutes:duration,focusArea:clean(input.focusArea,80)||null,video},
       provenance:provenance(id), createdAt:timestamp, updatedAt:timestamp
     };
     root.MSHStorage.updateState(state=>{state.calendar.events.push(event);return state;});
