@@ -15,7 +15,6 @@
     letter-spacing: -.04em;
   }
 
-  /* Give mobile a purpose-built stage instead of scaling the desktop canvas. */
   .product-demo:first-child .story-landscape-art {
     min-height: 0;
     height: auto;
@@ -24,274 +23,147 @@
     border-radius: 24px;
   }
 
-  .product-demo:first-child .landscape-whole {
-    width: 100%;
-    height: clamp(360px, 103vw, 430px);
-    aspect-ratio: auto;
-    transform: none !important;
-    transform-origin: center;
-    overflow: hidden;
-  }
-
-  /* The vector paths stay inside a safe mobile inset. */
-  .product-demo:first-child .landscape-network {
-    inset: 11% 10% 12%;
-    width: 80%;
-    height: 77%;
-    overflow: hidden;
-  }
-
-  .product-demo:first-child .network-node {
-    width: 31%;
-    max-width: 31%;
-    min-width: 0;
-    gap: 5px;
-    font-size: 8.5px;
-    line-height: 1.08;
-    white-space: normal;
-    box-sizing: border-box;
-  }
-
-  .product-demo:first-child .network-node span {
-    display: block;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .product-demo:first-child .network-node i {
-    flex: 0 0 30px;
-    width: 30px;
-    height: 30px;
-    border-width: 1px;
-    box-shadow: 0 5px 12px rgba(23,61,43,.08), inset 0 0 0 3px rgba(255,255,255,.74);
-  }
-
-  /* Pull all labels well inside the viewport. */
-  .product-demo:first-child .node-physical { left: 5%; top: 13%; }
-  .product-demo:first-child .node-emotional { left: 4%; top: 31%; }
-  .product-demo:first-child .node-social { left: 5%; top: 49%; }
-  .product-demo:first-child .node-environment { left: 6%; top: 67%; }
-
-  .product-demo:first-child .node-meaning { right: 5%; top: 13%; }
-  .product-demo:first-child .node-financial { right: 4%; top: 31%; }
-  .product-demo:first-child .node-mental { right: 4%; top: 49%; }
-  .product-demo:first-child .node-work { right: 5%; top: 67%; }
-
-  .product-demo:first-child .node-meaning,
-  .product-demo:first-child .node-financial,
-  .product-demo:first-child .node-mental,
-  .product-demo:first-child .node-work {
-    flex-direction: row-reverse;
-    text-align: right;
-  }
-
-  /* Locked three-line center typography: your / whole / Health. */
-  .product-demo:first-child .network-core {
-    width: 128px;
-    min-width: 128px;
-    max-width: 128px;
-    height: 128px;
-    aspect-ratio: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 0;
-    box-sizing: border-box;
-    box-shadow: 0 15px 26px rgba(37,40,34,.15), 0 4px 9px rgba(37,40,34,.07), inset 0 0 0 7px rgba(255,255,255,.8);
-  }
-
-  .product-demo:first-child .network-core::before {
-    inset: -8px;
-  }
-
-  .product-demo:first-child .network-core span,
-  .product-demo:first-child .network-core strong {
-    display: block;
-    margin: 0;
-    padding: 0;
-    font-size: 25px;
-    line-height: .92;
-    letter-spacing: -.02em;
-    white-space: nowrap;
-  }
-
-  .product-demo:first-child .network-status {
-    bottom: 2.5%;
-    gap: 5px;
-    grid-template-columns: repeat(6, 5px);
-    font-size: 8px;
-  }
-
-  .product-demo:first-child .network-status i {
-    width: 5px;
-    height: 5px;
-  }
-
   .product-demo:first-child .demo-doorways {
     margin-top: 16px;
   }
 }
 
-@media (max-width: 380px) {
-  .product-demo:first-child .landscape-whole {
-    height: 350px;
-  }
-
-  .product-demo:first-child .network-node {
-    width: 32%;
-    max-width: 32%;
-    font-size: 8px;
-  }
-
-  .product-demo:first-child .network-node i {
-    flex-basis: 28px;
-    width: 28px;
-    height: 28px;
-  }
-
-  .product-demo:first-child .network-core {
-    width: 116px;
-    min-width: 116px;
-    max-width: 116px;
-    height: 116px;
-  }
-
-  .product-demo:first-child .network-core span,
-  .product-demo:first-child .network-core strong {
-    font-size: 22px;
-  }
-}
-
-@media (min-width: 521px) and (max-width: 800px) {
-  .product-demo:first-child .story-landscape-art {
-    min-height: 460px;
-  }
-
-  .product-demo:first-child .landscape-whole {
-    width: 100%;
-    max-width: 680px;
-  }
-
-  .product-demo:first-child .network-core {
-    width: 27%;
-    max-width: 176px;
-  }
-}
-
-/*
- * The whole-health graphic lives in the second column of a two-column demo on
- * larger screens. Viewport media queries therefore do not describe the space
- * the graphic actually has. A laptop can be wider than 800px while this stage
- * is only ~600px wide. Size the composition from its own container so labels,
- * center type and nodes stay proportional at every intermediate width.
- */
+/* Whole-health SVG v2. The illustration now owns all geometry in one viewBox. */
 .product-demo:first-child .story-landscape-art {
   container-name: whole-health-stage;
   container-type: inline-size;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #fff;
 }
 
-/* Keep the center message on three intentional lines at every width. */
-.product-demo:first-child .network-core {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  box-sizing: border-box;
+.product-demo:first-child .landscape-whole {
+  position: relative;
+  width: min(100%, 820px);
+  height: auto;
+  aspect-ratio: 820 / 560;
+  min-height: 0;
 }
 
-.product-demo:first-child .network-core span,
-.product-demo:first-child .network-core strong {
-  margin: 0;
-  padding: 0;
-  line-height: .92;
-  white-space: nowrap;
+.whole-health-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-@container whole-health-stage (max-width: 720px) {
+.whole-health-svg .wh-route {
+  fill: none;
+  stroke: rgba(125,148,96,.30);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-dasharray: 4 6;
+  vector-effect: non-scaling-stroke;
+}
+.whole-health-svg .wh-route.is-blue { stroke: rgba(145,164,184,.42); }
+.whole-health-svg .wh-route.is-rose { stroke: rgba(205,157,142,.42); }
+.whole-health-svg .wh-route.is-plum { stroke: rgba(181,166,199,.42); }
+
+.whole-health-svg .wh-orbit {
+  fill: none;
+  stroke: rgba(125,148,96,.10);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.whole-health-svg .wh-node-ring {
+  fill: #fff;
+  stroke: rgba(23,61,43,.08);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.whole-health-svg .wh-node-fill { fill: #eef5e8; }
+.whole-health-svg .wh-node-emotional .wh-node-fill { fill: #fae9e6; }
+.whole-health-svg .wh-node-social .wh-node-fill,
+.whole-health-svg .wh-node-mental .wh-node-fill { fill: #eee9f8; }
+.whole-health-svg .wh-node-environment .wh-node-fill { fill: #e3f4f3; }
+.whole-health-svg .wh-node-financial .wh-node-fill,
+.whole-health-svg .wh-node-work .wh-node-fill { fill: #fbf0d9; }
+.whole-health-svg .wh-node-meaning .wh-node-fill { fill: #e8f2fb; }
+.whole-health-svg .wh-node-dot { fill: #173d2b; opacity: .52; }
+
+.whole-health-svg .wh-label {
+  fill: #252822;
+  font: 400 13px Arial, sans-serif;
+  letter-spacing: .005em;
+}
+.whole-health-svg .wh-label-right { text-anchor: end; }
+
+.whole-health-svg .wh-core-shadow {
+  fill: rgba(37,40,34,.12);
+  filter: blur(12px);
+}
+.whole-health-svg .wh-core-outer {
+  fill: rgba(255,255,255,.76);
+  stroke: rgba(125,148,96,.11);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.whole-health-svg .wh-core {
+  fill: #fcfbf7;
+  stroke: rgba(23,61,43,.10);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.whole-health-svg .wh-core-word {
+  fill: #173d2b;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.whole-health-svg .wh-core-word.wh-your { font-size: 35px; }
+.whole-health-svg .wh-core-word.wh-whole { font-size: 35px; }
+.whole-health-svg .wh-core-word.wh-health { font-size: 35px; }
+
+.whole-health-svg .wh-travel-dot { fill: #7d9460; }
+.whole-health-svg .wh-travel-dot.is-blue { fill: #91a4b8; }
+.whole-health-svg .wh-travel-dot.is-rose { fill: #cd9d8e; }
+.whole-health-svg .wh-travel-dot.is-plum { fill: #b5a6c7; }
+
+.whole-health-svg .wh-status-dot { fill: #d8d3c7; }
+.whole-health-svg .wh-status-dot.is-active { fill: #7d9460; }
+.whole-health-svg .wh-status-label {
+  fill: #536157;
+  font: 400 11px Arial, sans-serif;
+  text-anchor: middle;
+}
+
+/* Mobile uses a taller viewBox generated by JS, not a squeezed desktop layout. */
+@container whole-health-stage (max-width: 560px) {
   .product-demo:first-child .landscape-whole {
     width: 100%;
-    max-width: 100%;
+    aspect-ratio: 390 / 520;
   }
 
-  .product-demo:first-child .network-node {
-    width: 29%;
-    max-width: 29%;
-    min-width: 0;
-    gap: 6px;
-    box-sizing: border-box;
-    font-size: clamp(8.5px, 1.65cqw, 10px);
-    line-height: 1.08;
-    white-space: normal;
+  .whole-health-svg .wh-label {
+    font-size: 10.5px;
   }
 
-  .product-demo:first-child .network-node span {
-    display: block;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .product-demo:first-child .network-node i {
-    flex: 0 0 clamp(32px, 6.2cqw, 39px);
-    width: clamp(32px, 6.2cqw, 39px);
-    height: clamp(32px, 6.2cqw, 39px);
-  }
-
-  .product-demo:first-child .node-physical { left: 4%; }
-  .product-demo:first-child .node-emotional { left: 3%; }
-  .product-demo:first-child .node-social { left: 3%; }
-  .product-demo:first-child .node-environment { left: 5%; }
-  .product-demo:first-child .node-meaning { right: 4%; }
-  .product-demo:first-child .node-financial { right: 3%; }
-  .product-demo:first-child .node-mental { right: 3%; }
-  .product-demo:first-child .node-work { right: 4%; }
-
-  .product-demo:first-child .node-meaning,
-  .product-demo:first-child .node-financial,
-  .product-demo:first-child .node-mental,
-  .product-demo:first-child .node-work {
-    flex-direction: row-reverse;
-    text-align: right;
-  }
-
-  .product-demo:first-child .network-core {
-    width: clamp(138px, 25cqw, 176px);
-    min-width: 0;
-    max-width: 176px;
-    aspect-ratio: 1;
-  }
-
-  .product-demo:first-child .network-core span,
-  .product-demo:first-child .network-core strong {
-    font-size: clamp(24px, 4.8cqw, 31px);
-  }
-
-  .product-demo:first-child .network-status {
-    bottom: 0;
+  .whole-health-svg .wh-core-word.wh-your,
+  .whole-health-svg .wh-core-word.wh-whole,
+  .whole-health-svg .wh-core-word.wh-health {
+    font-size: 30px;
   }
 }
 
-@container whole-health-stage (max-width: 560px) {
-  .product-demo:first-child .network-node {
-    width: 31%;
-    max-width: 31%;
-    font-size: clamp(8px, 1.8cqw, 9px);
-  }
+@container whole-health-stage (max-width: 390px) {
+  .whole-health-svg .wh-label { font-size: 10px; }
+  .whole-health-svg .wh-core-word.wh-your,
+  .whole-health-svg .wh-core-word.wh-whole,
+  .whole-health-svg .wh-core-word.wh-health { font-size: 28px; }
+}
 
-  .product-demo:first-child .network-node i {
-    flex-basis: clamp(29px, 6.4cqw, 34px);
-    width: clamp(29px, 6.4cqw, 34px);
-    height: clamp(29px, 6.4cqw, 34px);
-  }
-
-  .product-demo:first-child .network-core {
-    width: clamp(124px, 27cqw, 148px);
-  }
-
-  .product-demo:first-child .network-core span,
-  .product-demo:first-child .network-core strong {
-    font-size: clamp(22px, 5.1cqw, 27px);
+@media (prefers-reduced-motion: reduce) {
+  .whole-health-svg * {
+    animation: none !important;
+    transition: none !important;
   }
 }
