@@ -1,4 +1,4 @@
-/* My Simple Health — Calendar selected-layer action doorways */
+/* My Simple Health — Calendar user-selected action doorways */
 (function () {
   'use strict';
 
@@ -31,10 +31,10 @@
       new Date().toISOString().slice(0, 10);
   }
 
-  function enabledLayers() {
+  function enabledActions() {
     const state = MSHStorage.getState();
-    const layers = state?.calendar?.settings?.layers || {};
-    return Object.keys(ACTIONS).filter(key => layers[key] === true);
+    const selected = state?.settings?.memory?.calendarQuickAdd || {};
+    return Object.keys(ACTIONS).filter(key => selected[key] === true);
   }
 
   function actionMarkup(key) {
@@ -48,16 +48,21 @@
   function syncDayActions() {
     const inspector = root.querySelector('.msh-date-inspector');
     if (!inspector) return;
+    const keys = enabledActions();
     let actions = inspector.querySelector('.msh-date-actions');
+
+    if (!keys.length) {
+      actions?.remove();
+      return;
+    }
+
     if (!actions) {
       actions = document.createElement('div');
       actions.className = 'msh-date-actions';
       inspector.appendChild(actions);
     }
-    const keys = enabledLayers();
-    const markup = keys.length
-      ? keys.map(actionMarkup).join('')
-      : '<p class="msh-date-action-empty">Choose what you want to use in Customize.</p>';
+
+    const markup = keys.map(actionMarkup).join('');
     if (actions.innerHTML !== markup) actions.innerHTML = markup;
   }
 
@@ -134,11 +139,7 @@
     saveGeneric(event.target);
   });
 
-  root.addEventListener('change', event => {
-    if (event.target.matches('[data-calendar-layer]')) {
-      window.setTimeout(syncDayActions, 0);
-    }
-  });
+  window.addEventListener('msh:calendar-quick-actions-changed', syncDayActions);
 
   const observer = new MutationObserver(() => {
     if (!genericSheet) syncDayActions();
