@@ -15,13 +15,13 @@
         <p class="msh-glass-category">Food & nutrition</p>
         <h2 id="food-tools">My Food</h2>
         <p>Keep your foods, meals, recipes, what you have on hand, and what you need in one personal food workspace.</p>
-        <a href="my-health.html?view=tools&tool=food" data-msh-route="food">Open My Food <span aria-hidden="true">→</span></a>
+        <a href="my-food.html" data-msh-route="food">Open My Food <span aria-hidden="true">→</span></a>
       </section>
       <section aria-labelledby="finance-tools" data-msh-tool-id="finances">
         <p class="msh-glass-category">Life context</p>
         <h2 id="finance-tools">Finances</h2>
         <p>Bring financial context into view when it matters to your health, choices, resources, or everyday life.</p>
-        <a href="my-health.html?view=tools&tool=finances" data-msh-route="finances">Open Finances <span aria-hidden="true">→</span></a>
+        <a href="financial-health.html" data-msh-route="finances">Open Finances <span aria-hidden="true">→</span></a>
       </section>`);
     directory.dispatchEvent(new CustomEvent('msh:tools-changed', { bubbles:true }));
   }
@@ -57,8 +57,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (tool === 'food' || tool === 'finances') {
-      renderToolPage(tool);
+    if (tool === 'food') {
+      location.replace('my-food.html');
+      return;
+    }
+    if (tool === 'finances') {
+      location.replace('financial-health.html');
       return;
     }
     toolsDirectory();
