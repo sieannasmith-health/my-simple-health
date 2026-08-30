@@ -5,14 +5,58 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Your whole Health — SVG test</title>
 <style>
-:root{--forest:#173d2b;--sage:#7d9460;--cream:#f5f1e7;--warm:#fcfbf7;--charcoal:#252822;--line:#d8d3c7;--rose:#cd9d8e;--plum:#b5a6c7;--blue:#91a4b8}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--cream);color:var(--charcoal);font-family:Arial,sans-serif}body{padding:clamp(18px,4vw,44px)}
-.preview-shell{width:min(100%,1080px);margin:0 auto}.eyebrow{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--sage)}h1{margin:0;font:400 clamp(46px,7vw,84px)/.94 Georgia,serif;letter-spacing:-.045em;color:var(--forest)}.lede{max-width:700px;margin:18px 0 30px;font-size:clamp(16px,2vw,21px);line-height:1.5;color:#536157}
-.stage{position:relative;width:100%;overflow:hidden;border:1px solid rgba(23,61,43,.08);border-radius:32px;background:rgba(255,255,255,.94);box-shadow:0 28px 80px rgba(35,55,42,.10)}
-.stage svg{display:block;width:100%;height:auto}.route{fill:none;stroke:rgba(125,148,96,.36);stroke-width:1.4;stroke-linecap:round}.route.rose{stroke:rgba(205,157,142,.52)}.route.plum{stroke:rgba(181,166,199,.55)}.route.blue{stroke:rgba(145,164,184,.55)}
-.orbit{fill:none;stroke:rgba(23,61,43,.08);stroke-width:1}.node-ring{fill:#fff;stroke:rgba(23,61,43,.10);stroke-width:1}.node-fill{fill:#eef5e8}.node-dot{fill:var(--sage)}.node.emotional .node-fill{fill:#fae9e6}.node.emotional .node-dot{fill:var(--rose)}.node.social .node-fill,.node.mental .node-fill{fill:#eee9f8}.node.social .node-dot,.node.mental .node-dot{fill:var(--plum)}.node.environment .node-fill{fill:#e3f4f3}.node.environment .node-dot{fill:#5f9da0}.node.financial .node-fill,.node.work .node-fill{fill:#fbf0d9}.node.financial .node-dot,.node.work .node-dot{fill:#c99643}.node.meaning .node-fill{fill:#e8f2fb}.node.meaning .node-dot{fill:var(--blue)}
-.label{font-size:13px;fill:var(--charcoal)}.label.right{text-anchor:end}.core-shadow{fill:rgba(37,40,34,.12)}.core-outer{fill:#fff;stroke:rgba(23,61,43,.07)}.core{fill:url(#coreGrad);stroke:rgba(23,61,43,.06)}.core-word{font-family:Georgia,serif;font-size:38px;fill:var(--forest);text-anchor:middle}.status-dot{fill:#d8d3c7}.status-dot.active{fill:var(--sage)}.status-label{font-size:11px;fill:#536157;text-anchor:middle}.travel-dot{fill:var(--sage)}.travel-dot.rose{fill:var(--rose)}.travel-dot.plum{fill:var(--plum)}.travel-dot.blue{fill:var(--blue)}
-@media(max-width:560px){body{padding:12px}.preview-shell{width:100%}.lede{margin-bottom:18px}.stage{border-radius:24px}.label{font-size:10px}.core-word{font-size:28px}}
+:root{
+  --forest:#173d2b;--sage:#7d9460;--cream:#f5f1e7;--warm:#fcfbf7;--charcoal:#252822;--line:#d8d3c7;
+  --rose:#cd9d8e;--plum:#b5a6c7;--blue:#91a4b8;
+  --glass-fill:rgba(255,255,255,.72);
+  --glass-fill-raised:rgba(255,255,255,.82);
+  --glass-border:rgba(255,255,255,.68);
+  --glass-inner:inset 0 1px 0 rgba(255,255,255,.92), inset 0 -1px 0 rgba(23,61,43,.035);
+  --glass-shadow:0 24px 60px rgba(27,43,34,.16),0 48px 110px rgba(27,43,34,.13),0 10px 24px rgba(27,43,34,.10);
+  --glass-shadow-raised:0 20px 46px rgba(27,43,34,.18),0 7px 18px rgba(27,43,34,.11);
+  --glass-blur:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--charcoal);font-family:Arial,sans-serif}
+body{
+  padding:clamp(18px,4vw,44px);
+  background:
+    radial-gradient(circle at 12% 88%,rgba(125,148,96,.20),transparent 32%),
+    radial-gradient(circle at 88% 20%,rgba(145,164,184,.13),transparent 28%),
+    linear-gradient(145deg,#f5f1e7 0%,#f1eee4 52%,#e8eadf 100%);
+  background-attachment:fixed;
+}
+body::before,body::after{content:"";position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(34px);opacity:.65}
+body::before{width:210px;height:210px;left:-55px;bottom:4%;background:rgba(125,148,96,.20)}
+body::after{width:180px;height:180px;right:-35px;top:20%;background:rgba(205,157,142,.11)}
+.preview-shell{width:min(100%,1080px);margin:0 auto}
+.eyebrow{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--sage)}
+h1{margin:0;font:400 clamp(44px,7vw,84px)/.94 Georgia,serif;letter-spacing:-.045em;color:var(--forest)}
+.lede{max-width:700px;margin:18px 0 30px;font-size:clamp(16px,2vw,21px);line-height:1.5;color:#536157}
+.stage{
+  position:relative;width:100%;overflow:hidden;border:1px solid var(--glass-border);border-radius:32px;
+  background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.60));
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(125%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(125%);
+  box-shadow:var(--glass-inner),var(--glass-shadow);
+}
+.stage::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(255,255,255,0) 35%,rgba(125,148,96,.035) 100%)}
+.stage svg{position:relative;z-index:1;display:block;width:100%;height:auto}
+.route{fill:none;stroke:rgba(125,148,96,.38);stroke-width:1.4;stroke-linecap:round}.route.rose{stroke:rgba(205,157,142,.55)}.route.plum{stroke:rgba(181,166,199,.58)}.route.blue{stroke:rgba(145,164,184,.58)}
+.orbit{fill:none;stroke:rgba(23,61,43,.075);stroke-width:1}
+.node-ring{fill:rgba(255,255,255,.80);stroke:rgba(255,255,255,.92);stroke-width:1;filter:url(#nodeShadow)}
+.node-fill{fill:#eef5e8}.node-dot{fill:var(--sage)}.node.emotional .node-fill{fill:#fae9e6}.node.emotional .node-dot{fill:var(--rose)}.node.social .node-fill,.node.mental .node-fill{fill:#eee9f8}.node.social .node-dot,.node.mental .node-dot{fill:var(--plum)}.node.environment .node-fill{fill:#e3f4f3}.node.environment .node-dot{fill:#5f9da0}.node.financial .node-fill,.node.work .node-fill{fill:#fbf0d9}.node.financial .node-dot,.node.work .node-dot{fill:#c99643}.node.meaning .node-fill{fill:#e8f2fb}.node.meaning .node-dot{fill:var(--blue)}
+.label{font-size:13px;fill:var(--charcoal)}.label.right{text-anchor:end}
+.core-shadow{fill:rgba(37,40,34,.15);filter:url(#coreShadow)}
+.core-outer{fill:rgba(255,255,255,.74);stroke:rgba(255,255,255,.94);stroke-width:1.2}
+.core{fill:url(#coreGrad);stroke:rgba(255,255,255,.85);stroke-width:1}
+.core-word{font-family:Georgia,serif;font-size:38px;fill:var(--forest);text-anchor:middle}
+.status-label{font-size:11px;fill:#536157;text-anchor:middle}.travel-dot{fill:var(--sage)}.travel-dot.rose{fill:var(--rose)}.travel-dot.plum{fill:var(--plum)}.travel-dot.blue{fill:var(--blue)}
+@media(max-width:560px){
+  body{padding:12px}.preview-shell{width:100%}.lede{margin-bottom:18px}.stage{border-radius:26px;box-shadow:var(--glass-inner),0 22px 44px rgba(27,43,34,.18),0 44px 86px rgba(27,43,34,.16),0 9px 20px rgba(27,43,34,.10)}
+  .label{font-size:10px}.core-word{font-size:28px}h1{font-size:clamp(42px,13.5vw,56px)}
+}
+@media(prefers-reduced-transparency:reduce){.stage{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}}
 </style>
 </head>
 <body>
@@ -28,21 +72,26 @@
  const stage=document.getElementById('stage');
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const mobile=window.matchMedia('(max-width:560px)').matches;
- function node(cls,cx,cy,label,side){const tx=side==='left'?cx+30:cx-30;return `<g class="node ${cls}"><circle class="node-ring" cx="${cx}" cy="${cy}" r="24"/><circle class="node-fill" cx="${cx}" cy="${cy}" r="19"/><circle class="node-dot" cx="${cx}" cy="${cy}" r="3.2"/><text class="label ${side==='right'?'right':''}" x="${tx}" y="${cy+4}">${label}</text></g>`}
- function svgDesktop(){return `<svg viewBox="0 0 820 560" role="img"><defs><linearGradient id="coreGrad" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f8f6f0"/></linearGradient></defs><g class="routes"><path id="r1" class="route" d="M105 92 C245 92 304 205 410 280 S585 142 690 95"/><path id="r2" class="route rose" d="M82 208 C235 205 305 240 410 280 S575 238 705 205"/><path id="r3" class="route plum" d="M84 323 C236 330 304 302 410 280 S574 353 705 330"/><path id="r4" class="route blue" d="M112 442 C250 438 312 330 410 280 S566 450 676 445"/><path id="r5" class="route blue" d="M105 92 C240 173 300 360 410 280 S578 152 705 205"/><path id="r6" class="route plum" d="M82 208 C235 240 305 390 410 280 S568 318 705 330"/><path id="r7" class="route" d="M84 323 C230 330 302 136 410 280 S575 220 690 95"/><path id="r8" class="route rose" d="M112 442 C236 385 315 142 410 280 S566 408 676 445"/></g><g class="orbits"><circle class="orbit" cx="410" cy="280" r="116"/><circle class="orbit" cx="410" cy="280" r="145"/></g>${node('physical',105,92,'Physical','left')}${node('emotional',82,208,'Emotional','left')}${node('social',84,323,'Social','left')}${node('environment',112,442,'Environment','left')}${node('meaning',690,95,'What matters','right')}${node('financial',705,205,'Financial','right')}${node('mental',705,330,'Mental engagement','right')}${node('work',676,445,'Work & responsibilities','right')}<g class="travel"><circle class="travel-dot d1" r="4"/><circle class="travel-dot rose d2" r="4"/><circle class="travel-dot plum d3" r="4"/><circle class="travel-dot blue d4" r="4"/></g><g class="core-group"><circle class="core-shadow" cx="410" cy="293" r="93"/><circle class="core-outer" cx="410" cy="280" r="104"/><circle class="core" cx="410" cy="280" r="88"/><text class="core-word w1" x="410" y="248">your</text><text class="core-word w2" x="410" y="282">whole</text><text class="core-word w3" x="410" y="317">Health</text></g><g class="status"><circle class="status-dot active" cx="377" cy="523" r="3"/><circle class="status-dot active" cx="390" cy="523" r="3"/><circle class="status-dot" cx="403" cy="523" r="3"/><circle class="status-dot" cx="416" cy="523" r="3"/><circle class="status-dot" cx="429" cy="523" r="3"/><circle class="status-dot" cx="442" cy="523" r="3"/><text class="status-label" x="410" y="543">This is your whole picture.</text></g></svg>`}
- function svgMobile(){return `<svg viewBox="0 0 390 520" role="img"><defs><linearGradient id="coreGrad" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f8f6f0"/></linearGradient></defs><g class="routes"><path id="r1" class="route" d="M55 70 C110 78 138 176 195 260 S280 94 335 72"/><path id="r2" class="route rose" d="M48 170 C110 171 145 218 195 260 S280 205 342 170"/><path id="r3" class="route plum" d="M49 350 C112 348 146 306 195 260 S278 313 342 350"/><path id="r4" class="route blue" d="M60 449 C116 444 144 344 195 260 S280 430 332 448"/><path id="r5" class="route blue" d="M55 70 C121 145 132 325 195 260 S277 124 342 170"/><path id="r6" class="route plum" d="M48 170 C111 204 139 366 195 260 S278 310 342 350"/><path id="r7" class="route" d="M49 350 C109 330 144 150 195 260 S281 140 335 72"/><path id="r8" class="route rose" d="M60 449 C117 397 145 126 195 260 S278 400 332 448"/></g><g class="orbits"><circle class="orbit" cx="195" cy="260" r="92"/><circle class="orbit" cx="195" cy="260" r="116"/></g>${node('physical',55,70,'Physical','left')}${node('emotional',48,170,'Emotional','left')}${node('social',49,350,'Social','left')}${node('environment',60,449,'Environment','left')}${node('meaning',335,72,'What matters','right')}${node('financial',342,170,'Financial','right')}${node('mental',342,350,'Mental engagement','right')}${node('work',332,448,'Work & responsibilities','right')}<g class="travel"><circle class="travel-dot d1" r="3.6"/><circle class="travel-dot rose d2" r="3.6"/><circle class="travel-dot plum d3" r="3.6"/><circle class="travel-dot blue d4" r="3.6"/></g><g class="core-group"><circle class="core-shadow" cx="195" cy="270" r="77"/><circle class="core-outer" cx="195" cy="260" r="88"/><circle class="core" cx="195" cy="260" r="74"/><text class="core-word w1" x="195" y="235">your</text><text class="core-word w2" x="195" y="262">whole</text><text class="core-word w3" x="195" y="290">Health</text></g><g class="status"><circle class="status-dot active" cx="162" cy="490" r="3"/><circle class="status-dot active" cx="175" cy="490" r="3"/><circle class="status-dot" cx="188" cy="490" r="3"/><circle class="status-dot" cx="201" cy="490" r="3"/><circle class="status-dot" cx="214" cy="490" r="3"/><circle class="status-dot" cx="227" cy="490" r="3"/><text class="status-label" x="195" y="510">This is your whole picture.</text></g></svg>`}
+ function defs(){return `<defs>
+   <linearGradient id="coreGrad" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.96)"/><stop offset="1" stop-color="rgba(248,246,240,.86)"/></linearGradient>
+   <filter id="coreShadow" x="-45%" y="-45%" width="190%" height="210%"><feGaussianBlur stdDeviation="10"/></filter>
+   <filter id="nodeShadow" x="-80%" y="-80%" width="260%" height="260%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#1b2b22" flood-opacity=".15"/></filter>
+ </defs>`}
+ function node(cls,cx,cy,label,side){const tx=side==='left'?cx+34:cx-34;return `<g class="node ${cls}"><circle class="node-ring" cx="${cx}" cy="${cy}" r="25"/><circle class="node-fill" cx="${cx}" cy="${cy}" r="19"/><circle class="node-dot" cx="${cx}" cy="${cy}" r="3.2"/><text class="label ${side==='right'?'right':''}" x="${tx}" y="${cy+4}">${label}</text></g>`}
+ function svgDesktop(){return `<svg viewBox="0 0 820 560" role="img">${defs()}<g class="routes"><path id="r1" class="route" d="M105 92 C245 92 304 205 410 280 S585 142 690 95"/><path id="r2" class="route rose" d="M82 208 C235 205 305 240 410 280 S575 238 705 205"/><path id="r3" class="route plum" d="M84 323 C236 330 304 302 410 280 S574 353 705 330"/><path id="r4" class="route blue" d="M112 442 C250 438 312 330 410 280 S566 450 676 445"/><path id="r5" class="route blue" d="M105 92 C240 173 300 360 410 280 S578 152 705 205"/><path id="r6" class="route plum" d="M82 208 C235 240 305 390 410 280 S568 318 705 330"/><path id="r7" class="route" d="M84 323 C230 330 302 136 410 280 S575 220 690 95"/><path id="r8" class="route rose" d="M112 442 C236 385 315 142 410 280 S566 408 676 445"/></g><g class="orbits"><circle class="orbit" cx="410" cy="280" r="116"/><circle class="orbit" cx="410" cy="280" r="145"/></g>${node('physical',105,92,'Physical','left')}${node('emotional',82,208,'Emotional','left')}${node('social',84,323,'Social','left')}${node('environment',112,442,'Environment','left')}${node('meaning',690,95,'What matters','right')}${node('financial',705,205,'Financial','right')}${node('mental',705,330,'Mental engagement','right')}${node('work',676,445,'Work & responsibilities','right')}<g class="travel"><circle class="travel-dot d1" r="4"/><circle class="travel-dot rose d2" r="4"/><circle class="travel-dot plum d3" r="4"/><circle class="travel-dot blue d4" r="4"/></g><g class="core-group"><circle class="core-shadow" cx="410" cy="302" r="91"/><circle class="core-outer" cx="410" cy="280" r="104"/><circle class="core" cx="410" cy="280" r="88"/><text class="core-word w1" x="410" y="248">your</text><text class="core-word w2" x="410" y="282">whole</text><text class="core-word w3" x="410" y="317">Health</text></g><g class="status"><text class="status-label" x="410" y="535">This is your whole picture.</text></g></svg>`}
+ function svgMobile(){return `<svg viewBox="0 0 390 520" role="img">${defs()}<g class="routes"><path id="r1" class="route" d="M55 70 C110 78 138 176 195 260 S280 94 335 72"/><path id="r2" class="route rose" d="M48 170 C110 171 145 218 195 260 S280 205 342 170"/><path id="r3" class="route plum" d="M49 350 C112 348 146 306 195 260 S278 313 342 350"/><path id="r4" class="route blue" d="M60 449 C116 444 144 344 195 260 S280 430 332 448"/><path id="r5" class="route blue" d="M55 70 C121 145 132 325 195 260 S277 124 342 170"/><path id="r6" class="route plum" d="M48 170 C111 204 139 366 195 260 S278 310 342 350"/><path id="r7" class="route" d="M49 350 C109 330 144 150 195 260 S281 140 335 72"/><path id="r8" class="route rose" d="M60 449 C117 397 145 126 195 260 S278 400 332 448"/></g><g class="orbits"><circle class="orbit" cx="195" cy="260" r="92"/><circle class="orbit" cx="195" cy="260" r="116"/></g>${node('physical',55,70,'Physical','left')}${node('emotional',48,170,'Emotional','left')}${node('social',49,350,'Social','left')}${node('environment',60,449,'Environment','left')}${node('meaning',335,72,'What matters','right')}${node('financial',342,170,'Financial','right')}${node('mental',342,350,'Mental engagement','right')}${node('work',332,448,'Work & responsibilities','right')}<g class="travel"><circle class="travel-dot d1" r="3.6"/><circle class="travel-dot rose d2" r="3.6"/><circle class="travel-dot plum d3" r="3.6"/><circle class="travel-dot blue d4" r="3.6"/></g><g class="core-group"><circle class="core-shadow" cx="195" cy="278" r="76"/><circle class="core-outer" cx="195" cy="260" r="88"/><circle class="core" cx="195" cy="260" r="74"/><text class="core-word w1" x="195" y="235">your</text><text class="core-word w2" x="195" y="262">whole</text><text class="core-word w3" x="195" y="290">Health</text></g><g class="status"><text class="status-label" x="195" y="505">This is your whole picture.</text></g></svg>`}
  stage.innerHTML=mobile?svgMobile():svgDesktop();
  const svg=stage.querySelector('svg'), nodes=svg.querySelectorAll('.node'), routes=[...svg.querySelectorAll('.route')], core=svg.querySelector('.core-group'), words=svg.querySelectorAll('.core-word'), status=svg.querySelector('.status'), orbits=svg.querySelector('.orbits'), dots=svg.querySelectorAll('.travel-dot');
  function setDot(dot,path,progress){const p=path.getPointAtLength(path.getTotalLength()*progress);dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.y)}
  dots.forEach((dot,i)=>setDot(dot,routes[i],0));
- if(reduced||!window.gsap){gsap.set([nodes,routes,core,words,status,orbits,dots],{opacity:1});return}
+ if(reduced||!window.gsap){if(window.gsap)gsap.set([nodes,routes,core,words,status,orbits,dots],{opacity:1});return}
  routes.forEach(p=>{const len=p.getTotalLength();p.style.strokeDasharray=len;p.style.strokeDashoffset=len});
  gsap.set(nodes,{opacity:0,scale:.82,transformOrigin:'center center'});gsap.set(orbits,{opacity:0});gsap.set(core,{opacity:0,scale:.25,transformOrigin:'center center'});gsap.set(words,{opacity:0,y:10});gsap.set(status,{opacity:0});gsap.set(dots,{opacity:0});
  const tl=gsap.timeline({defaults:{ease:'power2.out'}});
  tl.to(nodes,{opacity:1,scale:1,duration:.55,stagger:.08}).to(routes,{strokeDashoffset:0,duration:1.15,stagger:.05},'-=.25').to(orbits,{opacity:1,duration:.5},'-=.7');
- dots.forEach((dot,i)=>{const proxy={p:0};tl.to(proxy,{p:1,duration:1.1,ease:'none',onStart:()=>gsap.set(dot,{opacity:1}),onUpdate:()=>setDot(dot,routes[i],proxy.p),onComplete:()=>gsap.set(dot,{opacity:.55})},i===0?'-=.5':'<.12')});
- tl.to(core,{opacity:1,scale:1,duration:.7,ease:'back.out(1.45)'},'-=.35').to(words,{opacity:1,y:0,duration:.45,stagger:.11},'-=.28').to(status,{opacity:1,duration:.45},'-=.12');
- })();
+ dots.forEach((dot,i)=>{const proxy={p:0};tl.to(proxy,{p:1,duration:1.1,ease:'none',onStart:()=>gsap.set(dot,{opacity:1}),onUpdate:()=>setDot(dot,routes[i],proxy.p),onComplete:()=>gsap.set(dot,{opacity:.45})},i===0?'-=.5':'<.12')});
+ tl.to(core,{opacity:1,scale:1,duration:.7,ease:'back.out(1.35)'},'-=.35').to(words,{opacity:1,y:0,duration:.45,stagger:.11},'-=.28').to(status,{opacity:1,duration:.45},'-=.12');
+})();
 </script>
 </body>
 </html>
