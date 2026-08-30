@@ -4,6 +4,72 @@
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canObserve = 'IntersectionObserver' in window;
+
+  /* Public homepage theme support. The app workspace already uses this same
+     storage key, so appearance now stays consistent between desktop surfaces. */
+  const THEME_KEY = 'msh_theme_preference';
+  const themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function getThemePreference() {
+    try {
+      const stored = window.localStorage.getItem(THEME_KEY);
+      return ['light', 'dark', 'system'].includes(stored) ? stored : 'system';
+    } catch (_) {
+      return 'system';
+    }
+  }
+
+  function resolveTheme(preference) {
+    return preference === 'system' ? (themeMedia.matches ? 'dark' : 'light') : preference;
+  }
+
+  function applyPublicTheme(preference, persist) {
+    const next = ['light', 'dark', 'system'].includes(preference) ? preference : 'system';
+    const resolved = resolveTheme(next);
+    document.documentElement.dataset.themePreference = next;
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.style.colorScheme = resolved;
+    if (persist) {
+      try { window.localStorage.setItem(THEME_KEY, next); } catch (_) {}
+    }
+    document.querySelectorAll('[data-public-theme-choice]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.publicThemeChoice === next));
+    });
+  }
+
+  applyPublicTheme(getThemePreference(), false);
+  if (typeof themeMedia.addEventListener === 'function') {
+    themeMedia.addEventListener('change', () => {
+      if (getThemePreference() === 'system') applyPublicTheme('system', false);
+    });
+  }
+
+  const storyHeader = document.querySelector('.story-header');
+  if (storyHeader) {
+    const nav = storyHeader.querySelector('.story-nav');
+    if (nav && !nav.querySelector('.story-theme-control')) {
+      const control = document.createElement('details');
+      control.className = 'story-theme-control';
+      control.innerHTML = `
+        <summary class="story-theme-trigger" aria-label="Appearance" title="Appearance"><span aria-hidden="true">◐</span></summary>
+        <div class="story-theme-menu" role="group" aria-label="Appearance">
+          <button type="button" data-public-theme-choice="light">Light</button>
+          <button type="button" data-public-theme-choice="dark">Dark</button>
+          <button type="button" data-public-theme-choice="system">System</button>
+        </div>`;
+      nav.appendChild(control);
+      applyPublicTheme(getThemePreference(), false);
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const choice = event.target.closest('[data-public-theme-choice]');
+    if (!choice) return;
+    applyPublicTheme(choice.dataset.publicThemeChoice, true);
+    const details = choice.closest('details');
+    if (details) details.open = false;
+  });
+
   const revealItems = Array.from(document.querySelectorAll('.story-reveal'));
   const constellation = document.querySelector('[data-constellation]');
   const panels = Array.from(document.querySelectorAll('[data-story-panel]'));
