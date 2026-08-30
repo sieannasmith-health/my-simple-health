@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bring the pieces of your health journey together into one living, reviewable story.">
+  <title>My Health Story | My Simple Health</title>
+  <script src="js/msh-theme.js"></script>
+  <script src="js/msh-routes.js"></script>
+  <script src="js/msh-environment.js"></script>
+  <script src="js/msh-storage.js"></script>
+  <script src="js/msh-health-story.js"></script>
+  <link rel="stylesheet" href="css/msh-foundation.css">
+  <link rel="stylesheet" href="css/msh-app.css">
+  <link rel="stylesheet" href="css/msh-sensory.css">
+  <style>
+    body{margin:0;background:var(--msh-page,#f7f4ec);color:var(--msh-text-primary,#252822);font-family:Arial,sans-serif}.story-shell{width:min(1040px,calc(100% - 40px));margin:0 auto;padding:clamp(64px,9vw,120px) 0 110px}.story-hero{max-width:780px;margin-bottom:54px}.eyebrow{margin:0 0 14px;color:var(--msh-accent,var(--msh-sage,#6f8656));font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}.story-hero h1,.story-section h2{font-family:Georgia,serif;font-weight:400;color:var(--msh-heading,var(--msh-forest,#173d2b))}.story-hero h1{margin:0 0 20px;font-size:clamp(52px,8vw,92px);line-height:.96;letter-spacing:-.045em}.story-hero .lede{max-width:720px;margin:0;font:clamp(21px,2.6vw,31px)/1.45 Georgia,serif;color:var(--msh-text-secondary,#484d47)}.story-principle{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:32px 0 0}.story-principle span{padding:14px 16px;border:1px solid var(--msh-border,rgba(23,61,43,.14));border-radius:16px;background:color-mix(in srgb,var(--msh-surface,#fff) 78%,transparent);font-size:12px;line-height:1.5}.story-toolbar{position:sticky;top:10px;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 44px;padding:12px 14px;border:1px solid var(--msh-border,rgba(23,61,43,.14));border-radius:18px;background:color-mix(in srgb,var(--msh-surface,#fff) 88%,transparent);backdrop-filter:blur(18px)}.story-toolbar p{margin:0;color:var(--msh-text-muted,#626b63);font-size:12px}.story-actions{display:flex;gap:8px;flex-wrap:wrap}.story-button,.story-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer}.story-button{border:1px solid var(--msh-heading,var(--msh-forest,#173d2b));background:var(--msh-heading,var(--msh-forest,#173d2b));color:var(--msh-page,#f7f4ec)}.story-link{border:1px solid var(--msh-border-strong,rgba(23,61,43,.2));background:transparent;color:var(--msh-heading,var(--msh-forest,#173d2b))}.story-empty{padding:42px;border:1px solid var(--msh-border,rgba(23,61,43,.14));border-radius:26px;background:color-mix(in srgb,var(--msh-surface,#fff) 78%,transparent)}.story-empty h2{margin:0 0 12px;font:400 34px Georgia,serif;color:var(--msh-heading,var(--msh-forest,#173d2b))}.story-empty p{margin:0;line-height:1.7;color:var(--msh-text-secondary,#484d47)}.story-section{margin:0 0 54px}.story-section header{margin-bottom:18px}.story-section h2{margin:0;font-size:clamp(32px,4vw,46px)}.story-grid{display:grid;gap:12px}.story-card{position:relative;padding:22px 24px;border:1px solid var(--msh-border,rgba(23,61,43,.14));border-radius:20px;background:color-mix(in srgb,var(--msh-surface,#fff) 82%,transparent);box-shadow:0 16px 42px rgba(30,50,38,.05)}.story-card.is-excluded{opacity:.48}.story-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.story-card h3{margin:0 0 8px;font:400 21px/1.3 Georgia,serif;color:var(--msh-heading,var(--msh-forest,#173d2b))}.story-card p{margin:0;line-height:1.65;color:var(--msh-text-primary,#252822)}.story-card .detail{margin-top:8px;color:var(--msh-text-secondary,#484d47);font-size:13px}.story-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.story-meta span{padding:6px 9px;border-radius:999px;background:var(--msh-surface-alt,#eef1e8);color:var(--msh-text-muted,#626b63);font-size:10px;font-weight:700;letter-spacing:.03em}.story-toggle{flex:none;display:inline-flex;align-items:center;gap:7px;color:var(--msh-text-muted,#626b63);font-size:11px}.story-toggle input{width:18px;height:18px;accent-color:var(--msh-heading,var(--msh-forest,#173d2b))}.story-note{margin-top:60px;padding:28px;border-radius:22px;background:var(--msh-surface-alt,#eef1e8);color:var(--msh-text-secondary,#484d47);line-height:1.7}.story-note strong{color:var(--msh-heading,var(--msh-forest,#173d2b))}[data-theme="dark"] .story-button{color:#182019;background:#dce8d8;border-color:#dce8d8}@media(max-width:720px){.story-shell{width:min(100% - 28px,1040px);padding-top:72px}.story-principle{grid-template-columns:1fr}.story-toolbar{align-items:flex-start;flex-direction:column}.story-card-head{gap:12px}.story-toggle span{display:none}}@media print{[data-msh-header],[data-msh-mobile-nav],.story-toolbar,.story-toggle{display:none!important}.story-shell{width:100%;padding:0}.story-card{break-inside:avoid;box-shadow:none}.story-note{background:transparent;border:1px solid #ccc}}
+  </style>
+</head>
+<body class="msh-app-page" data-msh-page="health-story">
+  <div data-msh-header></div>
+  <main class="story-shell">
+    <header class="story-hero">
+      <p class="eyebrow">MY HEALTH · BIGGER PICTURE</p>
+      <h1>My Health Story</h1>
+      <p class="lede">The pieces you have explored across My Simple Health, brought together without pretending they mean more than the source information supports.</p>
+      <div class="story-principle" aria-label="How your story works"><span><strong>You decide what belongs.</strong><br>Any contribution can be left out.</span><span><strong>Sources stay attached.</strong><br>Reflection, recorded data, and system summaries remain distinguishable.</span><span><strong>Your picture can change.</strong><br>This is a living document, not a fixed conclusion about you.</span></div>
+    </header>
+
+    <div class="story-toolbar">
+      <p id="storyCount">Assembling your story…</p>
+      <div class="story-actions"><a class="story-link" href="my-health.html?view=tools">Back to My Health</a><button class="story-button" id="printStory" type="button">Print / Save as PDF</button></div>
+    </div>
+
+    <div id="storyDocument" aria-live="polite"></div>
+
+    <aside class="story-note"><strong>About this document.</strong> My Health Story organizes information you have entered or created inside My Simple Health. It is for reflection and continuity, not diagnosis. A sequence of events does not by itself show that one thing caused another.</aside>
+  </main>
+  <div data-msh-mobile-nav></div>
+  <script src="js/msh-shell.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const host = document.getElementById('storyDocument');
+      const count = document.getElementById('storyCount');
+      const esc = value => String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+      const prettySource = value => String(value || 'My Simple Health').replace(/_/g,' ').replace(/\b\w/g, letter => letter.toUpperCase());
+      const formatDate = value => { const date = new Date(value || ''); return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); };
+
+      function render() {
+        if (!window.MSHHealthStory) return;
+        const all = MSHHealthStory.getContributions();
+        const snapshot = MSHHealthStory.buildSnapshot();
+        count.textContent = `${snapshot.contributionCount} ${snapshot.contributionCount === 1 ? 'piece' : 'pieces'} currently included in your story`;
+        if (!all.length) {
+          host.innerHTML = `<section class="story-empty"><h2>Your story begins with what you notice.</h2><p>As you use Health Landscape, Calendar, practices, reflections, and other My Health tools, meaningful pieces can appear here and gradually form a larger picture.</p></section>`;
+          return;
+        }
+        const sections = MSHHealthStory.SECTION_ORDER.map(id => ({ id, label:MSHHealthStory.SECTION_LABELS[id], contributions:all.filter(item => item.section === id) })).filter(section => section.contributions.length);
+        host.innerHTML = sections.map(section => `<section class="story-section" data-story-section="${esc(section.id)}"><header><p class="eyebrow">YOUR STORY</p><h2>${esc(section.label)}</h2></header><div class="story-grid">${section.contributions.map(item => {
+          const excluded = item.inclusion === 'excluded';
+          const date = formatDate(item.observedAt || item.createdAt);
+          const source = prettySource(item.sourceType);
+          const status = prettySource(item.provenance && item.provenance.status || 'Source preserved');
+          return `<article class="story-card${excluded ? ' is-excluded' : ''}" data-story-id="${esc(item.id)}"><div class="story-card-head"><div><h3>${esc(item.title || section.label)}</h3><p>${esc(item.summary)}</p>${item.detail ? `<p class="detail">${esc(item.detail)}</p>` : ''}</div><label class="story-toggle"><input type="checkbox" ${excluded ? '' : 'checked'} data-story-include="${esc(item.id)}"><span>Include</span></label></div><div class="story-meta"><span>${esc(source)}</span>${date ? `<span>${esc(date)}</span>` : ''}<span>${esc(status)}</span></div></article>`;
+        }).join('')}</div></section>`).join('');
+      }
+
+      host.addEventListener('change', event => {
+        const input = event.target.closest('[data-story-include]');
+        if (!input || !window.MSHHealthStory) return;
+        MSHHealthStory.setInclusion(input.dataset.storyInclude, input.checked);
+        render();
+      });
+      document.getElementById('printStory').addEventListener('click', () => window.print());
+      render();
+    })();
+  </script>
+</body>
+</html>
