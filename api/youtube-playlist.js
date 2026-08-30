@@ -50,6 +50,16 @@ function inferFocus(title) {
   return tags.length ? tags : ['other'];
 }
 
+function dedupeVideos(videos) {
+  const seen = new Set();
+  return (videos || []).filter(video => {
+    const videoId = String(video?.videoId || '').trim();
+    if (!videoId || seen.has(videoId)) return false;
+    seen.add(videoId);
+    return true;
+  });
+}
+
 async function fetchWithApiKey(playlistId, key) {
   const videos = [];
   let pageToken = '';
@@ -111,7 +121,7 @@ export default async function handler(req, res) {
   if (!playlistId) return send(res, 400, { error: 'Paste a valid YouTube playlist URL.' });
   try {
     const apiKey = process.env.YOUTUBE_API_KEY || '';
-    const videos = apiKey ? await fetchWithApiKey(playlistId, apiKey) : await fetchWithFeed(playlistId);
+    const videos = dedupeVideos(apiKey ? await fetchWithApiKey(playlistId, apiKey) : await fetchWithFeed(playlistId));
     return send(res, 200, {
       playlistId,
       videos,
