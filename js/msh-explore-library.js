@@ -10,6 +10,7 @@
   const unknown = document.querySelector('[data-answer-unknown]');
   const sources = document.querySelector('[data-answer-sources]');
   const sourceLabel = document.querySelector('[data-source-label]');
+  let answering = false;
 
   document.querySelectorAll('[data-prompt]').forEach(button => {
     button.addEventListener('click', () => {
@@ -18,11 +19,9 @@
     });
   });
 
-  form?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const question = input.value.trim();
-    if (!question) return;
-
+  async function answerQuestion(question) {
+    if (!question || answering) return;
+    answering = true;
     submit.disabled = true;
     submit.textContent = 'Looking through the research…';
     answer.classList.add('is-visible');
@@ -72,14 +71,28 @@
       strength.textContent = 'Evidence service unavailable';
       count.textContent = '';
       known.textContent = 'MSH will not generate a health answer when the evidence service has not completed successfully.';
-      unknown.textContent = 'The question is fine. The connection to the evidence service needs to be restored.';
+      unknown.textContent = 'Your question has been kept. You can try the evidence search again without re-entering it.';
       sourceLabel.textContent = 'Research sources';
     } finally {
+      answering = false;
       submit.disabled = false;
       submit.textContent = 'Ask Explore →';
       answer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  form?.addEventListener('submit', event => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) return;
+    answerQuestion(question);
   });
+
+  const carriedQuestion = new URLSearchParams(window.location.search).get('q');
+  if (carriedQuestion && input) {
+    input.value = carriedQuestion.slice(0, 1000);
+    requestAnimationFrame(() => answerQuestion(input.value.trim()));
+  }
 
   function formatLabel(value) {
     return String(value || '').toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
