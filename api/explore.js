@@ -3,11 +3,67 @@ import { searchPubMed } from "./pubmed.js";
 import { rankEvidence, getEvidenceStrength } from "./rankEvidence.js";
 import { synthesizeEvidence } from "./synthesizeEvidence.js";
 
+const ALLOWED_ORIGINS = new Set([
+  "https://mysimplehealth.org",
+  "https://www.mysimplehealth.org",
+  "https://my-simple-health.vercel.app"
+]);
+
+function setCors(req, res) {
+  const origin = String(req.headers.origin || "");
+  if (ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+}
+
+async function checkOpenAIConnection() {
+  if (!process.env.OPENAI_API_KEY) {
+    return { connected: false, configured: false, model: "gpt-5.6-luna", status: "missing_api_key" };
+  }
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/models/gpt-5.6-luna", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Accept": "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      return {
+        connected: false,
+        configured: true,
+        model: "gpt-5.6-luna",
+        status: `openai_${response.status}`
+      };
+    }
+
+    return { connected: true, configured: true, model: "gpt-5.6-luna", status: "ready" };
+  } catch (error) {
+    console.error("OpenAI connection check failed:", error);
+    return { connected: false, configured: true, model: "gpt-5.6-luna", status: "network_error" };
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
+  setCors(req, res);
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  if (req.method === "GET") {
+    const health = await checkOpenAIConnection();
+    return res.status(health.connected ? 200 : 503).json({ service: "explore", ...health });
+  }
 
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+    res.setHeader("Allow", "GET, POST, OPTIONS");
     return res.status(405).json({ error: "Method not allowed." });
   }
 
