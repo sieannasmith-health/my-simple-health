@@ -251,3 +251,57 @@ html[data-theme='dark'] .story-nav-enter{
 }
 html[data-theme='light'] :focus-visible{outline:3px solid #173d2b;outline-offset:3px}
 html[data-theme='dark'] :focus-visible{outline:3px solid #d9ead0;outline-offset:3px}
+
+/* Homepage cleanup: remove the broken showcase while preserving the rest of the story. */
+.landing-health-life-showcase{display:none!important}
+
+/* Clean hero: the story starts with one clear statement, not a second navigation system. */
+.context-feature-rail,
+.context-principles{display:none!important}
+.context-hero{padding-bottom:clamp(72px,10vw,128px)!important}
+.context-actions{gap:28px;align-items:center;flex-wrap:wrap}
+.context-link{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  margin-top:28px;
+  padding:10px 2px 12px;
+  color:#173d2b;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+.context-link::after{
+  content:'↓';
+  display:inline-block;
+  font-size:18px;
+  font-weight:400;
+  line-height:1;
+  animation:msh-scroll-cue 1.7s cubic-bezier(.45,0,.2,1) infinite;
+}
+.context-link::before{
+  content:'';
+  position:absolute;
+  left:0;
+  right:30px;
+  bottom:5px;
+  height:1px;
+  background:currentColor;
+  opacity:.32;
+  transform-origin:left center;
+  animation:msh-scroll-line 2.2s ease-in-out infinite;
+}
+@keyframes msh-scroll-cue{
+  0%,100%{transform:translateY(-2px);opacity:.55}
+  50%{transform:translateY(6px);opacity:1}
+}
+@keyframes msh-scroll-line{
+  0%,100%{transform:scaleX(.25);opacity:.2}
+  50%{transform:scaleX(1);opacity:.5}
+}
+html[data-theme='dark'] .context-link{color:#f5f1e7!important}
+@media(prefers-reduced-motion:reduce){
+  .context-link::after,.context-link::before{animation:none}
+}
