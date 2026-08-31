@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="My Simple Health preview for personal health patterns and progressive insight depth.">
+  <title>Health Patterns Preview | My Simple Health</title>
+  <script src="js/msh-theme.js"></script>
+  <script src="js/msh-routes.js"></script>
+  <link rel="stylesheet" href="css/msh-foundation.css">
+  <link rel="stylesheet" href="css/msh-app.css">
+  <link rel="stylesheet" href="css/msh-glass-workspace.css">
+  <link rel="stylesheet" href="css/msh-patterns-preview.css">
+</head>
+<body class="msh-app-page" data-msh-page="health">
+  <div class="msh-app-shell">
+    <div data-msh-header></div>
+    <main class="msh-patterns-preview" data-patterns-preview>
+      <header class="msh-patterns-hero">
+        <div>
+          <p class="msh-patterns-eyebrow">My Health / Patterns</p>
+          <h1>What your health may be showing.</h1>
+          <p>MSH surfaces the signal. You choose the depth.</p>
+        </div>
+        <div class="msh-patterns-preview-note" role="note">
+          <strong>Design preview</strong>
+          <span>The information below is illustrative. It is not your health data.</span>
+        </div>
+      </header>
+
+      <div class="msh-patterns-layout">
+        <section class="msh-patterns-feed" aria-labelledby="patterns-feed-title">
+          <div class="msh-patterns-section-heading">
+            <div>
+              <p class="msh-patterns-kicker">What’s new</p>
+              <h2 id="patterns-feed-title">Three patterns worth a look</h2>
+            </div>
+            <span class="msh-patterns-period">Past 30 days</span>
+          </div>
+
+          <article class="msh-pattern-card is-active" data-pattern-card="sleep-timing">
+            <div class="msh-pattern-card-copy">
+              <div class="msh-pattern-label">Pattern change</div>
+              <h3>Your sleep timing has been later than your usual pattern.</h3>
+              <p>This began around Aug 11 and has persisted across 19 observed nights.</p>
+              <div class="msh-pattern-meta"><span>Moderate signal</span><span>19 nights</span></div>
+              <div class="msh-pattern-actions">
+                <button type="button" class="msh-pattern-primary" data-explore-pattern="sleep-timing">Explore this <span aria-hidden="true">→</span></button>
+                <button type="button" data-quick-action="context">Add context</button>
+                <button type="button" data-quick-action="watch">Keep watching</button>
+              </div>
+            </div>
+            <figure class="msh-pattern-mini-chart" aria-label="Illustrative sleep timing trend becoming later during August">
+              <svg viewBox="0 0 260 112" role="img" aria-hidden="true">
+                <line x1="12" y1="88" x2="248" y2="88" class="axis"></line>
+                <line x1="142" y1="10" x2="142" y2="92" class="marker"></line>
+                <polyline points="16,73 34,74 52,72 70,66 88,62 106,54 124,58 142,43 160,47 178,37 196,43 214,39 232,42 246,39" class="trend"></polyline>
+                <g class="dots"><circle cx="16" cy="73" r="3"></circle><circle cx="34" cy="74" r="3"></circle><circle cx="52" cy="72" r="3"></circle><circle cx="70" cy="66" r="3"></circle><circle cx="88" cy="62" r="3"></circle><circle cx="106" cy="54" r="3"></circle><circle cx="124" cy="58" r="3"></circle><circle cx="142" cy="43" r="3"></circle><circle cx="160" cy="47" r="3"></circle><circle cx="178" cy="37" r="3"></circle><circle cx="196" cy="43" r="3"></circle><circle cx="214" cy="39" r="3"></circle><circle cx="232" cy="42" r="3"></circle><circle cx="246" cy="39" r="3"></circle></g>
+              </svg>
+              <figcaption><span>Jul 25</span><span>Aug 25</span></figcaption>
+            </figure>
+          </article>
+
+          <article class="msh-pattern-card" data-pattern-card="sleep-energy">
+            <div class="msh-pattern-card-copy">
+              <div class="msh-pattern-label is-association">Association</div>
+              <h3>Lower-sleep days have coincided with lower morning energy.</h3>
+              <p>The pattern appears on 13 of the 19 comparable days in this preview.</p>
+              <div class="msh-pattern-meta"><span>Moderate signal</span><span>19 comparable days</span></div>
+              <div class="msh-pattern-actions">
+                <button type="button" class="msh-pattern-primary" data-explore-pattern="sleep-energy">Explore this <span aria-hidden="true">→</span></button>
+                <button type="button" data-quick-action="context">Add context</button>
+                <button type="button" data-quick-action="watch">Keep watching</button>
+              </div>
+            </div>
+            <figure class="msh-pattern-mini-chart" aria-label="Illustrative scatterplot showing lower morning energy on shorter sleep days">
+              <svg viewBox="0 0 260 112" role="img" aria-hidden="true">
+                <line x1="18" y1="92" x2="246" y2="92" class="axis"></line>
+                <line x1="18" y1="12" x2="18" y2="92" class="axis"></line>
+                <line x1="38" y1="26" x2="226" y2="78" class="trendline"></line>
+                <g class="scatter"><circle cx="42" cy="28" r="4"></circle><circle cx="58" cy="35" r="4"></circle><circle cx="72" cy="32" r="4"></circle><circle cx="85" cy="44" r="4"></circle><circle cx="101" cy="48" r="4"></circle><circle cx="116" cy="42" r="4"></circle><circle cx="131" cy="56" r="4"></circle><circle cx="147" cy="60" r="4"></circle><circle cx="161" cy="55" r="4"></circle><circle cx="179" cy="66" r="4"></circle><circle cx="195" cy="69" r="4"></circle><circle cx="211" cy="76" r="4"></circle></g>
+              </svg>
+              <figcaption><span>Shorter sleep</span><span>Longer sleep</span></figcaption>
+            </figure>
+          </article>
+
+          <article class="msh-pattern-card" data-pattern-card="schedule-load">
+            <div class="msh-pattern-card-copy">
+              <div class="msh-pattern-label is-context">Context shift</div>
+              <h3>Your schedule load increased on weekdays.</h3>
+              <p>This change began around the same period as the sleep timing shift.</p>
+              <div class="msh-pattern-meta"><span>Context signal</span><span>3 weeks</span></div>
+              <div class="msh-pattern-actions">
+                <button type="button" class="msh-pattern-primary" data-explore-pattern="schedule-load">Explore this <span aria-hidden="true">→</span></button>
+                <button type="button" data-quick-action="context">Add context</button>
+                <button type="button" data-quick-action="watch">Keep watching</button>
+              </div>
+            </div>
+            <figure class="msh-pattern-mini-chart" aria-label="Illustrative weekday schedule comparison">
+              <svg viewBox="0 0 260 112" role="img" aria-hidden="true">
+                <line x1="18" y1="92" x2="246" y2="92" class="axis"></line>
+                <g class="bars old"><rect x="36" y="59" width="11" height="33"></rect><rect x="76" y="52" width="11" height="40"></rect><rect x="116" y="46" width="11" height="46"></rect><rect x="156" y="43" width="11" height="49"></rect><rect x="196" y="48" width="11" height="44"></rect></g>
+                <g class="bars current"><rect x="49" y="45" width="11" height="47"></rect><rect x="89" y="39" width="11" height="53"></rect><rect x="129" y="35" width="11" height="57"></rect><rect x="169" y="31" width="11" height="61"></rect><rect x="209" y="34" width="11" height="58"></rect></g>
+              </svg>
+              <figcaption><span>Earlier period</span><span>Recent period</span></figcaption>
+            </figure>
+          </article>
+
+          <aside class="msh-patterns-principle">
+            <strong>Insight depth is your choice.</strong>
+            <span>MSH can stop at the signal or show the analysis underneath it.</span>
+          </aside>
+        </section>
+
+        <aside class="msh-pattern-detail" aria-live="polite" aria-labelledby="pattern-detail-title">
+          <div class="msh-pattern-detail-top">
+            <p class="msh-patterns-kicker" data-detail-label>Pattern change</p>
+            <h2 id="pattern-detail-title" data-detail-title>Your sleep timing has been later than your usual pattern.</h2>
+            <p data-detail-summary>This began around Aug 11 and has persisted across 19 observed nights.</p>
+            <div class="msh-pattern-meta"><span data-detail-strength>Moderate signal</span><span data-detail-count>19 nights</span></div>
+          </div>
+
+          <div class="msh-pattern-depth" data-pattern-depth>
+            <details open>
+              <summary>What changed</summary>
+              <div data-detail-changed>
+                <p>Your sleep midpoint shifted later by about 46 minutes on average.</p>
+                <dl class="msh-pattern-stats"><div><dt>Change began</dt><dd>Aug 11</dd></div><div><dt>Direction</dt><dd>Later</dd></div><div><dt>Average change</dt><dd>46 min</dd></div><div><dt>Nights observed</dt><dd>19</dd></div></dl>
+              </div>
+            </details>
+            <details>
+              <summary>What moved with it</summary>
+              <div data-detail-related>
+                <p>Three related changes appeared around the same period.</p>
+                <ul><li>Sleep duration decreased.</li><li>Morning energy decreased.</li><li>Schedule load increased.</li></ul>
+                <p class="msh-pattern-caveat">These variables moving together does not establish that one caused another.</p>
+              </div>
+            </details>
+            <details>
+              <summary>What else was happening</summary>
+              <div data-detail-context>
+                <p>Calendar load and evening activity also increased during the comparison period.</p>
+                <button type="button" class="msh-text-action" data-action="context">Add or edit context</button>
+              </div>
+            </details>
+            <details>
+              <summary>How unusual is this for you?</summary>
+              <div data-detail-unusual>
+                <p>The recent sleep timing sits outside the illustrative usual range shown in this preview.</p>
+                <div class="msh-range-bar" aria-hidden="true"><span></span><i></i></div>
+                <div class="msh-range-labels"><span>Typical</span><span>More unusual</span></div>
+              </div>
+            </details>
+            <details>
+              <summary>How confident is MSH?</summary>
+              <div data-detail-confidence>
+                <p><strong>Moderate confidence</strong> in the pattern description, not in a causal explanation.</p>
+                <dl class="msh-pattern-stats"><div><dt>Usable observations</dt><dd>19</dd></div><div><dt>Data completeness</dt><dd>78%</dd></div><div><dt>Consistency</dt><dd>Moderate</dd></div><div><dt>Pattern stability</dt><dd>Moderate</dd></div></dl>
+              </div>
+            </details>
+          </div>
+
+          <section class="msh-pattern-choices" aria-labelledby="pattern-choice-title">
+            <p class="msh-patterns-kicker">What could you do with this?</p>
+            <h3 id="pattern-choice-title">You choose.</h3>
+            <div class="msh-pattern-choice-list">
+              <button type="button" data-action="understand"><strong>Understand this better</strong><span>Ask questions or inspect the evidence.</span></button>
+              <button type="button" data-action="experiment"><strong>Try something</strong><span>Run a small experiment without creating a streak.</span></button>
+              <button type="button" data-action="context"><strong>Add context</strong><span>Share what MSH cannot see.</span></button>
+              <button type="button" data-action="watch"><strong>Keep watching</strong><span>Observe without changing anything.</span></button>
+              <button type="button" data-action="dismiss"><strong>Not important to me</strong><span>Dismiss this insight.</span></button>
+            </div>
+            <p class="msh-pattern-action-status" data-action-status>No action has been chosen.</p>
+          </section>
+
+          <section class="msh-pattern-deeper" aria-labelledby="go-deeper-title">
+            <div>
+              <p class="msh-patterns-kicker">Optional depth</p>
+              <h3 id="go-deeper-title">Go deeper, only if you want to.</h3>
+              <p>See comparison periods, observation counts, missingness, associations, and uncertainty without turning the experience into a score.</p>
+            </div>
+            <button type="button" class="msh-pattern-primary" data-toggle-deeper aria-expanded="false">Go deeper</button>
+            <div class="msh-pattern-deeper-panel" data-deeper-panel hidden>
+              <div><span>Comparison period</span><strong>Jul 25–Aug 10</strong></div>
+              <div><span>Recent period</span><strong>Aug 11–Aug 25</strong></div>
+              <div><span>Comparable nights</span><strong>19</strong></div>
+              <div><span>Missingness</span><strong>22%</strong></div>
+              <div><span>Direction</span><strong>Later</strong></div>
+              <div><span>Causal claim</span><strong>None</strong></div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/msh-shell.js"></script>
+  <script src="js/msh-patterns-preview.js"></script>
+</body>
+</html>
