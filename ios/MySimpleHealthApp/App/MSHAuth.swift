@@ -167,15 +167,20 @@ struct MSHAuthGateView: View {
                             submit()
                         } label: {
                             HStack {
-                                if isWorking { ProgressView().tint(.white) }
+                                if isWorking { ProgressView().tint(MSHColor.warmWhite) }
                                 Text(mode.actionTitle)
                             }
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(MSHColor.warmWhite)
                             .frame(maxWidth: .infinity, minHeight: 54)
                             .background(MSHColor.forest)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .stroke(MSHColor.charcoal.opacity(0.32), lineWidth: 0.75)
+                            }
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
+                        .buttonStyle(.plain)
                         .disabled(isWorking || email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || password.count < 6)
 
                         Button {
