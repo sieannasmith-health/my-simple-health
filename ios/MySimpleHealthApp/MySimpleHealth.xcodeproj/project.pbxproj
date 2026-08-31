@@ -1,0 +1,479 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12798D94C30D525365CE9F3A /* MSHHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 37897D51A209B111301BBF74 /* MSHHealthCore */; };
+		26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */; };
+		3ADD0323DC0F51D0B774E7BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B3DB5402D73C03AA7ED2892 /* Assets.xcassets */; };
+		53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA05488D28DF0D6053601B6 /* MSHWebView.swift */; };
+		9F06AB60D571D27BEF7942EA /* AppleHealthBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */; };
+		A91C70B485B14F0FBE72E8A1 /* SQLiteHealthRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91C70B485B14F0FBE72E8A2 /* SQLiteHealthRecordStore.swift */; };
+		C33B0A7CFCDFA421CF4D51ED /* MySimpleHealthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */; };
+		FEC824609EB11E14AECB7B67 /* FileHealthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105124B82C67397BF1E74C25 /* FileHealthStore.swift */; };
+		FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4EF78DFADE2286B3A6A080E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F222795B46CB42CA492BA297 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7AB4A151FFB72E6ECB5E70F3;
+			remoteInfo = MySimpleHealth;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStoreTests.swift; sourceTree = "<group>"; };
+		0AA05488D28DF0D6053601B6 /* MSHWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHWebView.swift; sourceTree = "<group>"; };
+		105124B82C67397BF1E74C25 /* FileHealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStore.swift; sourceTree = "<group>"; };
+		35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthBridge.swift; sourceTree = "<group>"; };
+		473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MySimpleHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySimpleHealthApp.swift; sourceTree = "<group>"; };
+		7BC4A6349D1004D170B6C977 /* MySimpleHealth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MySimpleHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8496059FB9B25B3B9A0B527B /* MySimpleHealthHealthKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MySimpleHealthHealthKit; path = ../MySimpleHealthHealthKit; sourceTree = SOURCE_ROOT; };
+		95F42BB7DD7AE20C2756FE6E /* Info-Debug.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-Debug.plist"; sourceTree = "<group>"; };
+		9B3DB5402D73C03AA7ED2892 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A91C70B485B14F0FBE72E8A2 /* SQLiteHealthRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteHealthRecordStore.swift; sourceTree = "<group>"; };
+		D40CD07AC85001504274A352 /* MySimpleHealth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MySimpleHealth.entitlements; sourceTree = "<group>"; };
+		E08CEDED5B19E322B00C097C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		91DD0839DF6C6C29DA6CB965 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12798D94C30D525365CE9F3A /* MSHHealthCore in Frameworks */,
+				FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5AE9DB1BC021F630BAE3B39E /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				8496059FB9B25B3B9A0B527B /* MySimpleHealthHealthKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		9156CBB7CE2049425670C000 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7BC4A6349D1004D170B6C977 /* MySimpleHealth.app */,
+				473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B1CFA1A39F752A60DE15FDF3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */,
+				9B3DB5402D73C03AA7ED2892 /* Assets.xcassets */,
+				105124B82C67397BF1E74C25 /* FileHealthStore.swift */,
+				95F42BB7DD7AE20C2756FE6E /* Info-Debug.plist */,
+				E08CEDED5B19E322B00C097C /* Info.plist */,
+				0AA05488D28DF0D6053601B6 /* MSHWebView.swift */,
+				A91C70B485B14F0FBE72E8A2 /* SQLiteHealthRecordStore.swift */,
+				D40CD07AC85001504274A352 /* MySimpleHealth.entitlements */,
+				792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B726506B20AA523818D87500 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		F7EE268F229635263D09B2F5 = {
+			isa = PBXGroup;
+			children = (
+				B1CFA1A39F752A60DE15FDF3 /* App */,
+				5AE9DB1BC021F630BAE3B39E /* Packages */,
+				B726506B20AA523818D87500 /* Tests */,
+				9156CBB7CE2049425670C000 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7AB4A151FFB72E6ECB5E70F3 /* MySimpleHealth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ADEFE9B8543CD94EF139BA39 /* Build configuration list for PBXNativeTarget "MySimpleHealth" */;
+			buildPhases = (
+				5C49421E0B965D965CDCC43B /* Sources */,
+				F2E037D00A151099F7B6E0E9 /* Resources */,
+				91DD0839DF6C6C29DA6CB965 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MySimpleHealth;
+			packageProductDependencies = (
+				37897D51A209B111301BBF74 /* MSHHealthCore */,
+				7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */,
+			);
+			productName = MySimpleHealth;
+			productReference = 7BC4A6349D1004D170B6C977 /* MySimpleHealth.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D0BA0C5934225ED4A3073AF9 /* MySimpleHealthTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8A0DE3285C619A92CBDE74F /* Build configuration list for PBXNativeTarget "MySimpleHealthTests" */;
+			buildPhases = (
+				6689BE214C427DCA70E66E24 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1864D75A4BD5950FCFE1BC6F /* PBXTargetDependency */,
+			);
+			name = MySimpleHealthTests;
+			packageProductDependencies = (
+			);
+			productName = MySimpleHealthTests;
+			productReference = 473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F222795B46CB42CA492BA297 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					7AB4A151FFB72E6ECB5E70F3 = {
+						DevelopmentTeam = 736NRP69T9;
+						SystemCapabilities = "[\"com.apple.HealthKit\": [\"enabled\": 1]]";
+					};
+				};
+			};
+			buildConfigurationList = BECA2A0B7208EA8C3093FAE3 /* Build configuration list for PBXProject "MySimpleHealth" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = F7EE268F229635263D09B2F5;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BA44A31C33F6DFC2768304FA /* XCLocalSwiftPackageReference "../MySimpleHealthHealthKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9156CBB7CE2049425670C000 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7AB4A151FFB72E6ECB5E70F3 /* MySimpleHealth */,
+				D0BA0C5934225ED4A3073AF9 /* MySimpleHealthTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F2E037D00A151099F7B6E0E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3ADD0323DC0F51D0B774E7BC /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5C49421E0B965D965CDCC43B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9F06AB60D571D27BEF7942EA /* AppleHealthBridge.swift in Sources */,
+				FEC824609EB11E14AECB7B67 /* FileHealthStore.swift in Sources */,
+				53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */,
+				A91C70B485B14F0FBE72E8A1 /* SQLiteHealthRecordStore.swift in Sources */,
+				C33B0A7CFCDFA421CF4D51ED /* MySimpleHealthApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6689BE214C427DCA70E66E24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1864D75A4BD5950FCFE1BC6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7AB4A151FFB72E6ECB5E70F3 /* MySimpleHealth */;
+			targetProxy = 4EF78DFADE2286B3A6A080E0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		10B4323A9305D8F1330B672D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		12A5060B89F39C47962D9275 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/MySimpleHealth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 736NRP69T9;
+				INFOPLIST_FILE = "App/Info-Debug.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.mysimplehealth.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1F5B93E514D30FD322CF2669 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/MySimpleHealth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 736NRP69T9;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.mysimplehealth.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6BB153F93299B83EDD003458 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 736NRP69T9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.mysimplehealth.MySimpleHealthTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MySimpleHealth.app/MySimpleHealth";
+			};
+			name = Debug;
+		};
+		A20F5922F1BD56E773EDBD06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 736NRP69T9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.mysimplehealth.MySimpleHealthTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MySimpleHealth.app/MySimpleHealth";
+			};
+			name = Release;
+		};
+		A582BCFECB088DD9960A4FEC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ADEFE9B8543CD94EF139BA39 /* Build configuration list for PBXNativeTarget "MySimpleHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12A5060B89F39C47962D9275 /* Debug */,
+				1F5B93E514D30FD322CF2669 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BECA2A0B7208EA8C3093FAE3 /* Build configuration list for PBXProject "MySimpleHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10B4323A9305D8F1330B672D /* Debug */,
+				A582BCFECB088DD9960A4FEC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E8A0DE3285C619A92CBDE74F /* Build configuration list for PBXNativeTarget "MySimpleHealthTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6BB153F93299B83EDD003458 /* Debug */,
+				A20F5922F1BD56E773EDBD06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		BA44A31C33F6DFC2768304FA /* XCLocalSwiftPackageReference "../MySimpleHealthHealthKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../MySimpleHealthHealthKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		37897D51A209B111301BBF74 /* MSHHealthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MSHHealthCore;
+		};
+		7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MSHAppleHealthKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F222795B46CB42CA492BA297 /* Project object */;
+}
