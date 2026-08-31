@@ -29,7 +29,7 @@ enum MSHOnboardingStartingPoint: String, Codable, CaseIterable, Identifiable {
 }
 
 struct MSHOnboardingState: Codable, Equatable {
-    static let currentSchemaVersion = 1
+    static let currentSchemaVersion = 2
 
     var schemaVersion = currentSchemaVersion
     var started = false
@@ -57,12 +57,20 @@ final class MSHOnboardingStore: ObservableObject {
         self.existingUserDetector = existingUserDetector
 
         if let data = defaults.data(forKey: Self.storageKey),
-           let decoded = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) {
+           var decoded = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) {
+            if decoded.schemaVersion < MSHOnboardingState.currentSchemaVersion {
+                // v1 treated existing HealthKit state as completed onboarding.
+                // v2 introduces an explicit account-first gate, so those
+                // migrated development users must see onboarding once.
+                if decoded.migratedExistingUser {
+                    decoded.completed = false
+                    decoded.started = false
+                }
+                decoded.schemaVersion = MSHOnboardingState.currentSchemaVersion
+            }
             state = decoded
+            persist()
         } else {
-            // Existing device health state is remembered, but it no longer
-            // bypasses onboarding. Account identity and onboarding are now
-            // explicit gates before a person enters the MSH app shell.
             state = MSHOnboardingState(
                 migratedExistingUser: existingUserDetector()
             )
