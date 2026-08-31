@@ -164,7 +164,7 @@ private struct MSHWebFeatureScreen: View {
 
 private struct MSHMovementScreen: View {
     private let destinations: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.movementPlan, "Plan a workout or movement session, then record how it went.", "calendar.badge.plus"),
+        (.movementPlan, "Plan a workout or movement session, then record how it went. Existing MSH movements can be opened and edited without creating a duplicate.", "calendar.badge.plus"),
         (.calendar, "See scheduled and completed movement beside other dated health context.", "calendar"),
         (.movementLibrary, "Browse the existing movement vocabulary across exercise, recreation, daily life, and mobility.", "figure.run")
     ]
@@ -198,7 +198,7 @@ private struct MSHMovementScreen: View {
                     }
 
                     MSHNativeBoundaryNote(
-                        text: "Recent Apple Health movement remains available in My Health. Calendar requests only the visible date range rather than loading your complete HealthKit history."
+                        text: "Recent Apple Health movement remains available in My Health. Calendar requests only the visible date range rather than loading your complete HealthKit history. Apple Health source records stay unchanged; MSH can edit only its own attached context."
                     )
                 }
                 .padding(MSHSpacing.medium)
