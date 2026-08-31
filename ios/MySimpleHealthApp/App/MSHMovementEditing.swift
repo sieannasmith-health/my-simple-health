@@ -1,11 +1,89 @@
 import Foundation
 import SwiftUI
 
-enum MSHMovementRecordSource: String, Codable, Equatable {
+enum MSHMovementConnectionPath: String, Codable, Equatable {
+    case native
+    case appleHealth
+    case directIntegration
+    case importOrManual
+}
+
+enum MSHMovementRecordSource: String, Codable, CaseIterable, Equatable, Identifiable {
     case msh
+    case appleFitness
     case appleHealth
     case youtube
+    case strava
+    case peloton
+    case garminConnect
+    case fitbit
+    case nikeRunClub
+    case runna
+    case hevy
+    case fitbod
+    case jefit
+    case caliber
+    case whoop
+    case zwift
+    case trainerRoad
+    case ifit
+    case classApp
     case imported
+    case manual
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .msh: return "MSH Movement Library"
+        case .appleFitness: return "Apple Fitness"
+        case .appleHealth: return "Apple Health"
+        case .youtube: return "YouTube"
+        case .strava: return "Strava"
+        case .peloton: return "Peloton"
+        case .garminConnect: return "Garmin Connect"
+        case .fitbit: return "Fitbit"
+        case .nikeRunClub: return "Nike Run Club"
+        case .runna: return "Runna"
+        case .hevy: return "Hevy"
+        case .fitbod: return "Fitbod"
+        case .jefit: return "JEFIT"
+        case .caliber: return "Caliber"
+        case .whoop: return "WHOOP"
+        case .zwift: return "Zwift"
+        case .trainerRoad: return "TrainerRoad"
+        case .ifit: return "iFIT"
+        case .classApp: return "Fitness class app"
+        case .imported: return "Import from another app"
+        case .manual: return "Add manually"
+        }
+    }
+
+    var connectionPath: MSHMovementConnectionPath {
+        switch self {
+        case .msh, .manual:
+            return .native
+        case .appleFitness, .appleHealth, .peloton, .garminConnect, .fitbit, .nikeRunClub, .hevy, .fitbod, .jefit, .caliber, .whoop:
+            return .appleHealth
+        case .youtube, .strava, .zwift, .trainerRoad, .ifit, .runna:
+            return .directIntegration
+        case .classApp, .imported:
+            return .importOrManual
+        }
+    }
+
+    var availabilityLabel: String {
+        switch connectionPath {
+        case .native:
+            return "Available in MSH"
+        case .appleHealth:
+            return "Use Apple Health when available"
+        case .directIntegration:
+            return "Connection pathway"
+        case .importOrManual:
+            return "Import or add manually"
+        }
+    }
 }
 
 struct MSHMovementDraft: Equatable {
@@ -38,6 +116,74 @@ protocol MSHMovementEditableRecord {
     var isCompleted: Bool { get }
 }
 
+struct MSHMovementSourcePicker: View {
+    @Binding var selection: MSHMovementRecordSource
+
+    var body: some View {
+        List {
+            Section("My movement") {
+                sourceRow(.msh)
+                sourceRow(.manual)
+            }
+
+            Section("Apple") {
+                sourceRow(.appleFitness)
+                sourceRow(.appleHealth)
+            }
+
+            Section("Workout apps") {
+                ForEach([
+                    MSHMovementRecordSource.youtube,
+                    .strava,
+                    .peloton,
+                    .garminConnect,
+                    .fitbit,
+                    .nikeRunClub,
+                    .runna,
+                    .hevy,
+                    .fitbod,
+                    .jefit,
+                    .caliber,
+                    .whoop,
+                    .zwift,
+                    .trainerRoad,
+                    .ifit,
+                    .classApp,
+                    .imported
+                ]) { source in
+                    sourceRow(source)
+                }
+            }
+        }
+        .navigationTitle("Add movement from")
+    }
+
+    @ViewBuilder
+    private func sourceRow(_ source: MSHMovementRecordSource) -> some View {
+        Button {
+            selection = source
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(source.displayName)
+                        .foregroundStyle(.primary)
+                    Text(source.availabilityLabel)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                if selection == source {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(MSHColor.forest)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct MSHMovementEditSheet<Record: MSHMovementEditableRecord>: View {
     let record: Record
     let onSave: (MSHMovementDraft) -> Void
@@ -64,12 +210,19 @@ struct MSHMovementEditSheet<Record: MSHMovementEditableRecord>: View {
     }
 
     private var sourceIsReadOnly: Bool {
-        record.source == .appleHealth
+        record.source == .appleHealth || record.source == .appleFitness
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Source") {
+                    LabeledContent("Added from", value: record.source.displayName)
+                    Text(record.source.availabilityLabel)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
                 if sourceIsReadOnly {
                     Section {
                         Text("Apple Health source data stays unchanged. You can update your MSH notes and completion context here.")
@@ -127,7 +280,6 @@ struct MSHMovementEditSheet<Record: MSHMovementEditableRecord>: View {
 private struct OptionalIntegerField: View {
     let title: String
     @Binding var value: Int?
-    @State private var text = ""
 
     var body: some View {
         TextField(title, text: Binding(
