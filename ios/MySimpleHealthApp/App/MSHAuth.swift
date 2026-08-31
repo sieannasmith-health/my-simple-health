@@ -76,9 +76,15 @@ final class MSHAuthStore: ObservableObject {
 }
 
 struct MSHAuthenticatedRootExperience: View {
+#if !DEBUG
     @StateObject private var authStore = MSHAuthStore.shared
+#endif
 
     var body: some View {
+#if DEBUG
+        // Development-only bypass so the native app remains testable when auth is unavailable.
+        MSHRootExperience()
+#else
         Group {
             if authStore.isResolvingSession {
                 ZStack {
@@ -93,6 +99,7 @@ struct MSHAuthenticatedRootExperience: View {
             }
         }
         .environmentObject(authStore)
+#endif
     }
 }
 
