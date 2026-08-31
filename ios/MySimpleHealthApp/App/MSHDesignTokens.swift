@@ -2,6 +2,11 @@ import SwiftUI
 import UIKit
 
 enum MSHColor {
+    static let accentLight = UIColor(red: 0.10, green: 0.25, blue: 0.16, alpha: 1)
+    static let accentDark = UIColor(red: 0.48, green: 0.72, blue: 0.50, alpha: 1)
+    static let canvasLight = UIColor(red: 0.98, green: 0.96, blue: 0.91, alpha: 1)
+    static let canvasDark = UIColor(red: 0.055, green: 0.07, blue: 0.06, alpha: 1)
+
     static let forest = Color(red: 0.10, green: 0.25, blue: 0.16)
     static let sage = Color(red: 0.56, green: 0.66, blue: 0.55)
     static let cream = Color(red: 0.98, green: 0.96, blue: 0.91)
@@ -9,13 +14,13 @@ enum MSHColor {
     static let charcoal = Color(red: 0.14, green: 0.15, blue: 0.14)
 
     static let accent = adaptive(
-        light: UIColor(red: 0.10, green: 0.25, blue: 0.16, alpha: 1),
-        dark: UIColor(red: 0.48, green: 0.72, blue: 0.50, alpha: 1)
+        light: accentLight,
+        dark: accentDark
     )
 
     static let canvas = adaptive(
-        light: UIColor(red: 0.98, green: 0.96, blue: 0.91, alpha: 1),
-        dark: UIColor(red: 0.055, green: 0.07, blue: 0.06, alpha: 1)
+        light: canvasLight,
+        dark: canvasDark
     )
 
     static let surface = adaptive(

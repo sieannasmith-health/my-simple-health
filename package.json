@@ -2,6 +2,7 @@
   "type": "module",
   "scripts": {
     "dev": "node dev-server.js",
+    "dev:device": "MSH_DEV_HOST=0.0.0.0 MSH_DEV_PORT=43128 node dev-server.js",
     "test": "node --test tests/*.test.mjs"
   }
 }

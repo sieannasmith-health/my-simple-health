@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { networkInterfaces } from 'node:os';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import helloHandler from './api/hello.js';
@@ -96,9 +97,28 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-const port = Number(process.env.PORT) || 43127;
-server.listen(port, '127.0.0.1', () => {
-  console.log(`[dev] My Simple Health: http://127.0.0.1:${port}`);
+const host = process.env.MSH_DEV_HOST || process.env.HOST || '127.0.0.1';
+const port = Number(process.env.MSH_DEV_PORT || process.env.PORT) || 43127;
+
+function lanIPv4Addresses() {
+  return Object.entries(networkInterfaces())
+    .flatMap(([name, addresses]) => (addresses || []).map(address => ({ name, ...address })))
+    .filter(address => address.family === 'IPv4' && !address.internal && !address.address.startsWith('169.254.'))
+    .sort((left, right) => Number(right.name === 'en0') - Number(left.name === 'en0') || left.name.localeCompare(right.name))
+    .map(address => address.address);
+}
+
+server.on('error', error => {
+  console.error(`[dev] Server failed on ${host}:${port}:`, error.message);
+});
+
+server.listen(port, host, () => {
+  console.log(`[dev] My Simple Health: http://${host}:${port}`);
+  if (host === '0.0.0.0' || host === '::') {
+    const addresses = lanIPv4Addresses();
+    if (addresses.length) addresses.forEach(address => console.log(`[dev] Physical device URL: http://${address}:${port}/my-health.html`));
+    else console.error('[dev] Physical device URL unavailable: no LAN IPv4 address was found.');
+  }
   console.log(`[dev] API runtimes: /api/hello, /api/explore`);
   console.log(`[dev] OPENAI_API_KEY detected: ${Boolean(process.env.OPENAI_API_KEY) ? 'yes' : 'no'}`);
   console.log(`[dev] HELLO_MODEL: ${process.env.HELLO_MODEL || 'gpt-5.6-luna'}`);

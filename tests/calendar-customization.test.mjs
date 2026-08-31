@@ -5,6 +5,7 @@ import vm from 'node:vm';
 
 const storageSource=await readFile(new URL('../js/msh-storage.js',import.meta.url),'utf8');
 const calendarSource=await readFile(new URL('../js/msh-calendar.js',import.meta.url),'utf8');
+const calendarDataSource=await readFile(new URL('../js/msh-calendar-data.js',import.meta.url),'utf8');
 const css=await readFile(new URL('../css/msh-cycle.css',import.meta.url),'utf8');
 
 function runtime(seed=null){
@@ -58,8 +59,8 @@ test('visibility migration changes presentation preferences without mutating rec
 });
 
 test('Cycle subrecords project through their own existing layer types',()=>{
-  for(const category of ['symptom','medication','sexualHealth','measurement','note'])assert.match(calendarSource,new RegExp(`category:'${category}'`));
-  assert.match(calendarSource,/cycleRelatedEvents/);
-  assert.match(calendarSource,/layerEnabled\(state,event\.category\)/);
+  for(const category of ['symptom','medication','sexualHealth','measurement','note'])assert.match(calendarDataSource,new RegExp(`category:'${category}'`));
+  assert.match(calendarDataSource,/cycleRelatedEvents/);
+  assert.match(calendarDataSource,/layerEnabled\(state\.calendar\.settings\.layers,event\.category\)/);
   assert.match(calendarSource,/const cycleVisible=state\.calendar\.settings\.layers\.cycle!==false/);
 });

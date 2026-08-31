@@ -45,6 +45,8 @@ enum MSHDebugLifecycle {
 
 @main
 struct MySimpleHealthApp: App {
+    @UIApplicationDelegateAdaptor(MSHApplicationDelegate.self) private var applicationDelegate
+
     init() {
         MSHDebugLifecycle.log("process_launch")
     }
@@ -59,7 +61,7 @@ private struct MSHSceneRoot: View {
     @StateObject private var lifecycle = MSHSceneLifecycleProbe()
 
     var body: some View {
-        MSHAppShell()
+        MSHRootExperience()
             .onAppear {
                 MSHDebugLifecycle.log(
                     scenePhase.mshLifecycleEvent,

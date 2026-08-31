@@ -13,6 +13,19 @@
 		4D5348010000000000000001 /* MSHDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000001 /* MSHDesignTokens.swift */; };
 		4D5348010000000000000002 /* MSHNativeShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000002 /* MSHNativeShell.swift */; };
 		4D5348010000000000000003 /* MSHNativeShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000003 /* MSHNativeShellTests.swift */; };
+		4D5348010000000000000004 /* MSHMyHealthModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000004 /* MSHMyHealthModel.swift */; };
+		4D5348010000000000000005 /* MSHMyHealthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000005 /* MSHMyHealthDataSource.swift */; };
+		4D5348010000000000000006 /* MSHMyHealthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000006 /* MSHMyHealthScreen.swift */; };
+		4D5348010000000000000007 /* MSHMyHealthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000007 /* MSHMyHealthTests.swift */; };
+		4D5348010000000000000008 /* MSHNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000008 /* MSHNotificationService.swift */; };
+		4D5348010000000000000009 /* MSHNotificationRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000009 /* MSHNotificationRouting.swift */; };
+		4D534801000000000000000A /* MSHNotificationBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000A /* MSHNotificationBridge.swift */; };
+		4D534801000000000000000B /* MSHNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000B /* MSHNotificationTests.swift */; };
+		4D534801000000000000000C /* MSHOnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000C /* MSHOnboardingState.swift */; };
+		4D534801000000000000000D /* MSHAppleHealthRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000D /* MSHAppleHealthRuntime.swift */; };
+		4D534801000000000000000E /* MSHOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000E /* MSHOnboardingView.swift */; };
+		4D534801000000000000000F /* MSHOnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D534802000000000000000F /* MSHOnboardingTests.swift */; };
+		4D5348010000000000000010 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D5348020000000000000010 /* LaunchScreen.storyboard */; };
 		53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA05488D28DF0D6053601B6 /* MSHWebView.swift */; };
 		9F06AB60D571D27BEF7942EA /* AppleHealthBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */; };
 		A91C70B485B14F0FBE72E8A1 /* SQLiteHealthRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91C70B485B14F0FBE72E8A2 /* SQLiteHealthRecordStore.swift */; };
@@ -36,10 +49,23 @@
 		0AA05488D28DF0D6053601B6 /* MSHWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHWebView.swift; sourceTree = "<group>"; };
 		105124B82C67397BF1E74C25 /* FileHealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStore.swift; sourceTree = "<group>"; };
 		35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthBridge.swift; sourceTree = "<group>"; };
+		473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MySimpleHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D5348020000000000000001 /* MSHDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHDesignTokens.swift; sourceTree = "<group>"; };
 		4D5348020000000000000002 /* MSHNativeShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNativeShell.swift; sourceTree = "<group>"; };
 		4D5348020000000000000003 /* MSHNativeShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNativeShellTests.swift; sourceTree = "<group>"; };
-		473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MySimpleHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D5348020000000000000004 /* MSHMyHealthModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthModel.swift; sourceTree = "<group>"; };
+		4D5348020000000000000005 /* MSHMyHealthDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthDataSource.swift; sourceTree = "<group>"; };
+		4D5348020000000000000006 /* MSHMyHealthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthScreen.swift; sourceTree = "<group>"; };
+		4D5348020000000000000007 /* MSHMyHealthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthTests.swift; sourceTree = "<group>"; };
+		4D5348020000000000000008 /* MSHNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationService.swift; sourceTree = "<group>"; };
+		4D5348020000000000000009 /* MSHNotificationRouting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationRouting.swift; sourceTree = "<group>"; };
+		4D534802000000000000000A /* MSHNotificationBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationBridge.swift; sourceTree = "<group>"; };
+		4D534802000000000000000B /* MSHNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationTests.swift; sourceTree = "<group>"; };
+		4D534802000000000000000C /* MSHOnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingState.swift; sourceTree = "<group>"; };
+		4D534802000000000000000D /* MSHAppleHealthRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHAppleHealthRuntime.swift; sourceTree = "<group>"; };
+		4D534802000000000000000E /* MSHOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingView.swift; sourceTree = "<group>"; };
+		4D534802000000000000000F /* MSHOnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingTests.swift; sourceTree = "<group>"; };
+		4D5348020000000000000010 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySimpleHealthApp.swift; sourceTree = "<group>"; };
 		7BC4A6349D1004D170B6C977 /* MySimpleHealth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MySimpleHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8496059FB9B25B3B9A0B527B /* MySimpleHealthHealthKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MySimpleHealthHealthKit; path = ../MySimpleHealthHealthKit; sourceTree = SOURCE_ROOT; };
@@ -88,8 +114,18 @@
 				105124B82C67397BF1E74C25 /* FileHealthStore.swift */,
 				95F42BB7DD7AE20C2756FE6E /* Info-Debug.plist */,
 				E08CEDED5B19E322B00C097C /* Info.plist */,
+				4D5348020000000000000010 /* LaunchScreen.storyboard */,
 				4D5348020000000000000001 /* MSHDesignTokens.swift */,
+				4D534802000000000000000D /* MSHAppleHealthRuntime.swift */,
+				4D5348020000000000000005 /* MSHMyHealthDataSource.swift */,
+				4D5348020000000000000004 /* MSHMyHealthModel.swift */,
+				4D5348020000000000000006 /* MSHMyHealthScreen.swift */,
 				4D5348020000000000000002 /* MSHNativeShell.swift */,
+				4D534802000000000000000A /* MSHNotificationBridge.swift */,
+				4D5348020000000000000009 /* MSHNotificationRouting.swift */,
+				4D5348020000000000000008 /* MSHNotificationService.swift */,
+				4D534802000000000000000C /* MSHOnboardingState.swift */,
+				4D534802000000000000000E /* MSHOnboardingView.swift */,
 				0AA05488D28DF0D6053601B6 /* MSHWebView.swift */,
 				A91C70B485B14F0FBE72E8A2 /* SQLiteHealthRecordStore.swift */,
 				D40CD07AC85001504274A352 /* MySimpleHealth.entitlements */,
@@ -103,6 +139,9 @@
 			children = (
 				0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */,
 				4D5348020000000000000003 /* MSHNativeShellTests.swift */,
+				4D5348020000000000000007 /* MSHMyHealthTests.swift */,
+				4D534802000000000000000B /* MSHNotificationTests.swift */,
+				4D534802000000000000000F /* MSHOnboardingTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -203,6 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3ADD0323DC0F51D0B774E7BC /* Assets.xcassets in Resources */,
+				4D5348010000000000000010 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,7 +257,16 @@
 				FEC824609EB11E14AECB7B67 /* FileHealthStore.swift in Sources */,
 				53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */,
 				4D5348010000000000000001 /* MSHDesignTokens.swift in Sources */,
+				4D534801000000000000000D /* MSHAppleHealthRuntime.swift in Sources */,
+				4D5348010000000000000005 /* MSHMyHealthDataSource.swift in Sources */,
+				4D5348010000000000000004 /* MSHMyHealthModel.swift in Sources */,
+				4D5348010000000000000006 /* MSHMyHealthScreen.swift in Sources */,
 				4D5348010000000000000002 /* MSHNativeShell.swift in Sources */,
+				4D534801000000000000000A /* MSHNotificationBridge.swift in Sources */,
+				4D5348010000000000000009 /* MSHNotificationRouting.swift in Sources */,
+				4D5348010000000000000008 /* MSHNotificationService.swift in Sources */,
+				4D534801000000000000000C /* MSHOnboardingState.swift in Sources */,
+				4D534801000000000000000E /* MSHOnboardingView.swift in Sources */,
 				A91C70B485B14F0FBE72E8A1 /* SQLiteHealthRecordStore.swift in Sources */,
 				C33B0A7CFCDFA421CF4D51ED /* MySimpleHealthApp.swift in Sources */,
 			);
@@ -229,6 +278,9 @@
 			files = (
 				26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */,
 				4D5348010000000000000003 /* MSHNativeShellTests.swift in Sources */,
+				4D5348010000000000000007 /* MSHMyHealthTests.swift in Sources */,
+				4D534801000000000000000B /* MSHNotificationTests.swift in Sources */,
+				4D534801000000000000000F /* MSHOnboardingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
