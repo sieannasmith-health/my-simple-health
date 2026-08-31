@@ -56,47 +56,158 @@ final class MSHMyHealthViewModel: ObservableObject {
 @MainActor
 struct MSHMyHealthScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
+    @AppStorage("msh.displayName") private var displayName = ""
+    @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
+    @State private var pendingName = ""
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    private var hasDisplayName: Bool {
+        !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
         ZStack {
             MSHColor.canvas.ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: MSHSpacing.xLarge) {
-                    header
-
-                    switch viewModel.loadState {
-                    case .loading:
-                        loadingContent
-                    case .loaded(let snapshot):
-                        loadedContent(snapshot)
-                    case .failed:
-                        failedContent
-                    }
-                }
-                .padding(.horizontal, MSHSpacing.medium)
-                .padding(.vertical, MSHSpacing.large)
+            if hasDisplayName {
+                homeContent
+            } else {
+                doorway
             }
-            .refreshable { await viewModel.reload() }
         }
-        .task { await viewModel.loadIfNeeded() }
+        .task(id: hasDisplayName) {
+            if hasDisplayName {
+                await viewModel.loadIfNeeded()
+            }
+        }
+    }
+
+    private var homeContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: MSHSpacing.xLarge) {
+                header
+                MSHTimeOfDayCard()
+
+                switch viewModel.loadState {
+                case .loading:
+                    loadingContent
+                case .loaded(let snapshot):
+                    loadedContent(snapshot)
+                case .failed:
+                    failedContent
+                }
+            }
+            .padding(.horizontal, MSHSpacing.medium)
+            .padding(.vertical, MSHSpacing.large)
+        }
+        .refreshable { await viewModel.reload() }
+    }
+
+    private var doorway: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: MSHSpacing.xLarge) {
+                Spacer(minLength: 44)
+
+                VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                    Text("My Health")
+                        .font(MSHTypography.destinationTitle)
+                        .foregroundStyle(MSHColor.primaryText)
+
+                    Text("Before you come in, make this space yours.")
+                        .font(.title3)
+                        .foregroundStyle(MSHColor.secondaryText)
+                }
+
+                VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                        Text("What should we call you here?")
+                            .font(.system(.title2, design: .serif, weight: .semibold))
+                            .foregroundStyle(MSHColor.primaryText)
+                        Text("Your name, nickname, or whatever feels natural to you.")
+                            .font(MSHTypography.body)
+                            .foregroundStyle(MSHColor.secondaryText)
+                    }
+
+                    TextField("Name or nickname", text: $pendingName)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
+                        .padding(.horizontal, MSHSpacing.medium)
+                        .frame(height: 52)
+                        .background(MSHColor.controlFill)
+                        .foregroundStyle(MSHColor.primaryText)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous)
+                                .stroke(MSHColor.border, lineWidth: 1)
+                        }
+                        .onSubmit { enterHome() }
+
+                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                        Text("Appearance")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(MSHColor.primaryText)
+                        Picker("Appearance", selection: $appearanceRawValue) {
+                            ForEach(MSHAppearancePreference.allCases) { preference in
+                                Text(preference.title).tag(preference.rawValue)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    Button(action: enterHome) {
+                        Text("Come in")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(MSHColor.warmWhite)
+                    .background(MSHColor.forest)
+                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                    .disabled(pendingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .opacity(pendingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.45 : 1)
+                }
+                .mshSurface()
+
+                Text("You can change your name or appearance later in Profile & Settings.")
+                    .font(.footnote)
+                    .foregroundStyle(MSHColor.secondaryText)
+            }
+            .padding(.horizontal, MSHSpacing.medium)
+            .padding(.bottom, MSHSpacing.large)
+        }
+    }
+
+    private func enterHome() {
+        let trimmed = pendingName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        displayName = trimmed
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: MSHSpacing.small) {
-            Text("My Health")
+            Text("\(timeGreeting), \(displayName).")
                 .font(MSHTypography.destinationTitle)
                 .foregroundStyle(MSHColor.primaryText)
-            Text("Your current picture, brought together gently and privately on this iPhone.")
+            Text("You’re home. Here’s what matters right now.")
                 .font(MSHTypography.body)
                 .foregroundStyle(MSHColor.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var timeGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: "Good morning"
+        case 12..<17: "Good afternoon"
+        case 17..<22: "Good evening"
+        default: "Welcome back"
+        }
     }
 
     private var loadingContent: some View {
@@ -147,6 +258,47 @@ struct MSHMyHealthScreen: View {
     }
 }
 
+private struct MSHTimeOfDayCard: View {
+    private var hour: Int { Calendar.current.component(.hour, from: Date()) }
+
+    private var title: String {
+        switch hour {
+        case 5..<12: "This morning"
+        case 12..<17: "This afternoon"
+        case 17..<22: "This evening"
+        default: "Right now"
+        }
+    }
+
+    private var message: String {
+        switch hour {
+        case 5..<12:
+            "Begin with what carried over from overnight and what needs your attention today."
+        case 12..<17:
+            "See what has already happened today and what still deserves your attention."
+        case 17..<22:
+            "Let the day settle. Notice what happened, what remains, and what can wait until tomorrow."
+        default:
+            "Keep this quiet. Notice what matters now and leave the rest for later."
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: MSHSpacing.small) {
+            Text(title.uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(1.2)
+                .foregroundStyle(MSHColor.accent)
+            Text(message)
+                .font(.system(.title3, design: .serif))
+                .foregroundStyle(MSHColor.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, MSHSpacing.small)
+    }
+}
+
 private struct MSHSection<Content: View>: View {
     let title: String
     let subtitle: String
@@ -177,7 +329,7 @@ private struct MSHAppleHealthStatusCard: View {
                     .font(.title3)
                     .foregroundStyle(MSHColor.accent)
                     .frame(width: 42, height: 42)
-                    .background(MSHColor.sage.opacity(0.16))
+                    .background(MSHColor.controlFill)
                     .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
 
                 VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
@@ -203,7 +355,7 @@ private struct MSHAppleHealthStatusCard: View {
                             .foregroundStyle(MSHColor.primaryText)
                             .padding(.horizontal, MSHSpacing.small)
                             .padding(.vertical, MSHSpacing.xSmall)
-                            .background(MSHColor.sage.opacity(0.14))
+                            .background(MSHColor.controlFill)
                             .clipShape(Capsule())
                     }
                 }
@@ -238,7 +390,7 @@ private struct MSHHealthAreaCard: View {
                 .font(.title3)
                 .foregroundStyle(model.isSelected ? MSHColor.accent : MSHColor.secondaryText)
                 .frame(width: 42, height: 42)
-                .background(MSHColor.sage.opacity(model.isSelected ? 0.16 : 0.08))
+                .background(MSHColor.controlFill)
                 .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
 
             VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
