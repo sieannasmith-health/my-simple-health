@@ -1,0 +1,54 @@
+/* Movement Library interaction layer */
+.movement-library-item[data-movement-interactive="true"] {
+  cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background-color .16s ease;
+}
+.movement-library-item[data-movement-interactive="true"]:hover,
+.movement-library-item[data-movement-interactive="true"]:focus-visible {
+  border-color:rgba(23,61,43,.34);
+  background:#fff;
+  transform:translateY(-1px);
+}
+.movement-library-detail-backdrop {
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(12,17,13,.5);
+}
+.movement-library-detail {
+  position:relative;
+  width:min(520px,100%);
+  padding:30px;
+  border:1px solid rgba(23,61,43,.14);
+  border-radius:28px;
+  background:#fcfbf7;
+  color:#252822;
+  box-shadow:0 28px 90px rgba(0,0,0,.22);
+}
+.movement-library-detail h2 {
+  margin:4px 0 12px;
+  color:#173d2b;
+  font:400 clamp(2rem,8vw,3rem)/1 Georgia,serif;
+}
+.movement-library-detail p { color:#5d655b; line-height:1.6; }
+.movement-library-detail-close {
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:#173d2b;
+  font-size:28px;
+  cursor:pointer;
+}
+.movement-library-detail-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+@media(max-width:600px) {
+  .movement-library-detail-backdrop { align-items:end; padding:0; }
+  .movement-library-detail { width:100%; border-radius:28px 28px 0 0; padding:28px 22px calc(28px + env(safe-area-inset-bottom)); }
+}
