@@ -75,6 +75,27 @@ final class MSHAuthStore: ObservableObject {
     }
 }
 
+struct MSHAuthenticatedRootExperience: View {
+    @StateObject private var authStore = MSHAuthStore.shared
+
+    var body: some View {
+        Group {
+            if authStore.isResolvingSession {
+                ZStack {
+                    MSHOnboardingPalette.cream.ignoresSafeArea()
+                    ProgressView()
+                        .tint(MSHOnboardingPalette.forest)
+                }
+            } else if authStore.isAuthenticated {
+                MSHRootExperience()
+            } else {
+                MSHAuthGateView(store: authStore)
+            }
+        }
+        .environmentObject(authStore)
+    }
+}
+
 struct MSHAuthGateView: View {
     @ObservedObject var store: MSHAuthStore
     @State private var mode: Mode = .signIn
