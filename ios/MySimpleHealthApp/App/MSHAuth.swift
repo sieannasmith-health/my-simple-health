@@ -82,9 +82,9 @@ struct MSHAuthenticatedRootExperience: View {
         Group {
             if authStore.isResolvingSession {
                 ZStack {
-                    MSHOnboardingPalette.cream.ignoresSafeArea()
+                    MSHColor.cream.ignoresSafeArea()
                     ProgressView()
-                        .tint(MSHOnboardingPalette.forest)
+                        .tint(MSHColor.forest)
                 }
             } else if authStore.isAuthenticated {
                 MSHRootExperience()
@@ -124,7 +124,7 @@ struct MSHAuthGateView: View {
 
     var body: some View {
         ZStack {
-            MSHOnboardingPalette.cream.ignoresSafeArea()
+            MSHColor.cream.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
@@ -133,17 +133,17 @@ struct MSHAuthGateView: View {
                     VStack(spacing: 10) {
                         Text("My Simple Health")
                             .font(.system(size: 18, weight: .semibold, design: .serif))
-                            .foregroundStyle(MSHOnboardingPalette.forest)
+                            .foregroundStyle(MSHColor.forest)
 
                         Text(mode.title)
                             .font(.system(size: 34, weight: .medium, design: .serif))
                             .multilineTextAlignment(.center)
-                            .foregroundStyle(MSHOnboardingPalette.charcoal)
+                            .foregroundStyle(MSHColor.charcoal)
 
                         Text("Your health information stays connected to your account and your choices.")
                             .font(.body)
                             .multilineTextAlignment(.center)
-                            .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.72))
+                            .foregroundStyle(MSHColor.charcoal.opacity(0.72))
                     }
 
                     VStack(spacing: 14) {
@@ -153,14 +153,14 @@ struct MSHAuthGateView: View {
                             .autocorrectionDisabled()
                             .padding(.horizontal, 16)
                             .frame(minHeight: 54)
-                            .background(MSHOnboardingPalette.warmWhite)
+                            .background(MSHColor.warmWhite)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                         SecureField("Password", text: $password)
                             .textContentType(mode == .signIn ? .password : .newPassword)
                             .padding(.horizontal, 16)
                             .frame(minHeight: 54)
-                            .background(MSHOnboardingPalette.warmWhite)
+                            .background(MSHColor.warmWhite)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                         Button {
@@ -173,7 +173,7 @@ struct MSHAuthGateView: View {
                             .font(.body.weight(.semibold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, minHeight: 54)
-                            .background(MSHOnboardingPalette.forest)
+                            .background(MSHColor.forest)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
                         .disabled(isWorking || email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || password.count < 6)
@@ -187,12 +187,12 @@ struct MSHAuthGateView: View {
                         } label: {
                             Text("Continue with Google")
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(MSHOnboardingPalette.forest)
+                                .foregroundStyle(MSHColor.forest)
                                 .frame(maxWidth: .infinity, minHeight: 54)
-                                .background(MSHOnboardingPalette.warmWhite.opacity(0.9))
+                                .background(MSHColor.warmWhite.opacity(0.9))
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .stroke(MSHOnboardingPalette.forest.opacity(0.18), lineWidth: 1)
+                                        .stroke(MSHColor.forest.opacity(0.18), lineWidth: 1)
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
@@ -211,7 +211,7 @@ struct MSHAuthGateView: View {
                         mode = mode == .signIn ? .createAccount : .signIn
                     }
                     .font(.callout.weight(.semibold))
-                    .foregroundStyle(MSHOnboardingPalette.forest)
+                    .foregroundStyle(MSHColor.forest)
                     .frame(minHeight: 44)
 
                     HStack(spacing: 24) {
@@ -219,7 +219,7 @@ struct MSHAuthGateView: View {
                         Link("Terms", destination: URL(string: "https://mysimplehealth.org/terms.html")!)
                     }
                     .font(.footnote)
-                    .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.66))
+                    .foregroundStyle(MSHColor.charcoal.opacity(0.66))
 
                     Spacer(minLength: 28)
                 }
@@ -228,7 +228,7 @@ struct MSHAuthGateView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .tint(MSHOnboardingPalette.forest)
+        .tint(MSHColor.forest)
     }
 
     private func submit() {
