@@ -61,7 +61,7 @@ private struct MSHSceneRoot: View {
     @StateObject private var lifecycle = MSHSceneLifecycleProbe()
 
     var body: some View {
-        MSHRootExperience()
+        MSHAuthenticatedRootExperience()
             .onAppear {
                 MSHDebugLifecycle.log(
                     scenePhase.mshLifecycleEvent,
