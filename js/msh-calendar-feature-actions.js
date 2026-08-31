@@ -8,14 +8,26 @@
   const ACTIONS = Object.freeze({
     movement: { label: 'Add movement', category: 'movement', native: 'movement' },
     cycle: { label: 'Add cycle information', category: 'cycle', native: 'cycle' },
-    symptoms: { label: 'Add symptoms', category: 'symptom', title: 'Symptoms' },
-    medications: { label: 'Add medication', category: 'medication', title: 'Medication' },
-    sexualHealth: { label: 'Add sexual health information', category: 'sexualHealth', title: 'Sexual health' },
+    symptoms: { label: 'Add symptoms', category: 'symptom', title: 'Symptoms', fieldLabel: 'Symptom', placeholder: 'What are you experiencing?' },
+    medications: { label: 'Add medication', category: 'medication', title: 'Medication', fieldLabel: 'Rx Name', placeholder: 'Medication name' },
+    sexualHealth: { label: 'Add sexual health information', category: 'sexualHealth', title: 'Sexual health', special: 'sexualHealth' },
     care: { label: 'Add care or appointment', category: 'care', title: 'Care & appointment' },
     measurements: { label: 'Add measurement', category: 'measurement', title: 'Measurement' },
     life: { label: 'Add life context', category: 'life', title: 'Life context' },
     observations: { label: 'Add observation', category: 'note', title: 'Observation' }
   });
+
+  const SEXUAL_HEALTH_CHOICES = Object.freeze([
+    ['libido', 'Libido'],
+    ['protected_sex', 'Protected sex'],
+    ['unprotected_sex', 'Unprotected sex'],
+    ['masturbation', 'Masturbation'],
+    ['kissing_intimacy', 'Kissing / intimacy'],
+    ['arousal_function', 'Arousal / sexual function'],
+    ['orgasm', 'Orgasm'],
+    ['pain_discomfort', 'Pain / discomfort'],
+    ['other', 'Other sexual activity']
+  ]);
 
   let genericSheet = null;
 
@@ -61,6 +73,25 @@
     if (actions.innerHTML !== markup) actions.innerHTML = markup;
   }
 
+  function openSexualHealthSheet(item, date) {
+    genericSheet.innerHTML = `
+      <div class="msh-sheet-backdrop" data-close-generic-entry></div>
+      <section class="msh-cycle-sheet" role="dialog" aria-modal="true" aria-labelledby="generic-entry-title">
+        <header>
+          <div><p class="msh-eyebrow">${esc(item.title)} · ${esc(date)}</p><h2 id="generic-entry-title">Add sexual health</h2></div>
+          <button type="button" data-close-generic-entry aria-label="Close">×</button>
+        </header>
+        <div class="msh-cycle-field">
+          <span>Select what you want to record</span>
+          <div class="msh-cycle-chips" role="group" aria-label="Sexual health entries">
+            ${SEXUAL_HEALTH_CHOICES.map(([value, label]) => `<button type="button" class="msh-button-secondary" data-sexual-health-choice="${esc(value)}">${esc(label)}</button>`).join('')}
+          </div>
+        </div>
+        <p class="msh-date-action-empty">Your main Calendar will show only a discreet sexual health marker. The specific activity stays inside the saved entry.</p>
+        <footer><button type="button" class="msh-text-button" data-close-generic-entry>Cancel</button></footer>
+      </section>`;
+  }
+
   function openGenericSheet(layerKey) {
     const item = ACTIONS[layerKey];
     if (!item || item.native) return;
@@ -68,27 +99,63 @@
     const date = selectedDate();
     genericSheet = document.createElement('div');
     genericSheet.className = 'msh-calendar-generic-entry';
-    genericSheet.innerHTML = `
-      <div class="msh-sheet-backdrop" data-close-generic-entry></div>
-      <section class="msh-cycle-sheet" role="dialog" aria-modal="true" aria-labelledby="generic-entry-title">
-        <header>
-          <div><p class="msh-eyebrow">${esc(item.title)} · ${esc(date)}</p><h2 id="generic-entry-title">Add ${esc(item.title.toLowerCase())}</h2></div>
-          <button type="button" data-close-generic-entry aria-label="Close">×</button>
-        </header>
-        <form data-generic-calendar-form data-layer="${esc(layerKey)}">
-          <label class="msh-cycle-field">What happened?<input name="title" required maxlength="120" placeholder="${esc(item.title)}"></label>
-          <label class="msh-cycle-field">Anything else you want to remember?<textarea name="detail" rows="4" maxlength="1000" placeholder="Optional"></textarea></label>
-          <footer><button type="button" class="msh-text-button" data-close-generic-entry>Cancel</button><button class="msh-button" type="submit">Save</button></footer>
-        </form>
-      </section>`;
+
+    if (item.special === 'sexualHealth') {
+      openSexualHealthSheet(item, date);
+    } else {
+      const fieldLabel = item.fieldLabel || 'What happened?';
+      const placeholder = item.placeholder || item.title;
+      genericSheet.innerHTML = `
+        <div class="msh-sheet-backdrop" data-close-generic-entry></div>
+        <section class="msh-cycle-sheet" role="dialog" aria-modal="true" aria-labelledby="generic-entry-title">
+          <header>
+            <div><p class="msh-eyebrow">${esc(item.title)} · ${esc(date)}</p><h2 id="generic-entry-title">Add ${esc(item.title.toLowerCase())}</h2></div>
+            <button type="button" data-close-generic-entry aria-label="Close">×</button>
+          </header>
+          <form data-generic-calendar-form data-layer="${esc(layerKey)}">
+            <label class="msh-cycle-field">${esc(fieldLabel)}<input name="title" required maxlength="120" placeholder="${esc(placeholder)}"></label>
+            <label class="msh-cycle-field">Anything else you want to remember?<textarea name="detail" rows="4" maxlength="1000" placeholder="Optional"></textarea></label>
+            <footer><button type="button" class="msh-text-button" data-close-generic-entry>Cancel</button><button class="msh-button" type="submit">Save</button></footer>
+          </form>
+        </section>`;
+    }
+
     root.appendChild(genericSheet);
     genericSheet.querySelector('input[name="title"]')?.focus();
+  }
+
+  function saveSexualHealth(choice) {
+    const selected = SEXUAL_HEALTH_CHOICES.find(([value]) => value === choice);
+    if (!selected) return;
+    const date = selectedDate();
+    const [, label] = selected;
+    MSHStorage.updateState(state => {
+      state.calendar.events ||= [];
+      state.calendar.events.push({
+        id: `calendar_sexualHealth_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        date,
+        category: 'sexualHealth',
+        title: '♡ Sexual health',
+        detail: '',
+        sexualActivity: choice,
+        sexualActivityLabel: label,
+        privacyDisplay: 'discreet',
+        recordStatus: 'recorded',
+        informationClass: 'RECORDED',
+        createdAt: new Date().toISOString()
+      });
+      return state;
+    });
+    genericSheet?.remove();
+    genericSheet = null;
+    window.MSHFeedback?.emit('record', { source: 'calendar-sexualHealth' });
+    location.reload();
   }
 
   function saveGeneric(form) {
     const layerKey = form.dataset.layer;
     const item = ACTIONS[layerKey];
-    if (!item || item.native) return;
+    if (!item || item.native || item.special) return;
     const data = new FormData(form);
     const title = String(data.get('title') || '').trim();
     const detail = String(data.get('detail') || '').trim();
@@ -115,6 +182,13 @@
   }
 
   root.addEventListener('click', event => {
+    const sexualChoice = event.target.closest('[data-sexual-health-choice]');
+    if (sexualChoice) {
+      event.preventDefault();
+      saveSexualHealth(sexualChoice.dataset.sexualHealthChoice);
+      return;
+    }
+
     const add = event.target.closest('[data-add-calendar-layer]');
     if (add) {
       event.preventDefault();
