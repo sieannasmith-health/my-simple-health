@@ -31,10 +31,97 @@
   min-width: 0;
 }
 
+/*
+  The planner is rendered as a fixed modal. On iOS/WKWebView the page itself
+  can be wider than the visual viewport, so percentage widths can inherit that
+  oversized layout width. Pin the planner to the visual viewport instead.
+*/
+.msh-youtube-modal {
+  width: 100dvw !important;
+  max-width: 100dvw !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+.msh-youtube-modal .msh-youtube-card {
+  width: min(760px, calc(100dvw - 36px)) !important;
+  max-width: calc(100dvw - 36px) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+.msh-youtube-card,
+.msh-youtube-card header,
+.msh-youtube-card header > div,
+.msh-youtube-card form,
+.msh-youtube-card label,
+.msh-youtube-card .msh-card-actions,
+.msh-youtube-card .msh-youtube-grid,
+.msh-youtube-card .msh-youtube-results,
+.msh-youtube-card [data-youtube-account-panel],
+.msh-youtube-card [data-youtube-saved-connection] {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.msh-youtube-card input,
+.msh-youtube-card select,
+.msh-youtube-card textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.msh-youtube-card p,
+.msh-youtube-card small,
+.msh-youtube-card strong,
+.msh-youtube-card h2,
+.msh-youtube-card h3 {
+  max-width: 100% !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.msh-youtube-card .msh-card-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.msh-youtube-card .msh-card-actions > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
 @media (max-width: 680px) {
   #msh-youtube-workout-title {
     max-width: 20ch;
     font-size: clamp(26px, 8vw, 34px);
     line-height: 1.08;
+  }
+
+  .msh-youtube-modal {
+    padding: 0 !important;
+  }
+
+  .msh-youtube-modal .msh-youtube-card {
+    width: 100dvw !important;
+    max-width: 100dvw !important;
+    padding: 24px 20px !important;
+    border-radius: 24px 24px 0 0 !important;
+  }
+
+  .msh-youtube-card header {
+    gap: 10px !important;
+  }
+
+  .msh-youtube-card .msh-card-actions > button,
+  .msh-youtube-card .msh-card-actions > a {
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 }
