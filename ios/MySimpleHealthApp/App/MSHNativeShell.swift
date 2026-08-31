@@ -235,6 +235,17 @@ private struct MSHToolsScreen: View {
                     }
                     .padding(.bottom, MSHSpacing.small)
 
+                    NavigationLink {
+                        MSHMeditateScreen()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Meditate",
+                            subtitle: "Make space for quiet, reflection, prayer, meaningful reading, or sound.",
+                            systemImage: "moon.stars"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     ForEach(destinations.indices, id: \.self) { index in
                         let item = destinations[index]
                         NavigationLink {
