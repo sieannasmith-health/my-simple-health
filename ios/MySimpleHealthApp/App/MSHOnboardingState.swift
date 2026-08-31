@@ -59,18 +59,14 @@ final class MSHOnboardingStore: ObservableObject {
         if let data = defaults.data(forKey: Self.storageKey),
            let decoded = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) {
             state = decoded
-        } else if existingUserDetector() {
-            // A person who already used the native HealthKit app should not be
-            // forced through newly introduced onboarding. This migration does
-            // not inspect, rewrite, or remove any health records.
+        } else {
+            // Existing device health state is remembered, but it no longer
+            // bypasses onboarding. Account identity and onboarding are now
+            // explicit gates before a person enters the MSH app shell.
             state = MSHOnboardingState(
-                started: true,
-                completed: true,
-                migratedExistingUser: true
+                migratedExistingUser: existingUserDetector()
             )
             persist()
-        } else {
-            state = MSHOnboardingState()
         }
     }
 
@@ -103,8 +99,6 @@ final class MSHOnboardingStore: ObservableObject {
         persist()
     }
 
-    // These methods are the stable state hooks a future Settings surface can
-    // use without replaying the full onboarding flow.
     func prepareAppleHealthChoiceForSettingsReview() {
         state.appleHealthChoice = .notAsked
         persist()
