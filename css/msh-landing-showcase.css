@@ -305,3 +305,50 @@ html[data-theme='dark'] .context-link{color:#f5f1e7!important}
 @media(prefers-reduced-motion:reduce){
   .context-link::after,.context-link::before{animation:none}
 }
+
+/* Public homepage is intentionally light-only for the current design phase. */
+html{color-scheme:light}
+.story-theme-control{display:none!important}
+html .msh-story-home{
+  --landing-text:#252822!important;
+  --landing-heading:#173d2b!important;
+  --landing-muted:#4d574f!important;
+  --landing-surface:#fcfbf7!important;
+  --landing-surface-soft:#f7f4ec!important;
+  --landing-border:rgba(23,61,43,.14)!important;
+  color:#252822!important;
+  background:#f7f4ec!important;
+}
+html .story-header{
+  color:#252822!important;
+  background:rgba(247,244,236,.92)!important;
+  border-bottom-color:rgba(23,61,43,.14)!important;
+}
+html .story-brand,
+html .story-nav a:not(.story-nav-enter),
+html .context-copy h1,
+html .journey-deck-heading h2,
+html .journey-deck-card h3,
+html .product-demo-copy h2,
+html .trust-strip h2,
+html .story-ending h2{color:#173d2b!important}
+html .context-lede,
+html .journey-deck-heading>div:first-child>p:last-child,
+html .journey-card-support,
+html .demo-doorways small,
+html .trust-strip p,
+html .story-ending p{color:#4d574f!important}
+html .context-hero{background:linear-gradient(180deg,#fbf8ef 0%,#f3ead9 43%,#cad0bd 100%)!important}
+html .journey-deck{background:linear-gradient(180deg,#f7f4ec,#eef0e7)!important}
+html .journey-deck-card,
+html .product-demo,
+html .demo-doorways a,
+html .trust-strip>div{background:#fcfbf7!important;color:#252822!important;border-color:rgba(23,61,43,.14)!important}
+html .product-demo-stack,
+html .story-ending{background:#f7f4ec!important}
+html .story-footer{background:#173d2b!important;color:#f7f4ec!important;border-top-color:rgba(23,61,43,.14)!important}
+html .story-footer a{color:#f7f4ec!important}
+html .story-button,
+html .story-nav-enter{background:#173d2b!important;color:#fff!important}
+html .context-link{color:#173d2b!important}
+html :focus-visible{outline:3px solid #173d2b!important;outline-offset:3px}
