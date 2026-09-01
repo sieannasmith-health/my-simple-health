@@ -53,6 +53,8 @@ test('normalizes a provider response behind the MSH product contract', async () 
               proteins_100g:10,
               carbohydrates_100g:8,
               fat_100g:2,
+              fiber_100g:null,
+              sugars_100g:'',
               sodium_100g:0.05
             }
           }
@@ -69,6 +71,8 @@ test('normalizes a provider response behind the MSH product contract', async () 
     assert.equal(res.body.product.canonicalName, 'Test Yogurt');
     assert.equal(res.body.product.identifier.scheme, 'gtin_12');
     assert.equal(res.body.product.nutrition.nutrients.per100g.sodiumMg, 50);
+    assert.equal(res.body.product.nutrition.nutrients.per100g.fiberG, null);
+    assert.equal(res.body.product.nutrition.nutrients.per100g.sugarsG, null);
   } finally {
     globalThis.fetch = originalFetch;
   }
