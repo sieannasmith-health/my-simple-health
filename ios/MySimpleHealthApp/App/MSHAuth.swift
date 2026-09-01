@@ -5,10 +5,12 @@ import SwiftUI
 @MainActor
 final class MSHAuthStore: ObservableObject {
     static let shared = MSHAuthStore()
+    static let authCallbackURL = URL(string: "mysimplehealth://auth-callback")!
 
     @Published private(set) var session: Session?
     @Published private(set) var isResolvingSession = true
     @Published var errorMessage: String?
+    @Published var noticeMessage: String?
 
     let client: SupabaseClient
     private var authTask: Task<Void, Never>?
@@ -42,27 +44,53 @@ final class MSHAuthStore: ObservableObject {
     var userID: UUID? { session?.user.id }
 
     func signIn(email: String, password: String) async {
+        noticeMessage = nil
         await perform {
             _ = try await client.auth.signIn(email: email, password: password)
         }
     }
 
     func createAccount(email: String, password: String) async {
+        noticeMessage = nil
         await perform {
-            _ = try await client.auth.signUp(email: email, password: password)
+            _ = try await client.auth.signUp(
+                email: email,
+                password: password,
+                redirectTo: Self.authCallbackURL
+            )
+        }
+        if errorMessage == nil {
+            noticeMessage = "Account created. If email confirmation is required, check your inbox and return to My Simple Health."
         }
     }
 
     func signInWithGoogle() async {
+        noticeMessage = nil
         await perform {
             _ = try await client.auth.signInWithOAuth(
-    provider: .google,
-    redirectTo: URL(string: "mysimplehealth://auth-callback")!
-)
+                provider: .google,
+                redirectTo: Self.authCallbackURL
+            )
+        }
+    }
+
+    func handleAuthCallback(_ url: URL) async {
+        guard url.scheme?.lowercased() == "mysimplehealth",
+              url.host?.lowercased() == "auth-callback" else {
+            return
+        }
+
+        errorMessage = nil
+        do {
+            _ = try await client.auth.session(from: url)
+            noticeMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
     func signOut() async {
+        noticeMessage = nil
         await perform {
             try await client.auth.signOut()
         }
@@ -219,10 +247,18 @@ struct MSHAuthGateView: View {
                                 .foregroundStyle(.red)
                                 .multilineTextAlignment(.center)
                         }
+
+                        if let notice = store.noticeMessage {
+                            Text(notice)
+                                .font(.footnote)
+                                .foregroundStyle(MSHColor.charcoal.opacity(0.72))
+                                .multilineTextAlignment(.center)
+                        }
                     }
 
                     Button(mode == .signIn ? "New to MSH? Create an account" : "Already have an account? Log in") {
                         store.errorMessage = nil
+                        store.noticeMessage = nil
                         mode = mode == .signIn ? .createAccount : .signIn
                     }
                     .font(.callout.weight(.semibold))
