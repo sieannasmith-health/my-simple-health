@@ -71,8 +71,10 @@ final class MSHOnboardingStore: ObservableObject {
             state = decoded
             persist()
         } else {
+            let isExistingUser = existingUserDetector()
             state = MSHOnboardingState(
-                migratedExistingUser: existingUserDetector()
+                completed: isExistingUser,
+                migratedExistingUser: isExistingUser
             )
             persist()
         }
