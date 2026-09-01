@@ -119,9 +119,22 @@
       }
     });
   }
+  function loadReflectionClarity() {
+    const page = root.document && root.document.body && root.document.body.dataset.mshPage;
+    if (page !== 'landscape' && page !== 'vision') return;
+    if (root.document.querySelector('script[data-msh-reflection-clarity]')) return;
+    const script = root.document.createElement('script');
+    script.src = 'js/msh-reflection-clarity.js?v=20260901-1';
+    script.defer = true;
+    script.dataset.mshReflectionClarity = 'true';
+    (root.document.body || root.document.head || root.document.documentElement).appendChild(script);
+  }
 
   if (root.document) {
-    root.document.addEventListener('DOMContentLoaded', () => decorate());
+    root.document.addEventListener('DOMContentLoaded', () => {
+      decorate();
+      loadReflectionClarity();
+    });
     root.document.addEventListener('click', event => {
       const anchor = event.target.closest && event.target.closest('a[href]');
       if (!anchor) return;
