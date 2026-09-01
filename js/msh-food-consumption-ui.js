@@ -34,7 +34,6 @@
     const products = productMap();
     const seen = new Set();
     const rows = [];
-
     (food.onHand || []).forEach(stock => {
       const legacy = (food.foods || []).find(item => item.id === stock.foodId);
       if (!legacy) return;
@@ -42,29 +41,14 @@
       const key = product ? `product:${product.id}` : `food:${legacy.id}`;
       if (seen.has(key)) return;
       seen.add(key);
-      rows.push({
-        foodId:legacy.id,
-        productId:product && product.id || legacy.productId || null,
-        name:product && product.canonicalName || legacy.name,
-        brand:product && product.brand || null,
-        hasSpecific:Boolean(product && food.productSpecifics && food.productSpecifics[product.id]),
-        onHand:true
-      });
+      rows.push({ foodId:legacy.id, productId:product && product.id || legacy.productId || null, name:product && product.canonicalName || legacy.name, brand:product && product.brand || null, hasSpecific:Boolean(product && food.productSpecifics && food.productSpecifics[product.id]), onHand:true });
     });
-
     (food.foods || []).forEach(legacy => {
       const product = legacy.productId ? products[legacy.productId] : null;
       const key = product ? `product:${product.id}` : `food:${legacy.id}`;
       if (seen.has(key) || legacy.status === 'archived') return;
       seen.add(key);
-      rows.push({
-        foodId:legacy.id,
-        productId:product && product.id || legacy.productId || null,
-        name:product && product.canonicalName || legacy.name,
-        brand:product && product.brand || null,
-        hasSpecific:Boolean(product && food.productSpecifics && food.productSpecifics[product.id]),
-        onHand:false
-      });
+      rows.push({ foodId:legacy.id, productId:product && product.id || legacy.productId || null, name:product && product.canonicalName || legacy.name, brand:product && product.brand || null, hasSpecific:Boolean(product && food.productSpecifics && food.productSpecifics[product.id]), onHand:false });
     });
     return rows;
   }
@@ -100,16 +84,15 @@
         </div>
         <label>Meal<select name="mealType"><option value="">Not specified</option><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></label>
         <label>When<input name="consumedAt" type="datetime-local"></label>
-        <label class="msh-food-inventory-choice"><input type="checkbox" name="reduceInventory" checked> Reduce on-hand inventory when MSH can match the purchased product</label>
+        <label class="msh-food-inventory-choice"><input type="checkbox" name="reduceInventory" checked> Reduce on-hand inventory when the quantity can be reconciled safely</label>
         <p class="msh-food-acquisition-status" data-consumption-status hidden></p>
         <button class="msh-food-primary" type="submit" ${foods.length ? '' : 'disabled'}>Save food</button>
       </form>`);
     const form = dialog() && dialog().querySelector('[data-consumption-form]');
     if (form) {
       form._mshFoods = foods;
-      const now = new Date();
-      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-      form.elements.consumedAt.value = local;
+      const current = new Date();
+      form.elements.consumedAt.value = new Date(current.getTime() - current.getTimezoneOffset() * 60000).toISOString().slice(0,16);
       updateMeasurement(form);
     }
   }
@@ -157,12 +140,13 @@
       return;
     }
     const calculated = consumption.calculateNutrition(specifics, form.elements.amount.value, form.elements.unit.value);
+    const packageUnits = consumption.purchasedUnitsForAmount(form.elements.amount.value, form.elements.unit.value, specifics);
     preview.innerHTML = calculated
-      ? `<strong>${esc(nutrientLine(calculated))}</strong><small>Calculated from ${esc(calculated.grams)} g using the stored exact-product nutrition record.</small>`
+      ? `<strong>${esc(nutrientLine(calculated))}</strong><small>Calculated from ${esc(calculated.grams)} g using the stored exact-product nutrition record.${packageUnits != null ? ` This is about ${esc((packageUnits * 100).toFixed(1))}% of one purchased package.` : ''}</small>`
       : '<small>This serving unit cannot be converted to grams from the available product data. Try grams or ounces for a nutrient calculation.</small>';
   }
 
-  function reduceInventory(productId, amount, unit) {
+  function reduceInventory(productId, amount, unit, specifics) {
     if (!productId) return null;
     let result = null;
     root.MSHStorage.updateState(state => {
@@ -171,14 +155,19 @@
       const lots = Array.isArray(state.food.acquisition.inventoryLots) ? state.food.acquisition.inventoryLots : [];
       let quantity = Number(amount);
       if (!Number.isFinite(quantity) || quantity <= 0) quantity = 1;
-      // Inventory lots currently represent purchased units. Only decrement directly when the logged unit is a unit-like amount.
-      if (!['serving','piece','portion'].includes(unit)) {
+      let purchasedUnits = null;
+      if (['g','oz'].includes(unit) || (unit === 'serving' && specifics)) {
+        purchasedUnits = consumption.purchasedUnitsForAmount(quantity, unit, specifics);
+      } else if (['serving','piece','portion'].includes(unit)) {
+        purchasedUnits = quantity;
+      }
+      if (purchasedUnits == null || purchasedUnits <= 0) {
         result = { applied:false, reason:'measurement_not_comparable' };
         return state;
       }
-      const adjusted = consumption.consumeFromLots(lots, productId, quantity);
+      const adjusted = consumption.consumeFromLots(lots, productId, purchasedUnits);
       state.food.acquisition.inventoryLots = adjusted.lots;
-      result = { applied:adjusted.consumed > 0, consumed:adjusted.consumed, unfilled:adjusted.remaining, adjustments:adjusted.adjustments };
+      result = { applied:adjusted.consumed > 0, purchasedUnitsRequested:purchasedUnits, consumed:adjusted.consumed, unfilled:adjusted.remaining, adjustments:adjusted.adjustments };
       return state;
     });
     return result;
@@ -194,20 +183,14 @@
     const unit = form.elements.unit.value || 'portion';
     const calculated = mode === 'measured' && specifics ? consumption.calculateNutrition(specifics, amount, unit) : null;
     const inventoryAdjustment = form.elements.reduceInventory.checked
-      ? reduceInventory(item.productId, mode === 'quick' ? 1 : amount, mode === 'quick' ? 'portion' : unit)
+      ? reduceInventory(item.productId, mode === 'quick' ? 1 : amount, mode === 'quick' ? 'portion' : unit, specifics)
       : null;
     const event = consumption.createConsumptionEvent({
-      productId:item.productId,
-      foodId:item.foodId,
-      foodName:item.name,
-      mode,
-      amount:mode === 'quick' ? null : amount,
-      unit:mode === 'quick' ? 'portion' : unit,
-      grams:calculated && calculated.grams,
-      nutrition:calculated && calculated.nutrients,
+      productId:item.productId, foodId:item.foodId, foodName:item.name, mode,
+      amount:mode === 'quick' ? null : amount, unit:mode === 'quick' ? 'portion' : unit,
+      grams:calculated && calculated.grams, nutrition:calculated && calculated.nutrients,
       mealType:form.elements.mealType.value || null,
-      consumedAt:form.elements.consumedAt.value || new Date().toISOString(),
-      inventoryAdjustment
+      consumedAt:form.elements.consumedAt.value || new Date().toISOString(), inventoryAdjustment
     });
     root.MSHStorage.updateState(state => {
       state.food = state.food || {};
@@ -224,7 +207,6 @@
     if (button.matches('[data-open-add]')) setTimeout(enhanceAddMenu,0);
     if (button.matches('[data-log-food]')) logForm();
   });
-
   page.addEventListener('change', event => {
     const form = event.target.closest('[data-consumption-form]');
     if (form) updateMeasurement(form);
@@ -233,7 +215,6 @@
     const form = event.target.closest('[data-consumption-form]');
     if (form && (event.target.name === 'amount' || event.target.name === 'unit')) updateMeasurement(form);
   });
-
   page.addEventListener('submit', event => {
     if (!event.target.matches('[data-consumption-form]')) return;
     event.preventDefault();
