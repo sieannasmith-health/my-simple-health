@@ -225,8 +225,6 @@ struct MSHMyHealthScreen: View {
 
     private func loadedContent(_ snapshot: MSHMyHealthSnapshot) -> some View {
         Group {
-            MSHAppleHealthStatusCard(status: snapshot.appleHealth)
-
             MSHSection(title: "Health areas", subtitle: "The areas you choose to bring into My Health.") {
                 VStack(spacing: MSHSpacing.small) {
                     ForEach(snapshot.areaCards) { card in
@@ -240,6 +238,8 @@ struct MSHMyHealthScreen: View {
             }
 
             MSHComingUpCard()
+
+            MSHAppleHealthStatusCard(status: snapshot.appleHealth)
         }
     }
 
