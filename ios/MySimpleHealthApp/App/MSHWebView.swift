@@ -54,7 +54,7 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
         case .medications: "medications.html"
         case .landscape: "health-landscape.html"
         case .selfInsight: "assessments.html"
-        case .explore: "my-health.html"
+        case .explore: "resources.html"
         case .horizon: "my-vision.html"
         case .path: "my-project.html"
         case .practice: "my-practice.html"
@@ -70,7 +70,6 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
         switch self {
         case .movementPlan: "view=movement"
         case .cycle: "view=cycle"
-        case .explore: "view=explore"
         default: nil
         }
     }
