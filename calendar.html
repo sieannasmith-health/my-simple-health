@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/msh-app.css">
   <link rel="stylesheet" href="css/msh-cycle.css">
   <link rel="stylesheet" href="css/msh-cycle-icons.css?v=20260901-1">
+  <link rel="stylesheet" href="css/msh-calendar-layout.css?v=20260901-1">
   <link rel="stylesheet" href="css/msh-sensory.css">
   <link rel="stylesheet" href="css/msh-youtube-workout-modal.css">
   <link rel="stylesheet" href="css/msh-mobile-form-fix.css?v=20260831-1">
@@ -34,9 +35,7 @@
       .msh-calendar-weekdays, .msh-calendar-grid { width: 100% !important; max-width: 100% !important; min-width: 0 !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
       .msh-calendar-day { min-width: 0 !important; width: 100% !important; }
     }
-    @media (max-width: 380px) {
-      .msh-calendar-main .msh-calendar-layers, .msh-calendar-main .msh-calendar-color-presets { grid-template-columns: 1fr !important; }
-    }
+    @media (max-width: 380px) { .msh-calendar-main .msh-calendar-layers, .msh-calendar-main .msh-calendar-color-presets { grid-template-columns: 1fr !important; } }
   </style>
 </head>
 <body class="msh-app-page msh-sensory-calendar" data-msh-page="calendar">
@@ -58,6 +57,7 @@
   <script src="js/msh-intelligence.js"></script>
   <script src="js/msh-shell.js"></script>
   <script src="js/msh-calendar.js"></script>
+  <script src="js/msh-calendar-layout.js?v=20260901-1"></script>
   <script src="js/msh-calendar-feature-actions.js"></script>
   <script src="js/msh-calendar-sharing.js"></script>
   <script src="js/msh-youtube-movement.js"></script>
