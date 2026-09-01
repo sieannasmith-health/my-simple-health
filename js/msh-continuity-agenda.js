@@ -98,6 +98,7 @@
 
   function render() {
     root.querySelector('[data-continuity-agenda]')?.remove();
+    root.querySelector('[data-medication-continuity-panel]')?.remove();
     const events = getContinuityEvents();
     const grouped = Object.fromEntries(SECTION_ORDER.map(key => [key, []]));
     events.forEach(event => grouped[classify(event)].push(event));
