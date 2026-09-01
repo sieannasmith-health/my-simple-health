@@ -140,9 +140,9 @@
           lineTotal: item.lineTotal,
           sourceIdentifier: item.sourceIdentifier || null,
           confidence: item.confidence,
-          resolutionStatus: item.productId ? 'resolved' : 'unresolved',
+          resolutionStatus: item.resolutionStatus || (item.productId ? 'resolved' : 'unresolved'),
           productId: item.productId || null,
-          category: item.category || null,
+          category: item.category || item.itemType || null,
           provenance: {
             sourceType: source.sourceType || 'receipt_image',
             sourceProvider: source.sourceProvider || 'msh_receipt',
