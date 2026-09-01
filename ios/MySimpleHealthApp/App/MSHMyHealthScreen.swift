@@ -254,25 +254,9 @@ struct MSHMyHealthScreen: View {
                 }
             }
 
-            MSHSection(title: "Health areas", subtitle: "The areas you choose to bring into My Health.") {
-                VStack(spacing: MSHSpacing.small) {
-                    ForEach(snapshot.areaCards) { card in
-                        let activity = snapshot.recentActivity.filter { $0.area == card.area }
-                        NavigationLink {
-                            MSHHealthDataExploreView(
-                                title: card.area.title,
-                                icon: card.area.systemImage,
-                                activity: activity
-                            )
-                        } label: {
-                            MSHHealthAreaCard(model: card)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-
-            MSHSection(title: "Data visualization", subtitle: "Only keep what matters to you.") {
+            // Connection/source status belongs in one place. Do not repeat the
+            // selected Apple Health areas above the connection card below.
+            MSHSection(title: "Explore My Metrics", subtitle: "See the health information you chose to bring into My Health as measurements and patterns, not another connection-status list.") {
                 MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
