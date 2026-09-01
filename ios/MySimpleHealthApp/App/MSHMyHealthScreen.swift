@@ -683,7 +683,7 @@ private struct MSHHealthDataVisualizationCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, MSHSpacing.small)
             } else if repeatedMetric, numericValues.count > 1 {
-                MSHMiniBarTrend(values: numericValues)
+                MSHMiniLineTrend(values: numericValues)
                     .frame(height: 72)
 
                 HStack {
@@ -733,24 +733,50 @@ private struct MSHHealthDataVisualizationCard: View {
     }
 }
 
-private struct MSHMiniBarTrend: View {
+private struct MSHMiniLineTrend: View {
     let values: [Double]
 
     var body: some View {
         GeometryReader { proxy in
-            let maximum = max(values.max() ?? 1, 1)
-            HStack(alignment: .bottom, spacing: 5) {
-                ForEach(Array(values.enumerated()), id: \.offset) { _, value in
-                    Capsule()
-                        .fill(MSHColor.accent.opacity(0.78))
-                        .frame(
-                            maxWidth: .infinity,
-                            minHeight: 6,
-                            maxHeight: max(6, proxy.size.height * CGFloat(value / maximum))
-                        )
+            let minimum = values.min() ?? 0
+            let maximum = values.max() ?? minimum + 1
+            let range = max(maximum - minimum, 1)
+            let horizontalInset: CGFloat = 4
+            let verticalInset: CGFloat = 8
+            let width = max(proxy.size.width - (horizontalInset * 2), 1)
+            let height = max(proxy.size.height - (verticalInset * 2), 1)
+            let denominator = CGFloat(max(values.count - 1, 1))
+
+            let points = values.enumerated().map { index, value in
+                CGPoint(
+                    x: horizontalInset + (CGFloat(index) / denominator) * width,
+                    y: verticalInset + (1 - CGFloat((value - minimum) / range)) * height
+                )
+            }
+
+            ZStack {
+                Path { path in
+                    guard let first = points.first else { return }
+                    path.move(to: first)
+                    for point in points.dropFirst() {
+                        path.addLine(to: point)
+                    }
+                }
+                .stroke(
+                    MSHColor.accent,
+                    style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
+                )
+
+                ForEach(Array(points.enumerated()), id: \.offset) { _, point in
+                    Circle()
+                        .fill(MSHColor.surface)
+                        .overlay {
+                            Circle().stroke(MSHColor.accent, lineWidth: 2)
+                        }
+                        .frame(width: 7, height: 7)
+                        .position(point)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
         .accessibilityHidden(true)
     }
