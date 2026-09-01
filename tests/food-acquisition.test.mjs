@@ -27,6 +27,37 @@ test('keeps unresolved receipt lines instead of discarding them', () => {
   assert.equal(acquisition.items[0].lineTotal, 5.99);
 });
 
+test('preserves user-confirmed receipt resolution and links inventory to the acquisition item', () => {
+  const repo = food.createRepository();
+  const product = repo.addProduct({ canonicalName:'Greek yogurt', category:'food' });
+  const result = repo.recordAcquisition({
+    purchaseDate:'2026-08-31',
+    sourceType:'receipt_image',
+    sourceProvider:'msh_receipt_ai',
+    sourceRecordId:'receipt_demo',
+    items:[{
+      receiptText:'GRK YOG 32OZ',
+      productId:product.id,
+      quantity:1,
+      unit:'package',
+      lineTotal:5.99,
+      resolutionStatus:'user_confirmed'
+    }]
+  });
+  const item = result.acquisition.items[0];
+  assert.equal(item.resolutionStatus, 'user_confirmed');
+  const lot = repo.addInventoryLot({
+    productId:product.id,
+    acquisitionItemId:item.id,
+    quantityAcquired:1,
+    quantityRemaining:1,
+    unit:'package',
+    acquiredAt:result.acquisition.acquiredAt
+  });
+  assert.equal(lot.productId, product.id);
+  assert.equal(lot.acquisitionItemId, item.id);
+});
+
 test('does not use GTIN as the product primary key', () => {
   const repo = food.createRepository();
   const product = repo.addProduct({ canonicalName: 'Demo Yogurt', brand: 'Demo' });
