@@ -4,6 +4,7 @@ import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import helloHandler from './api/hello.js';
 import exploreHandler from './api/explore.js';
+import foodProductHandler from './api/food-product.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 
@@ -78,7 +79,8 @@ const server = http.createServer(async (request, response) => {
   try {
     const apiHandlers = {
       '/api/hello': helloHandler,
-      '/api/explore': exploreHandler
+      '/api/explore': exploreHandler,
+      '/api/food-product': foodProductHandler
     };
     const handler = apiHandlers[url.pathname];
     if (handler) {
@@ -99,7 +101,7 @@ const server = http.createServer(async (request, response) => {
 const port = Number(process.env.PORT) || 43127;
 server.listen(port, '127.0.0.1', () => {
   console.log(`[dev] My Simple Health: http://127.0.0.1:${port}`);
-  console.log(`[dev] API runtimes: /api/hello, /api/explore`);
+  console.log(`[dev] API runtimes: /api/hello, /api/explore, /api/food-product`);
   console.log(`[dev] OPENAI_API_KEY detected: ${Boolean(process.env.OPENAI_API_KEY) ? 'yes' : 'no'}`);
   console.log(`[dev] HELLO_MODEL: ${process.env.HELLO_MODEL || 'gpt-5.6-luna'}`);
 });
