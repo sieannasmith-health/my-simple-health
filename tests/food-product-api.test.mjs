@@ -78,15 +78,76 @@ test('normalizes a provider response behind the MSH product contract', async () 
   }
 });
 
+test('falls back to USDA FoodData Central when Open Food Facts has no match', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalKey = process.env.USDA_FDC_API_KEY;
+  process.env.USDA_FDC_API_KEY = 'test-key';
+  let calls = 0;
+  globalThis.fetch = async (url, options = {}) => {
+    calls += 1;
+    if (String(url).includes('openfoodfacts.org')) {
+      return { ok:false, status:404, async json(){ return {}; } };
+    }
+    assert.match(String(url), /api\.nal\.usda\.gov\/fdc\/v1\/foods\/search/);
+    assert.match(String(url), /api_key=test-key/);
+    assert.equal(options.method, 'POST');
+    const body = JSON.parse(options.body);
+    assert.deepEqual(body.dataType, ['Branded']);
+    assert.equal(body.query, '036000291452');
+    return {
+      ok:true,
+      status:200,
+      async json(){
+        return {
+          foods:[{
+            fdcId:123456,
+            gtinUpc:'036000291452',
+            description:'USDA Test Yogurt',
+            brandName:'Example Brand',
+            foodCategory:'Yogurt',
+            ingredients:'Milk, cultures',
+            servingSize:170,
+            servingSizeUnit:'g',
+            foodNutrients:[
+              { nutrientName:'Protein', value:9.5, unitName:'G' },
+              { nutrientName:'Sodium, Na', value:48, unitName:'MG' }
+            ]
+          }]
+        };
+      }
+    };
+  };
+
+  try {
+    const res = responseHarness();
+    await handler({ method:'GET', url:'/api/food-product?code=036000291452' }, res);
+    assert.equal(calls, 2);
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.provider, 'usda_fooddata_central');
+    assert.equal(res.body.product.canonicalName, 'USDA Test Yogurt');
+    assert.equal(res.body.product.nutrition.sourceRecordId, '123456');
+    assert.deepEqual(res.body.product.nutrition.nutrients.protein, { value:9.5, unit:'G' });
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.USDA_FDC_API_KEY;
+    else process.env.USDA_FDC_API_KEY = originalKey;
+  }
+});
+
 test('returns a clean not-found response without inventing a product', async () => {
   const originalFetch = globalThis.fetch;
+  const originalKey = process.env.USDA_FDC_API_KEY;
+  delete process.env.USDA_FDC_API_KEY;
   globalThis.fetch = async () => ({ ok:false, status:404, async json(){ return {}; } });
   try {
     const res = responseHarness();
     await handler({ method:'GET', url:'/api/food-product?code=036000291452' }, res);
     assert.equal(res.statusCode, 404);
     assert.equal(res.body.found, false);
+    assert.deepEqual(res.body.sourcesChecked, ['open_food_facts']);
   } finally {
     globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.USDA_FDC_API_KEY;
+    else process.env.USDA_FDC_API_KEY = originalKey;
   }
 });
