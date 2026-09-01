@@ -68,6 +68,15 @@ struct MSHMyHealthScreen: View {
         !displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var healthCapabilities: [(destination: MSHFeatureDestination, subtitle: String, image: String)] {
+        [
+            (.cycle, "Keep cycle observations inside the shared Calendar time layer.", "circle.dotted.circle"),
+            (.medications, "Review medication supply, refill timing, and prepared continuity actions.", "pills"),
+            (.selfInsight, "Use a structured reflection when one part of your health needs more context.", "sparkles.rectangle.stack"),
+            (.healthStory, "See confirmed experiences and records come together without replacing their sources.", "book.pages")
+        ]
+    }
+
     var body: some View {
         ZStack {
             MSHColor.canvas.ignoresSafeArea()
@@ -227,10 +236,38 @@ struct MSHMyHealthScreen: View {
         Group {
             MSHComingUpCard()
 
+            MSHSection(title: "Health capabilities", subtitle: "Open the existing MSH workspaces connected to your health picture.") {
+                VStack(spacing: MSHSpacing.small) {
+                    ForEach(healthCapabilities.indices, id: \.self) { index in
+                        let item = healthCapabilities[index]
+                        NavigationLink {
+                            MSHWebFeatureScreen(destination: item.destination)
+                        } label: {
+                            MSHFeatureDoorway(
+                                title: item.destination.title,
+                                subtitle: item.subtitle,
+                                systemImage: item.image
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
             MSHSection(title: "Health areas", subtitle: "The areas you choose to bring into My Health.") {
                 VStack(spacing: MSHSpacing.small) {
                     ForEach(snapshot.areaCards) { card in
-                        MSHHealthAreaCard(model: card)
+                        let activity = snapshot.recentActivity.filter { $0.area == card.area }
+                        NavigationLink {
+                            MSHHealthDataExploreView(
+                                title: card.area.title,
+                                icon: card.area.systemImage,
+                                activity: activity
+                            )
+                        } label: {
+                            MSHHealthAreaCard(model: card)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -239,7 +276,12 @@ struct MSHMyHealthScreen: View {
                 MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
-            MSHAppleHealthStatusCard(status: snapshot.appleHealth)
+            NavigationLink {
+                MSHWebFeatureScreen(destination: .myHealth)
+            } label: {
+                MSHAppleHealthStatusCard(status: snapshot.appleHealth)
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -341,6 +383,12 @@ private struct MSHAppleHealthStatusCard: View {
                         .foregroundStyle(status.isConnected ? MSHColor.accent : MSHColor.secondaryText)
                 }
                 Spacer()
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text("Manage")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MSHColor.accent)
             }
 
             if status.selectedAreas.isEmpty {
@@ -407,6 +455,9 @@ private struct MSHHealthAreaCard: View {
                 }
             }
             Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MSHColor.accent)
         }
         .padding(MSHSpacing.medium)
         .background(MSHColor.surface)
@@ -468,12 +519,12 @@ private struct MSHHealthDataVisualization: View {
     @AppStorage("msh.healthWidgets.other") private var showOther = false
 
     private func area(for item: MSHRecentHealthActivity) -> MSHHealthWidgetArea {
-        let value = item.title.lowercased()
-        if value.contains("heart") || value.contains("pulse") { return .heart }
-        if value.contains("sleep") { return .sleep }
-        if value.contains("weight") || value.contains("body") || value.contains("mass") || value.contains("bmi") || value.contains("height") { return .body }
-        if value.contains("step") || value.contains("energy") || value.contains("distance") || value.contains("movement") || value.contains("workout") || value.contains("exercise") { return .movement }
-        return .other
+        switch item.area {
+        case .heartActivity: .heart
+        case .movement: .movement
+        case .sleep: .sleep
+        case .bodyMeasurements: .body
+        }
     }
 
     private func isEnabled(_ area: MSHHealthWidgetArea) -> Bool {
@@ -858,16 +909,28 @@ private struct MSHHealthDataExploreView: View {
 
 private struct MSHComingUpCard: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: MSHSpacing.small) {
-            Label("Coming up", systemImage: "calendar.badge.clock")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(MSHColor.primaryText)
-            Text("Calendar and Continuity will bring relevant upcoming information into this space in a future stage.")
-                .font(MSHTypography.body)
-                .foregroundStyle(MSHColor.secondaryText)
+        NavigationLink {
+            MSHWebFeatureScreen(destination: .calendar)
+        } label: {
+            HStack(alignment: .top, spacing: MSHSpacing.medium) {
+                VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                    Label("Coming up", systemImage: "calendar.badge.clock")
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(MSHColor.primaryText)
+                    Text("Open Calendar to review planned workouts, medication continuity, appointments, cycle events, practices, and other dated MSH actions.")
+                        .font(MSHTypography.body)
+                        .foregroundStyle(MSHColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: MSHSpacing.small)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MSHColor.accent)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .mshSurface()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .mshSurface()
+        .buttonStyle(.plain)
     }
 }
 

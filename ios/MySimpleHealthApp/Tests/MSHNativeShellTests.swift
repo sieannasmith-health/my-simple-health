@@ -13,6 +13,13 @@ final class MSHNativeShellTests: XCTestCase {
         )
     }
 
+    func testCriticalTabPathCanReturnToMyHealthWithoutChangingArchitecture() {
+        let path = MSHAppSection.allCases + [.myHealth]
+
+        XCTAssertEqual(path, [.myHealth, .calendar, .movement, .track, .tools, .myHealth])
+        XCTAssertTrue(path.allSatisfy(\.isImplemented))
+    }
+
     func testEverySectionHasDistinctNativeNavigationMetadata() {
         let sections = MSHAppSection.allCases
 
@@ -21,12 +28,12 @@ final class MSHNativeShellTests: XCTestCase {
         XCTAssertTrue(sections.allSatisfy { !$0.introduction.isEmpty })
     }
 
-    func testFirstBridgeStagePreservesFiveTabsAndImplementsOnlyRealDestinations() {
+    func testIntegratedShellPreservesFiveTabsAndUsesRealDestinations() {
         XCTAssertTrue(MSHAppSection.myHealth.isImplemented)
         XCTAssertTrue(MSHAppSection.calendar.isImplemented)
         XCTAssertTrue(MSHAppSection.movement.isImplemented)
+        XCTAssertTrue(MSHAppSection.track.isImplemented)
         XCTAssertTrue(MSHAppSection.tools.isImplemented)
-        XCTAssertFalse(MSHAppSection.track.isImplemented)
     }
 
     func testCalendarAndMovementRoutesUseWorkingExistingFeatures() {
@@ -56,10 +63,34 @@ final class MSHNativeShellTests: XCTestCase {
         }
     }
 
+    func testIntegratedCapabilitiesMapToCommittedRoutes() {
+        let routes: [MSHFeatureDestination: (path: String, query: String?)] = [
+            .cycle: ("calendar.html", "view=cycle"),
+            .medications: ("medications.html", nil),
+            .explore: ("my-health.html", "view=explore"),
+            .healthStory: ("my-health-story.html", nil)
+        ]
+
+        for (destination, expected) in routes {
+            XCTAssertEqual(destination.path, expected.path)
+            XCTAssertEqual(destination.query, expected.query)
+        }
+    }
+
+    func testCrossDomainRoutesOpenInTheExpectedPrimaryTab() {
+        XCTAssertEqual(MSHWebRoute(destination: .healthStory).appSection, .track)
+        XCTAssertEqual(MSHWebRoute(destination: .cycle).appSection, .calendar)
+        XCTAssertEqual(MSHWebRoute(destination: .movementLibrary).appSection, .movement)
+        XCTAssertEqual(MSHWebRoute(destination: .medications).appSection, .tools)
+        XCTAssertEqual(MSHWebRoute(destination: .explore).appSection, .tools)
+    }
+
     func testEveryNativeFeatureDestinationHasAUniqueRouteIdentity() {
         let identities = MSHFeatureDestination.allCases.map {
             [$0.path, $0.query].compactMap { $0 }.joined(separator: "?")
         }
         XCTAssertEqual(Set(identities).count, identities.count)
+        XCTAssertFalse(identities.contains("hello.html"))
+        XCTAssertFalse(identities.contains("health-patterns-preview.html"))
     }
 }

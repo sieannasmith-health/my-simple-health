@@ -20,11 +20,12 @@ function loadRoutes(pathname='/my-health.html', search='') {
 
 test('canonical registry separates private, public, and external destinations', () => {
   const routes=loadRoutes();
-  for(const key of ['health','explore','tools','calendar','landscape','assessments','horizon','path','practice','discovery','journey','cycle','movement','hello'])assert.equal(routes.get(key).type,'PRIVATE');
+  for(const key of ['health','explore','tools','calendar','landscape','assessments','horizon','path','practice','discovery','journey','healthStory','cycle','movement','hello'])assert.equal(routes.get(key).type,'PRIVATE');
   for(const key of ['publicHome','science','publicResources','recipes'])assert.equal(routes.get(key).type,'PUBLIC');
   assert.equal(routes.classify('https://example.com/health'),'EXTERNAL');
   assert.equal(routes.classify('mailto:hello@example.com'),'EXTERNAL');
   assert.equal(routes.href('landscape'),'health-landscape.html');
+  assert.equal(routes.href('healthStory'),'my-health-story.html');
   assert.equal(routes.href('cycle',{from:'tools'}),'calendar.html?view=cycle&from=tools');
 });
 
