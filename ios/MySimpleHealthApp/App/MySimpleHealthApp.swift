@@ -63,6 +63,11 @@ private struct MSHSceneRoot: View {
 
     var body: some View {
         MSHAuthenticatedRootExperience()
+            .onOpenURL { url in
+                Task { @MainActor in
+                    await MSHAuthStore.shared.handleAuthCallback(url)
+                }
+            }
             .onAppear {
                 MSHDebugLifecycle.log(
                     scenePhase.mshLifecycleEvent,
