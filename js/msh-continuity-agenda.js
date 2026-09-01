@@ -6,6 +6,7 @@
   if (!root || !window.MSHStorage) return;
 
   const MEDICATION_EVENT = 'medication_refill_outreach';
+  const CARE_EVENT = 'care_followup';
   const SECTION_ORDER = ['ready', 'waiting', 'risk', 'upcoming', 'resolved'];
   const SECTION_META = Object.freeze({
     ready: { label: 'Ready for you', hint: 'A next step is waiting on you.' },
@@ -61,6 +62,13 @@
       if (section === 'resolved') return 'Refill continuity restored.';
       return `Refill outreach scheduled for ${niceDate(event.date)}.`;
     }
+    if (event.type === CARE_EVENT) {
+      if (section === 'ready') return event.detail || 'This care step is ready for your attention.';
+      if (section === 'waiting') return continuity.waitingOn ? `Waiting on ${continuity.waitingOn}.` : 'Waiting for the next care step.';
+      if (section === 'risk') return 'This care step may be slipping and could use attention.';
+      if (section === 'resolved') return 'This care step is complete. Continuity restored.';
+      return `This care step is scheduled for ${niceDate(event.date)}.`;
+    }
     return event.detail || 'A health step is being kept visible in Continuity.';
   }
 
@@ -69,6 +77,12 @@
       return `<div class="msh-continuity-agenda-actions">
         <button type="button" class="msh-button" data-approve-medication-request="${esc(event.id)}">Approve &amp; send</button>
         <button type="button" class="msh-text-button" data-reschedule-medication-request="${esc(event.id)}">Tomorrow</button>
+      </div>`;
+    }
+    if (event.type === CARE_EVENT && section !== 'resolved') {
+      return `<div class="msh-continuity-agenda-actions">
+        <button type="button" class="msh-button" data-resolve-care-continuity="${esc(event.id)}">Mark resolved</button>
+        ${section === 'risk' ? '' : `<button type="button" class="msh-text-button" data-risk-care-continuity="${esc(event.id)}">Needs attention</button>`}
       </div>`;
     }
     return '';
@@ -92,7 +106,7 @@
   function getContinuityEvents() {
     const events = MSHStorage.getState()?.calendar?.events || [];
     return events
-      .filter(event => event && (event.continuity || event.type === MEDICATION_EVENT))
+      .filter(event => event && (event.continuity || event.type === MEDICATION_EVENT || event.type === CARE_EVENT))
       .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
   }
 
@@ -128,7 +142,7 @@
   document.addEventListener('msh:continuity-changed', render);
   window.addEventListener('storage', event => { if (event.key === 'msh_data') render(); });
   root.addEventListener('click', event => {
-    if (event.target.closest('[data-approve-medication-request], [data-reschedule-medication-request]')) {
+    if (event.target.closest('[data-approve-medication-request], [data-reschedule-medication-request], [data-resolve-care-continuity], [data-risk-care-continuity]')) {
       window.setTimeout(render, 0);
     }
   });
