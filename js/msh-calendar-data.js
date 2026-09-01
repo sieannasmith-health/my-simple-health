@@ -3,10 +3,10 @@
   'use strict';
 
   const EVENT_META = Object.freeze({
-    cycle:{label:'Cycle',layer:'cycle'}, movement:{label:'Movement',layer:'movement'}, symptom:{label:'Symptoms',layer:'symptoms'}, care:{label:'Care & appointments',layer:'care'},
+    event:{label:'Event',layer:'event'}, cycle:{label:'Cycle',layer:'cycle'}, movement:{label:'Movement',layer:'movement'}, symptom:{label:'Symptoms',layer:'symptoms'}, care:{label:'Care & appointments',layer:'care'},
     medication:{label:'Medication',layer:'medications'}, sexualHealth:{label:'Sexual health',layer:'sexualHealth'}, measurement:{label:'Measurement',layer:'measurements'},
     practice:{label:'Practice',layer:'practices'}, project:{label:'Project',layer:'projects'}, prevention:{label:'Preventive care',layer:'care'},
-    life:{label:'Life context',layer:'life'}, note:{label:'Observation',layer:'observations'}
+    note:{label:'Observation',layer:'observations'}
   });
 
   const eventDate = value => {
@@ -17,6 +17,7 @@
   const inRange = (date, range) => Boolean(date) && (!range || ((!range.startDate || date>=range.startDate) && (!range.endDate || date<=range.endDate)));
   function eventCategory(event) {
     const value=String(event.category||event.type||event.sourceType||event.progressType||'').toLowerCase();
+    if (value==='event'||/birthday|celebration|travel|school|work/.test(value)) return 'event';
     if (/sexual|reproductive/.test(value)) return 'sexualHealth';
     if (/cycle|period|menstrual|fertil/.test(value)) return 'cycle';
     if (/movement|workout|walk|run|strength|cycling|swimming|mobility|yoga|sport/.test(value)) return 'movement';
@@ -27,10 +28,9 @@
     if (/practice|routine/.test(value)) return 'practice';
     if (/project|milestone/.test(value)) return 'project';
     if (/prevent|reminder/.test(value)) return 'prevention';
-    if (/travel|school|work|life|disruption/.test(value)) return 'life';
     return 'note';
   }
-  const layerEnabled = (layers,category) => layers[EVENT_META[category]?.layer||'life']!==false;
+  const layerEnabled = (layers,category) => layers[EVENT_META[category]?.layer||'observations']!==false;
 
   function deriveHealthEvents(state, importedEvents=[], range=null) {
     const byKey=new Map(), represented=new Set();
@@ -61,14 +61,14 @@
     const items=[];
     cycleEvents.filter(event=>event.type==='cycle_day_observation'&&inRange(event.date,range)).forEach(event=>{
       const value=event.value||{}, date=event.date, base=`cycle-related-${event.id||date}`;
-      if((value.symptoms||[]).length)items.push({id:`${base}-symptoms`,date,category:'symptom',sourceKind:'cycle',title:'Symptoms recorded',detail:value.symptoms.join(' · '),recordStatus:'recorded',informationClass:'RECORDED'});
+      if((value.symptoms||[]).length)items.push({id:`${base}-symptoms`,date,category:'symptom',sourceKind:'cycle',title:'Symptoms',detail:value.symptoms.join(' · '),recordStatus:'recorded',informationClass:'RECORDED'});
       const medication=value.care&&value.care.medication;
-      if(medication)items.push({id:`${base}-medication`,date,category:'medication',sourceKind:'cycle',title:'Medication or relief recorded',detail:medication,recordStatus:'recorded',informationClass:'RECORDED'});
+      if(medication)items.push({id:`${base}-medication`,date,category:'medication',sourceKind:'cycle',title:'Medication / relief',detail:medication,recordStatus:'recorded',informationClass:'RECORDED'});
       const sexual=value.sexualReproductive||{}, sexualDetail=[sexual.sexualActivity,sexual.contraception,sexual.context].filter(Boolean).join(' · ');
-      if(sexualDetail)items.push({id:`${base}-sexual`,date,category:'sexualHealth',sourceKind:'cycle',title:'Sexual-health information recorded',detail:sexualDetail,recordStatus:'recorded',informationClass:'RECORDED'});
+      if(sexualDetail)items.push({id:`${base}-sexual`,date,category:'sexualHealth',sourceKind:'cycle',title:'♡ Sexual health',detail:sexualDetail,recordStatus:'recorded',informationClass:'RECORDED'});
       const measurements=value.measurements||{}, measurementDetail=[measurements.temperature?`Temperature ${measurements.temperature}`:'',measurements.weight?`Weight ${measurements.weight}`:''].filter(Boolean).join(' · ');
-      if(measurementDetail)items.push({id:`${base}-measurements`,date,category:'measurement',sourceKind:'cycle',title:'Measurement recorded',detail:measurementDetail,recordStatus:'recorded',informationClass:'RECORDED'});
-      if(value.note)items.push({id:`${base}-note`,date,category:'note',sourceKind:'cycle',title:'Personal observation',detail:value.note,recordStatus:'recorded',informationClass:'RECORDED'});
+      if(measurementDetail)items.push({id:`${base}-measurements`,date,category:'measurement',sourceKind:'cycle',title:'Measurement',detail:measurementDetail,recordStatus:'recorded',informationClass:'RECORDED'});
+      if(value.note)items.push({id:`${base}-note`,date,category:'note',sourceKind:'cycle',title:'Observation',detail:value.note,recordStatus:'recorded',informationClass:'RECORDED'});
     });
     return items;
   }
