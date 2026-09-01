@@ -1,0 +1,10 @@
+.msh-health-connections{box-sizing:border-box;width:min(1180px,calc(100% - 32px));margin:0 auto 48px}
+.msh-health-connection-card{box-sizing:border-box;max-width:100%;padding:clamp(22px,4vw,38px);border:1px solid color-mix(in srgb,var(--msh-line,#a8aaa5) 65%,transparent);border-radius:24px;background:color-mix(in srgb,var(--msh-surface,#fff) 88%,transparent);overflow-wrap:anywhere}
+.msh-health-connection-card>header{display:flex;gap:24px;justify-content:space-between;align-items:flex-start}.msh-health-connection-card h2{margin:.2rem 0}.msh-health-connection-card p{max-width:68ch}
+.msh-health-connection-status{padding:8px 12px;border-radius:999px;background:var(--msh-soft-surface,#eef0eb);white-space:nowrap}
+.msh-health-privacy-note{padding:14px 16px;border-left:3px solid var(--msh-accent,#496b3c);background:var(--msh-soft-surface,#f2f3ef)}
+.msh-health-connection-card fieldset{border:0;padding:0;margin:24px 0}.msh-health-connection-card legend{font-weight:700;margin-bottom:10px}
+.msh-health-connection-card fieldset label{display:flex;gap:12px;align-items:flex-start;padding:12px 0;min-height:48px}.msh-health-connection-card input{width:22px;height:22px}.msh-health-connection-card label span{display:grid;gap:3px}.msh-health-connection-card small{opacity:.72}
+.msh-health-connection-actions{display:flex;flex-wrap:wrap;gap:10px}.msh-health-connection-actions button{min-height:44px;padding:10px 15px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit}.msh-health-connection-actions button:first-child{background:var(--msh-ink,#1f2922);color:var(--msh-surface,#fff)}.msh-health-connection-actions .is-caution{color:#8b3f35}.msh-health-live-status{font-size:.9rem;opacity:.76}
+.msh-health-connection-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:620px){.msh-health-connection-card>header{display:grid}.msh-health-connection-status{white-space:normal}.msh-health-connections{width:min(100% - 20px,1180px)}}
