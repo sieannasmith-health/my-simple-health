@@ -55,7 +55,10 @@ final class MSHAuthStore: ObservableObject {
 
     func signInWithGoogle() async {
         await perform {
-            _ = try await client.auth.signInWithOAuth(provider: .google)
+            _ = try await client.auth.signInWithOAuth(
+    provider: .google,
+    redirectTo: URL(string: "mysimplehealth://auth-callback")!
+)
         }
     }
 

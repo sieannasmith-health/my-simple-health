@@ -28,10 +28,16 @@
 				<string>com.googleusercontent.apps.393412854054-03ej5aindksoog3uivrhd8tg59bphv4m</string>
 			</array>
 		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-		</dict>
+<dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLName</key>
+    <string>MSH Auth</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+        <string>mysimplehealth</string>
+    </array>
+</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
