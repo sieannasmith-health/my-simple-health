@@ -1,0 +1,51 @@
+/* Financial Health — mobile-safe editors and dark-mode contrast */
+.msh-financial-dialog{
+  background:var(--msh-glass-reading-bg,#111814);
+  color:var(--msh-glass-ink,#f7f5ee);
+  border-color:var(--msh-glass-border,rgba(255,255,255,.16));
+}
+.msh-financial-dialog::backdrop{background:rgba(2,8,5,.68)}
+.msh-financial-dialog header p{color:var(--msh-personal-accent,#a9ce91)}
+.msh-financial-dialog h2,.msh-financial-dialog label,.msh-module-grid label{color:var(--msh-glass-ink,#f7f5ee)}
+.msh-financial-dialog .msh-dialog-copy,.msh-financial-dialog label>span,.msh-financial-dialog small{color:var(--msh-glass-ink-secondary,rgba(247,245,238,.72))}
+.msh-financial-dialog input,.msh-financial-dialog select{
+  border-color:var(--msh-glass-border,rgba(255,255,255,.16));
+  background:var(--msh-glass-panel-bg,rgba(10,20,15,.82));
+  color:var(--msh-glass-ink,#f7f5ee);
+  -webkit-text-fill-color:var(--msh-glass-ink,#f7f5ee);
+  opacity:1;
+}
+.msh-financial-dialog input::placeholder{color:var(--msh-glass-ink-secondary,rgba(247,245,238,.55));-webkit-text-fill-color:var(--msh-glass-ink-secondary,rgba(247,245,238,.55))}
+.msh-financial-dialog input[type="checkbox"]{accent-color:var(--msh-personal-accent,#a9ce91);-webkit-text-fill-color:initial}
+.msh-financial-dialog .msh-module-grid label,.msh-financial-dialog .msh-suggestion-chips button{
+  border-color:var(--msh-glass-border,rgba(255,255,255,.16));
+  background:var(--msh-glass-panel-bg,rgba(10,20,15,.72));
+  color:var(--msh-glass-ink,#f7f5ee);
+}
+.msh-financial-dialog .msh-dialog-actions button{
+  border-color:var(--msh-glass-border,rgba(255,255,255,.18));
+  color:var(--msh-glass-ink,#f7f5ee);
+}
+.msh-financial-dialog .msh-dialog-actions [data-save-customize],
+.msh-financial-dialog .msh-dialog-actions [data-save-expense],
+.msh-financial-dialog .msh-dialog-actions [data-save-area],
+.msh-financial-dialog .msh-dialog-actions [data-save-editor]{
+  border-color:transparent;
+  background:var(--msh-personal-accent,#b8d9a6);
+  color:#102015;
+}
+.msh-editable-card{cursor:pointer;position:relative;transition:border-color .16s ease,background .16s ease}
+.msh-editable-card:hover,.msh-editable-card:focus-visible{outline:none;border-color:color-mix(in srgb,var(--msh-personal-accent) 62%,var(--msh-glass-border));background:color-mix(in srgb,var(--msh-personal-accent) 8%,var(--msh-glass-panel-bg))}
+.msh-financial-summary-grid .msh-editable-card small{display:block;margin-top:5px;color:var(--msh-glass-ink-secondary);font-size:10px}
+.msh-investment-editor-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;padding:14px;border:1px solid var(--msh-glass-border);border-radius:16px;background:var(--msh-glass-soft-bg)}
+.msh-investment-editor-row .msh-check-field{display:flex;align-items:center;gap:10px}
+.msh-investment-editor-row .msh-check-field input{width:20px;height:20px;min-height:20px;flex:0 0 auto}
+@media(max-width:720px){
+  .msh-financial-dialog{width:min(94vw,720px);max-height:82svh;overflow:auto}
+  .msh-financial-dialog form{padding:24px 20px calc(24px + env(safe-area-inset-bottom))}
+  .msh-financial-dialog h2{font-size:30px}
+  .msh-financial-dialog input,.msh-financial-dialog select{min-height:50px;font-size:16px}
+  .msh-financial-dialog .msh-dialog-actions{position:sticky;bottom:0;padding-top:14px;background:linear-gradient(to bottom,transparent,var(--msh-glass-reading-bg,#111814) 24%)}
+  .msh-financial-dialog .msh-dialog-actions button{min-height:48px}
+  .msh-investment-editor-row{grid-template-columns:1fr}
+}
