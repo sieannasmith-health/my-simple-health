@@ -1,4 +1,5 @@
 const OPEN_FOOD_FACTS_BASE = 'https://world.openfoodfacts.org/api/v3/product';
+const USDA_FDC_SEARCH = 'https://api.nal.usda.gov/fdc/v1/foods/search';
 const USER_AGENT = 'MySimpleHealth/0.1 (https://mysimplehealth.org; food acquisition)';
 const FIELDS = [
   'code','product_name','generic_name','brands','quantity','serving_size',
@@ -25,6 +26,10 @@ function normalizeCode(value) {
   if (![8, 12, 13, 14].includes(digits.length)) return null;
   if (checkDigit(digits.slice(0, -1)) !== Number(digits.at(-1))) return null;
   return digits;
+}
+
+function identifierScheme(code) {
+  return code.length === 8 ? 'gtin_8' : code.length === 12 ? 'gtin_12' : code.length === 13 ? 'gtin_13' : 'gtin_14';
 }
 
 function firstString(...values) {
@@ -69,14 +74,11 @@ function normalizeNutrients(nutriments) {
   };
 }
 
-function normalizeProduct(raw, requestedCode) {
+function normalizeOpenFoodFactsProduct(raw, requestedCode) {
   const product = raw && raw.product && typeof raw.product === 'object' ? raw.product : raw || {};
   const quantity = parseQuantity(product.quantity);
   return {
-    identifier: {
-      scheme: requestedCode.length === 8 ? 'gtin_8' : requestedCode.length === 12 ? 'gtin_12' : requestedCode.length === 13 ? 'gtin_13' : 'gtin_14',
-      value: requestedCode
-    },
+    identifier: { scheme:identifierScheme(requestedCode), value:requestedCode },
     canonicalName: firstString(product.product_name, product.generic_name) || 'Unnamed product',
     brand: firstString(product.brands),
     description: firstString(product.generic_name),
@@ -102,6 +104,83 @@ function normalizeProduct(raw, requestedCode) {
   };
 }
 
+function normalizeUsdaNutrients(foodNutrients) {
+  const nutrients = Array.isArray(foodNutrients) ? foodNutrients : [];
+  const find = names => {
+    const wanted = names.map(name => name.toLowerCase());
+    const item = nutrients.find(entry => wanted.includes(String(entry && (entry.nutrientName || entry.name) || '').toLowerCase()));
+    if (!item || item.value == null || item.value === '') return null;
+    const value = Number(item.value);
+    return Number.isFinite(value) ? { value, unit:firstString(item.unitName, item.unit) } : null;
+  };
+  return {
+    basis: 'usda_source_reported',
+    calories: find(['Energy','Energy (Atwater General Factors)','Energy (Atwater Specific Factors)']),
+    protein: find(['Protein']),
+    carbohydrate: find(['Carbohydrate, by difference']),
+    fat: find(['Total lipid (fat)']),
+    saturatedFat: find(['Fatty acids, total saturated']),
+    fiber: find(['Fiber, total dietary']),
+    sugars: find(['Sugars, total including NLEA','Total Sugars']),
+    sodium: find(['Sodium, Na'])
+  };
+}
+
+function normalizeUsdaProduct(food, requestedCode) {
+  const servingSize = food.servingSize == null ? null : `${food.servingSize}${food.servingSizeUnit ? ` ${food.servingSizeUnit}` : ''}`;
+  return {
+    identifier: { scheme:identifierScheme(requestedCode), value:requestedCode },
+    canonicalName: firstString(food.description) || 'Unnamed product',
+    brand: firstString(food.brandName, food.brandOwner),
+    description: firstString(food.description),
+    packageQuantity: null,
+    packageUnit: null,
+    category: firstString(food.foodCategory),
+    imageUrl: null,
+    nutrition: {
+      servingSize,
+      ingredients: firstString(food.ingredients),
+      allergens: [],
+      nutrients: normalizeUsdaNutrients(food.foodNutrients),
+      source: 'usda_fooddata_central',
+      sourceRecordId: food.fdcId == null ? null : String(food.fdcId),
+      sourceUpdatedAt: firstString(food.publicationDate) || null
+    },
+    provenance: {
+      sourceType: 'product_lookup',
+      sourceProvider: 'usda_fooddata_central',
+      sourceRecordId: food.fdcId == null ? null : String(food.fdcId),
+      observedAt: new Date().toISOString()
+    }
+  };
+}
+
+async function lookupOpenFoodFacts(code) {
+  const upstream = await fetch(`${OPEN_FOOD_FACTS_BASE}/${encodeURIComponent(code)}?fields=${encodeURIComponent(FIELDS)}`, {
+    headers: { 'User-Agent':USER_AGENT, 'Accept':'application/json' }
+  });
+  if (upstream.status === 404) return null;
+  if (!upstream.ok) throw new Error(`OPEN_FOOD_FACTS_${upstream.status}`);
+  const raw = await upstream.json();
+  const found = raw && (raw.status === 'success' || raw.status === 1 || raw.product);
+  return found ? normalizeOpenFoodFactsProduct(raw, code) : null;
+}
+
+async function lookupUsda(code) {
+  const apiKey = process.env.USDA_FDC_API_KEY;
+  if (!apiKey) return null;
+  const upstream = await fetch(`${USDA_FDC_SEARCH}?api_key=${encodeURIComponent(apiKey)}`, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Accept':'application/json', 'User-Agent':USER_AGENT },
+    body:JSON.stringify({ query:code, dataType:['Branded'], pageSize:10 })
+  });
+  if (!upstream.ok) throw new Error(`USDA_FDC_${upstream.status}`);
+  const raw = await upstream.json();
+  const foods = Array.isArray(raw && raw.foods) ? raw.foods : [];
+  const exact = foods.find(food => digitsOnly(food && food.gtinUpc) === code);
+  return exact ? normalizeUsdaProduct(exact, code) : null;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://mysimplehealth.org');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -113,29 +192,28 @@ export default async function handler(req, res) {
   const code = normalizeCode(url.searchParams.get('code'));
   if (!code) return res.status(400).json({ success:false, message:'Enter a valid UPC or GTIN.' });
 
+  let openFoodFactsError = null;
   try {
-    const upstream = await fetch(`${OPEN_FOOD_FACTS_BASE}/${encodeURIComponent(code)}?fields=${encodeURIComponent(FIELDS)}`, {
-      headers: { 'User-Agent':USER_AGENT, 'Accept':'application/json' }
-    });
-
-    if (upstream.status === 404) return res.status(404).json({ success:false, found:false, code, message:'Product not found.' });
-    if (!upstream.ok) {
-      console.error('food product lookup failed', upstream.status);
-      return res.status(502).json({ success:false, message:'Product lookup is temporarily unavailable.' });
-    }
-
-    const raw = await upstream.json();
-    const status = raw && (raw.status === 'success' || raw.status === 1 || raw.product);
-    if (!status) return res.status(404).json({ success:false, found:false, code, message:'Product not found.' });
-
-    return res.status(200).json({
-      success:true,
-      found:true,
-      product:normalizeProduct(raw, code),
-      provider:'open_food_facts'
-    });
+    const product = await lookupOpenFoodFacts(code);
+    if (product) return res.status(200).json({ success:true, found:true, product, provider:'open_food_facts' });
   } catch (error) {
-    console.error('food product lookup error', error);
-    return res.status(502).json({ success:false, message:'Product lookup is temporarily unavailable.' });
+    openFoodFactsError = error;
+    console.error('open food facts lookup error', error && error.message ? error.message : error);
   }
+
+  try {
+    const product = await lookupUsda(code);
+    if (product) return res.status(200).json({ success:true, found:true, product, provider:'usda_fooddata_central' });
+  } catch (error) {
+    console.error('USDA FoodData Central lookup error', error && error.message ? error.message : error);
+    if (openFoodFactsError) return res.status(502).json({ success:false, message:'Product lookup is temporarily unavailable.' });
+  }
+
+  return res.status(404).json({
+    success:false,
+    found:false,
+    code,
+    message:'Product not found.',
+    sourcesChecked: process.env.USDA_FDC_API_KEY ? ['open_food_facts','usda_fooddata_central'] : ['open_food_facts']
+  });
 }
