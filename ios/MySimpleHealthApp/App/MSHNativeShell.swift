@@ -165,6 +165,19 @@ private struct MSHSectionNavigation: View {
                             }
                         }
                     }
+
+                    if section == .calendar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            NavigationLink {
+                                MSHPeopleSharingScreen()
+                            } label: {
+                                Label("Share Calendar", systemImage: "person.2")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .accessibilityLabel("Share Calendar")
+                            .accessibilityIdentifier("calendar-share-button")
+                        }
+                    }
                 }
         }
     }
