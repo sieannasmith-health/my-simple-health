@@ -4,6 +4,12 @@ function clean(value, max = 160) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : '';
 }
 
+function numberOrNull(value) {
+  if (value == null || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function tokens(value) {
   return new Set(clean(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ').filter(token => token.length > 1));
 }
@@ -24,8 +30,8 @@ function nutrientValue(food, names) {
   for (const nutrient of nutrients) {
     const name = String(nutrient && (nutrient.nutrientName || nutrient.name) || '').toLowerCase();
     if (names.some(candidate => name === candidate)) {
-      const value = Number(nutrient.value);
-      if (Number.isFinite(value)) return value;
+      const value = numberOrNull(nutrient.value);
+      if (value != null) return value;
     }
   }
   return null;
@@ -34,21 +40,33 @@ function nutrientValue(food, names) {
 function normalizeCandidate(food, query) {
   const description = clean(food && food.description, 240);
   const brandOwner = clean(food && (food.brandOwner || food.brandName), 160) || null;
+  const brandName = clean(food && food.brandName, 160) || null;
   const gtin = clean(food && food.gtinUpc, 32) || null;
-  const score = Math.max(similarity(query, description), similarity(query, `${brandOwner || ''} ${description}`));
+  const score = Math.max(similarity(query, description), similarity(query, `${brandName || brandOwner || ''} ${description}`));
   return {
     provider:'usda_fdc',
     providerId:food && food.fdcId != null ? String(food.fdcId) : null,
     canonicalName:description || 'Unnamed product',
-    brand:brandOwner,
+    brand:brandName || brandOwner,
+    brandOwner,
     gtin,
     dataType:food && food.dataType || null,
+    category:clean(food && food.brandedFoodCategory, 160) || null,
+    ingredients:clean(food && food.ingredients, 1200) || null,
+    packageWeight:clean(food && food.packageWeight, 120) || null,
+    serving:{
+      size:numberOrNull(food && food.servingSize),
+      unit:clean(food && food.servingSizeUnit, 40) || null,
+      household:clean(food && food.householdServingFullText, 160) || null
+    },
     score:Math.round(score * 1000) / 1000,
     nutrition:{
+      basis:'per_100g',
       caloriesKcal:nutrientValue(food, ['energy']),
       proteinG:nutrientValue(food, ['protein']),
       carbohydrateG:nutrientValue(food, ['carbohydrate, by difference']),
       fatG:nutrientValue(food, ['total lipid (fat)']),
+      saturatedFatG:nutrientValue(food, ['fatty acids, total saturated']),
       fiberG:nutrientValue(food, ['fiber, total dietary']),
       sugarsG:nutrientValue(food, ['total sugars']),
       sodiumMg:nutrientValue(food, ['sodium, na'])
@@ -74,7 +92,7 @@ export default async function handler(req, res) {
       body:JSON.stringify({
         query,
         dataType:['Branded'],
-        pageSize:8,
+        pageSize:12,
         pageNumber:1,
         sortBy:'dataType.keyword',
         sortOrder:'asc'
@@ -89,7 +107,7 @@ export default async function handler(req, res) {
       .map(food => normalizeCandidate(food, query))
       .filter(candidate => candidate.canonicalName)
       .sort((a,b) => b.score - a.score)
-      .slice(0,5);
+      .slice(0,8);
     return res.status(200).json({ success:true, query, candidates });
   } catch (error) {
     console.error('USDA receipt match error', error);
