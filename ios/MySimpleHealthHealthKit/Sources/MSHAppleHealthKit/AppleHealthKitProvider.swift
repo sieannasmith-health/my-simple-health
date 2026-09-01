@@ -16,6 +16,7 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
     public let provider = HealthProvider.appleHealth
     private let store: HKHealthStore
     private let calendar: Calendar
+    private static let anchoredQueryLimit = 750
 
     public init(store: HKHealthStore = HKHealthStore(), calendar: Calendar = .autoupdatingCurrent) {
         self.store = store
@@ -61,7 +62,7 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
                 let result = try await anchoredSamples(
                     for: descriptor.sampleType,
                     checkpoint: request.checkpoints[descriptor.key],
-                    initialLookbackDays: descriptor.area == .movement ? 90 : nil
+                    initialLookbackDays: Self.initialLookbackDays(for: descriptor.area)
                 )
                 mshProviderDiagnostic("query_execute_complete", "area=\(descriptor.area.rawValue) key=\(descriptor.key) sampleCount=\(result.samples.count) deletedCount=\(result.deleted.count) hasCheckpoint=\(result.checkpoint != nil)")
                 mshProviderDiagnostic("mapping_start", "area=\(descriptor.area.rawValue) key=\(descriptor.key) sampleCount=\(result.samples.count)")
@@ -121,6 +122,17 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
         let domain: HealthDomain
         let unit: HKUnit?
         let canonicalUnit: String?
+    }
+
+    private static func initialLookbackDays(for area: HealthDataArea) -> Int {
+        switch area {
+        case .movement, .sleep:
+            return 90
+        case .heartActivity:
+            return 30
+        case .bodyMeasurements:
+            return 3650
+        }
     }
 
     private static var descriptors: [Descriptor] {
@@ -194,7 +206,7 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
             HKQuery.predicateForSamples(withStart: calendar.date(byAdding: .day, value: -$0, to: Date()), end: nil)
         } : nil
         return try await withCheckedThrowingContinuation { continuation in
-            let query = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: anchor, limit: HKObjectQueryNoLimit) { _, samples, deleted, newAnchor, error in
+            let query = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: anchor, limit: Self.anchoredQueryLimit) { _, samples, deleted, newAnchor, error in
                 mshProviderDiagnostic("query_callback_enter", "healthKitType=\(type.identifier)")
                 if let error {
                     let nsError = error as NSError
@@ -202,12 +214,17 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
                     continuation.resume(throwing: error)
                     return
                 }
-                mshProviderDiagnostic("query_callback_results", "healthKitType=\(type.identifier) sampleCount=\(samples?.count ?? 0) deletedCount=\(deleted?.count ?? 0)")
+                let sampleCount = samples?.count ?? 0
+                let deletedCount = deleted?.count ?? 0
+                mshProviderDiagnostic("query_callback_results", "healthKitType=\(type.identifier) sampleCount=\(sampleCount) deletedCount=\(deletedCount) limit=\(Self.anchoredQueryLimit)")
+                if sampleCount >= Self.anchoredQueryLimit || deletedCount >= Self.anchoredQueryLimit {
+                    mshProviderDiagnostic("query_batch_bounded", "healthKitType=\(type.identifier) sampleCount=\(sampleCount) deletedCount=\(deletedCount) nextSyncContinuesFromCheckpoint=true")
+                }
                 let data = newAnchor.flatMap { try? NSKeyedArchiver.archivedData(withRootObject: $0, requiringSecureCoding: true) }
                 mshProviderDiagnostic("query_callback_checkpoint_archived", "healthKitType=\(type.identifier) hasCheckpoint=\(data != nil) byteCount=\(data?.count ?? 0)")
                 continuation.resume(returning: AnchoredResult(samples: samples ?? [], deleted: deleted ?? [], checkpoint: data))
             }
-            mshProviderDiagnostic("query_store_execute", "healthKitType=\(type.identifier)")
+            mshProviderDiagnostic("query_store_execute", "healthKitType=\(type.identifier) limit=\(Self.anchoredQueryLimit) firstQuery=\(anchor == nil) lookbackDays=\(initialLookbackDays ?? 0)")
             store.execute(query)
         }
     }
