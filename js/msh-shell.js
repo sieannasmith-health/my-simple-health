@@ -96,7 +96,7 @@
       learning: learning && { selectedObjectType:'learning', selectedObjectId:learning.id, selectedObjectLabel:learning.statement },
       progress: latestProgress && { selectedObjectType:'progress_event', selectedObjectId:latestProgress.id, selectedObjectLabel:latestProgress.title || 'Recent journey activity' }
     };
-    return { ...base, route:`${location.pathname}${location.search}`, contextId:base.page, contextLabel:base.visibleActivity, projectId:project && project.id || '', projectLabel:project && project.title || '', practiceId:practice && practice.id || '', practiceLabel:practice && practice.title || '', ...(objectByPage[page] || {}), provenance:'SYSTEM_OBSERVED', recordable:false, ...extra };
+    return { ...base, route:`${location.pathname}${location.search}`, contextId:base.page, contextLabel:base.visibleActivity, projectId:project && project.id || '', projectLabel:project && project.title || '', practiceId:practice && practice.id || '', practiceLabel:practice && practice.title || '', ...(objectByPage[page] || {}), provenance: 'SYSTEM_OBSERVED', recordable: false, ...extra };
   }
 
   function rememberHelloActivity(page, patch) {
@@ -134,7 +134,16 @@
     if (header) {
       header.innerHTML = `<header class="msh-app-header"><div class="msh-app-header-inner"><a class="msh-app-logo" href="${route('health').href}" data-msh-route="health">My Simple Health</a><nav class="msh-app-nav" aria-label="My Health workspace">${renderNav(navActive,false,navItems)}</nav><div class="msh-app-header-actions" aria-label="Workspace controls">${soundControl()}${themeControl()}</div></div></header>${renderJourneyContinuity(active)}`;
     }
-    if (mobile) { mobile.replaceChildren(); mobile.hidden = true; mobile.setAttribute('aria-hidden','true'); }
+    if (mobile) {
+      mobile.innerHTML = `<nav class="msh-mobile-nav" aria-label="My Health mobile navigation">${renderNav(navActive, true, navItems)}</nav>`;
+      mobile.hidden = false;
+      mobile.removeAttribute('aria-hidden');
+      const mobileNav = mobile.querySelector('.msh-mobile-nav');
+      const currentLink = mobile.querySelector('[aria-current="page"]');
+      if (mobileNav && currentLink) requestAnimationFrame(() => {
+        mobileNav.scrollLeft = currentLink.offsetLeft - (mobileNav.clientWidth - currentLink.clientWidth) / 2;
+      });
+    }
     const shell = document.querySelector('.msh-app-shell') || document.body;
     if (!document.querySelector('.msh-app-utility-footer')) shell.insertAdjacentHTML('beforeend',renderUtilityFooter());
     syncThemeControl();

@@ -51,8 +51,8 @@ test('page context contract is system-observed and explicitly non-recordable', (
   assert.match(shellSource, /practiceId/);
   assert.match(shellSource, /questionText/);
   assert.match(shellSource, /allowedActions/);
-  assert.match(shellSource, /provenance: 'SYSTEM_OBSERVED'/);
-  assert.match(shellSource, /recordable: false/);
+  assert.match(shellSource, /provenance:\s*'SYSTEM_OBSERVED'/);
+  assert.match(shellSource, /recordable:\s*false/);
 
   const localStorage = memoryStorage();
   const sandbox = { console, localStorage, crypto:{ randomUUID:() => 'test' } };
