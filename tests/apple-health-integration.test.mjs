@@ -101,6 +101,10 @@ test('native integration is read-only and declares the required privacy purpose'
 test('physical-device Debug uses a LAN server without changing the production URL', () => {
   const server=source('dev-server.js');
   const packageJson=JSON.parse(source('package.json'));
+  const project=source('ios/MySimpleHealthApp/project.yml');
+  const debugConfig=source('ios/MySimpleHealthApp/Config/Debug.xcconfig');
+  const debugInfo=source('ios/MySimpleHealthApp/App/Info-Debug.plist');
+  const gitignore=source('.gitignore');
   const scheme=source('ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/xcshareddata/xcschemes/MySimpleHealth.xcscheme');
   const webView=source('ios/MySimpleHealthApp/App/MSHWebView.swift');
 
@@ -108,10 +112,14 @@ test('physical-device Debug uses a LAN server without changing the production UR
   assert.match(server,/process\.env\.MSH_DEV_HOST \|\| process\.env\.HOST \|\| '127\.0\.0\.1'/);
   assert.match(server,/process\.env\.MSH_DEV_PORT \|\| process\.env\.PORT/);
   assert.match(server,/Physical device URL:/);
-  assert.match(scheme,/key\s*=\s*"MSH_WEB_APP_URL"/);
-  assert.match(scheme,/value\s*=\s*"http:\/\/192\.168\.12\.241:43128\/my-health\.html"/);
-  assert.doesNotMatch(scheme,/\.local:43128/);
+  assert.match(project,/configFiles:[\s\S]*Debug: Config\/Debug\.xcconfig/);
+  assert.match(debugConfig,/#include\? "Debug\.local\.xcconfig"/);
+  assert.match(debugInfo,/<key>MSHWebAppURL<\/key>[\s\S]*\$\(MSH_WEB_APP_URL\)/);
+  assert.match(gitignore,/Debug\.local\.xcconfig/);
+  assert.doesNotMatch(scheme,/MSH_WEB_APP_URL|192\.168\./);
   assert.match(webView,/productionURL = URL\(string: "https:\/\/mysimplehealth\.org\/my-health\.html"\)!/);
+  assert.match(webView,/Debug Info\.plist \(local xcconfig\)/);
+  assert.match(webView,/MSHWebConfigurationError\.missing/);
   assert.match(webView,/#if DEBUG[\s\S]*showNavigationFailure/);
   assert.match(webView,/My Simple Health development page could not be reached\./);
 });

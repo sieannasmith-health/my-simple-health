@@ -34,6 +34,18 @@ const mime = {
   '.json':'application/json; charset=utf-8', '.mjs':'text/javascript; charset=utf-8',
   '.png':'image/png', '.svg':'image/svg+xml; charset=utf-8', '.webp':'image/webp'
 };
+const publicDirectories = new Set(['assets', 'css', 'data', 'js']);
+const publicRootExtensions = new Set(['.css', '.html', '.ico', '.jpg', '.jpeg', '.png', '.svg', '.webp']);
+const publicRootFiles = new Set(['youtube-config.json']);
+
+function isPublicStaticPath(pathname) {
+  const parts = pathname.split('/').filter(Boolean);
+  if (!parts.length || parts.some(part => part.startsWith('.'))) return pathname === '/';
+  if (parts.length === 1) {
+    return publicRootFiles.has(parts[0]) || publicRootExtensions.has(extname(parts[0]).toLowerCase());
+  }
+  return publicDirectories.has(parts[0]) && Boolean(mime[extname(parts.at(-1)).toLowerCase()]);
+}
 
 function apiResponse(response) {
   let statusCode = 200;
@@ -60,6 +72,7 @@ async function parseJson(request) {
 
 async function serveStatic(pathname, response) {
   const requested = pathname === '/' ? '/index.html' : pathname;
+  if (!isPublicStaticPath(pathname)) return false;
   const file = resolve(root, `.${decodeURIComponent(requested)}`);
   if (file !== root && !file.startsWith(root + sep)) return false;
   try {
@@ -76,6 +89,9 @@ async function serveStatic(pathname, response) {
 
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url || '/', 'http://127.0.0.1');
+  if (host === '0.0.0.0' || host === '::') {
+    console.log(`[dev] Request: ${request.method || 'GET'} ${url.pathname} from ${request.socket.remoteAddress || 'unknown'}`);
+  }
   try {
     const apiHandlers = {
       '/api/hello': helloHandler,
