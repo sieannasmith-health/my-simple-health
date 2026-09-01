@@ -37,6 +37,25 @@
     return null;
   }
 
+  function packageGrams(specifics) {
+    const raw = String(specifics && specifics.packageWeight || '').trim().toLowerCase();
+    if (!raw) return null;
+    const grams = raw.match(/(?:^|[^a-z])([0-9]+(?:\.[0-9]+)?)\s*(?:g|gram|grams)\b/);
+    if (grams) return numberOrNull(grams[1]);
+    const ounces = raw.match(/(?:^|[^a-z])([0-9]+(?:\.[0-9]+)?)\s*(?:oz|ounce|ounces)\b/);
+    if (ounces) return round(Number(ounces[1]) * 28.349523125, 2);
+    const pounds = raw.match(/(?:^|[^a-z])([0-9]+(?:\.[0-9]+)?)\s*(?:lb|lbs|pound|pounds)\b/);
+    if (pounds) return round(Number(pounds[1]) * 453.59237, 2);
+    return null;
+  }
+
+  function purchasedUnitsForAmount(amount, unit, specifics) {
+    const grams = gramsForAmount(amount, unit, specifics);
+    const packageMass = packageGrams(specifics);
+    if (grams == null || packageMass == null || packageMass <= 0) return null;
+    return round(grams / packageMass, 6);
+  }
+
   function calculateNutrition(specifics, amount, unit) {
     const nutrition = specifics && specifics.nutrition;
     if (!nutrition || typeof nutrition !== 'object') return null;
@@ -74,10 +93,7 @@
       consumedAt:data.consumedAt ? new Date(data.consumedAt).toISOString() : now(),
       nutrition:data.nutrition ? clone(data.nutrition) : null,
       inventoryAdjustment:data.inventoryAdjustment ? clone(data.inventoryAdjustment) : null,
-      source:{
-        kind:'USER_ENTRY',
-        provenance:'USER_STATED'
-      },
+      source:{ kind:'USER_ENTRY', provenance:'USER_STATED' },
       createdAt:data.createdAt || now()
     };
   }
@@ -93,18 +109,18 @@
       const available = Math.max(0, Number(lot.quantityRemaining) || 0);
       if (!available) return;
       const used = Math.min(available, remaining);
-      lot.quantityRemaining = round(available - used, 4);
+      lot.quantityRemaining = round(available - used, 6);
       if (lot.quantityRemaining <= 0) {
         lot.quantityRemaining = 0;
         lot.status = 'depleted';
       }
-      remaining = round(remaining - used, 4);
+      remaining = round(remaining - used, 6);
       adjustments.push({ inventoryLotId:lot.id, quantityUsed:used, unit:lot.unit || null });
     });
-    return { lots:next, consumed:round(requested - remaining, 4), remaining, adjustments };
+    return { lots:next, consumed:round(requested - remaining, 6), remaining, adjustments };
   }
 
-  const API = Object.freeze({ MODES, UNITS, NUTRIENTS, gramsForAmount, calculateNutrition, createConsumptionEvent, consumeFromLots });
+  const API = Object.freeze({ MODES, UNITS, NUTRIENTS, gramsForAmount, packageGrams, purchasedUnitsForAmount, calculateNutrition, createConsumptionEvent, consumeFromLots });
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   global.MSHFoodConsumption = API;
 })(typeof window !== 'undefined' ? window : globalThis);
