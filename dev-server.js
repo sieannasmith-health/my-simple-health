@@ -6,6 +6,7 @@ import helloHandler from './api/hello.js';
 import exploreHandler from './api/explore.js';
 import foodProductHandler from './api/food-product.js';
 import foodReceiptHandler from './api/food-receipt.js';
+import foodProductMatchHandler from './api/food-product-match.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 
@@ -82,7 +83,8 @@ const server = http.createServer(async (request, response) => {
       '/api/hello': helloHandler,
       '/api/explore': exploreHandler,
       '/api/food-product': foodProductHandler,
-      '/api/food-receipt': foodReceiptHandler
+      '/api/food-receipt': foodReceiptHandler,
+      '/api/food-product-match': foodProductMatchHandler
     };
     const handler = apiHandlers[url.pathname];
     if (handler) {
@@ -104,7 +106,7 @@ const server = http.createServer(async (request, response) => {
 const port = Number(process.env.PORT) || 43127;
 server.listen(port, '127.0.0.1', () => {
   console.log(`[dev] My Simple Health: http://127.0.0.1:${port}`);
-  console.log(`[dev] API runtimes: /api/hello, /api/explore, /api/food-product, /api/food-receipt`);
+  console.log(`[dev] API runtimes: /api/hello, /api/explore, /api/food-product, /api/food-receipt, /api/food-product-match`);
   console.log(`[dev] OPENAI_API_KEY detected: ${Boolean(process.env.OPENAI_API_KEY) ? 'yes' : 'no'}`);
   console.log(`[dev] HELLO_MODEL: ${process.env.HELLO_MODEL || 'gpt-5.6-luna'}`);
 });
