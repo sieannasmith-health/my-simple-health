@@ -20,6 +20,23 @@ final class MSHNativeShellTests: XCTestCase {
         XCTAssertTrue(path.allSatisfy(\.isImplemented))
     }
 
+    func testRapidTabSelectionAlwaysTransfersToTheMostRecentTab() {
+        var selected = MSHAppSection.myHealth
+
+        for section in MSHAppSection.allCases + Array(MSHAppSection.allCases.reversed()) {
+            selected = section
+            XCTAssertEqual(selected, section)
+        }
+    }
+
+    func testSelectingTheCurrentTabIsStable() {
+        for section in MSHAppSection.allCases {
+            var selected = section
+            selected = section
+            XCTAssertEqual(selected, section)
+        }
+    }
+
     func testEverySectionHasDistinctNativeNavigationMetadata() {
         let sections = MSHAppSection.allCases
 

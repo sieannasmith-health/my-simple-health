@@ -97,10 +97,11 @@ struct MSHAppShell: View {
                     .tag(section)
             }
         }
+        .toolbar(.hidden, for: .tabBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            MSHBottomTabBar(selection: $selection)
+        }
         .preferredColorScheme(appearance.colorScheme)
-        .tint(MSHColor.accent)
-        .toolbarBackground(MSHColor.surface, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
         .onAppear { openNotificationRouteIfNeeded(notificationRouter.route) }
         .onChange(of: notificationRouter.route) { _, route in
             openNotificationRouteIfNeeded(route)
@@ -110,6 +111,72 @@ struct MSHAppShell: View {
     private func openNotificationRouteIfNeeded(_ route: MSHWebRoute?) {
         guard let route else { return }
         selection = route.appSection
+    }
+}
+
+struct MSHBottomTabBar: View {
+    @Binding var selection: MSHAppSection
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(MSHAppSection.allCases) { section in
+                Button {
+                    selection = section
+                } label: {
+                    VStack(spacing: 3) {
+                        Image(systemName: section.systemImage)
+                            .font(.system(size: 19, weight: .medium))
+                            .frame(height: 22)
+                        Text(section.title)
+                            .font(.caption2.weight(selection == section ? .semibold : .regular))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                    }
+                    .foregroundStyle(selection == section ? MSHColor.accent : MSHColor.secondaryText)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 48)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(MSHBottomTabButtonStyle())
+                .accessibilityLabel(section.title)
+                .accessibilityValue(selection == section ? "Selected" : "")
+                .accessibilityAddTraits(selection == section ? .isSelected : [])
+                .accessibilityIdentifier("msh-tab-\(section.rawValue)")
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.top, 4)
+        .padding(.bottom, 2)
+        .background {
+            MSHColor.surface
+                .ignoresSafeArea(edges: .bottom)
+        }
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(MSHColor.border)
+                .frame(height: 0.5)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("msh-bottom-tab-bar")
+    }
+}
+
+private struct MSHBottomTabButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(MSHColor.controlFill.opacity(configuration.isPressed ? 0.72 : 0))
+                    .padding(.horizontal, 3)
+                    .padding(.vertical, 2)
+            }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: configuration.isPressed ? 0.08 : 0.1),
+                value: configuration.isPressed
+            )
     }
 }
 
