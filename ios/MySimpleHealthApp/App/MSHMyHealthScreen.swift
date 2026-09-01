@@ -225,17 +225,11 @@ struct MSHMyHealthScreen: View {
 
     private func loadedContent(_ snapshot: MSHMyHealthSnapshot) -> some View {
         Group {
+            // Connection/source status belongs in one place. Do not repeat the
+            // selected Apple Health areas as a second status section below it.
             MSHAppleHealthStatusCard(status: snapshot.appleHealth)
 
-            MSHSection(title: "Health areas", subtitle: "The areas you choose to bring into My Health.") {
-                VStack(spacing: MSHSpacing.small) {
-                    ForEach(snapshot.areaCards) { card in
-                        MSHHealthAreaCard(model: card)
-                    }
-                }
-            }
-
-            MSHSection(title: "Data visualization", subtitle: "Only keep what matters to you.") {
+            MSHSection(title: "Explore My Metrics", subtitle: "See the health information you chose to bring into My Health as measurements and patterns, not another connection-status list.") {
                 MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
