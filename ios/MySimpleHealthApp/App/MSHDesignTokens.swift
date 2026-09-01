@@ -3,9 +3,9 @@ import UIKit
 
 enum MSHColor {
     // Editorial base: neutral first, MSH green reserved for emphasis.
-    static let accentLight = UIColor(red: 0.16, green: 0.33, blue: 0.22, alpha: 1)
+    static let accentLight = UIColor(red: 0.12, green: 0.29, blue: 0.19, alpha: 1)
     static let accentDark = UIColor(red: 0.52, green: 0.72, blue: 0.54, alpha: 1)
-    static let canvasLight = UIColor(red: 0.975, green: 0.965, blue: 0.94, alpha: 1)
+    static let canvasLight = UIColor(red: 0.965, green: 0.945, blue: 0.905, alpha: 1)
     static let canvasDark = UIColor(red: 0.045, green: 0.045, blue: 0.043, alpha: 1)
 
     static let forest = Color(red: 0.10, green: 0.25, blue: 0.16)
@@ -25,23 +25,28 @@ enum MSHColor {
     )
 
     static let surface = adaptive(
-        light: UIColor(red: 0.995, green: 0.99, blue: 0.975, alpha: 0.98),
-        dark: UIColor(red: 0.085, green: 0.085, blue: 0.08, alpha: 0.98)
+        light: UIColor(red: 1.0, green: 0.995, blue: 0.985, alpha: 1),
+        dark: UIColor(red: 0.085, green: 0.085, blue: 0.08, alpha: 1)
+    )
+
+    static let controlFill = adaptive(
+        light: UIColor(red: 0.985, green: 0.975, blue: 0.95, alpha: 1),
+        dark: UIColor(red: 0.13, green: 0.13, blue: 0.125, alpha: 1)
     )
 
     static let primaryText = adaptive(
-        light: UIColor(red: 0.12, green: 0.12, blue: 0.115, alpha: 1),
+        light: UIColor(red: 0.09, green: 0.09, blue: 0.085, alpha: 1),
         dark: UIColor(red: 0.955, green: 0.95, blue: 0.925, alpha: 1)
     )
 
     static let secondaryText = adaptive(
-        light: UIColor(red: 0.36, green: 0.36, blue: 0.34, alpha: 1),
-        dark: UIColor(red: 0.68, green: 0.68, blue: 0.65, alpha: 1)
+        light: UIColor(red: 0.28, green: 0.28, blue: 0.265, alpha: 1),
+        dark: UIColor(red: 0.72, green: 0.72, blue: 0.69, alpha: 1)
     )
 
     static let border = adaptive(
-        light: UIColor(red: 0.15, green: 0.15, blue: 0.14, alpha: 0.10),
-        dark: UIColor(red: 0.88, green: 0.87, blue: 0.82, alpha: 0.13)
+        light: UIColor(red: 0.13, green: 0.13, blue: 0.12, alpha: 0.18),
+        dark: UIColor(red: 0.88, green: 0.87, blue: 0.82, alpha: 0.16)
     )
 
     private static func adaptive(light: UIColor, dark: UIColor) -> Color {

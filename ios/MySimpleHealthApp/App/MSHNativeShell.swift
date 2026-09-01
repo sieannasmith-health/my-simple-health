@@ -52,9 +52,38 @@ enum MSHAppSection: String, CaseIterable, Identifiable {
     }
 }
 
+enum MSHAppearancePreference: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
+
 struct MSHAppShell: View {
     @State private var selection: MSHAppSection = .myHealth
     @StateObject private var notificationRouter = MSHNotificationRouter.shared
+    @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
+
+    private var appearance: MSHAppearancePreference {
+        MSHAppearancePreference(rawValue: appearanceRawValue) ?? .system
+    }
 
     var body: some View {
         TabView(selection: $selection) {
@@ -71,6 +100,7 @@ struct MSHAppShell: View {
                     .tag(section)
             }
         }
+        .preferredColorScheme(appearance.colorScheme)
         .tint(MSHColor.accent)
         .toolbarBackground(MSHColor.surface, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
@@ -277,7 +307,7 @@ private struct MSHFeatureDoorway: View {
                 .font(.title3)
                 .foregroundStyle(MSHColor.accent)
                 .frame(width: 42, height: 42)
-                .background(MSHColor.sage.opacity(0.14))
+                .background(MSHColor.controlFill)
                 .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
             VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
                 Text(title)
@@ -330,7 +360,7 @@ private struct MSHDestinationScreen: View {
                             .font(.system(size: 30, weight: .medium))
                             .foregroundStyle(MSHColor.accent)
                             .frame(width: 56, height: 56)
-                            .background(MSHColor.sage.opacity(0.18))
+                            .background(MSHColor.controlFill)
                             .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
 
                         Text(section.title)
@@ -357,6 +387,9 @@ private struct MSHDestinationScreen: View {
 }
 
 struct MSHProfileSettingsScreen: View {
+    @AppStorage("msh.displayName") private var displayName = ""
+    @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
+
     var body: some View {
         ZStack {
             MSHColor.canvas.ignoresSafeArea()
@@ -372,11 +405,46 @@ struct MSHProfileSettingsScreen: View {
                             .font(MSHTypography.destinationTitle)
                             .foregroundStyle(MSHColor.primaryText)
 
-                        Text("Your profile, preferences, privacy, and app settings will live here.")
+                        Text("Keep this space personal and comfortable to return to.")
                             .font(MSHTypography.body)
                             .foregroundStyle(MSHColor.secondaryText)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .mshSurface()
+
+                    VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                        Text("What should we call you?")
+                            .font(MSHTypography.cardTitle)
+                            .foregroundStyle(MSHColor.primaryText)
+                        TextField("Name or nickname", text: $displayName)
+                            .textInputAutocapitalization(.words)
+                            .padding(.horizontal, MSHSpacing.medium)
+                            .frame(height: 48)
+                            .background(MSHColor.controlFill)
+                            .foregroundStyle(MSHColor.primaryText)
+                            .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous)
+                                    .stroke(MSHColor.border, lineWidth: 1)
+                            }
+                    }
+                    .mshSurface()
+
+                    VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                        Text("Appearance")
+                            .font(MSHTypography.cardTitle)
+                            .foregroundStyle(MSHColor.primaryText)
+                        Text("Choose the environment that is easiest for you to read.")
+                            .font(.subheadline)
+                            .foregroundStyle(MSHColor.secondaryText)
+
+                        Picker("Appearance", selection: $appearanceRawValue) {
+                            ForEach(MSHAppearancePreference.allCases) { preference in
+                                Text(preference.title).tag(preference.rawValue)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
                     .mshSurface()
                 }
                 .padding(MSHSpacing.medium)
