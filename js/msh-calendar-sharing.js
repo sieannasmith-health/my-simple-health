@@ -81,7 +81,7 @@
       <div class="msh-sheet-backdrop" data-close-calendar-share></div>
       <section class="msh-cycle-sheet" role="dialog" aria-modal="true" aria-labelledby="calendar-share-title">
         <header>
-          <div><p class="msh-eyebrow">${esc(date)}</p><h2 id="calendar-share-title">Add / Share</h2></div>
+          <div><p class="msh-eyebrow">${esc(date)}</p><h2 id="calendar-share-title">Share event</h2></div>
           <button type="button" data-close-calendar-share aria-label="Close">×</button>
         </header>
 
@@ -92,7 +92,7 @@
         </div>
 
         <div class="msh-cycle-field">
-          <span>Shared events</span>
+          <span>Events on this date</span>
           <button type="button" class="msh-button-secondary" data-calendar-new-shared-event>+ New shared event</button>
           ${dayEvents.length ? dayEvents.map(item => {
             const sharing = item.sharing || {};
@@ -102,7 +102,7 @@
           }).join('') : '<p class="msh-date-action-empty">No recorded events on this date yet.</p>'}
         </div>
 
-        <p class="msh-date-action-empty">Your calendar itself stays private. Only the event or recurring series you explicitly share becomes visible to the person you choose.</p>
+        <p class="msh-date-action-empty">Your calendar stays private. Only the event or recurring series you explicitly choose is shared.</p>
         <footer><button type="button" class="msh-text-button" data-close-calendar-share>Done</button></footer>
       </section>`;
     root.appendChild(sheet);
@@ -132,7 +132,7 @@
           <label class="msh-cycle-field">Event<input name="title" required maxlength="120" placeholder="What are you planning?"></label>
           <label class="msh-cycle-field">Share with<select name="personId" required>${personOptions('')}</select></label>
           <label class="msh-cycle-field">Repeat<select name="recurrence"><option value="none">Does not repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></label>
-          <label class="msh-cycle-field">Anything else?<textarea name="detail" rows="3" maxlength="1000" placeholder="Optional"></textarea></label>
+          <label class="msh-cycle-field">Notes<textarea name="detail" rows="3" maxlength="1000" placeholder="Optional"></textarea></label>
           <p class="msh-date-action-empty">Only this event or recurring series is shared. The rest of your calendar remains private.</p>
           <footer><button type="button" class="msh-text-button" data-calendar-share-back>Back</button><button type="submit" class="msh-button">Save shared event</button></footer>
         </form>
@@ -140,6 +140,9 @@
   }
 
   function openExistingEventSheet(eventId) {
+    sheet?.remove();
+    sheet = document.createElement('div');
+    sheet.className = 'msh-calendar-sharing-sheet';
     const state = MSHStorage.getState();
     const item = (state.calendar?.events || []).find(event => event.id === eventId);
     if (!item) return openMainSheet();
@@ -152,10 +155,11 @@
           <label class="msh-cycle-field">Visibility<select name="scope"><option value="private" ${sharing.scope!=='shared'?'selected':''}>Private</option><option value="shared" ${sharing.scope==='shared'?'selected':''}>Shared</option></select></label>
           <label class="msh-cycle-field">Share with<select name="personId">${personOptions(sharing.personId || '')}</select></label>
           <label class="msh-cycle-field">Repeat sharing<select name="recurrence"><option value="none" ${(sharing.recurrence||'none')==='none'?'selected':''}>This event only</option><option value="daily" ${sharing.recurrence==='daily'?'selected':''}>Daily series</option><option value="weekly" ${sharing.recurrence==='weekly'?'selected':''}>Weekly series</option><option value="monthly" ${sharing.recurrence==='monthly'?'selected':''}>Monthly series</option></select></label>
-          ${item.category === 'sexualHealth' ? '<p class="msh-date-action-empty"><strong>Sensitive entry:</strong> sharing this requires this explicit event-level choice. It is never shared because another person was added.</p>' : ''}
+          ${item.category === 'sexualHealth' ? '<p class="msh-date-action-empty"><strong>Sensitive entry:</strong> this can only be shared through this explicit event-level choice.</p>' : ''}
           <footer><button type="button" class="msh-text-button" data-calendar-share-back>Back</button><button type="submit" class="msh-button">Save</button></footer>
         </form>
       </section>`;
+    root.appendChild(sheet);
   }
 
   function saveSharedEvent(form) {
@@ -168,7 +172,7 @@
     MSHStorage.updateState(state => {
       state.calendar.events ||= [];
       state.calendar.events.push({
-        id: uid('calendar_shared'), date, category: 'life', title,
+        id: uid('calendar_shared'), date, category: 'event', title,
         detail: String(data.get('detail') || '').trim(),
         recordStatus: 'recorded', informationClass: 'RECORDED',
         sharing: { scope: 'shared', personId, recurrence, explicit: true },
@@ -188,23 +192,13 @@
     if (scope === 'shared' && !getPeople().some(person => person.id === personId)) return;
     MSHStorage.updateState(state => {
       const item = (state.calendar.events || []).find(event => event.id === eventId);
-      if (item) item.sharing = { scope, personId, recurrence, explicit: true };
+      if (item) {
+        item.sharing = { scope, personId, recurrence, explicit: true };
+        item.updatedAt = new Date().toISOString();
+      }
       return state;
     });
     openMainSheet();
-  }
-
-  function syncEntryPoint() {
-    const inspector = root.querySelector('.msh-date-inspector');
-    if (!inspector) return;
-    let holder = inspector.querySelector('[data-calendar-sharing-entry]');
-    if (!holder) {
-      holder = document.createElement('div');
-      holder.dataset.calendarSharingEntry = '';
-      holder.className = 'msh-date-actions';
-      inspector.appendChild(holder);
-    }
-    holder.innerHTML = '<button type="button" class="msh-button-secondary" data-open-calendar-share>+ Add / Share</button>';
   }
 
   root.addEventListener('click', event => {
@@ -232,14 +226,11 @@
     }
   });
 
-  const observer = new MutationObserver(() => { if (!sheet) syncEntryPoint(); });
-  observer.observe(root, { childList: true, subtree: true });
-
   window.MSHCalendarSharing = Object.freeze({
     getPeople,
     addPerson,
+    openMain: openMainSheet,
+    openEvent: openExistingEventSheet,
     scopeLabels: Object.freeze({ private: 'Private', shared: 'Shared' })
   });
-
-  syncEntryPoint();
 })();
