@@ -15,116 +15,13 @@
   <link rel="stylesheet" href="css/msh-cycle.css">
   <link rel="stylesheet" href="css/msh-sensory.css">
   <link rel="stylesheet" href="css/msh-youtube-workout-modal.css">
+  <link rel="stylesheet" href="css/msh-sharing.css">
   <link rel="stylesheet" href="css/msh-mobile-form-fix.css?v=20260831-1">
   <style>
-    html, body {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
-    }
-
-    .msh-app-shell,
-    .msh-calendar-main {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-    }
-
-    .msh-calendar-main {
-      overflow-x: clip;
-    }
-
-    .msh-calendar-main *,
-    .msh-calendar-main *::before,
-    .msh-calendar-main *::after {
-      box-sizing: border-box;
-    }
-
-    .msh-calendar-main img,
-    .msh-calendar-main svg,
-    .msh-calendar-main video,
-    .msh-calendar-main iframe {
-      max-width: 100%;
-      height: auto;
-    }
-
-    .msh-calendar-main p,
-    .msh-calendar-main strong,
-    .msh-calendar-main small,
-    .msh-calendar-main a {
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    @media (max-width: 600px) {
-      .msh-calendar-main {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-        padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
-      }
-
-      .msh-calendar-main > *,
-      .msh-calendar-main section,
-      .msh-calendar-main article,
-      .msh-calendar-main fieldset,
-      .msh-calendar-main details,
-      .msh-calendar-main form {
-        min-width: 0 !important;
-        max-width: 100% !important;
-      }
-
-      .msh-calendar-main .msh-calendar-layers,
-      .msh-calendar-main .msh-calendar-color-presets {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
-      }
-
-      .msh-calendar-main .msh-calendar-layers label,
-      .msh-calendar-main .msh-calendar-color-presets button {
-        min-width: 0 !important;
-        width: 100% !important;
-      }
-
-      .msh-calendar-main [role="tablist"],
-      .msh-calendar-main .msh-calendar-tabs,
-      .msh-calendar-main .msh-calendar-actions,
-      .msh-calendar-main .msh-calendar-header-actions {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        gap: 8px !important;
-      }
-
-      .msh-calendar-main button,
-      .msh-calendar-main input,
-      .msh-calendar-main select,
-      .msh-calendar-main textarea {
-        max-width: 100%;
-      }
-
-      .msh-calendar-weekdays,
-      .msh-calendar-grid {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-      }
-
-      .msh-calendar-day {
-        min-width: 0 !important;
-        width: 100% !important;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .msh-calendar-main .msh-calendar-layers,
-      .msh-calendar-main .msh-calendar-color-presets {
-        grid-template-columns: 1fr !important;
-      }
-    }
+    html, body { width:100%; max-width:100%; overflow-x:hidden; }
+    .msh-app-shell,.msh-calendar-main{width:100%;max-width:100%;min-width:0;box-sizing:border-box}.msh-calendar-main{overflow-x:clip}.msh-calendar-main *,.msh-calendar-main *::before,.msh-calendar-main *::after{box-sizing:border-box}.msh-calendar-main img,.msh-calendar-main svg,.msh-calendar-main video,.msh-calendar-main iframe{max-width:100%;height:auto}.msh-calendar-main p,.msh-calendar-main strong,.msh-calendar-main small,.msh-calendar-main a{overflow-wrap:anywhere;word-break:break-word}
+    @media(max-width:600px){.msh-calendar-main{padding-left:16px!important;padding-right:16px!important;padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}.msh-calendar-main>*,.msh-calendar-main section,.msh-calendar-main article,.msh-calendar-main fieldset,.msh-calendar-main details,.msh-calendar-main form{min-width:0!important;max-width:100%!important}.msh-calendar-main .msh-calendar-layers,.msh-calendar-main .msh-calendar-color-presets{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.msh-calendar-main .msh-calendar-layers label,.msh-calendar-main .msh-calendar-color-presets button{min-width:0!important;width:100%!important}.msh-calendar-main [role="tablist"],.msh-calendar-main .msh-calendar-tabs,.msh-calendar-main .msh-calendar-actions,.msh-calendar-main .msh-calendar-header-actions{display:flex!important;flex-wrap:wrap!important;width:100%!important;max-width:100%!important;gap:8px!important}.msh-calendar-main button,.msh-calendar-main input,.msh-calendar-main select,.msh-calendar-main textarea{max-width:100%}.msh-calendar-weekdays,.msh-calendar-grid{width:100%!important;max-width:100%!important;min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}.msh-calendar-day{min-width:0!important;width:100%!important}}
+    @media(max-width:380px){.msh-calendar-main .msh-calendar-layers,.msh-calendar-main .msh-calendar-color-presets{grid-template-columns:1fr!important}}
   </style>
 </head>
 <body class="msh-app-page msh-sensory-calendar" data-msh-page="calendar">
@@ -134,6 +31,7 @@
     <div data-msh-mobile-nav></div>
   </div>
   <script src="js/msh-storage.js"></script>
+  <script src="js/msh-sharing.js"></script>
   <script src="js/msh-calendar-appearance.js"></script>
   <script src="js/msh-cycle.js"></script>
   <script src="js/msh-cycle-symptoms.js"></script>
@@ -143,6 +41,7 @@
   <script src="js/msh-shell.js"></script>
   <script src="js/msh-calendar.js"></script>
   <script src="js/msh-calendar-feature-actions.js"></script>
+  <script src="js/msh-sharing-ui.js"></script>
   <script src="js/msh-youtube-movement.js"></script>
   <script src="js/msh-youtube-account.js"></script>
 </body>
