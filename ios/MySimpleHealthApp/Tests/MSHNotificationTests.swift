@@ -162,15 +162,42 @@ final class MSHNotificationTests: XCTestCase {
 
     func testRouteBuildsExactExistingTestOriginURL() {
         let route = MSHWebRoute(rawValue: "calendar.html?view=movement&event=msh-42")!
-        let url = MSHWebRuntime.url(
+        let url = try! MSHWebRuntime.url(
             for: route,
-            environment: ["MSH_WEB_APP_URL": "http://192.168.1.10:4173/my-health.html"]
+            environment: ["MSH_WEB_APP_URL": "http://192.168.1.10:4173/my-health.html"],
+            infoDictionary: [:]
         )
 
         XCTAssertEqual(
             url.absoluteString,
             "http://192.168.1.10:4173/calendar.html?view=movement&event=msh-42"
         )
+    }
+
+    func testDebugInfoPlistConfigurationTakesPriorityAndBuildsEveryWebRoute() throws {
+        let configuration = try MSHWebRuntime.resolveConfiguration(
+            environment: ["MSH_WEB_APP_URL": "http://192.168.1.11:43128/my-health.html"],
+            infoDictionary: [MSHWebRuntime.infoDictionaryKey: "http://192.168.1.10:43128/my-health.html"]
+        )
+
+        XCTAssertEqual(configuration.source, .debugInfoPlist)
+        XCTAssertEqual(configuration.baseURL.absoluteString, "http://192.168.1.10:43128/my-health.html")
+        for destination in MSHFeatureDestination.allCases {
+            let url = try MSHWebRuntime.url(
+                for: MSHWebRoute(destination: destination),
+                configuration: configuration
+            )
+            XCTAssertEqual(url.host, "192.168.1.10")
+            XCTAssertEqual(url.port, 43128)
+        }
+    }
+
+    func testDebugConfigurationRejectsMissingAndLoopbackBaseURLs() {
+        XCTAssertThrowsError(try MSHWebRuntime.resolveConfiguration(environment: [:], infoDictionary: [:]))
+        XCTAssertThrowsError(try MSHWebRuntime.resolveConfiguration(
+            environment: [:],
+            infoDictionary: [MSHWebRuntime.infoDictionaryKey: "http://localhost:43128/my-health.html"]
+        ))
     }
 
     func testInjectedWebBridgeExposesGenericNotificationActions() {

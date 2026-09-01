@@ -60,7 +60,7 @@ test('dark glass and headers remain neutral while brand color stays an accent', 
   assert.match(dark, /--msh-glass-text-primary:\s*#f5f1e7/);
   assert.match(dark, /--msh-glass-text-secondary:\s*rgba\(245, 241, 231, \.78\)/);
   assert.match(dark, /--msh-accent:\s*#a9bb91/);
-  assert.match(header, /background:\s*rgba\(13, 15, 14, \.82\)/);
+  assert.match(header, /background:\s*rgba\(13,\s*15,\s*14,\s*\.82\)/);
 });
 
 test('environment does not override theme-owned glass surfaces', () => {

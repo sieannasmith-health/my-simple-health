@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { networkInterfaces } from 'node:os';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import helloHandler from './api/hello.js';
@@ -37,6 +38,18 @@ const mime = {
   '.json':'application/json; charset=utf-8', '.mjs':'text/javascript; charset=utf-8',
   '.png':'image/png', '.svg':'image/svg+xml; charset=utf-8', '.webp':'image/webp'
 };
+const publicDirectories = new Set(['assets', 'css', 'data', 'js']);
+const publicRootExtensions = new Set(['.css', '.html', '.ico', '.jpg', '.jpeg', '.png', '.svg', '.webp']);
+const publicRootFiles = new Set(['youtube-config.json']);
+
+function isPublicStaticPath(pathname) {
+  const parts = pathname.split('/').filter(Boolean);
+  if (!parts.length || parts.some(part => part.startsWith('.'))) return pathname === '/';
+  if (parts.length === 1) {
+    return publicRootFiles.has(parts[0]) || publicRootExtensions.has(extname(parts[0]).toLowerCase());
+  }
+  return publicDirectories.has(parts[0]) && Boolean(mime[extname(parts.at(-1)).toLowerCase()]);
+}
 
 function apiResponse(response) {
   let statusCode = 200;
@@ -63,6 +76,7 @@ async function parseJson(request, limit = 1_000_000) {
 
 async function serveStatic(pathname, response) {
   const requested = pathname === '/' ? '/index.html' : pathname;
+  if (!isPublicStaticPath(pathname)) return false;
   const file = resolve(root, `.${decodeURIComponent(requested)}`);
   if (file !== root && !file.startsWith(root + sep)) return false;
   try {
@@ -79,6 +93,9 @@ async function serveStatic(pathname, response) {
 
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url || '/', 'http://127.0.0.1');
+  if (host === '0.0.0.0' || host === '::') {
+    console.log(`[dev] Request: ${request.method || 'GET'} ${url.pathname} from ${request.socket.remoteAddress || 'unknown'}`);
+  }
   try {
     const apiHandlers = {
       '/api/hello': helloHandler,
@@ -105,9 +122,28 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-const port = Number(process.env.PORT) || 43127;
-server.listen(port, '127.0.0.1', () => {
-  console.log(`[dev] My Simple Health: http://127.0.0.1:${port}`);
+const host = process.env.MSH_DEV_HOST || process.env.HOST || '127.0.0.1';
+const port = Number(process.env.MSH_DEV_PORT || process.env.PORT) || 43127;
+
+function lanIPv4Addresses() {
+  return Object.entries(networkInterfaces())
+    .flatMap(([name, addresses]) => (addresses || []).map(address => ({ name, ...address })))
+    .filter(address => address.family === 'IPv4' && !address.internal && !address.address.startsWith('169.254.'))
+    .sort((left, right) => Number(right.name === 'en0') - Number(left.name === 'en0') || left.name.localeCompare(right.name))
+    .map(address => address.address);
+}
+
+server.on('error', error => {
+  console.error(`[dev] Server failed on ${host}:${port}:`, error.message);
+});
+
+server.listen(port, host, () => {
+  console.log(`[dev] My Simple Health: http://${host}:${port}`);
+  if (host === '0.0.0.0' || host === '::') {
+    const addresses = lanIPv4Addresses();
+    if (addresses.length) addresses.forEach(address => console.log(`[dev] Physical device URL: http://${address}:${port}/my-health.html`));
+    else console.error('[dev] Physical device URL unavailable: no LAN IPv4 address was found.');
+  }
   console.log(`[dev] API runtimes: /api/hello, /api/explore, /api/food-product, /api/food-receipt, /api/food-product-match, /api/food-date-label`);
   console.log(`[dev] OPENAI_API_KEY detected: ${Boolean(process.env.OPENAI_API_KEY) ? 'yes' : 'no'}`);
   console.log(`[dev] HELLO_MODEL: ${process.env.HELLO_MODEL || 'gpt-5.6-luna'}`);

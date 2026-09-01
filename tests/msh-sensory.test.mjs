@@ -136,10 +136,10 @@ test('protected foreground tokens remain readable independently of environmental
 });
 
 test('environmental app navigation uses stable light and dark glass contrast',()=>{
-  assert.match(foundationCss,/\.msh-app-header\s*\{[^}]*background:\s*rgba\(245, 241, 231, \.72\)/s);
+  assert.match(foundationCss,/\.msh-app-header\s*\{[^}]*background:\s*rgba\(245,\s*241,\s*231,\s*\.72\)/s);
   assert.match(foundationCss,/-webkit-backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
   assert.match(foundationCss,/backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
-  assert.match(foundationCss,/box-shadow:\s*0 4px 20px rgba\(0, 0, 0, \.05\)/);
+  assert.match(foundationCss,/box-shadow:\s*0 4px 20px rgba\(0,\s*0,\s*0,\s*\.05\)/);
   assert.match(environmentCss,/\.msh-environment-home \.msh-app-header\{[^}]*background:var\(--msh-glass-soft-bg\)[^}]*blur\(18px\) saturate\(125%\)/);
   assert.match(environmentCss,/\[data-theme="dark"\] \.msh-environment-home \.msh-app-header\{[^}]*background:rgba\(13,15,14,\.82\)/);
   assert.match(glassWorkspaceCss,/\.msh-landscape-workspace-page \.msh-app-header\{[^}]*background:rgba\(245,241,231,\.72\)[^}]*blur\(18px\) saturate\(125%\)/);
@@ -165,10 +165,10 @@ test('environmental atmosphere responds to time while theme owns Glass and Calen
 });
 
 test('Explore protects supporting and card copy while preserving expressive green hierarchy',()=>{
-  assert.match(exploreHtml,/\.hero \.lede,\.hero \.copy,\.landscape-door>p/);
-  assert.match(exploreHtml,/color:var\(--msh-text-secondary/);
-  assert.match(exploreHtml,/\[data-theme="dark"\] \.hero/);
-  assert.match(exploreHtml,/\.landscape-door \.action\{color:var\(--msh-page/);
-  assert.doesNotMatch(exploreHtml,/\.hero\{[^}]*opacity:/);
-  assert.doesNotMatch(exploreHtml,/\.landscape-door\{[^}]*opacity:/);
+  assert.match(exploreHtml,/\.self-insight \.lede\{[^}]*color:var\(--msh-text-muted/);
+  assert.match(exploreHtml,/\.insight-card p\{[^}]*color:var\(--msh-text-muted/);
+  assert.match(exploreHtml,/\.insight-card span\{[^}]*color:var\(--msh-heading/);
+  assert.match(exploreHtml,/\[data-theme='dark'\] \.insight-card/);
+  assert.doesNotMatch(exploreHtml,/\.self-insight\{[^}]*opacity:/);
+  assert.doesNotMatch(exploreHtml,/\.insight-card\{[^}]*opacity:/);
 });

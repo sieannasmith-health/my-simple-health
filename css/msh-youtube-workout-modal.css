@@ -31,6 +31,23 @@
   min-width: 0;
 }
 
+html.msh-native-embedded .msh-date-events .msh-youtube-workout-thumb {
+  margin-top: 7px;
+  margin-bottom: 3px;
+}
+
+html.msh-native-embedded .msh-date-events .msh-youtube-workout-thumb span {
+  margin-top: 5px;
+  color: var(--msh-heading);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+  text-transform: none;
+}
+
 /*
   The planner is rendered as a fixed modal. On iOS/WKWebView the page itself
   can be wider than the visual viewport, so percentage widths can inherit that

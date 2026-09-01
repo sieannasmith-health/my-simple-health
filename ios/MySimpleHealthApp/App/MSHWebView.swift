@@ -7,13 +7,17 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
     case calendar
     case movementPlan
     case movementLibrary
+    case cycle
+    case medications
     case landscape
     case selfInsight
+    case explore
     case horizon
     case path
     case practice
     case discovery
     case journey
+    case healthStory
     case food
     case financialHealth
 
@@ -24,14 +28,18 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
         case .myHealth: "My Health"
         case .calendar: "Calendar"
         case .movementPlan: "Plan Movement"
-        case .movementLibrary: "Movement Library"
+        case .movementLibrary: "Movement Library & Workouts"
+        case .cycle: "Cycle"
+        case .medications: "Medication Continuity"
         case .landscape: "Landscape"
         case .selfInsight: "Self-Insight"
+        case .explore: "Explore"
         case .horizon: "Horizon"
         case .path: "Path"
         case .practice: "Practice"
         case .discovery: "Discovery"
         case .journey: "Journey"
+        case .healthStory: "My Health Story"
         case .food: "Food"
         case .financialHealth: "Financial Health"
         }
@@ -42,59 +50,162 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
         case .myHealth: "my-health.html"
         case .calendar, .movementPlan: "calendar.html"
         case .movementLibrary: "movement-library.html"
+        case .cycle: "calendar.html"
+        case .medications: "medications.html"
         case .landscape: "health-landscape.html"
         case .selfInsight: "assessments.html"
+        case .explore: "my-health.html"
         case .horizon: "my-vision.html"
         case .path: "my-project.html"
         case .practice: "my-practice.html"
         case .discovery: "my-learning.html"
         case .journey: "my-progress.html"
+        case .healthStory: "my-health-story.html"
         case .food: "my-food.html"
         case .financialHealth: "financial-health.html"
         }
     }
 
     var query: String? {
-        self == .movementPlan ? "view=movement" : nil
+        switch self {
+        case .movementPlan: "view=movement"
+        case .cycle: "view=cycle"
+        case .explore: "view=explore"
+        default: nil
+        }
+    }
+}
+
+enum MSHWebConfigurationSource: String, Equatable, Sendable {
+    case debugInfoPlist = "Debug Info.plist (local xcconfig)"
+    case processEnvironment = "process environment"
+    case production = "Release production default"
+}
+
+struct MSHResolvedWebConfiguration: Equatable, Sendable {
+    let baseURL: URL
+    let source: MSHWebConfigurationSource
+}
+
+enum MSHWebConfigurationError: Error, Equatable, LocalizedError {
+    case missing
+    case invalid(source: String, value: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .missing:
+            "The Debug build has no MSH web base URL. Add MSH_WEB_APP_URL to Config/Debug.local.xcconfig and rebuild."
+        case let .invalid(source, value):
+            "The MSH web base URL from \(source) is invalid or is not reachable from a physical device: \(value)"
+        }
     }
 }
 
 enum MSHWebRuntime {
     static let productionURL = URL(string: "https://mysimplehealth.org/my-health.html")!
+    static let infoDictionaryKey = "MSHWebAppURL"
 
-    static func initialURL(environment: [String: String] = ProcessInfo.processInfo.environment) -> URL {
+    static func resolveConfiguration(
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        infoDictionary: [String: Any] = Bundle.main.infoDictionary ?? [:]
+    ) throws -> MSHResolvedWebConfiguration {
 #if DEBUG
-        if let value = environment["MSH_WEB_APP_URL"]?.trimmingCharacters(in: .whitespacesAndNewlines),
-           !value.isEmpty,
-           let url = URL(string: value),
-           url.scheme == "https" || url.scheme == "http",
-           url.host != nil {
-            return url
+        let candidates: [(source: MSHWebConfigurationSource, value: String?)] = [
+            (.debugInfoPlist, infoDictionary[infoDictionaryKey] as? String),
+            (.processEnvironment, environment["MSH_WEB_APP_URL"])
+        ]
+        for candidate in candidates {
+            let value = candidate.value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            guard !value.isEmpty, value != "$(MSH_WEB_APP_URL)" else { continue }
+            guard let url = validatedDevelopmentURL(value) else {
+                throw MSHWebConfigurationError.invalid(source: candidate.source.rawValue, value: value)
+            }
+            return MSHResolvedWebConfiguration(baseURL: url, source: candidate.source)
         }
+        throw MSHWebConfigurationError.missing
+#else
+        return MSHResolvedWebConfiguration(baseURL: productionURL, source: .production)
 #endif
-        return productionURL
     }
 
     static func url(
         for destination: MSHFeatureDestination,
-        environment: [String: String] = ProcessInfo.processInfo.environment
-    ) -> URL {
-        url(for: MSHWebRoute(destination: destination), environment: environment)
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        infoDictionary: [String: Any] = Bundle.main.infoDictionary ?? [:]
+    ) throws -> URL {
+        try url(
+            for: MSHWebRoute(destination: destination),
+            environment: environment,
+            infoDictionary: infoDictionary
+        )
     }
 
     static func url(
         for route: MSHWebRoute,
-        environment: [String: String] = ProcessInfo.processInfo.environment
-    ) -> URL {
-        let entryURL = initialURL(environment: environment)
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        infoDictionary: [String: Any] = Bundle.main.infoDictionary ?? [:]
+    ) throws -> URL {
+        let configuration = try resolveConfiguration(
+            environment: environment,
+            infoDictionary: infoDictionary
+        )
+        return try url(for: route, configuration: configuration)
+    }
+
+    static func url(
+        for route: MSHWebRoute,
+        configuration: MSHResolvedWebConfiguration
+    ) throws -> URL {
+        let entryURL = configuration.baseURL
         var components = URLComponents(url: entryURL, resolvingAgainstBaseURL: false)!
         let parentPath = (components.path as NSString).deletingLastPathComponent
         let routeComponents = URLComponents(string: route.rawValue)!
         components.path = (parentPath as NSString).appendingPathComponent(routeComponents.path)
         components.queryItems = routeComponents.queryItems
         components.fragment = nil
-        return components.url!
+        guard let url = components.url else {
+            throw MSHWebConfigurationError.invalid(
+                source: configuration.source.rawValue,
+                value: entryURL.absoluteString
+            )
+        }
+#if DEBUG
+        print(
+            "[MSHWebConfiguration] baseURL=\(entryURL.absoluteString) source=\(configuration.source.rawValue) route=\(route.rawValue) requestedURL=\(url.absoluteString)"
+        )
+#endif
+        return url
     }
+
+    static func logStartupConfiguration() {
+#if DEBUG
+        do {
+            let configuration = try resolveConfiguration()
+            MSHDebugLifecycle.log(
+                "web_configuration_resolved",
+                "baseURL=\(configuration.baseURL.absoluteString) source=\(configuration.source.rawValue.replacingOccurrences(of: " ", with: "_"))"
+            )
+            print(
+                "[MSHWebConfiguration] resolved baseURL=\(configuration.baseURL.absoluteString) source=\(configuration.source.rawValue)"
+            )
+        } catch {
+            MSHDebugLifecycle.log("web_configuration_error", "description=\(error.localizedDescription)")
+            print("[MSHWebConfiguration] error=\(error.localizedDescription)")
+        }
+#endif
+    }
+
+#if DEBUG
+    private static func validatedDevelopmentURL(_ value: String) -> URL? {
+        guard let url = URL(string: value),
+              url.scheme == "https" || url.scheme == "http",
+              let host = url.host?.lowercased(),
+              host != "localhost",
+              host != "127.0.0.1",
+              host != "::1" else { return nil }
+        return url
+    }
+#endif
 }
 
 struct MSHWebView: UIViewRepresentable {
@@ -140,29 +251,81 @@ struct MSHWebView: UIViewRepresentable {
         context.coordinator.bridge.webView = webView
         context.coordinator.notificationBridge.webView = webView
         webView.navigationDelegate = context.coordinator
-        let initialURL = MSHWebRuntime.url(for: route)
-        context.coordinator.configure(initialURL: initialURL)
         context.coordinator.markRequested(route: route)
-        let request = URLRequest(url: initialURL)
+        do {
+            let configuration = try MSHWebRuntime.resolveConfiguration()
+            let initialURL = try MSHWebRuntime.url(for: route, configuration: configuration)
+            context.coordinator.configure(initialURL: initialURL)
+            let request = URLRequest(url: initialURL)
 #if DEBUG
-        print("[MSHWebView] LOAD REQUEST:", request.url?.absoluteString ?? "nil")
+            print("[MSHWebView] LOAD REQUEST:", request.url?.absoluteString ?? "nil")
 #endif
-        MSHDebugLifecycle.log(
-            "webview_load_request",
-            "webview=\(ObjectIdentifier(webView)) url=\(request.url?.absoluteString ?? "nil")"
-        )
-        webView.load(request)
+            MSHDebugLifecycle.log(
+                "webview_load_request",
+                "webview=\(ObjectIdentifier(webView)) route=\(route.rawValue) baseURL=\(configuration.baseURL.absoluteString) source=\(configuration.source.rawValue.replacingOccurrences(of: " ", with: "_")) url=\(request.url?.absoluteString ?? "nil")"
+            )
+            webView.load(request)
+        } catch {
+            Self.showConfigurationError(on: webView, route: route, error: error)
+        }
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         guard context.coordinator.shouldRequest(route: route) else { return }
-        let url = MSHWebRuntime.url(for: route)
+        do {
+            let configuration = try MSHWebRuntime.resolveConfiguration()
+            let url = try MSHWebRuntime.url(for: route, configuration: configuration)
+            context.coordinator.configure(initialURL: url)
+            Self.removeConfigurationError(from: webView)
+            MSHDebugLifecycle.log(
+                "webview_route_update",
+                "webview=\(ObjectIdentifier(webView)) route=\(route.rawValue) baseURL=\(configuration.baseURL.absoluteString) source=\(configuration.source.rawValue.replacingOccurrences(of: " ", with: "_")) url=\(url.absoluteString)"
+            )
+            webView.load(URLRequest(url: url))
+        } catch {
+            Self.showConfigurationError(on: webView, route: route, error: error)
+        }
+    }
+
+    private static let configurationErrorViewTag = 0x4D5343
+
+    private static func removeConfigurationError(from webView: WKWebView) {
+        webView.viewWithTag(configurationErrorViewTag)?.removeFromSuperview()
+    }
+
+    private static func showConfigurationError(on webView: WKWebView, route: MSHWebRoute, error: Error) {
+        removeConfigurationError(from: webView)
         MSHDebugLifecycle.log(
-            "webview_route_update",
-            "webview=\(ObjectIdentifier(webView)) route=\(route.rawValue) url=\(url.absoluteString)"
+            "web_configuration_error",
+            "route=\(route.rawValue) description=\(error.localizedDescription)"
         )
-        webView.load(URLRequest(url: url))
+#if DEBUG
+        print("[MSHWebConfiguration] route=\(route.rawValue) error=\(error.localizedDescription)")
+        let message = UILabel()
+        message.tag = configurationErrorViewTag
+        message.translatesAutoresizingMaskIntoConstraints = false
+        message.numberOfLines = 0
+        message.textAlignment = .left
+        message.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+        message.textColor = .label
+        message.backgroundColor = .systemBackground
+        message.layer.cornerRadius = 16
+        message.layer.masksToBounds = true
+        message.text = """
+        My Simple Health development web configuration is missing or invalid.
+
+        Route: \(route.rawValue)
+        \(error.localizedDescription)
+        """
+        message.accessibilityLabel = message.text
+        webView.addSubview(message)
+        NSLayoutConstraint.activate([
+            message.leadingAnchor.constraint(equalTo: webView.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            message.trailingAnchor.constraint(equalTo: webView.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            message.centerYAnchor.constraint(equalTo: webView.safeAreaLayoutGuide.centerYAnchor)
+        ])
+#endif
     }
 
     static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {

@@ -204,7 +204,9 @@
       holder.className = 'msh-date-actions';
       inspector.appendChild(holder);
     }
-    holder.innerHTML = '<button type="button" class="msh-button-secondary" data-open-calendar-share>+ Add / Share</button>';
+    if (!holder.querySelector(':scope > [data-open-calendar-share]')) {
+      holder.innerHTML = '<button type="button" class="msh-button-secondary" data-open-calendar-share>+ Add / Share</button>';
+    }
   }
 
   root.addEventListener('click', event => {

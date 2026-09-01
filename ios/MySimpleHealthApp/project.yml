@@ -14,6 +14,8 @@ targets:
     type: application
     platform: iOS
     sources: [App]
+    configFiles:
+      Debug: Config/Debug.xcconfig
     attributes:
       SystemCapabilities:
         com.apple.HealthKit:

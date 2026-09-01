@@ -30,9 +30,12 @@ struct MSHWebRoute: RawRepresentable, Hashable, Identifiable, Sendable {
     var appSection: MSHAppSection {
         guard let components = URLComponents(string: rawValue) else { return .calendar }
         switch components.path {
-        case "my-health.html": return .myHealth
+        case "my-health.html":
+            let view = components.queryItems?.first(where: { $0.name == "view" })?.value
+            return view == "explore" ? .tools : .myHealth
         case "calendar.html": return .calendar
         case "movement-library.html": return .movement
+        case "my-health-story.html", "health-patterns-preview.html": return .track
         default: return .tools
         }
     }

@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
 const ui=await readFile(new URL('../js/msh-calendar.js',import.meta.url),'utf8');
+const data=await readFile(new URL('../js/msh-calendar-data.js',import.meta.url),'utf8');
 const css=await readFile(new URL('../css/msh-cycle.css',import.meta.url),'utf8');
 const storage=await readFile(new URL('../js/msh-storage.js',import.meta.url),'utf8');
 
@@ -16,7 +17,7 @@ test('Calendar is framed as health in time rather than a period tracker',()=>{
 });
 
 test('Calendar derives dated context from existing records without a competing data store',()=>{
-  for(const source of ['calendar.events','progressEvents','practiceAttempts','practices','projects'])assert.match(ui,new RegExp(source.replace('.','\\.')));
+  for(const source of ['calendar?.events','progressEvents','practiceAttempts','practices','projects'])assert.match(data,new RegExp(source.replace(/[?.]/g,'\\$&')));
   assert.match(ui,/from its original records without changing their meaning/);
   assert.doesNotMatch(ui,/calendar\.events\.push/);
 });

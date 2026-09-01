@@ -113,6 +113,7 @@ final class MSHMyHealthTests: XCTestCase {
         }
         XCTAssertEqual(requestedLimits, [MSHMyHealthViewModel.recentActivityLimit])
         XCTAssertEqual(snapshot.recentActivity.count, MSHMyHealthViewModel.recentActivityLimit)
+        XCTAssertEqual(snapshot.recentActivity.first?.area, .sleep)
         let mappedAreas: [MSHHealthArea] = snapshot.areaCards.map { card in card.area }
         XCTAssertEqual(mappedAreas, MSHHealthArea.allCases)
         XCTAssertTrue(snapshot.areaCards.first(where: { $0.area == MSHHealthArea.movement })?.isSelected == true)
