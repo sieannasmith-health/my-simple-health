@@ -27,6 +27,17 @@ test('keeps unknown nutrient values null instead of zero', () => {
   assert.equal(result.nutrients.proteinG,null);
 });
 
+test('parses package mass and converts measured food into purchased-unit fractions', () => {
+  const specifics = { packageWeight:'32 oz (907 g)', serving:{size:170,unit:'g'} };
+  assert.equal(food.packageGrams(specifics),907);
+  assert.equal(food.purchasedUnitsForAmount(170,'g',specifics),0.187431);
+});
+
+test('uses ounce package mass when grams are unavailable', () => {
+  const specifics = { packageWeight:'12 oz' };
+  assert.equal(food.packageGrams(specifics),340.19);
+});
+
 test('consumes oldest matching inventory lots first', () => {
   const result = food.consumeFromLots([
     {id:'new',productId:'p1',quantityRemaining:1,status:'available',acquiredAt:'2026-08-20'},
