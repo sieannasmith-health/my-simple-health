@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/primary.swiftdeps"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/Sources/MSHAppleHealthKit/AppleHealthKitProvider.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/AppleHealthKitProvider.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/AppleHealthKitProvider.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/AppleHealthKitProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/AppleHealthKitProvider.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/AppleHealthKitProvider.dia"
+  }
+}

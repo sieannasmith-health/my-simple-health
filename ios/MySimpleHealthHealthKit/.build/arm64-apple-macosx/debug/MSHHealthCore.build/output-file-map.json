@@ -1,0 +1,33 @@
+{
+  "": {
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/primary.swiftdeps"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/Sources/MSHHealthCore/HealthDataProvider.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthDataProvider.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthDataProvider.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthDataProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthDataProvider.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthDataProvider.dia"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/Sources/MSHHealthCore/HealthRecord.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthRecord.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthRecord.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthRecord~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthRecord.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthRecord.dia"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/Sources/MSHHealthCore/HealthSyncCoordinator.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthSyncCoordinator.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthSyncCoordinator.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthSyncCoordinator~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthSyncCoordinator.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/HealthSyncCoordinator.dia"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/Sources/MSHHealthCore/InMemoryHealthStore.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/InMemoryHealthStore.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/InMemoryHealthStore.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/InMemoryHealthStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/InMemoryHealthStore.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHHealthCore.build/InMemoryHealthStore.dia"
+  }
+}

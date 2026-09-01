@@ -17,6 +17,9 @@
     journey: Object.freeze({ key:'journey', label:'Journey', href:'my-progress.html', type:TYPES.PRIVATE, role:'activity' }),
     cycle: Object.freeze({ key:'cycle', label:'Cycle', href:'calendar.html?view=cycle', type:TYPES.PRIVATE, role:'activity' }),
     movement: Object.freeze({ key:'movement', label:'Movement', href:'calendar.html?view=movement', type:TYPES.PRIVATE, role:'activity' }),
+    medications: Object.freeze({ key:'medications', label:'Medications', href:'medications.html', type:TYPES.PRIVATE, role:'activity' }),
+    food: Object.freeze({ key:'food', label:'Food', href:'my-food.html', type:TYPES.PRIVATE, role:'activity' }),
+    financial: Object.freeze({ key:'financial', label:'Financial Health', href:'financial-health.html', type:TYPES.PRIVATE, role:'activity' }),
     publicHome: Object.freeze({ key:'publicHome', label:'My Simple Health', href:'index.html', type:TYPES.PUBLIC, role:'doorway' }),
     publicResources: Object.freeze({ key:'publicResources', label:'Resources', href:'resources.html', type:TYPES.PUBLIC, role:'doorway' }),
     science: Object.freeze({ key:'science', label:'Explore the science', href:'resources.html', type:TYPES.PUBLIC, role:'doorway' }),
@@ -48,7 +51,7 @@
   }
   function classify(value) {
     if (!value || value[0] === '#') return null;
-    if (/^(?:mailto:|tel:)/i.test(value)) return TYPES.EXTERNAL;
+    if (/^(?:mailto:|tel:|sms:)/i.test(value)) return TYPES.EXTERNAL;
     let url;
     try { url = new URL(value, root.location && root.location.href || 'https://msh.local/'); }
     catch (_) { return null; }
@@ -64,7 +67,7 @@
     if (page === 'health' && view === 'tools') return 'tools';
     if (page === 'calendar') return 'calendar';
     if (page === 'landscape' || page === 'assessments') return 'explore';
-    return ({ health:'health', vision:'horizon', project:'path', practice:'practice', learning:'discovery', progress:'journey' })[page] || 'health';
+    return ({ health:'health', vision:'horizon', project:'path', practice:'practice', learning:'discovery', progress:'journey', medications:'medications', food:'food', financial:'financial' })[page] || 'health';
   }
   function transition(sourceKey, destination) {
     const source = get(sourceKey) || get('health');

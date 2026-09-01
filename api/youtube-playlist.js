@@ -18,6 +18,13 @@ function playlistIdFrom(value) {
   }
 }
 
+function playlistIdFromRequest(req) {
+  const requestUrl = new URL(req.url || '/', 'https://my-simple-health.local');
+  return playlistIdFrom(
+    requestUrl.searchParams.get('url') || requestUrl.searchParams.get('playlistId')
+  );
+}
+
 function decodeXml(value) {
   return String(value || '')
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
@@ -50,6 +57,16 @@ function inferFocus(title) {
   return tags.length ? tags : ['other'];
 }
 
+function dedupeVideos(videos) {
+  const seen = new Set();
+  return (videos || []).filter(video => {
+    const videoId = String(video?.videoId || '').trim();
+    if (!videoId || seen.has(videoId)) return false;
+    seen.add(videoId);
+    return true;
+  });
+}
+
 async function fetchWithApiKey(playlistId, key) {
   const videos = [];
   let pageToken = '';
@@ -57,7 +74,19 @@ async function fetchWithApiKey(playlistId, key) {
     const params = new URLSearchParams({ part: 'snippet,contentDetails', playlistId, maxResults: '50', key });
     if (pageToken) params.set('pageToken', pageToken);
     const response = await fetch(`${YOUTUBE_API}/playlistItems?${params}`);
-    if (!response.ok) throw new Error('YouTube playlist request failed.');
+    if (!response.ok) {
+      let reason = '';
+      try {
+        const body = await response.json();
+        reason = body?.error?.errors?.[0]?.reason || body?.error?.status || '';
+      } catch (_) {
+        // The status is enough to diagnose a non-JSON upstream response.
+      }
+      const error = new Error('YouTube playlist request failed.');
+      error.status = response.status;
+      error.reason = reason;
+      throw error;
+    }
     const data = await response.json();
     videos.push(...(data.items || []).map(item => ({
       videoId: item.contentDetails?.videoId || item.snippet?.resourceId?.videoId || '',
@@ -107,17 +136,40 @@ async function fetchWithFeed(playlistId) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed.' });
-  const playlistId = playlistIdFrom(req.query?.url || req.query?.playlistId);
+  const playlistId = playlistIdFromRequest(req);
   if (!playlistId) return send(res, 400, { error: 'Paste a valid YouTube playlist URL.' });
   try {
     const apiKey = process.env.YOUTUBE_API_KEY || '';
-    const videos = apiKey ? await fetchWithApiKey(playlistId, apiKey) : await fetchWithFeed(playlistId);
+    let videos;
+    let source = 'youtube-public-feed';
+    let limited = true;
+    let note = 'Public-feed fallback may include only the most recent playlist videos. Add YOUTUBE_API_KEY for the complete playlist.';
+
+    if (apiKey) {
+      try {
+        videos = await fetchWithApiKey(playlistId, apiKey);
+        source = 'youtube-data-api';
+        limited = false;
+        note = '';
+      } catch (error) {
+        console.warn('[youtube-playlist] YouTube Data API request failed; using public feed.', {
+          status: error.status || null,
+          reason: error.reason || 'unknown'
+        });
+        videos = await fetchWithFeed(playlistId);
+        note = 'Public-feed fallback may include only the most recent playlist videos.';
+      }
+    } else {
+      videos = await fetchWithFeed(playlistId);
+    }
+
+    videos = dedupeVideos(videos);
     return send(res, 200, {
       playlistId,
       videos,
-      source: apiKey ? 'youtube-data-api' : 'youtube-public-feed',
-      limited: !apiKey,
-      note: apiKey ? '' : 'Public-feed fallback may include only the most recent playlist videos. Add YOUTUBE_API_KEY for the complete playlist.'
+      source,
+      limited,
+      note
     });
   } catch (error) {
     return send(res, 502, { error: error.message || 'YouTube playlist could not be loaded.' });

@@ -1,106 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movement Library | My Simple Health</title>
-  <meta name="description" content="Browse movement by type, from strength and walking to mobility, recreation, sports, and everyday activity.">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .movement-library{min-height:100vh;background:linear-gradient(180deg,#f8f6ef 0%,#f3efe5 52%,#f8f6ef 100%);color:#252822}
-    .movement-library-inner{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:96px 0 88px}
-    .movement-library-back{display:inline-flex;align-items:center;gap:8px;margin-bottom:42px;color:#173d2b;text-decoration:none;font-size:.84rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-    .movement-library-eyebrow{margin:0 0 12px;color:#63715e;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-    .movement-library h1{max-width:760px;margin:0;color:#173d2b;font-family:Georgia,serif;font-size:clamp(2.7rem,7vw,5.7rem);font-weight:400;line-height:.97;letter-spacing:-.045em}
-    .movement-library-intro{max-width:680px;margin:26px 0 0;color:#555d52;font-size:1.06rem;line-height:1.75}
-    .movement-library-tools{display:flex;gap:12px;align-items:center;margin:42px 0 34px}
-    .movement-library-search{width:min(520px,100%);border:1px solid rgba(23,61,43,.17);border-radius:999px;background:rgba(255,255,255,.66);box-shadow:0 14px 38px rgba(35,43,35,.08);backdrop-filter:blur(18px);padding:15px 20px;color:#252822;font:inherit;outline:none}
-    .movement-library-search:focus{border-color:#7d9460;box-shadow:0 0 0 4px rgba(125,148,96,.13),0 14px 38px rgba(35,43,35,.08)}
-    .movement-library-count{color:#71776f;font-size:.9rem;white-space:nowrap}
-    .movement-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-    .movement-library-section{padding:28px;border:1px solid rgba(23,61,43,.12);border-radius:26px;background:rgba(255,255,255,.58);box-shadow:0 18px 60px rgba(34,44,36,.09);backdrop-filter:blur(20px)}
-    .movement-library-section h2{margin:0 0 18px;color:#173d2b;font-family:Georgia,serif;font-size:1.45rem;font-weight:400}
-    .movement-library-items{display:flex;flex-wrap:wrap;gap:10px}
-    .movement-library-item{display:inline-flex;align-items:center;min-height:42px;padding:10px 14px;border:1px solid rgba(23,61,43,.12);border-radius:999px;background:rgba(252,251,247,.74);color:#314137;font-size:.92rem;line-height:1.2}
-    .movement-library-empty{display:none;margin:42px 0 0;padding:30px;border:1px solid rgba(23,61,43,.12);border-radius:24px;background:rgba(255,255,255,.56);color:#5d655b;text-align:center}
-    .movement-library-note{margin:48px 0 0;padding-top:24px;border-top:1px solid rgba(23,61,43,.12);color:#71776f;font-size:.9rem;line-height:1.6}
-    @media(max-width:760px){.movement-library-inner{width:min(100% - 28px,1120px);padding:72px 0}.movement-library-tools{align-items:stretch;flex-direction:column}.movement-library-grid{grid-template-columns:1fr}.movement-library-section{padding:22px}.movement-library h1{font-size:clamp(2.7rem,14vw,4.4rem)}}
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Movement Library | My Simple Health</title>
+<meta name="description" content="Browse movement and keep your own connected workout collection in one place.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/msh-movement-library-interactions.css?v=20260831-1">
+<style>
+.movement-library{min-height:100vh;background:linear-gradient(180deg,#f8f6ef 0%,#f3efe5 52%,#f8f6ef 100%);color:#252822}.movement-library-inner{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:96px 0 88px}.movement-library-back{display:inline-flex;margin-bottom:42px;color:#173d2b;text-decoration:none;font-size:.84rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.movement-library-eyebrow{margin:0 0 12px;color:#63715e;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.movement-library h1{max-width:760px;margin:0;color:#173d2b;font-family:Georgia,serif;font-size:clamp(2.7rem,7vw,5.7rem);font-weight:400;line-height:.97;letter-spacing:-.045em}.movement-library-intro{max-width:680px;margin:26px 0 0;color:#555d52;font-size:1.06rem;line-height:1.75}.your-workouts{margin:46px 0;padding:30px;border:1px solid rgba(23,61,43,.13);border-radius:28px;background:rgba(255,255,255,.62);box-shadow:0 20px 65px rgba(34,44,36,.1);backdrop-filter:blur(20px)}.your-workouts-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end}.your-workouts h2{margin:4px 0 8px;color:#173d2b;font:400 2rem Georgia,serif}.your-workouts p{margin:0;color:#60685f;line-height:1.6}.playlist-form{display:flex;gap:10px;margin-top:22px}.playlist-form input{flex:1;min-width:0;padding:14px 16px;border:1px solid rgba(23,61,43,.18);border-radius:14px;background:#fff;color:inherit;font:inherit}.playlist-form button,.playlist-action{border:0;border-radius:999px;padding:13px 18px;background:#173d2b;color:#fff;font:inherit;font-weight:700;cursor:pointer}.playlist-secondary{background:transparent;color:#173d2b;border:1px solid rgba(23,61,43,.18)}.playlist-status{margin-top:12px!important;font-size:.9rem}.playlist-connected{display:none;margin-top:22px;padding-top:22px;border-top:1px solid rgba(23,61,43,.12)}.playlist-connected.is-visible{display:block}.playlist-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}.movement-library-tools{display:flex;gap:12px;align-items:center;margin:42px 0 34px}.movement-library-search{width:min(520px,100%);border:1px solid rgba(23,61,43,.17);border-radius:999px;background:rgba(255,255,255,.66);box-shadow:0 14px 38px rgba(35,43,35,.08);backdrop-filter:blur(18px);padding:15px 20px;color:#252822;font:inherit;outline:none}.movement-library-count{color:#71776f;font-size:.9rem;white-space:nowrap}.movement-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.movement-library-section{padding:28px;border:1px solid rgba(23,61,43,.12);border-radius:26px;background:rgba(255,255,255,.58);box-shadow:0 18px 60px rgba(34,44,36,.09);backdrop-filter:blur(20px)}.movement-library-section h2{margin:0 0 18px;color:#173d2b;font:400 1.45rem Georgia,serif}.movement-library-items{display:flex;flex-wrap:wrap;gap:10px}.movement-library-item{display:inline-flex;align-items:center;min-height:42px;padding:10px 14px;border:1px solid rgba(23,61,43,.12);border-radius:999px;background:rgba(252,251,247,.74);color:#314137;font-size:.92rem}.movement-library-empty{display:none;margin:42px 0 0;padding:30px;border:1px solid rgba(23,61,43,.12);border-radius:24px;background:rgba(255,255,255,.56);color:#5d655b;text-align:center}.movement-library-note{margin:48px 0 0;padding-top:24px;border-top:1px solid rgba(23,61,43,.12);color:#71776f;font-size:.9rem;line-height:1.6}@media(max-width:760px){.movement-library-inner{width:min(100% - 28px,1120px);padding:72px 0}.your-workouts-head,.playlist-form,.movement-library-tools{align-items:stretch;flex-direction:column}.movement-library-grid{grid-template-columns:1fr}.movement-library-section,.your-workouts{padding:22px}.movement-library h1{font-size:clamp(2.7rem,14vw,4.4rem)}}
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <a class="site-logo" href="index.html">My Simple Health</a>
-    <button class="menu-button" aria-label="Open menu" onclick="toggleMenu()">Menu</button>
-    <nav class="site-nav">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="resources.html">Resources</a>
-      <a href="recipes.html">Recipes</a>
-      <a href="movement.html" aria-current="page">Movement</a>
-      <a href="my-health.html">My Health</a>
-    </nav>
-  </header>
-  <main class="movement-library">
-    <div class="movement-library-inner">
-      <a class="movement-library-back" href="movement.html">← Movement</a>
-      <p class="movement-library-eyebrow">Movement Library</p>
-      <h1>Find a way to move.</h1>
-      <p class="movement-library-intro">Browse movement across exercise, everyday activity, recreation, sports, mobility, and meaningful accomplishments. Movement counts in more than one form.</p>
-      <div class="movement-library-tools">
-        <input class="movement-library-search" id="movement-library-search" type="search" placeholder="Search walking, Pilates, gardening..." autocomplete="off" aria-label="Search the Movement Library">
-        <span class="movement-library-count" id="movement-library-count" aria-live="polite"></span>
-      </div>
-      <div class="movement-library-grid" id="movement-library-grid"></div>
-      <div class="movement-library-empty" id="movement-library-empty">No movement matches that search yet.</div>
-      <p class="movement-library-note">This library is for discovering and naming movement, not ranking one kind of movement over another. More detailed guides and resources can be layered in over time without changing the underlying movement vocabulary.</p>
-    </div>
-  </main>
-  <footer class="site-footer">
-    <div class="footer-main">
-      <div class="footer-brand"><h2>MY SIMPLE HEALTH</h2><p>Understand health without turning your life into a health project.</p></div>
-      <div class="footer-column"><h3>EXPLORE</h3><a href="movement.html">Movement</a><a href="resources.html">Resources</a><a href="recipes.html">Recipes</a><a href="my-health.html">My Health</a></div>
-      <div class="footer-column"><h3>ABOUT</h3><a href="about.html">About My Simple Health</a><a href="support.html">Help &amp; Support</a><a href="contact.html">Contact</a></div>
-    </div>
-  </footer>
-  <script>function toggleMenu(){document.querySelector('.site-nav').classList.toggle('active')}</script>
-  <script src="js/msh-movement-directory.js"></script>
-  <script>
-    (function(){
-      const directory=window.MSHMovementDirectory;
-      const grid=document.getElementById('movement-library-grid');
-      const search=document.getElementById('movement-library-search');
-      const count=document.getElementById('movement-library-count');
-      const empty=document.getElementById('movement-library-empty');
-      if(!directory||!grid)return;
-      function render(query){
-        const needle=String(query||'').trim().toLowerCase();
-        grid.innerHTML='';
-        let shown=0;
-        directory.DIRECTORY.forEach(category=>{
-          const items=category.items.filter(item=>!needle||item.label.toLowerCase().includes(needle)||category.label.toLowerCase().includes(needle));
-          if(!items.length)return;
-          shown+=items.length;
-          const section=document.createElement('section');
-          section.className='movement-library-section';
-          const heading=document.createElement('h2');
-          heading.textContent=category.label;
-          const wrap=document.createElement('div');
-          wrap.className='movement-library-items';
-          items.forEach(item=>{
-            const chip=document.createElement('span');
-            chip.className='movement-library-item';
-            chip.textContent=item.label;
-            wrap.appendChild(chip);
-          });
-          section.append(heading,wrap);
-          grid.appendChild(section);
-        });
-        count.textContent=shown+' movement'+(shown===1?'':'s');
-        empty.style.display=shown?'none':'block';
-      }
-      search.addEventListener('input',event=>render(event.target.value));
-      render('');
-    })();
-  </script>
-</body>
-</html>
+<header class="site-header"><a class="site-logo" href="index.html">My Simple Health</a><button class="menu-button" aria-label="Open menu" onclick="toggleMenu()">Menu</button><nav class="site-nav"><a href="index.html">Home</a><a href="about.html">About</a><a href="resources.html">Resources</a><a href="recipes.html">Recipes</a><a href="movement.html" aria-current="page">Movement</a><a href="my-health.html">My Health</a></nav></header>
+<main class="movement-library"><div class="movement-library-inner">
+<a class="movement-library-back" href="movement.html">← Movement</a><p class="movement-library-eyebrow">Movement Library</p><h1>Find a way to move.</h1><p class="movement-library-intro">Browse movement across exercise, everyday activity, recreation, sports, mobility, and meaningful accomplishments.</p>
+<section class="your-workouts" aria-labelledby="your-workouts-title"><div class="your-workouts-head"><div><p class="movement-library-eyebrow">Your Workouts</p><h2 id="your-workouts-title">Keep your workouts here.</h2><p>Connect the YouTube fitness playlist you already use. MSH saves the collection so your workouts are ready before you add or plan Movement.</p></div></div><form class="playlist-form" data-playlist-form><input type="url" name="url" required placeholder="Paste your YouTube playlist link" aria-label="YouTube playlist URL"><button type="submit">Connect playlist</button></form><p class="playlist-status" data-playlist-status role="status" aria-live="polite"></p><div class="playlist-connected" data-playlist-connected><strong data-playlist-title>Your fitness playlist</strong><p><span data-playlist-count>0</span> workouts saved in MSH.</p><div class="playlist-meta"><button class="playlist-action" type="button" data-playlist-sync>Sync playlist</button><button class="playlist-action playlist-secondary" type="button" data-playlist-change>Change playlist</button></div></div></section>
+<div class="movement-library-tools"><input class="movement-library-search" id="movement-library-search" type="search" placeholder="Search walking, Pilates, gardening..." autocomplete="off" aria-label="Search the Movement Library"><span class="movement-library-count" id="movement-library-count" aria-live="polite"></span></div><div class="movement-library-grid" id="movement-library-grid"></div><div class="movement-library-empty" id="movement-library-empty">No movement matches that search yet.</div><p class="movement-library-note">Tap any movement to open it. Your Workouts is your personal collection and remains separate so the same saved workout can be used whenever you add, plan, or schedule Movement.</p>
+</div></main>
+<footer class="site-footer"><div class="footer-main"><div class="footer-brand"><h2>MY SIMPLE HEALTH</h2><p>Understand health without turning your life into a health project.</p></div><div class="footer-column"><h3>EXPLORE</h3><a href="movement.html">Movement</a><a href="resources.html">Resources</a><a href="recipes.html">Recipes</a><a href="my-health.html">My Health</a></div><div class="footer-column"><h3>ABOUT</h3><a href="about.html">About My Simple Health</a><a href="support.html">Help &amp; Support</a><a href="contact.html">Contact</a></div></div></footer>
+<script>function toggleMenu(){document.querySelector('.site-nav').classList.toggle('active')}</script><script src="js/msh-storage.js"></script><script src="js/msh-movement-directory.js"></script><script src="js/msh-youtube-movement.js"></script><script src="js/msh-youtube-account.js"></script>
+<script>(function(){const d=window.MSHMovementDirectory,g=document.getElementById('movement-library-grid'),s=document.getElementById('movement-library-search'),c=document.getElementById('movement-library-count'),e=document.getElementById('movement-library-empty');function render(q){const n=String(q||'').trim().toLowerCase();g.innerHTML='';let shown=0;d.DIRECTORY.forEach(cat=>{const items=cat.items.filter(i=>!n||i.label.toLowerCase().includes(n)||cat.label.toLowerCase().includes(n));if(!items.length)return;shown+=items.length;const sec=document.createElement('section');sec.className='movement-library-section';const h=document.createElement('h2');h.textContent=cat.label;const w=document.createElement('div');w.className='movement-library-items';items.forEach(i=>{const chip=document.createElement('span');chip.className='movement-library-item';chip.textContent=i.label;w.appendChild(chip)});sec.append(h,w);g.appendChild(sec)});c.textContent=shown+' movement'+(shown===1?'':'s');e.style.display=shown?'none':'block'}if(d&&g){s.addEventListener('input',x=>render(x.target.value));render('')}const form=document.querySelector('[data-playlist-form]'),status=document.querySelector('[data-playlist-status]'),connected=document.querySelector('[data-playlist-connected]'),title=document.querySelector('[data-playlist-title]'),count=document.querySelector('[data-playlist-count]');function saved(){return window.MSHStorage?.getState()?.settings?.memory?.youtubeFitnessPlaylist||null}function paint(){const p=saved();connected.classList.toggle('is-visible',!!p);form.style.display=p?'none':'flex';if(p){title.textContent=p.title||'Your fitness playlist';count.textContent=(p.videos||[]).length}}paint();form.addEventListener('submit',async ev=>{ev.preventDefault();status.textContent='Connecting your playlist…';try{const url=new FormData(form).get('url');const response=await fetch('/api/youtube-playlist?url='+encodeURIComponent(url),{headers:{Accept:'application/json'}});const data=await response.json().catch(()=>({}));if(!response.ok||!data.videos?.length)throw new Error(data.error||'Playlist could not be loaded.');window.MSHStorage.updateState(state=>{state.settings||={};state.settings.memory||={};state.settings.memory.youtubeFitnessPlaylist={playlistId:data.playlistId,url,source:data.source||'youtube',limited:data.limited===true,note:data.note||'',title:data.title||'Your fitness playlist',videos:data.videos.slice(0,500),connectedAt:new Date().toISOString(),lastSyncedAt:new Date().toISOString()};return state});status.textContent=data.videos.length+' workouts connected.';paint()}catch(err){status.textContent=err.message}});document.querySelector('[data-playlist-change]').addEventListener('click',()=>{window.MSHStorage.updateState(state=>{if(state.settings?.memory)delete state.settings.memory.youtubeFitnessPlaylist;return state});status.textContent='Playlist disconnected.';form.reset();paint()});document.querySelector('[data-playlist-sync]').addEventListener('click',async()=>{const p=saved();if(!p?.url){status.textContent='Reconnect the playlist to sync it.';return}form.querySelector('input').value=p.url;connected.classList.remove('is-visible');form.style.display='flex';form.requestSubmit()})})();</script>
+<script src="js/msh-movement-library-interactions.js?v=20260831-1"></script>
+</body></html>

@@ -1,0 +1,3 @@
+module MSHAppleHealthKit {
+    header "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MSHAppleHealthKit.build/include/MSHAppleHealthKit-Swift.h"
+}

@@ -1,0 +1,41 @@
+/* My Simple Health — keep the My Health environment aligned with the resolved appearance theme. */
+
+/* The environment previously derived its foreground palette only from time of day.
+   That meant an evening/night scene could continue to read as dark even after the
+   shared theme runtime resolved the user's Appearance choice to Light. */
+html[data-theme='light'] .msh-home-world {
+  --msh-world-ink:#1e2b24;
+  --msh-world-muted:#46554c;
+  --msh-world-line:rgba(29,52,41,.2);
+  --msh-world-scrim:rgba(244,237,215,.2);
+  background:#f3efe3;
+}
+
+html[data-theme='light'] .msh-home-environment {
+  background-color:#e9eee7;
+}
+
+html[data-theme='light'] .msh-home-scene {
+  filter:brightness(calc(.9 + var(--msh-environment-light) * .34)) saturate(calc(.78 + var(--msh-environment-light) * .22)) sepia(calc(var(--msh-environment-warmth) * .1)) contrast(.94);
+}
+
+html[data-theme='light'] .msh-home-atmosphere {
+  background:linear-gradient(90deg,rgba(248,246,237,.62) 0,rgba(248,246,237,.34) 42%,rgba(248,246,237,.08) 72%),linear-gradient(180deg,rgba(242,220,169,calc(var(--msh-environment-warmth) * .12)),transparent 46%),linear-gradient(0deg,rgba(244,247,241,calc(var(--msh-environment-haze) * .2)),transparent 48%);
+}
+
+html[data-theme='light'] .msh-returning-dashboard-world .msh-my-health-dashboard__intro h1,
+html[data-theme='light'] .msh-returning-dashboard-world .msh-story-carousel__header h2 {
+  color:var(--msh-world-ink);
+}
+
+html[data-theme='dark'] .msh-home-world {
+  --msh-world-ink:#f3f0e6;
+  --msh-world-muted:#c9cec5;
+  --msh-world-line:rgba(244,240,225,.2);
+  --msh-world-scrim:rgba(5,14,13,.62);
+  background:#17231f;
+}
+
+html[data-theme='dark'] .msh-home-atmosphere {
+  background:linear-gradient(90deg,rgba(7,20,16,calc(.66 - var(--msh-environment-light) * .32)) 0,rgba(7,20,16,calc(.4 - var(--msh-environment-light) * .18)) 42%,transparent 72%),linear-gradient(180deg,rgba(242,220,169,calc(var(--msh-environment-warmth) * .12)),transparent 46%),linear-gradient(0deg,rgba(230,237,227,calc(var(--msh-environment-haze) * .12)),transparent 48%);
+}

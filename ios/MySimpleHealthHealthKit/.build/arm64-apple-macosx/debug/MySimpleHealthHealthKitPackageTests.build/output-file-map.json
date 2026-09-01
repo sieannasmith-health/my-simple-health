@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/primary.swiftdeps"
+  },
+  "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/runner.d",
+    "object": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/sieannasmith/Documents/New project/apple-health-phase1/ios/MySimpleHealthHealthKit/.build/arm64-apple-macosx/debug/MySimpleHealthHealthKitPackageTests.build/runner.dia"
+  }
+}

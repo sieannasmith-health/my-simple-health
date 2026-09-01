@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		02775F53CE5DA82FC47878B2 /* MSHNativeShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953C2AF46C6E6B552F2B9B31 /* MSHNativeShell.swift */; };
+		0A7B95DBD0CAA319AAB94726 /* MSHReaderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B2CC396606CFE6E51B7AD5 /* MSHReaderScreen.swift */; };
 		0E782D607237B80CCA2B4DB2 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = EC56EC4D38C286DF8FA4F4BE /* Supabase */; };
 		105237004C94BD66F3297C6C /* MSHAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11472DA81BF6F34067B30F1 /* MSHAuth.swift */; };
 		10801D4CF4DC806BFCCED832 /* MSHMyHealthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */; };
@@ -55,6 +56,7 @@
 		0AA05488D28DF0D6053601B6 /* MSHWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHWebView.swift; sourceTree = "<group>"; };
 		0EDB504A090DE4AB63A6D1DD /* MSHAppleHealthRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHAppleHealthRuntime.swift; sourceTree = "<group>"; };
 		105124B82C67397BF1E74C25 /* FileHealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStore.swift; sourceTree = "<group>"; };
+		35B2CC396606CFE6E51B7AD5 /* MSHReaderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHReaderScreen.swift; sourceTree = "<group>"; };
 		35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthBridge.swift; sourceTree = "<group>"; };
 		463C60E260C799F4ED741DA6 /* MSHOnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingTests.swift; sourceTree = "<group>"; };
 		473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MySimpleHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -140,6 +142,7 @@
 				9A2EC03C77F19D427EFAA87F /* MSHNotificationService.swift */,
 				A8AE904CF468D4F1EC8FB56B /* MSHOnboardingState.swift */,
 				54D74396292D4BCC80E7F8C5 /* MSHOnboardingView.swift */,
+				35B2CC396606CFE6E51B7AD5 /* MSHReaderScreen.swift */,
 				0AA05488D28DF0D6053601B6 /* MSHWebView.swift */,
 				D40CD07AC85001504274A352 /* MySimpleHealth.entitlements */,
 				792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */,
@@ -286,6 +289,7 @@
 				291AF110FED7BF3DF8C97BEB /* MSHNotificationService.swift in Sources */,
 				E2E226C59CBA5609EED72372 /* MSHOnboardingState.swift in Sources */,
 				C22239AA972507CE2D428109 /* MSHOnboardingView.swift in Sources */,
+				0A7B95DBD0CAA319AAB94726 /* MSHReaderScreen.swift in Sources */,
 				53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */,
 				C33B0A7CFCDFA421CF4D51ED /* MySimpleHealthApp.swift in Sources */,
 				5F996406B20BA241B6DB76BC /* SQLiteHealthRecordStore.swift in Sources */,
