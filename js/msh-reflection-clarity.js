@@ -1,0 +1,196 @@
+/* My Simple Health — clarity layer for Landscape and Horizon */
+(function (root) {
+  'use strict';
+  const document = root.document;
+  if (!document) return;
+
+  const page = document.body && document.body.dataset.mshPage;
+  if (page !== 'landscape' && page !== 'vision') return;
+
+  const style = document.createElement('style');
+  style.id = 'msh-reflection-clarity-style';
+  style.textContent = `
+    body[data-msh-page="landscape"], body[data-msh-page="vision"]{
+      --reflection-canvas:#0d1712;
+      --reflection-surface:#13231b;
+      --reflection-surface-2:#193126;
+      --reflection-ink:#f5f1e7;
+      --reflection-muted:#b7c0b8;
+      --reflection-accent:#b8d69f;
+      --reflection-line:rgba(184,214,159,.25);
+      background:var(--reflection-canvas)!important;
+      color:var(--reflection-ink)!important;
+    }
+    body[data-msh-page="landscape"] .landscape-hero{
+      padding:clamp(62px,9vw,112px) max(5vw,28px) 58px!important;
+      background:linear-gradient(180deg,#f8f4ea 0%,#f0f1e8 72%,#e4eadf 100%)!important;
+    }
+    body[data-msh-page="landscape"] .landscape-hero h1{
+      font-size:clamp(46px,6.4vw,78px)!important;
+      line-height:1!important;
+      color:#173d2b!important;
+    }
+    body[data-msh-page="landscape"] .landscape-hero .lede{max-width:680px!important;color:#315943!important;font-size:clamp(20px,2.2vw,28px)!important}
+    body[data-msh-page="landscape"] .landscape-hero .note{max-width:640px!important;color:#55645b!important;font-size:15px!important}
+    body[data-msh-page="landscape"] .intro{padding:52px 24px 28px!important;color:var(--reflection-ink)!important}
+    body[data-msh-page="landscape"] .intro h2{color:var(--reflection-ink)!important;font-size:clamp(32px,4vw,46px)!important}
+    body[data-msh-page="landscape"] .intro p:last-child{max-width:650px;margin-left:auto;margin-right:auto;color:var(--reflection-muted)!important}
+    body[data-msh-page="landscape"] .progress-wrap{margin-top:8px!important}.progress{background:rgba(255,255,255,.16)!important}.progress-bar{background:var(--reflection-accent)!important}.progress-text{color:var(--reflection-accent)!important}
+    body[data-msh-page="landscape"] .question{
+      background:linear-gradient(180deg,var(--reflection-surface-2),var(--reflection-surface))!important;
+      border:1px solid var(--reflection-line)!important;
+      box-shadow:none!important;
+      backdrop-filter:none!important;
+      border-radius:24px!important;
+      color:var(--reflection-ink)!important;
+    }
+    body[data-msh-page="landscape"] .question .dimension{color:var(--reflection-accent)!important}
+    body[data-msh-page="landscape"] .question h2{color:var(--reflection-ink)!important;font-size:clamp(30px,4vw,42px)!important;line-height:1.12!important}
+    body[data-msh-page="landscape"] .question-copy{color:var(--reflection-muted)!important;font-size:16px!important;line-height:1.65!important;max-width:620px}
+    body[data-msh-page="landscape"] .score{border-color:var(--reflection-line)!important;color:var(--reflection-ink)!important;background:rgba(255,255,255,.025)!important}
+    body[data-msh-page="landscape"] .score:hover,body[data-msh-page="landscape"] .score.selected{background:var(--reflection-accent)!important;color:#102117!important;border-color:var(--reflection-accent)!important}
+    body[data-msh-page="landscape"] .scale-labels{color:var(--reflection-muted)!important}
+    body[data-msh-page="landscape"] .btn{background:var(--reflection-accent)!important;color:#102117!important;border-color:var(--reflection-accent)!important}
+    body[data-msh-page="landscape"] .btn.secondary{background:transparent!important;color:var(--reflection-accent)!important}
+
+    body[data-msh-page="vision"] .msh-horizon-stage{max-width:1040px!important;padding-top:38px!important}
+    body[data-msh-page="vision"] .msh-horizon-stage-header{max-width:760px!important;margin-bottom:30px!important}
+    body[data-msh-page="vision"] .msh-horizon-stage-header h1{font-size:clamp(40px,6vw,64px)!important;line-height:1.04!important;color:var(--reflection-ink)!important}
+    body[data-msh-page="vision"] .msh-horizon-stage-header>p:last-child{font-size:16px!important;line-height:1.65!important;color:var(--reflection-muted)!important}
+    body[data-msh-page="vision"] .msh-stage-name,body[data-msh-page="vision"] .msh-eyebrow{color:var(--reflection-accent)!important}
+    body[data-msh-page="vision"] .msh-horizon-workspace{grid-template-columns:minmax(0,1.08fr) minmax(260px,.72fr)!important;border-color:var(--reflection-line)!important;min-height:520px!important}
+    body[data-msh-page="vision"] .msh-horizon-prompt{padding:clamp(28px,5vw,58px)!important;border-color:var(--reflection-line)!important}
+    body[data-msh-page="vision"] .msh-horizon-prompt label>span{color:var(--reflection-accent)!important}
+    body[data-msh-page="vision"] .msh-horizon-prompt label>strong{font-size:clamp(29px,4vw,43px)!important;line-height:1.15!important;color:var(--reflection-ink)!important;margin-bottom:12px!important}
+    body[data-msh-page="vision"] .msh-prompt-help{margin:0 0 18px;color:var(--reflection-muted);font-size:14px;line-height:1.55;max-width:640px}
+    body[data-msh-page="vision"] .msh-prompt-example{margin:0 0 18px;padding:12px 14px;border-left:2px solid var(--reflection-accent);background:rgba(184,214,159,.06);color:var(--reflection-muted);font-size:13px;line-height:1.55}
+    body[data-msh-page="vision"] .msh-horizon-prompt textarea{color:var(--reflection-ink)!important;border-color:var(--reflection-line)!important;font-size:19px!important;min-height:120px!important}
+    body[data-msh-page="vision"] .msh-horizon-prompt textarea::placeholder{color:#8f9a92!important}
+    body[data-msh-page="vision"] .msh-horizon-map{background:linear-gradient(180deg,var(--reflection-surface-2),var(--reflection-surface))!important;color:var(--reflection-ink)!important;padding:32px!important}
+    body[data-msh-page="vision"] .msh-horizon-now,body[data-msh-page="vision"] .msh-horizon-there,body[data-msh-page="vision"] .msh-horizon-fragments p{color:var(--reflection-muted)!important}
+    body[data-msh-page="vision"] .msh-horizon-progress i{background:rgba(255,255,255,.12)!important}.msh-horizon-progress i.is-seen{background:var(--reflection-accent)!important}
+    body[data-msh-page="vision"] .msh-voice-ready{display:none!important}
+    body[data-msh-page="vision"] .msh-button{background:var(--reflection-accent)!important;color:#102117!important}
+    body[data-msh-page="vision"] .msh-button-secondary{border-color:var(--reflection-line)!important;color:var(--reflection-ink)!important}
+    @media(max-width:900px){body[data-msh-page="vision"] .msh-horizon-workspace{grid-template-columns:1fr!important}body[data-msh-page="vision"] .msh-horizon-map{min-height:280px!important}}
+    @media(max-width:620px){body[data-msh-page="landscape"] .landscape-hero{padding-top:48px!important}body[data-msh-page="landscape"] .assessment{width:calc(100% - 32px)!important}body[data-msh-page="landscape"] .question{padding:28px 24px!important;border-radius:20px!important}body[data-msh-page="vision"] .msh-horizon-stage{padding:22px 16px 80px!important}body[data-msh-page="vision"] .msh-horizon-prompt{padding:28px 20px!important}.msh-horizon-map{padding:26px 20px!important}}
+  `;
+  (document.head || document.documentElement).appendChild(style);
+
+  const horizonPrompts = {
+    'The life I want to live': {
+      question:'Imagine your life is going well. What would feel different?',
+      help:'Think about your health, relationships, home, work, time, or anything else that matters to you.',
+      example:'For example: “I would have more energy, less rushing, and more time with the people I love.”'
+    },
+    'What I want to protect': {
+      question:'What is already good in your life that you want to keep?',
+      help:'Think about people, routines, values, places, or parts of your health that you do not want future changes to push aside.',
+      example:'For example: “I want to protect quiet mornings and time with my family.”'
+    },
+    'What I want more room for': {
+      question:'What would you like to have more time, energy, or space for?',
+      help:'Name anything you want more room to experience, do, or pay attention to.',
+      example:'For example: “I want more room for rest, movement, creativity, and being present.”'
+    },
+    'What I want less of': {
+      question:'What would you like to feel less weighed down by?',
+      help:'Think about demands, habits, stressors, obligations, or patterns you would like to reduce or simplify.',
+      example:'For example: “I want less rushing and fewer things competing for my attention.”'
+    },
+    'How I want to live': {
+      question:'How do you want to show up in your everyday life?',
+      help:'Think about qualities you want your choices and routines to reflect.',
+      example:'For example: “I want to be patient, grounded, present, and intentional.”'
+    },
+    'What I am building toward': {
+      question:'What do you hope becomes true in the future?',
+      help:'You do not need to know how you will get there yet. Just describe what you hope is different or possible.',
+      example:'For example: “I want a life that feels stable, healthy, connected, and spacious.”'
+    }
+  };
+
+  function cleanText(value) { return String(value || '').replace(/\s+/g,' ').trim(); }
+
+  function clarifyLandscape() {
+    const heroLede = document.querySelector('.landscape-hero .lede');
+    const heroNote = document.querySelector('.landscape-hero .note');
+    const introEyebrow = document.querySelector('.intro .eyebrow');
+    const introTitle = document.querySelector('.intro h2');
+    const introCopy = document.querySelector('.intro p:last-child');
+    if (heroLede) heroLede.textContent = 'Where I am now.';
+    if (heroNote) heroNote.textContent = 'Take a quick look across the areas of health and life that matter to you. This is a snapshot for reflection, not a grade.';
+    if (introEyebrow) introEyebrow.textContent = 'HOW THE ASSESSMENT WORKS';
+    if (introTitle) introTitle.textContent = 'Rate how each part of your life feels right now.';
+    if (introCopy) introCopy.textContent = 'You will see 8 areas. For each one, choose a number from 1 to 10. Use 1 for very dissatisfied and 10 for very satisfied. Answer based on your life today, not where you think you should be.';
+
+    document.querySelectorAll('.question').forEach(question => {
+      const dimension = cleanText(question.querySelector('.dimension') && question.querySelector('.dimension').textContent);
+      const title = question.querySelector('h2');
+      const copy = question.querySelector('.question-copy');
+      if (title && dimension) title.textContent = `How satisfied are you with your ${dimension.toLowerCase()} right now?`;
+      if (copy && !copy.dataset.clarityCopy) {
+        copy.dataset.clarityCopy = 'true';
+        copy.insertAdjacentHTML('afterbegin','<strong style="display:block;margin-bottom:7px;color:var(--reflection-ink)">Choose the number that best matches your experience today.</strong>');
+      }
+    });
+    document.querySelectorAll('.scale-labels').forEach(labels => {
+      const spans = labels.querySelectorAll('span');
+      if (spans[0]) spans[0].textContent = '1 · Very dissatisfied';
+      if (spans[1]) spans[1].textContent = '10 · Very satisfied';
+    });
+  }
+
+  function clarifyHorizon() {
+    document.querySelectorAll('.msh-horizon-stage-header').forEach(header => {
+      const title = header.querySelector('h1');
+      const copy = header.querySelector('p:last-child');
+      if (!title || !copy) return;
+      if (/Shape the direction/i.test(title.textContent)) {
+        title.textContent = 'Picture the life you want to move toward.';
+        copy.textContent = 'Answer one short question at a time. Your answers will come together into a direction you can review and change.';
+      } else if (/Let a direction come into view/i.test(title.textContent)) {
+        title.textContent = 'Where do you want to go from here?';
+        copy.textContent = 'You can answer a few guided questions or write a direction you already have. Nothing is final until you review it.';
+      }
+    });
+
+    document.querySelectorAll('.msh-horizon-prompt label').forEach(label => {
+      const labelSpan = label.querySelector('span');
+      const strong = label.querySelector('strong');
+      if (!labelSpan || !strong) return;
+      const rawLabel = cleanText(labelSpan.textContent).replace(/^\d+\s*·\s*/,'');
+      const config = horizonPrompts[rawLabel];
+      if (!config) return;
+      strong.textContent = config.question;
+      if (!label.querySelector('.msh-prompt-help')) {
+        const help = document.createElement('p');
+        help.className = 'msh-prompt-help';
+        help.textContent = config.help;
+        strong.insertAdjacentElement('afterend',help);
+        const example = document.createElement('p');
+        example.className = 'msh-prompt-example';
+        example.textContent = config.example;
+        help.insertAdjacentElement('afterend',example);
+      }
+      const textarea = label.querySelector('textarea');
+      if (textarea) textarea.placeholder = 'Write your answer here…';
+    });
+
+    document.querySelectorAll('.msh-horizon-prompt').forEach(prompt => {
+      const heading = prompt.querySelector('h2');
+      if (heading && /Would you rather explore/i.test(heading.textContent)) heading.textContent = 'How would you like to begin?';
+      const paragraph = heading && heading.nextElementSibling;
+      if (paragraph && paragraph.tagName === 'P') paragraph.textContent = 'Choose a guided question, write a direction you already know, or come back later.';
+    });
+  }
+
+  function apply() {
+    if (page === 'landscape') clarifyLandscape();
+    if (page === 'vision') clarifyHorizon();
+  }
+
+  apply();
+  const observer = new MutationObserver(() => apply());
+  observer.observe(document.body,{childList:true,subtree:true});
+})(typeof window !== 'undefined' ? window : globalThis);
