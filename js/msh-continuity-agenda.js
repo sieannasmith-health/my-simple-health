@@ -126,6 +126,11 @@
 
   document.addEventListener('msh:continuity-changed', render);
   window.addEventListener('storage', event => { if (event.key === 'msh_data') render(); });
+  root.addEventListener('click', event => {
+    if (event.target.closest('[data-approve-medication-request], [data-reschedule-medication-request]')) {
+      window.setTimeout(render, 0);
+    }
+  });
 
   const observer = new MutationObserver(() => {
     if (!root.querySelector('[data-continuity-agenda]')) render();
