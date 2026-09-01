@@ -45,7 +45,9 @@ function normalizeNutrients(nutriments) {
   const source = nutriments && typeof nutriments === 'object' ? nutriments : {};
   const read = (...keys) => {
     for (const key of keys) {
-      const value = Number(source[key]);
+      const raw = source[key];
+      if (raw == null || raw === '') continue;
+      const value = Number(raw);
       if (Number.isFinite(value)) return value;
     }
     return null;
