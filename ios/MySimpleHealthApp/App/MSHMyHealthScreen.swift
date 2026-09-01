@@ -203,10 +203,10 @@ struct MSHMyHealthScreen: View {
     private var timeGreeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12: "Good morning"
-        case 12..<17: "Good afternoon"
-        case 17..<22: "Good evening"
-        default: "Welcome back"
+        case 5..<12: return "Good morning"
+        case 12..<17: return "Good afternoon"
+        case 17..<22: return "Good evening"
+        default: return "Welcome back"
         }
     }
 
@@ -235,8 +235,8 @@ struct MSHMyHealthScreen: View {
                 }
             }
 
-            MSHSection(title: "Recent health activity", subtitle: "A small, recent view—not your full history.") {
-                MSHRecentHealthActivityList(activity: snapshot.recentActivity)
+            MSHSection(title: "Data visualization", subtitle: "See recent measures and patterns at a glance, then explore the detail behind them.") {
+                MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
             MSHComingUpCard()
@@ -418,58 +418,258 @@ private struct MSHHealthAreaCard: View {
     }
 }
 
-private struct MSHRecentHealthActivityList: View {
+private struct MSHHealthDataVisualization: View {
     let activity: [MSHRecentHealthActivity]
 
+    private enum Area: String, CaseIterable, Identifiable {
+        case heart
+        case movement
+        case sleep
+        case body
+        case other
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .heart: "Heart activity"
+            case .movement: "Movement"
+            case .sleep: "Sleep"
+            case .body: "Body measurements"
+            case .other: "Other"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .heart: "heart.fill"
+            case .movement: "figure.walk"
+            case .sleep: "moon.zzz"
+            case .body: "scalemass"
+            case .other: "waveform.path.ecg"
+            }
+        }
+    }
+
+    private func area(for item: MSHRecentHealthActivity) -> Area {
+        let value = item.title.lowercased()
+        if value.contains("heart") || value.contains("pulse") { return .heart }
+        if value.contains("sleep") { return .sleep }
+        if value.contains("weight") || value.contains("body") || value.contains("mass") || value.contains("bmi") || value.contains("height") { return .body }
+        if value.contains("step") || value.contains("energy") || value.contains("distance") || value.contains("movement") || value.contains("workout") || value.contains("exercise") { return .movement }
+        return .other
+    }
+
+    private var groups: [(Area, [MSHRecentHealthActivity])] {
+        Area.allCases.compactMap { area in
+            let items = activity.filter { self.area(for: $0) == area }
+            return items.isEmpty ? nil : (area, items)
+        }
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: MSHSpacing.small) {
             if activity.isEmpty {
                 VStack(spacing: MSHSpacing.small) {
-                    Image(systemName: "clock")
+                    Image(systemName: "chart.xyaxis.line")
                         .font(.title2)
                         .foregroundStyle(MSHColor.secondaryText)
-                    Text("No recent Apple Health activity to show yet.")
+                    Text("No recent Apple Health data to visualize yet.")
                         .font(MSHTypography.body)
                         .foregroundStyle(MSHColor.secondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(MSHSpacing.large)
-                .accessibilityIdentifier("recent-health-activity-empty")
+                .mshSurface()
+                .accessibilityIdentifier("health-data-visualization-empty")
             } else {
-                ForEach(Array(activity.enumerated()), id: \.element.id) { index, item in
-                    HStack(spacing: MSHSpacing.medium) {
-                        Image(systemName: item.systemImage)
-                            .foregroundStyle(MSHColor.accent)
-                            .frame(width: 28)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.title)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(MSHColor.primaryText)
-                            HStack(spacing: MSHSpacing.xSmall) {
-                                if let detail = item.detail { Text(detail) }
-                                Text(item.occurredAt, format: .relative(presentation: .named))
-                            }
-                            .font(.caption)
-                            .foregroundStyle(MSHColor.secondaryText)
-                        }
-                        Spacer()
+                ForEach(groups, id: \.0.id) { area, items in
+                    NavigationLink {
+                        MSHHealthDataExploreView(title: area.title, icon: area.icon, activity: items)
+                    } label: {
+                        MSHHealthDataVisualizationCard(title: area.title, icon: area.icon, activity: items)
                     }
-                    .padding(.vertical, MSHSpacing.small)
-
-                    if index < activity.count - 1 {
-                        Divider().overlay(MSHColor.border)
-                    }
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, MSHSpacing.medium)
             }
         }
+    }
+}
+
+private struct MSHHealthDataVisualizationCard: View {
+    let title: String
+    let icon: String
+    let activity: [MSHRecentHealthActivity]
+
+    private var repeatedMetric: Bool {
+        Set(activity.map { $0.title.lowercased() }).count == 1 && activity.count > 1
+    }
+
+    private var numericValues: [Double] {
+        activity.compactMap { item in
+            guard let detail = item.detail,
+                  let first = detail.split(separator: " ").first else { return nil }
+            return Double(first)
+        }
+    }
+
+    private var latestUniqueMeasures: [MSHRecentHealthActivity] {
+        var seen = Set<String>()
+        return activity.filter { item in
+            let key = item.title.lowercased()
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }.prefix(3).map { $0 }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+            HStack {
+                Label(title, systemImage: icon)
+                    .font(MSHTypography.cardTitle)
+                    .foregroundStyle(MSHColor.primaryText)
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("Explore")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MSHColor.accent)
+            }
+
+            if repeatedMetric, numericValues.count > 1 {
+                MSHMiniBarTrend(values: numericValues)
+                    .frame(height: 72)
+
+                HStack {
+                    if let low = numericValues.min(), let high = numericValues.max() {
+                        Text("Recent range \(formatted(low))–\(formatted(high))")
+                            .font(.caption)
+                            .foregroundStyle(MSHColor.secondaryText)
+                    }
+                    Spacer()
+                    Text(activity.first?.detail ?? "")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(MSHColor.primaryText)
+                }
+            } else {
+                HStack(spacing: MSHSpacing.small) {
+                    ForEach(latestUniqueMeasures) { item in
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.detail ?? "Recorded")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(MSHColor.primaryText)
+                                .lineLimit(1)
+                            Text(item.title)
+                                .font(.caption2)
+                                .foregroundStyle(MSHColor.secondaryText)
+                                .lineLimit(2)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(MSHSpacing.small)
+                        .background(MSHColor.controlFill)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                    }
+                }
+            }
+        }
+        .padding(MSHSpacing.medium)
         .background(MSHColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
                 .stroke(MSHColor.border, lineWidth: 1)
         }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func formatted(_ value: Double) -> String {
+        value.rounded() == value ? String(Int(value)) : String(format: "%.1f", value)
+    }
+}
+
+private struct MSHMiniBarTrend: View {
+    let values: [Double]
+
+    var body: some View {
+        GeometryReader { proxy in
+            let maximum = max(values.max() ?? 1, 1)
+            HStack(alignment: .bottom, spacing: 5) {
+                ForEach(Array(values.enumerated()), id: \.offset) { _, value in
+                    Capsule()
+                        .fill(MSHColor.accent.opacity(0.78))
+                        .frame(
+                            maxWidth: .infinity,
+                            minHeight: 6,
+                            maxHeight: max(6, proxy.size.height * CGFloat(value / maximum))
+                        )
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct MSHHealthDataExploreView: View {
+    let title: String
+    let icon: String
+    let activity: [MSHRecentHealthActivity]
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    Label(title, systemImage: icon)
+                        .font(MSHTypography.destinationTitle)
+                        .foregroundStyle(MSHColor.primaryText)
+
+                    Text("Recent measurements")
+                        .font(.subheadline)
+                        .foregroundStyle(MSHColor.secondaryText)
+
+                    VStack(spacing: 0) {
+                        ForEach(Array(activity.enumerated()), id: \.element.id) { index, item in
+                            HStack(spacing: MSHSpacing.medium) {
+                                Image(systemName: item.systemImage)
+                                    .foregroundStyle(MSHColor.accent)
+                                    .frame(width: 28)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.title)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(MSHColor.primaryText)
+                                    HStack(spacing: MSHSpacing.xSmall) {
+                                        if let detail = item.detail { Text(detail) }
+                                        Text(item.occurredAt, format: .relative(presentation: .named))
+                                    }
+                                    .font(.caption)
+                                    .foregroundStyle(MSHColor.secondaryText)
+                                }
+                                Spacer()
+                            }
+                            .padding(.vertical, MSHSpacing.small)
+
+                            if index < activity.count - 1 {
+                                Divider().overlay(MSHColor.border)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, MSHSpacing.medium)
+                    .background(MSHColor.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                            .stroke(MSHColor.border, lineWidth: 1)
+                    }
+                }
+                .padding(MSHSpacing.medium)
+            }
+        }
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
