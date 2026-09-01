@@ -130,3 +130,113 @@ html[data-theme='dark'] .msh-food-primary{color:#102018}
   .msh-food-door span{margin-bottom:11px}
   .msh-food-recipe-grid{grid-template-columns:1fr}
 }
+
+/* iPhone Food layout correction */
+html[data-theme='dark'] body[data-msh-page='food'] {
+  background: #0d1511 !important;
+}
+
+html[data-theme='dark'] body[data-msh-page='food'] .msh-app-main,
+html[data-theme='dark'] body[data-msh-page='food'] [data-msh-food] {
+  background: #0d1511 !important;
+}
+
+html[data-theme='dark'] .msh-food-board,
+html[data-theme='dark'] .msh-food-panel {
+  background: #131d18 !important;
+  border-color: rgba(224,232,221,.13) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .msh-food-door {
+  background: transparent !important;
+  color: #f4f0e6 !important;
+}
+
+html[data-theme='dark'] .msh-food-door:hover,
+html[data-theme='dark'] .msh-food-door:focus-visible {
+  background: #1b2a21 !important;
+}
+
+@media (max-width: 520px) {
+  .msh-food {
+    width: calc(100% - 32px);
+    padding-top: 28px;
+  }
+
+  .msh-food-header {
+    margin-bottom: 24px;
+  }
+
+  .msh-food h1 {
+    font-size: 3rem;
+    line-height: .95;
+  }
+
+  .msh-food-lede {
+    margin-top: 14px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .msh-food-add {
+    margin-top: 18px;
+    padding: 11px 17px;
+  }
+
+  .msh-food-board {
+    padding: 22px 18px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+  }
+
+  .msh-food-board h2 {
+    font-size: 1.55rem;
+  }
+
+  .msh-food-stats {
+    margin-top: 20px;
+  }
+
+  .msh-food-stat {
+    padding: 14px 8px;
+  }
+
+  .msh-food-stat strong {
+    font-size: 1.55rem;
+  }
+
+  .msh-food-doors {
+    display: block;
+    margin-top: 22px;
+    border-top: 1px solid var(--food-rule);
+    border-bottom: 0;
+  }
+
+  .msh-food-door {
+    width: 100%;
+    min-height: 0;
+    padding: 18px 4px;
+    border-right: 0;
+    border-bottom: 1px solid var(--food-rule) !important;
+    border-radius: 0;
+  }
+
+  .msh-food-door:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .msh-food-door span {
+    margin-bottom: 6px;
+    font-size: .66rem;
+  }
+
+  .msh-food-door strong {
+    font-size: 1.3rem;
+  }
+
+  .msh-food-door small {
+    margin-top: 4px;
+    font-size: .88rem;
+  }
+}
