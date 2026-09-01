@@ -1,0 +1,70 @@
+/* My Simple Health — Financial Health sharing entry point */
+(function(){
+  'use strict';
+  const button=document.querySelector('[data-financial-share]');
+  if(!button)return;
+  const KEY='msh_financial_share_intent_v1';
+  const defaults={scopes:['household','goals'],permission:'view'};
+  const read=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(_){return {...defaults}}};
+  const save=value=>localStorage.setItem(KEY,JSON.stringify({...value,updatedAt:new Date().toISOString()}));
+  const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  function close(){document.querySelector('[data-financial-share-sheet]')?.remove();}
+  function scopeMarkup(saved){
+    const options=[
+      ['household','Shared household items','Only household-level expenses or budget items you deliberately include.'],
+      ['goals','Selected goals','Share goals such as emergency savings or a home fund without exposing the rest of Finance.'],
+      ['categories','Selected categories','Choose financial categories to share while keeping other categories private.'],
+      ['items','Selected items','Share individual financial items when item-level sharing is available.']
+    ];
+    return options.map(([value,label,help])=>`<label class="msh-financial-share-option"><input type="checkbox" name="scope" value="${value}"${saved.scopes?.includes(value)?' checked':''}><span><strong>${label}</strong><small>${help}</small></span></label>`).join('');
+  }
+  function open(){
+    close();
+    const saved=read();
+    const wrap=document.createElement('div');
+    wrap.dataset.financialShareSheet='';
+    wrap.className='msh-financial-share-backdrop';
+    wrap.innerHTML=`<section class="msh-financial-share-sheet" role="dialog" aria-modal="true" aria-labelledby="financial-share-title">
+      <button type="button" class="msh-financial-share-close" data-financial-share-close aria-label="Close">×</button>
+      <p class="msh-financial-eyebrow">People &amp; Sharing</p>
+      <h2 id="financial-share-title">Share Financial Health</h2>
+      <p>Choose exactly what another MSH user may access. Nothing outside the selections below is included.</p>
+      <form data-financial-share-form>
+        <div class="msh-financial-share-options">${scopeMarkup(saved)}</div>
+        <label class="msh-financial-share-permission">Permission<select name="permission"><option value="view"${saved.permission==='view'?' selected':''}>View only</option><option value="collaborate"${saved.permission==='collaborate'?' selected':''}>Collaborate / edit shared items</option></select></label>
+        <p class="msh-financial-share-disclosure">Financial sharing stays separate from Calendar, Movement, and Health permissions. Saving these choices does not grant access to any other area.</p>
+        <div class="msh-financial-share-actions"><button class="msh-financial-share-primary" type="submit">Save sharing choices</button><button class="msh-financial-share-secondary" type="button" data-financial-share-close>Cancel</button></div>
+        <p class="msh-financial-share-status" data-financial-share-status role="status" aria-live="polite"></p>
+      </form>
+    </section>`;
+    document.body.appendChild(wrap);
+    wrap.querySelector('input,select,button')?.focus();
+  }
+  function syncSummary(){
+    const saved=read();
+    const summary=document.querySelector('[data-financial-share-summary]');
+    if(!summary)return;
+    const count=Array.isArray(saved.scopes)?saved.scopes.length:0;
+    summary.textContent=count?`${count} financial sharing scope${count===1?'':'s'} selected · ${saved.permission==='collaborate'?'Collaborate':'View only'}`:'No financial sharing scopes selected';
+    summary.classList.toggle('is-visible',count>0);
+  }
+  document.addEventListener('click',event=>{
+    if(event.target.closest('[data-financial-share]')){event.preventDefault();open();return;}
+    if(event.target.closest('[data-financial-share-close]')||event.target.matches('[data-financial-share-sheet]'))close();
+  });
+  document.addEventListener('submit',event=>{
+    const form=event.target.closest('[data-financial-share-form]');
+    if(!form)return;
+    event.preventDefault();
+    const data=new FormData(form);
+    const scopes=data.getAll('scope').map(String);
+    const permission=String(data.get('permission')||'view');
+    save({scopes,permission,category:'finances'});
+    const status=form.querySelector('[data-financial-share-status]');
+    status.textContent='Sharing choices saved. They will apply through your accepted People & Sharing relationship.';
+    syncSummary();
+    window.dispatchEvent(new CustomEvent('msh:financial-sharing-intent',{detail:{category:'finances',scopes,permission}}));
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+  syncSummary();
+})();

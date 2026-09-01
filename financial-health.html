@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/msh-financial-custom-areas.css?v=20260829-1">
   <link rel="stylesheet" href="css/msh-mobile-stabilization.css">
   <link rel="stylesheet" href="css/msh-mobile-form-fix.css?v=20260831-1">
+  <link rel="stylesheet" href="css/msh-financial-sharing.css?v=20260901-1">
 </head>
 <body class="msh-app-page msh-financial-page" data-msh-page="financial">
   <div class="msh-app-shell">
@@ -25,9 +26,15 @@
         <div class="msh-financial-atmosphere" aria-hidden="true"></div>
         <div class="msh-financial-shell">
           <header class="msh-financial-intro">
-            <p>Financial Health</p>
-            <h1>Understand your money.<br>Build toward what matters.</h1>
+            <div class="msh-financial-intro-row">
+              <div>
+                <p>Financial Health</p>
+                <h1>Understand your money.<br>Build toward what matters.</h1>
+              </div>
+              <button class="msh-financial-share-button" type="button" data-financial-share aria-haspopup="dialog" aria-label="Share Financial Health">Share</button>
+            </div>
             <p class="msh-financial-lede">Choose what belongs in your financial picture. Keep the parts of money that matter to your life visible without turning your finances into a score or forcing a standard budget.</p>
+            <p class="msh-financial-share-summary" data-financial-share-summary aria-live="polite"></p>
           </header>
           <div data-financial-health></div>
         </div>
@@ -39,5 +46,6 @@
   <script src="js/msh-shell.js"></script>
   <script src="js/msh-financial-health.js?v=20260829-3"></script>
   <script src="js/msh-financial-mobile-fixes.js?v=20260831-1"></script>
+  <script src="js/msh-financial-sharing.js?v=20260901-1"></script>
 </body>
 </html>
