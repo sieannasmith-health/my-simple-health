@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/msh-financial-custom-areas.css?v=20260829-1">
   <link rel="stylesheet" href="css/msh-financial-editor-fix.css?v=20260831-1">
   <link rel="stylesheet" href="css/msh-shared-budget.css?v=20260901-1">
+  <link rel="stylesheet" href="css/msh-financial-sharing.css?v=20260901-1">
   <link rel="stylesheet" href="css/msh-mobile-stabilization.css">
   <link rel="stylesheet" href="css/msh-mobile-form-fix.css?v=20260831-1">
 </head>
@@ -27,9 +28,15 @@
         <div class="msh-financial-atmosphere" aria-hidden="true"></div>
         <div class="msh-financial-shell">
           <header class="msh-financial-intro">
-            <p>Financial Health</p>
-            <h1>Understand your money.<br>Build toward what matters.</h1>
-            <p class="msh-financial-lede">Choose what belongs in your financial picture. Keep the parts of money that matter to your life visible without turning your finances into a score or forcing a standard budget.</p>
+            <div class="msh-financial-intro-row">
+              <div>
+                <p>Financial Health</p>
+                <h1>Understand your money.<br>Build toward what matters.</h1>
+                <p class="msh-financial-lede">Choose what belongs in your financial picture. Keep the parts of money that matter to your life visible without turning your finances into a score or forcing a standard budget.</p>
+              </div>
+              <button type="button" class="msh-financial-share-button" data-financial-share aria-label="Share Financial Health">Share</button>
+            </div>
+            <p class="msh-financial-share-summary" data-financial-share-summary></p>
           </header>
           <nav class="msh-financial-mode-switch" data-financial-mode-switch aria-label="Financial workspace">
             <button type="button" data-financial-mode="personal" aria-pressed="true" aria-current="page">My finances</button>
@@ -48,5 +55,6 @@
   <script src="js/msh-financial-mobile-fixes.js?v=20260831-1"></script>
   <script src="js/msh-supabase-auth.js?v=20260901-1"></script>
   <script src="js/msh-shared-budget.js?v=20260901-1"></script>
+  <script src="js/msh-financial-sharing.js?v=20260901-1"></script>
 </body>
 </html>
