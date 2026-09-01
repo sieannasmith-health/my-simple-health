@@ -1,7 +1,7 @@
-import { buildResearchQuery } from "./buildResearchQuery.js";
-import { searchPubMed } from "./pubmed.js";
-import { rankEvidence, getEvidenceStrength } from "./rankEvidence.js";
-import { synthesizeEvidence } from "./synthesizeEvidence.js";
+import { buildResearchQuery } from "../server/buildResearchQuery.js";
+import { searchPubMed } from "../server/pubmed.js";
+import { rankEvidence, getEvidenceStrength } from "../server/rankEvidence.js";
+import { synthesizeEvidence } from "../server/synthesizeEvidence.js";
 
 const ALLOWED_ORIGINS = new Set([
   "https://mysimplehealth.org",
