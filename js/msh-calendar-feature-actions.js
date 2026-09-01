@@ -6,16 +6,18 @@
   if (!root || !window.MSHStorage) return;
 
   const ACTIONS = Object.freeze({
-    movement: { label: 'Add movement', category: 'movement', native: 'movement' },
-    cycle: { label: 'Add cycle information', category: 'cycle', native: 'cycle' },
-    symptoms: { label: 'Add symptoms', category: 'symptom', title: 'Symptoms', fieldLabel: 'Symptom', placeholder: 'What are you experiencing?' },
+    event: { label: 'Add event', category: 'event', title: 'Event', fieldLabel: 'Event', placeholder: 'Birthday, celebration, work, travel…' },
+    movement: { label: 'Movement', category: 'movement', native: 'movement' },
+    cycle: { label: 'Cycle', category: 'cycle', native: 'cycle' },
+    symptoms: { label: 'Symptoms', category: 'symptom', title: 'Symptoms', fieldLabel: 'Symptom', placeholder: 'What are you experiencing?' },
     medications: { label: 'Add medication', category: 'medication', title: 'Medication', fieldLabel: 'Rx Name', placeholder: 'Medication name' },
-    sexualHealth: { label: 'Add sexual health information', category: 'sexualHealth', title: 'Sexual health', special: 'sexualHealth' },
-    care: { label: 'Add care or appointment', category: 'care', title: 'Care & appointment' },
-    measurements: { label: 'Add measurement', category: 'measurement', title: 'Measurement' },
-    life: { label: 'Add life context', category: 'life', title: 'Life context' },
+    sexualHealth: { label: 'Sexual health', category: 'sexualHealth', title: 'Sexual health', special: 'sexualHealth' },
+    care: { label: 'Add appointment', category: 'care', title: 'Appointment', fieldLabel: 'Appointment', placeholder: 'Doctor, dentist, therapy, or other care' },
+    measurements: { label: 'Measurement', category: 'measurement', title: 'Measurement' },
     observations: { label: 'Add observation', category: 'note', title: 'Observation' }
   });
+
+  const HEALTH_EVENT_KEYS = Object.freeze(['movement', 'cycle', 'symptoms', 'sexualHealth', 'measurements']);
 
   const SEXUAL_HEALTH_CHOICES = Object.freeze([
     ['libido', 'Libido'],
@@ -43,18 +45,24 @@
       new Date().toISOString().slice(0, 10);
   }
 
-  function enabledLayers() {
-    const state = MSHStorage.getState();
-    const layers = state?.calendar?.settings?.layers || {};
-    return Object.keys(ACTIONS).filter(key => layers[key] === true);
+  function layerSettings() {
+    return MSHStorage.getState()?.calendar?.settings?.layers || {};
   }
 
-  function actionMarkup(key) {
-    const item = ACTIONS[key];
-    if (!item) return '';
-    if (item.native === 'movement') return `<button type="button" class="msh-button" data-add-movement>${esc(item.label)}</button>`;
-    if (item.native === 'cycle') return `<button type="button" class="msh-button-secondary" data-open-sheet>${esc(item.label)}</button>`;
-    return `<button type="button" class="msh-button-secondary" data-add-calendar-layer="${esc(key)}">${esc(item.label)}</button>`;
+  function layerEnabled(key) {
+    const layers = layerSettings();
+    return layers[key] !== false;
+  }
+
+  function primaryActionMarkup() {
+    const healthEnabled = HEALTH_EVENT_KEYS.some(layerEnabled);
+    return [
+      `<button type="button" class="msh-button" data-add-calendar-layer="event">Add event</button>`,
+      healthEnabled ? `<button type="button" class="msh-button-secondary" data-open-health-event>Add health event</button>` : '',
+      layerEnabled('medications') ? `<button type="button" class="msh-button-secondary" data-add-calendar-layer="medications">Add medication</button>` : '',
+      layerEnabled('care') ? `<button type="button" class="msh-button-secondary" data-add-calendar-layer="care">Add appointment</button>` : '',
+      layerEnabled('observations') ? `<button type="button" class="msh-button-secondary" data-add-calendar-layer="observations">Add observation</button>` : ''
+    ].filter(Boolean).join('');
   }
 
   function syncDayActions() {
@@ -66,11 +74,42 @@
       actions.className = 'msh-date-actions';
       inspector.appendChild(actions);
     }
-    const keys = enabledLayers();
-    const markup = keys.length
-      ? keys.map(actionMarkup).join('')
-      : '<p class="msh-date-action-empty">Choose what you want to use in Customize.</p>';
+    const markup = primaryActionMarkup();
     if (actions.innerHTML !== markup) actions.innerHTML = markup;
+  }
+
+  function openHealthEventSheet() {
+    genericSheet?.remove();
+    const date = selectedDate();
+    genericSheet = document.createElement('div');
+    genericSheet.className = 'msh-calendar-generic-entry';
+
+    const choices = HEALTH_EVENT_KEYS.filter(layerEnabled).map(key => {
+      const item = ACTIONS[key];
+      if (item.native === 'movement') {
+        return `<button type="button" class="msh-button-secondary" data-add-movement data-close-after-native>${esc(item.label)}</button>`;
+      }
+      if (item.native === 'cycle') {
+        return `<button type="button" class="msh-button-secondary" data-open-sheet data-close-after-native>${esc(item.label)}</button>`;
+      }
+      return `<button type="button" class="msh-button-secondary" data-add-calendar-layer="${esc(key)}">${esc(item.label)}</button>`;
+    }).join('');
+
+    genericSheet.innerHTML = `
+      <div class="msh-sheet-backdrop" data-close-generic-entry></div>
+      <section class="msh-cycle-sheet" role="dialog" aria-modal="true" aria-labelledby="health-event-title">
+        <header>
+          <div><p class="msh-eyebrow">Health · ${esc(date)}</p><h2 id="health-event-title">Add health event</h2></div>
+          <button type="button" data-close-generic-entry aria-label="Close">×</button>
+        </header>
+        <div class="msh-cycle-field">
+          <span>What would you like to record?</span>
+          <div class="msh-cycle-chips" role="group" aria-label="Health event types">${choices}</div>
+        </div>
+        <footer><button type="button" class="msh-text-button" data-close-generic-entry>Cancel</button></footer>
+      </section>`;
+
+    root.appendChild(genericSheet);
   }
 
   function openSexualHealthSheet(item, date) {
@@ -182,6 +221,13 @@
   }
 
   root.addEventListener('click', event => {
+    const openHealth = event.target.closest('[data-open-health-event]');
+    if (openHealth) {
+      event.preventDefault();
+      openHealthEventSheet();
+      return;
+    }
+
     const sexualChoice = event.target.closest('[data-sexual-health-choice]');
     if (sexualChoice) {
       event.preventDefault();
@@ -195,6 +241,15 @@
       openGenericSheet(add.dataset.addCalendarLayer);
       return;
     }
+
+    if (event.target.closest('[data-close-after-native]')) {
+      window.setTimeout(() => {
+        genericSheet?.remove();
+        genericSheet = null;
+      }, 0);
+      return;
+    }
+
     if (event.target.closest('[data-close-generic-entry]')) {
       event.preventDefault();
       genericSheet?.remove();
