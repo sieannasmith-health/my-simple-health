@@ -165,6 +165,19 @@ private struct MSHSectionNavigation: View {
                             }
                         }
                     }
+
+                    if section == .calendar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            NavigationLink {
+                                MSHPeopleSharingScreen()
+                            } label: {
+                                Label("Share Calendar", systemImage: "person.2")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .accessibilityLabel("Share Calendar")
+                            .accessibilityIdentifier("calendar-share-button")
+                        }
+                    }
                 }
         }
     }
@@ -422,6 +435,17 @@ struct MSHProfileSettingsScreen: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .mshSurface()
+
+                    NavigationLink {
+                        MSHPeopleSharingScreen()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "People & Sharing",
+                            subtitle: "Invite someone and choose exactly which Calendar, workout, financial, and health information you share.",
+                            systemImage: "person.2"
+                        )
+                    }
+                    .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: MSHSpacing.medium) {
                         Text("What should we call you?")
