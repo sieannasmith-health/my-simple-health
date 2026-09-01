@@ -64,12 +64,6 @@ on public.msh_sharing_relationships for insert
 to authenticated
 with check (auth.uid() = inviter_id and invitee_id is null and status = 'pending');
 
-create policy "relationship_participants_update"
-on public.msh_sharing_relationships for update
-to authenticated
-using (auth.uid() = inviter_id or auth.uid() = invitee_id)
-with check (auth.uid() = inviter_id or auth.uid() = invitee_id);
-
 create policy "grant_participants_read"
 on public.msh_sharing_grants for select
 to authenticated
@@ -102,9 +96,7 @@ using (
   auth.uid() = owner_id
   or exists (
     select 1 from public.msh_sharing_grants g
-    where g.id = grant_id
-      and g.is_active = true
-      and g.recipient_id = auth.uid()
+    where g.id = grant_id and g.is_active = true and g.recipient_id = auth.uid()
   )
 );
 
@@ -156,8 +148,36 @@ as $$
   where r.status = 'pending' and lower(r.invitee_email) = lower(u.email);
 $$;
 
+create or replace function public.msh_revoke_sharing_relationship(relationship_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (
+    select 1 from public.msh_sharing_relationships r
+    where r.id = relationship_id
+      and (r.inviter_id = auth.uid() or r.invitee_id = auth.uid())
+      and r.status in ('pending','accepted')
+  ) then
+    raise exception 'Relationship not found or not available';
+  end if;
+
+  update public.msh_sharing_relationships
+     set status = 'revoked', revoked_at = now()
+   where id = relationship_id;
+
+  update public.msh_sharing_grants
+     set is_active = false, revoked_at = now(), updated_at = now()
+   where relationship_id = msh_revoke_sharing_relationship.relationship_id
+     and is_active = true;
+end;
+$$;
+
 grant execute on function public.msh_accept_sharing_invite(uuid) to authenticated;
 grant execute on function public.msh_pending_sharing_invites() to authenticated;
+grant execute on function public.msh_revoke_sharing_relationship(uuid) to authenticated;
 
 create or replace function public.msh_touch_sharing_grant()
 returns trigger language plpgsql as $$
