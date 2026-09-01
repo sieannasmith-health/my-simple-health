@@ -126,6 +126,66 @@
         grid-template-columns: 1fr !important;
       }
     }
+
+    .msh-calendar-hero-tools {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .msh-calendar-top-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .msh-calendar-top-icons button {
+      appearance: none;
+      border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+      background: color-mix(in srgb, var(--msh-surface, #fff) 8%, transparent);
+      color: inherit;
+      width: 46px;
+      min-width: 46px;
+      height: 46px;
+      padding: 7px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .msh-calendar-top-icons button span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .msh-calendar-top-icons .msh-cycle-original-icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    @media (max-width: 600px) {
+      .msh-calendar-hero-tools {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .msh-calendar-top-icons {
+        gap: 6px;
+      }
+
+      .msh-calendar-top-icons button {
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+      }
+    }
+
   </style>
 </head>
 <body class="msh-app-page msh-sensory-calendar" data-msh-page="calendar">
