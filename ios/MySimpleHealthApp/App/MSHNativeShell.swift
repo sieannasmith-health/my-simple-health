@@ -266,6 +266,17 @@ private struct MSHToolsScreen: View {
                     .padding(.bottom, MSHSpacing.small)
 
                     NavigationLink {
+                        MSHReaderScreen()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Reader",
+                            subtitle: "Read poetry, scripture, essays, or other text with OpenAI beside the source for context, explanation, reflection, and questions.",
+                            systemImage: "book.pages"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
                         MSHMeditateScreen()
                     } label: {
                         MSHFeatureDoorway(
