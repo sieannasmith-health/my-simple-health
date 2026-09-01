@@ -49,6 +49,7 @@ struct MySimpleHealthApp: App {
 
     init() {
         MSHDebugLifecycle.log("process_launch")
+        MSHWebRuntime.logStartupConfiguration()
     }
 
     var body: some Scene {

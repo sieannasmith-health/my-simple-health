@@ -1,0 +1,3 @@
+// Shared Debug build configuration. Machine-specific values belong in the
+// optional ignored file beside this one.
+#include? "Debug.local.xcconfig"

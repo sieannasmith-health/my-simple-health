@@ -52,6 +52,8 @@
 	<string>My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>My Simple Health connects to a test page on your Mac during local Phase 1 development.</string>
+	<key>MSHWebAppURL</key>
+	<string>$(MSH_WEB_APP_URL)</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UISupportedInterfaceOrientations</key>
