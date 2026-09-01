@@ -46,7 +46,10 @@ actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
     }
 
     func loadRecentActivity(limit: Int) async throws -> [HealthRecord] {
-        try await recentReader.recentRecords(provider: .appleHealth, limit: limit)
+        // Sleep arrives as several stage intervals plus a derived session. Give
+        // the snapshot a wider bounded window so one night cannot consume every
+        // recent slot before the sleep session and other health areas are read.
+        try await recentReader.recentRecords(provider: .appleHealth, limit: max(limit, 20))
     }
 }
 
