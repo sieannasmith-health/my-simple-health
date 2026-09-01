@@ -1,0 +1,209 @@
+/* My Simple Health — luxury editorial / clean science treatment for My Health */
+
+[data-msh-page="health"] {
+  --msh-health-rule: color-mix(in srgb, currentColor 16%, transparent);
+  --msh-health-muted: color-mix(in srgb, currentColor 62%, transparent);
+}
+
+[data-msh-page="health"] .msh-my-health-dashboard__intro {
+  max-width: 46rem;
+  padding: clamp(2rem, 7vw, 5rem) 0 clamp(1.75rem, 5vw, 3.5rem);
+  border-bottom: 1px solid var(--msh-health-rule);
+}
+
+[data-msh-page="health"] .msh-my-health-dashboard__eyebrow,
+[data-msh-page="health"] .msh-feature-board__kicker,
+[data-msh-page="health"] .msh-story-carousel__eyebrow,
+[data-msh-page="health"] .msh-story-card__eyebrow {
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: .7rem;
+  font-weight: 600;
+}
+
+[data-msh-page="health"] .msh-my-health-dashboard__intro h1,
+[data-msh-page="health"] .msh-feature-board h2,
+[data-msh-page="health"] .msh-story-carousel h2,
+[data-msh-page="health"] .msh-story-card h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -.025em;
+}
+
+[data-msh-page="health"] .msh-my-health-dashboard__intro h1 {
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: .94;
+  margin: .35rem 0 .9rem;
+}
+
+/* Main feature: typography and rule structure instead of a bubble card. */
+[data-msh-page="health"] .msh-feature-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  margin: 0;
+  padding: clamp(2rem, 5vw, 4rem) 0;
+  border: 0;
+  border-bottom: 1px solid var(--msh-health-rule);
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-msh-page="health"] .msh-feature-board__content { padding: 0; }
+[data-msh-page="health"] .msh-feature-board__visual,
+[data-msh-page="health"] .msh-feature-board__orb { display: none !important; }
+
+[data-msh-page="health"] .msh-feature-board h2 {
+  max-width: 14ch;
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 1.02;
+  margin: .65rem 0 .6rem;
+}
+
+[data-msh-page="health"] .msh-feature-board__meta,
+[data-msh-page="health"] .msh-feature-board__description { max-width: 42rem; }
+
+[data-msh-page="health"] .msh-feature-board__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--msh-health-rule);
+}
+
+[data-msh-page="health"] .msh-feature-board__signal {
+  padding: .8rem 1.1rem .8rem 0;
+  margin-right: 1.1rem;
+  border: 0;
+  border-right: 1px solid var(--msh-health-rule);
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-size: .78rem;
+}
+
+/* Journey cards become editorial columns, not floating rounded tiles. */
+[data-msh-page="health"] .msh-story-carousel { padding: clamp(2.25rem, 6vw, 4.5rem) 0 0; }
+[data-msh-page="health"] .msh-story-carousel__viewport { gap: 0; }
+
+[data-msh-page="health"] .msh-story-card {
+  border: 0;
+  border-right: 1px solid var(--msh-health-rule);
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 1.4rem clamp(1.25rem, 3vw, 2.25rem);
+}
+
+[data-msh-page="health"] .msh-story-card:first-child { padding-left: 0; }
+[data-msh-page="health"] .msh-story-card__icon { display: none; }
+
+[data-msh-page="health"] .msh-story-carousel__controls button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0 !important;
+  border: 1px solid var(--msh-health-rule);
+  background: transparent;
+}
+
+/* Reusable heart graph contract for HealthKit-backed heart views. */
+[data-msh-page="health"] .msh-heart-editorial {
+  margin-top: clamp(2rem, 5vw, 4rem);
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid var(--msh-health-rule);
+}
+
+[data-msh-page="health"] .msh-heart-editorial__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1.25rem;
+  margin-bottom: 1.35rem;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__header h2 {
+  margin: .25rem 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+  letter-spacing: -.02em;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__measure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__measure strong {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.2rem, 6vw, 4.75rem);
+  font-weight: 400;
+  line-height: .9;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__measure span,
+[data-msh-page="health"] .msh-heart-editorial__caption {
+  color: var(--msh-health-muted);
+  font-size: .74rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__plot {
+  width: 100%;
+  min-height: 13rem;
+  border-top: 1px solid var(--msh-health-rule);
+  border-bottom: 1px solid var(--msh-health-rule);
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(25% - 1px), var(--msh-health-rule) 25%);
+}
+
+[data-msh-page="health"] .msh-heart-editorial__plot svg {
+  display: block;
+  width: 100%;
+  height: 13rem;
+  overflow: visible;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__trace {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__point {
+  r: 2.25;
+  fill: currentColor;
+  stroke: none;
+}
+
+[data-msh-page="health"] .msh-heart-editorial__axis {
+  display: flex;
+  justify-content: space-between;
+  padding-top: .65rem;
+  color: var(--msh-health-muted);
+  font-size: .7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-msh-page="health"] .msh-my-health-dashboard__quiet {
+  border: 0;
+  border-top: 1px solid var(--msh-health-rule);
+  border-radius: 0 !important;
+  background: transparent !important;
+  margin-top: 3rem;
+  padding: 1.25rem 0 0;
+}
+
+@media (max-width: 680px) {
+  [data-msh-page="health"] .msh-feature-board { grid-template-columns: 1fr; }
+  [data-msh-page="health"] .msh-story-card { min-width: 84vw; }
+  [data-msh-page="health"] .msh-heart-editorial__header { align-items: start; }
+  [data-msh-page="health"] .msh-heart-editorial__plot,
+  [data-msh-page="health"] .msh-heart-editorial__plot svg { min-height: 10.5rem; height: 10.5rem; }
+}
