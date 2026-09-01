@@ -225,7 +225,7 @@ struct MSHMyHealthScreen: View {
 
     private func loadedContent(_ snapshot: MSHMyHealthSnapshot) -> some View {
         Group {
-            MSHComingUpCard()
+            MSHAppleHealthStatusCard(status: snapshot.appleHealth)
 
             MSHSection(title: "Health areas", subtitle: "The areas you choose to bring into My Health.") {
                 VStack(spacing: MSHSpacing.small) {
@@ -239,7 +239,7 @@ struct MSHMyHealthScreen: View {
                 MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
-            MSHAppleHealthStatusCard(status: snapshot.appleHealth)
+            MSHComingUpCard()
         }
     }
 
@@ -621,6 +621,7 @@ private struct MSHHealthWidgetDirectory: View {
             }
 
             Spacer()
+
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .tint(MSHColor.accent)
@@ -634,47 +635,150 @@ private struct MSHHealthDataVisualizationCard: View {
     let icon: String
     let activity: [MSHRecentHealthActivity]
 
+    private var repeatedMetric: Bool {
+        Set(activity.map { $0.title.lowercased() }).count == 1 && activity.count > 1
+    }
+
+    private var numericValues: [Double] {
+        activity.compactMap { item in
+            guard let detail = item.detail,
+                  let first = detail.split(separator: " ").first else { return nil }
+            return Double(first)
+        }
+    }
+
+    private var latestUniqueMeasures: [MSHRecentHealthActivity] {
+        var seen = Set<String>()
+        return activity.filter { item in
+            let key = item.title.lowercased()
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }.prefix(3).map { $0 }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: MSHSpacing.medium) {
             HStack {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(MSHColor.accent)
-                Text(title)
+                Label(title, systemImage: icon)
                     .font(MSHTypography.cardTitle)
                     .foregroundStyle(MSHColor.primaryText)
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(MSHColor.secondaryText)
+                HStack(spacing: 4) {
+                    Text("Explore")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MSHColor.accent)
             }
 
             if activity.isEmpty {
-                Text("No recent data in this area yet.")
-                    .font(.subheadline)
-                    .foregroundStyle(MSHColor.secondaryText)
+                HStack(spacing: MSHSpacing.small) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundStyle(MSHColor.secondaryText)
+                    Text("Ready when recent data is available")
+                        .font(.subheadline)
+                        .foregroundStyle(MSHColor.secondaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, MSHSpacing.small)
+            } else if repeatedMetric, numericValues.count > 1 {
+                MSHMiniLineTrend(values: numericValues)
+                    .frame(height: 72)
+
+                HStack {
+                    if let low = numericValues.min(), let high = numericValues.max() {
+                        Text("Recent range \(formatted(low))–\(formatted(high))")
+                            .font(.caption)
+                            .foregroundStyle(MSHColor.secondaryText)
+                    }
+                    Spacer()
+                    Text(activity.first?.detail ?? "")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(MSHColor.primaryText)
+                }
             } else {
-                ForEach(activity.prefix(3)) { item in
-                    HStack(alignment: .firstTextBaseline) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.title)
-                                .font(.subheadline.weight(.medium))
+                HStack(spacing: MSHSpacing.small) {
+                    ForEach(latestUniqueMeasures) { item in
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.detail ?? "Recorded")
+                                .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(MSHColor.primaryText)
-                            Text(item.date, format: .relative(presentation: .named))
-                                .font(.caption)
+                                .lineLimit(1)
+                            Text(item.title)
+                                .font(.caption2)
                                 .foregroundStyle(MSHColor.secondaryText)
+                                .lineLimit(2)
                         }
-                        Spacer()
-                        Text(item.value)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(MSHColor.primaryText)
-                            .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(MSHSpacing.small)
+                        .background(MSHColor.controlFill)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
                     }
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .mshSurface()
+        .padding(MSHSpacing.medium)
+        .background(MSHColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                .stroke(MSHColor.border, lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func formatted(_ value: Double) -> String {
+        value.rounded() == value ? String(Int(value)) : String(format: "%.1f", value)
+    }
+}
+
+private struct MSHMiniLineTrend: View {
+    let values: [Double]
+
+    var body: some View {
+        GeometryReader { proxy in
+            let minimum = values.min() ?? 0
+            let maximum = values.max() ?? minimum + 1
+            let range = max(maximum - minimum, 1)
+            let horizontalInset: CGFloat = 4
+            let verticalInset: CGFloat = 8
+            let width = max(proxy.size.width - (horizontalInset * 2), 1)
+            let height = max(proxy.size.height - (verticalInset * 2), 1)
+            let denominator = CGFloat(max(values.count - 1, 1))
+
+            let points = values.enumerated().map { index, value in
+                CGPoint(
+                    x: horizontalInset + (CGFloat(index) / denominator) * width,
+                    y: verticalInset + (1 - CGFloat((value - minimum) / range)) * height
+                )
+            }
+
+            ZStack {
+                Path { path in
+                    guard let first = points.first else { return }
+                    path.move(to: first)
+                    for point in points.dropFirst() {
+                        path.addLine(to: point)
+                    }
+                }
+                .stroke(
+                    MSHColor.accent,
+                    style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
+                )
+
+                ForEach(Array(points.enumerated()), id: \.offset) { _, point in
+                    Circle()
+                        .fill(MSHColor.surface)
+                        .overlay {
+                            Circle().stroke(MSHColor.accent, lineWidth: 2)
+                        }
+                        .frame(width: 7, height: 7)
+                        .position(point)
+                }
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -686,54 +790,61 @@ private struct MSHHealthDataExploreView: View {
     var body: some View {
         ZStack {
             MSHColor.canvas.ignoresSafeArea()
-
             ScrollView {
                 VStack(alignment: .leading, spacing: MSHSpacing.large) {
-                    HStack(spacing: MSHSpacing.medium) {
-                        Image(systemName: icon)
-                            .font(.title2)
-                            .foregroundStyle(MSHColor.accent)
-                        VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
-                            Text(title)
-                                .font(MSHTypography.destinationTitle)
-                                .foregroundStyle(MSHColor.primaryText)
-                            Text("Explore the recent measurements currently available on this iPhone.")
+                    Label(title, systemImage: icon)
+                        .font(MSHTypography.destinationTitle)
+                        .foregroundStyle(MSHColor.primaryText)
+
+                    Text("Recent measurements")
+                        .font(.subheadline)
+                        .foregroundStyle(MSHColor.secondaryText)
+
+                    if activity.isEmpty {
+                        VStack(spacing: MSHSpacing.small) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.title2)
+                                .foregroundStyle(MSHColor.secondaryText)
+                            Text("No recent measurements to show yet.")
                                 .font(MSHTypography.body)
                                 .foregroundStyle(MSHColor.secondaryText)
                         }
-                    }
-
-                    if activity.isEmpty {
-                        Text("No recent records are available for this area yet.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                            .mshSurface()
+                        .frame(maxWidth: .infinity)
+                        .padding(MSHSpacing.large)
+                        .mshSurface()
                     } else {
-                        VStack(spacing: MSHSpacing.small) {
-                            ForEach(activity) { item in
-                                HStack(alignment: .firstTextBaseline) {
-                                    VStack(alignment: .leading, spacing: 3) {
+                        VStack(spacing: 0) {
+                            ForEach(Array(activity.enumerated()), id: \.element.id) { index, item in
+                                HStack(spacing: MSHSpacing.medium) {
+                                    Image(systemName: item.systemImage)
+                                        .foregroundStyle(MSHColor.accent)
+                                        .frame(width: 28)
+                                    VStack(alignment: .leading, spacing: 2) {
                                         Text(item.title)
-                                            .font(.headline)
+                                            .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(MSHColor.primaryText)
-                                        Text(item.date, format: .dateTime.month(.abbreviated).day().hour().minute())
-                                            .font(.caption)
-                                            .foregroundStyle(MSHColor.secondaryText)
+                                        HStack(spacing: MSHSpacing.xSmall) {
+                                            if let detail = item.detail { Text(detail) }
+                                            Text(item.occurredAt, format: .relative(presentation: .named))
+                                        }
+                                        .font(.caption)
+                                        .foregroundStyle(MSHColor.secondaryText)
                                     }
                                     Spacer()
-                                    Text(item.value)
-                                        .font(.headline)
-                                        .foregroundStyle(MSHColor.primaryText)
-                                        .multilineTextAlignment(.trailing)
                                 }
-                                .padding(MSHSpacing.medium)
-                                .background(MSHColor.surface)
-                                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
-                                        .stroke(MSHColor.border, lineWidth: 1)
+                                .padding(.vertical, MSHSpacing.small)
+
+                                if index < activity.count - 1 {
+                                    Divider().overlay(MSHColor.border)
                                 }
                             }
+                        }
+                        .padding(.horizontal, MSHSpacing.medium)
+                        .background(MSHColor.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                                .stroke(MSHColor.border, lineWidth: 1)
                         }
                     }
                 }
@@ -747,43 +858,50 @@ private struct MSHHealthDataExploreView: View {
 
 private struct MSHComingUpCard: View {
     var body: some View {
-        NavigationLink {
-            MSHWebFeatureScreen(destination: .calendar)
-        } label: {
-            VStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                HStack {
-                    VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
-                        Text("COMING UP")
-                            .font(.caption2.weight(.semibold))
-                            .tracking(1.2)
-                            .foregroundStyle(MSHColor.accent)
-                        Text("Calendar")
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(MSHColor.primaryText)
-                    }
-                    Spacer()
-                    Image(systemName: "calendar")
-                        .font(.title2)
-                        .foregroundStyle(MSHColor.accent)
-                }
-
-                Text("See what is coming next across your health, movement, reminders, and appointments.")
-                    .font(MSHTypography.body)
-                    .foregroundStyle(MSHColor.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                HStack {
-                    Text("Open Calendar")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(MSHColor.accent)
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .foregroundStyle(MSHColor.accent)
-                }
-            }
-            .mshSurface()
+        VStack(alignment: .leading, spacing: MSHSpacing.small) {
+            Label("Coming up", systemImage: "calendar.badge.clock")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(MSHColor.primaryText)
+            Text("Calendar and Continuity will bring relevant upcoming information into this space in a future stage.")
+                .font(MSHTypography.body)
+                .foregroundStyle(MSHColor.secondaryText)
         }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("my-health-coming-up")
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .mshSurface()
+    }
+}
+
+private struct FlowLayout: Layout {
+    let spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        arrange(proposal: proposal, subviews: subviews).size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let arrangement = arrange(proposal: ProposedViewSize(width: bounds.width, height: bounds.height), subviews: subviews)
+        for (index, point) in arrangement.points.enumerated() {
+            subviews[index].place(at: CGPoint(x: bounds.minX + point.x, y: bounds.minY + point.y), proposal: .unspecified)
+        }
+    }
+
+    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, points: [CGPoint]) {
+        let width = proposal.width ?? .infinity
+        var points: [CGPoint] = []
+        var position = CGPoint.zero
+        var lineHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if position.x > 0, position.x + size.width > width {
+                position.x = 0
+                position.y += lineHeight + spacing
+                lineHeight = 0
+            }
+            points.append(position)
+            position.x += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+        }
+        return (CGSize(width: proposal.width ?? position.x, height: position.y + lineHeight), points)
     }
 }
