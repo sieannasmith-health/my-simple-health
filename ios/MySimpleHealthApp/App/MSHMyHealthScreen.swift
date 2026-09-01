@@ -235,7 +235,7 @@ struct MSHMyHealthScreen: View {
                 }
             }
 
-            MSHSection(title: "Data visualization", subtitle: "See recent measures and patterns at a glance, then explore the detail behind them.") {
+            MSHSection(title: "Data visualization", subtitle: "Only keep what matters to you.") {
                 MSHHealthDataVisualization(activity: snapshot.recentActivity)
             }
 
@@ -418,40 +418,56 @@ private struct MSHHealthAreaCard: View {
     }
 }
 
-private struct MSHHealthDataVisualization: View {
-    let activity: [MSHRecentHealthActivity]
+private enum MSHHealthWidgetArea: String, CaseIterable, Identifiable {
+    case heart
+    case movement
+    case sleep
+    case body
+    case other
 
-    private enum Area: String, CaseIterable, Identifiable {
-        case heart
-        case movement
-        case sleep
-        case body
-        case other
+    var id: String { rawValue }
 
-        var id: String { rawValue }
-
-        var title: String {
-            switch self {
-            case .heart: "Heart activity"
-            case .movement: "Movement"
-            case .sleep: "Sleep"
-            case .body: "Body measurements"
-            case .other: "Other"
-            }
-        }
-
-        var icon: String {
-            switch self {
-            case .heart: "heart.fill"
-            case .movement: "figure.walk"
-            case .sleep: "moon.zzz"
-            case .body: "scalemass"
-            case .other: "waveform.path.ecg"
-            }
+    var title: String {
+        switch self {
+        case .heart: "Heart activity"
+        case .movement: "Movement"
+        case .sleep: "Sleep"
+        case .body: "Body measurements"
+        case .other: "Other health data"
         }
     }
 
-    private func area(for item: MSHRecentHealthActivity) -> Area {
+    var icon: String {
+        switch self {
+        case .heart: "heart.fill"
+        case .movement: "figure.walk"
+        case .sleep: "moon.zzz"
+        case .body: "scalemass"
+        case .other: "waveform.path.ecg"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .heart: "Heart rate and other recent heart measures"
+        case .movement: "Steps, active energy, distance and movement"
+        case .sleep: "Recent sleep measures and patterns"
+        case .body: "Weight and other body measurements"
+        case .other: "Other recent Apple Health measurements"
+        }
+    }
+}
+
+private struct MSHHealthDataVisualization: View {
+    let activity: [MSHRecentHealthActivity]
+
+    @AppStorage("msh.healthWidgets.heart") private var showHeart = true
+    @AppStorage("msh.healthWidgets.movement") private var showMovement = true
+    @AppStorage("msh.healthWidgets.sleep") private var showSleep = true
+    @AppStorage("msh.healthWidgets.body") private var showBody = true
+    @AppStorage("msh.healthWidgets.other") private var showOther = false
+
+    private func area(for item: MSHRecentHealthActivity) -> MSHHealthWidgetArea {
         let value = item.title.lowercased()
         if value.contains("heart") || value.contains("pulse") { return .heart }
         if value.contains("sleep") { return .sleep }
@@ -460,31 +476,66 @@ private struct MSHHealthDataVisualization: View {
         return .other
     }
 
-    private var groups: [(Area, [MSHRecentHealthActivity])] {
-        Area.allCases.compactMap { area in
-            let items = activity.filter { self.area(for: $0) == area }
-            return items.isEmpty ? nil : (area, items)
+    private func isEnabled(_ area: MSHHealthWidgetArea) -> Bool {
+        switch area {
+        case .heart: showHeart
+        case .movement: showMovement
+        case .sleep: showSleep
+        case .body: showBody
+        case .other: showOther
         }
+    }
+
+    private var enabledAreas: [MSHHealthWidgetArea] {
+        MSHHealthWidgetArea.allCases.filter(isEnabled)
+    }
+
+    private func activity(for area: MSHHealthWidgetArea) -> [MSHRecentHealthActivity] {
+        activity.filter { self.area(for: $0) == area }
     }
 
     var body: some View {
         VStack(spacing: MSHSpacing.small) {
-            if activity.isEmpty {
+            NavigationLink {
+                MSHHealthWidgetDirectory()
+            } label: {
+                HStack(spacing: MSHSpacing.small) {
+                    Image(systemName: "slider.horizontal.3")
+                    Text("Edit widgets")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MSHColor.accent)
+                .padding(.horizontal, MSHSpacing.medium)
+                .frame(height: 48)
+                .background(MSHColor.surface)
+                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous)
+                        .stroke(MSHColor.border, lineWidth: 1)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if enabledAreas.isEmpty {
                 VStack(spacing: MSHSpacing.small) {
-                    Image(systemName: "chart.xyaxis.line")
+                    Image(systemName: "rectangle.3.group")
                         .font(.title2)
                         .foregroundStyle(MSHColor.secondaryText)
-                    Text("No recent Apple Health data to visualize yet.")
+                    Text("No widgets are currently shown.")
                         .font(MSHTypography.body)
                         .foregroundStyle(MSHColor.secondaryText)
-                        .multilineTextAlignment(.center)
+                    Text("Use Edit widgets to add what matters to you.")
+                        .font(.caption)
+                        .foregroundStyle(MSHColor.secondaryText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(MSHSpacing.large)
                 .mshSurface()
-                .accessibilityIdentifier("health-data-visualization-empty")
             } else {
-                ForEach(groups, id: \.0.id) { area, items in
+                ForEach(enabledAreas) { area in
+                    let items = activity(for: area)
                     NavigationLink {
                         MSHHealthDataExploreView(title: area.title, icon: area.icon, activity: items)
                     } label: {
@@ -494,6 +545,88 @@ private struct MSHHealthDataVisualization: View {
                 }
             }
         }
+    }
+}
+
+private struct MSHHealthWidgetDirectory: View {
+    @AppStorage("msh.healthWidgets.heart") private var showHeart = true
+    @AppStorage("msh.healthWidgets.movement") private var showMovement = true
+    @AppStorage("msh.healthWidgets.sleep") private var showSleep = true
+    @AppStorage("msh.healthWidgets.body") private var showBody = true
+    @AppStorage("msh.healthWidgets.other") private var showOther = false
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                        Text("Widget Directory")
+                            .font(MSHTypography.destinationTitle)
+                            .foregroundStyle(MSHColor.primaryText)
+                        Text("Only keep what matters to you.")
+                            .font(MSHTypography.body)
+                            .foregroundStyle(MSHColor.secondaryText)
+                    }
+
+                    VStack(spacing: 0) {
+                        widgetRow(area: .heart, isOn: $showHeart)
+                        Divider().overlay(MSHColor.border)
+                        widgetRow(area: .movement, isOn: $showMovement)
+                        Divider().overlay(MSHColor.border)
+                        widgetRow(area: .sleep, isOn: $showSleep)
+                        Divider().overlay(MSHColor.border)
+                        widgetRow(area: .body, isOn: $showBody)
+                        Divider().overlay(MSHColor.border)
+                        widgetRow(area: .other, isOn: $showOther)
+                    }
+                    .padding(.horizontal, MSHSpacing.medium)
+                    .background(MSHColor.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                            .stroke(MSHColor.border, lineWidth: 1)
+                    }
+
+                    Text("Turning a widget off only removes it from this dashboard. It does not delete any health data.")
+                        .font(.footnote)
+                        .foregroundStyle(MSHColor.secondaryText)
+                }
+                .padding(MSHSpacing.medium)
+            }
+        }
+        .navigationTitle("Widgets")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func widgetRow(area: MSHHealthWidgetArea, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: MSHSpacing.medium) {
+            Image(systemName: area.icon)
+                .font(.title3)
+                .foregroundStyle(MSHColor.accent)
+                .frame(width: 38, height: 38)
+                .background(MSHColor.controlFill)
+                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(area.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MSHColor.primaryText)
+                Text(area.description)
+                    .font(.caption)
+                    .foregroundStyle(MSHColor.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(MSHColor.accent)
+        }
+        .padding(.vertical, MSHSpacing.medium)
     }
 }
 
@@ -539,7 +672,17 @@ private struct MSHHealthDataVisualizationCard: View {
                 .foregroundStyle(MSHColor.accent)
             }
 
-            if repeatedMetric, numericValues.count > 1 {
+            if activity.isEmpty {
+                HStack(spacing: MSHSpacing.small) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundStyle(MSHColor.secondaryText)
+                    Text("Ready when recent data is available")
+                        .font(.subheadline)
+                        .foregroundStyle(MSHColor.secondaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, MSHSpacing.small)
+            } else if repeatedMetric, numericValues.count > 1 {
                 MSHMiniBarTrend(values: numericValues)
                     .frame(height: 72)
 
@@ -631,38 +774,52 @@ private struct MSHHealthDataExploreView: View {
                         .font(.subheadline)
                         .foregroundStyle(MSHColor.secondaryText)
 
-                    VStack(spacing: 0) {
-                        ForEach(Array(activity.enumerated()), id: \.element.id) { index, item in
-                            HStack(spacing: MSHSpacing.medium) {
-                                Image(systemName: item.systemImage)
-                                    .foregroundStyle(MSHColor.accent)
-                                    .frame(width: 28)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(item.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(MSHColor.primaryText)
-                                    HStack(spacing: MSHSpacing.xSmall) {
-                                        if let detail = item.detail { Text(detail) }
-                                        Text(item.occurredAt, format: .relative(presentation: .named))
+                    if activity.isEmpty {
+                        VStack(spacing: MSHSpacing.small) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.title2)
+                                .foregroundStyle(MSHColor.secondaryText)
+                            Text("No recent measurements to show yet.")
+                                .font(MSHTypography.body)
+                                .foregroundStyle(MSHColor.secondaryText)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(MSHSpacing.large)
+                        .mshSurface()
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(Array(activity.enumerated()), id: \.element.id) { index, item in
+                                HStack(spacing: MSHSpacing.medium) {
+                                    Image(systemName: item.systemImage)
+                                        .foregroundStyle(MSHColor.accent)
+                                        .frame(width: 28)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.title)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(MSHColor.primaryText)
+                                        HStack(spacing: MSHSpacing.xSmall) {
+                                            if let detail = item.detail { Text(detail) }
+                                            Text(item.occurredAt, format: .relative(presentation: .named))
+                                        }
+                                        .font(.caption)
+                                        .foregroundStyle(MSHColor.secondaryText)
                                     }
-                                    .font(.caption)
-                                    .foregroundStyle(MSHColor.secondaryText)
+                                    Spacer()
                                 }
-                                Spacer()
-                            }
-                            .padding(.vertical, MSHSpacing.small)
+                                .padding(.vertical, MSHSpacing.small)
 
-                            if index < activity.count - 1 {
-                                Divider().overlay(MSHColor.border)
+                                if index < activity.count - 1 {
+                                    Divider().overlay(MSHColor.border)
+                                }
                             }
                         }
-                    }
-                    .padding(.horizontal, MSHSpacing.medium)
-                    .background(MSHColor.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
-                            .stroke(MSHColor.border, lineWidth: 1)
+                        .padding(.horizontal, MSHSpacing.medium)
+                        .background(MSHColor.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                                .stroke(MSHColor.border, lineWidth: 1)
+                        }
                     }
                 }
                 .padding(MSHSpacing.medium)
