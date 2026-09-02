@@ -211,19 +211,6 @@ private struct MSHSectionNavigation: View {
             .toolbarBackground(MSHColor.canvas, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                if section == .myHealth {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink {
-                            MSHImmediateDestination(title: "Profile & Settings") {
-                                MSHProfileSettingsScreen()
-                            }
-                        } label: {
-                            Image(systemName: "person.crop.circle")
-                                .accessibilityLabel("Profile and Settings")
-                        }
-                    }
-                }
-
                 if section == .calendar {
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
