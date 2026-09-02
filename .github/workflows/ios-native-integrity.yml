@@ -11,7 +11,7 @@ on:
       - '.github/workflows/ios-native-integrity.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   native-integrity:
@@ -44,6 +44,24 @@ jobs:
           grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
 
+      - name: Synchronize checked-in Xcode project
+        if: github.event_name == 'push' && github.ref_name == 'integration/ios-current'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if ! git diff --cached --quiet; then
+            git commit -m "Regenerate native iOS project"
+            git push
+          fi
+
+      - name: Upload regenerated project
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-xcode-project
+          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if-no-files-found: error
+
       - name: Build and run unit tests
         working-directory: ios/MySimpleHealthApp
         run: |
@@ -53,11 +71,3 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -configuration Debug \
             test CODE_SIGNING_ALLOWED=NO
-
-      - name: Upload regenerated project
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-xcode-project
-          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
-          if-no-files-found: error
