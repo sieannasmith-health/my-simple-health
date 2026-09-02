@@ -28,12 +28,6 @@ final class MSHAuthStore: ObservableObject {
         }
     }
 
-    deinit {
-        if let authStateHandle {
-            Auth.auth().removeStateDidChangeListener(authStateHandle)
-        }
-    }
-
     var isAuthenticated: Bool { user != nil }
     var userEmail: String? { user?.email }
     var userID: String? { user?.uid }
