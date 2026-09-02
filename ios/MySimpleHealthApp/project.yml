@@ -66,6 +66,8 @@ targets:
         product: FirebaseCore
       - package: Firebase
         product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
       - package: GoogleSignIn
         product: GoogleSignIn
   MySimpleHealthTests:
