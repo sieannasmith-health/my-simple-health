@@ -12,6 +12,9 @@ packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
     from: 12.0.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 9.2.0
 targets:
   MySimpleHealth:
     type: application
@@ -30,6 +33,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: App/MySimpleHealth.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: 6.0
+        OTHER_LDFLAGS: $(inherited) -ObjC
       configs:
         Debug:
           INFOPLIST_FILE: App/Info-Debug.plist
@@ -40,7 +44,11 @@ targets:
         CFBundleDisplayName: My Simple Health
         CFBundleURLTypes:
           - CFBundleTypeRole: Editor
-            CFBundleURLName: MSH Auth
+            CFBundleURLName: Google OAuth
+            CFBundleURLSchemes:
+              - com.googleusercontent.apps.962838363677-6njo5buhrcn9ne6mbgb8pubehbgnnbtb
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: MSH Auth Rollback
             CFBundleURLSchemes:
               - mysimplehealth
         NSHealthShareUsageDescription: My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.
@@ -60,6 +68,8 @@ targets:
         product: FirebaseCore
       - package: Firebase
         product: FirebaseAuth
+      - package: GoogleSignIn
+        product: GoogleSignIn
   MySimpleHealthTests:
     type: bundle.unit-test
     platform: iOS
