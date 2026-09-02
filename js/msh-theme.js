@@ -4,10 +4,21 @@
 
   const STORAGE_KEY = 'msh_theme_preference';
   const OPTIONS = ['light', 'dark', 'system'];
+  const CONTRAST_STYLESHEET = 'css/msh-surface-contrast.css?v=20260902-1';
   const media = typeof root.matchMedia === 'function'
     ? root.matchMedia('(prefers-color-scheme: dark)')
     : { matches: false };
   const listeners = new Set();
+
+  function ensureContrastStylesheet() {
+    const document = root.document;
+    if (!document || document.querySelector('link[data-msh-surface-contrast]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CONTRAST_STYLESHEET;
+    link.dataset.mshSurfaceContrast = '';
+    (document.head || document.documentElement).appendChild(link);
+  }
 
   function normalize(value) {
     return OPTIONS.includes(value) ? value : 'system';
@@ -26,6 +37,7 @@
     const nextPreference = normalize(preference);
     const resolved = resolvedTheme(nextPreference);
     const documentElement = root.document && root.document.documentElement;
+    ensureContrastStylesheet();
     if (documentElement) {
       documentElement.dataset.themePreference = nextPreference;
       documentElement.dataset.theme = resolved;
