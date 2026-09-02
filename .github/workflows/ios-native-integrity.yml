@@ -11,7 +11,7 @@ on:
       - '.github/workflows/ios-native-integrity.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   native-integrity:
@@ -43,6 +43,17 @@ jobs:
           ! grep -Eq 'MSHWebView|MSHWebFeatureScreen|MSHNotificationWebRouteScreen' App/MSHNativeShell.swift
           grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
+
+      - name: Synchronize checked-in Xcode project
+        if: github.event_name == 'push' && github.ref_name == 'integration/ios-current'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if ! git diff --cached --quiet; then
+            git commit -m "Regenerate native iOS project"
+            git push
+          fi
 
       - name: Upload regenerated project
         uses: actions/upload-artifact@v4
