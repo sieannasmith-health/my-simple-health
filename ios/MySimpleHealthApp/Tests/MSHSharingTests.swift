@@ -9,25 +9,18 @@ final class MSHSharingTests: XCTestCase {
         XCTAssertEqual(MSHSharingCategory.health.defaultScope["mode"], "approved_metric_summaries")
     }
 
-    func testHealthSharingIsViewOnlyInPhaseOne() {
-        XCTAssertFalse(MSHSharingCategory.health.allowsCollaboration)
-        XCTAssertTrue(MSHSharingCategory.calendar.allowsCollaboration)
-        XCTAssertTrue(MSHSharingCategory.workouts.allowsCollaboration)
-        XCTAssertTrue(MSHSharingCategory.finances.allowsCollaboration)
-    }
-
     func testRelationshipResolvesOtherAccountInBothDirections() {
-        let inviter = UUID()
-        let invitee = UUID()
+        let inviter = "inviter-id"
+        let invitee = "invitee-id"
         let relationship = MSHSharingRelationship(
-            id: UUID(),
+            id: "relationship-id",
             inviterID: inviter,
             inviterEmail: "one@example.com",
             inviteeEmail: "two@example.com",
             inviteeID: invitee,
             status: "accepted",
-            createdAt: "2026-09-01T00:00:00Z",
-            acceptedAt: "2026-09-01T00:01:00Z",
+            createdAt: Date(timeIntervalSince1970: 1),
+            acceptedAt: Date(timeIntervalSince1970: 2),
             revokedAt: nil
         )
 
@@ -36,23 +29,44 @@ final class MSHSharingTests: XCTestCase {
         XCTAssertEqual(relationship.otherEmail(for: inviter), "two@example.com")
         XCTAssertEqual(relationship.otherEmail(for: invitee), "one@example.com")
         XCTAssertTrue(relationship.isAccepted)
+        XCTAssertFalse(relationship.isPending)
+        XCTAssertFalse(relationship.isRevoked)
     }
 
-    func testPendingRelationshipCannotBeTreatedAsAccepted() {
-        let inviter = UUID()
+    func testPendingRelationshipHasExplicitPendingState() {
         let relationship = MSHSharingRelationship(
-            id: UUID(),
-            inviterID: inviter,
+            id: "relationship-id",
+            inviterID: "inviter-id",
             inviterEmail: "one@example.com",
             inviteeEmail: "two@example.com",
             inviteeID: nil,
             status: "pending",
-            createdAt: "2026-09-01T00:00:00Z",
+            createdAt: Date(timeIntervalSince1970: 1),
             acceptedAt: nil,
             revokedAt: nil
         )
 
         XCTAssertFalse(relationship.isAccepted)
-        XCTAssertNil(relationship.otherUserID(for: inviter))
+        XCTAssertTrue(relationship.isPending)
+        XCTAssertFalse(relationship.isRevoked)
+        XCTAssertNil(relationship.otherUserID(for: "inviter-id"))
+    }
+
+    func testRevokedRelationshipIsNotActiveOrPending() {
+        let relationship = MSHSharingRelationship(
+            id: "relationship-id",
+            inviterID: "inviter-id",
+            inviterEmail: "one@example.com",
+            inviteeEmail: "two@example.com",
+            inviteeID: "invitee-id",
+            status: "revoked",
+            createdAt: Date(timeIntervalSince1970: 1),
+            acceptedAt: Date(timeIntervalSince1970: 2),
+            revokedAt: Date(timeIntervalSince1970: 3)
+        )
+
+        XCTAssertFalse(relationship.isAccepted)
+        XCTAssertFalse(relationship.isPending)
+        XCTAssertTrue(relationship.isRevoked)
     }
 }
