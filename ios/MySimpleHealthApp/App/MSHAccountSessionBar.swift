@@ -7,41 +7,20 @@ struct MSHAccountSessionBar: View {
     @State private var isSigningOut = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            if let email = authStore.userEmail, !email.isEmpty {
-                Text(email)
-                    .font(.caption2)
-                    .foregroundStyle(MSHColor.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .accessibilityLabel("Signed in as \(email)")
-            }
-
-            Spacer(minLength: 8)
-
-            Button {
-                showAccountHub = true
-            } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(MSHColor.primaryText)
-                    .frame(width: 34, height: 34)
-                    .background(MSHColor.controlFill)
-                    .clipShape(Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .disabled(isSigningOut)
-            .accessibilityLabel("Account and sharing")
+        Button {
+            showAccountHub = true
+        } label: {
+            Image(systemName: "person.crop.circle")
+                .font(.system(size: 21, weight: .medium))
+                .foregroundStyle(MSHColor.primaryText)
+                .frame(width: 44, height: 44)
+                .background(MSHColor.controlFill)
+                .clipShape(Circle())
+                .contentShape(Circle())
         }
-        .padding(.horizontal, 16)
-        .frame(height: 40)
-        .background(MSHColor.surface)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(MSHColor.border)
-                .frame(height: 0.5)
-        }
+        .buttonStyle(.plain)
+        .disabled(isSigningOut)
+        .accessibilityLabel("Account and sharing")
         .sheet(isPresented: $showAccountHub) {
             accountHub
                 .presentationDetents([.medium, .large])
