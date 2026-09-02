@@ -40,6 +40,11 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: My Simple Health
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: Google OAuth
+            CFBundleURLSchemes:
+              - com.googleusercontent.apps.962838363677-6njo5buhrcn9ne6mbgb8pubehbgnnbtb
         NSHealthShareUsageDescription: My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.
         UILaunchStoryboardName: LaunchScreen
         UISupportedInterfaceOrientations:

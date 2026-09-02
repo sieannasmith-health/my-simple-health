@@ -262,7 +262,6 @@ struct MSHSleepDashboardView: View {
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic(desiredCount: range == .month ? 4 : 7)) { value in
-                        AxisGridLine().hidden()
                         AxisValueLabel {
                             if let date = value.as(Date.self) {
                                 Text(range.axisLabel(date))

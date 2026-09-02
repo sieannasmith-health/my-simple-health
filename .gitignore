@@ -4,3 +4,11 @@
 node_modules/
 .DS_Store
 ios/MySimpleHealthApp/Config/Debug.local.xcconfig
+
+# Xcode per-user state
+**/xcuserdata/
+**/*.xcuserstate
+
+# SwiftPM and local build state
+**/.swiftpm/
+**/.build/
