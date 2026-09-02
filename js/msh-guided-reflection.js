@@ -11,6 +11,22 @@
   const WORDING_HELP = /\b(help me (word|write|phrase|rewrite|summarize|complete)|how (should|could|would) i (word|write|phrase|answer)|what (should|could|would) i (write|say)|rewrite (this|that|it)|summarize (this|that|it)|make (this|that|it) sound)\b/i;
   const MEANING_LANGUAGE = /\b(because|so that|in order to|would (help|allow|mean|give|make|let)|matters?|important|make possible|the reason|so (i|we|my|our))\b/i;
   const CONTEXT_LANGUAGE = /\b(right now|currently|at the moment|we have|i have|we only|i only|only enough|live in|one income|in school|trying to|the amount of|the size of)\b/i;
+  const OBJECTIVE_PRIORITY = Object.freeze([
+    'goals',
+    'currentSuccesses',
+    'motivationMeaning',
+    'previousAttempts',
+    'barriers',
+    'strengthsResources',
+    'preferences',
+    'environmentAccess',
+    'socialContext',
+    'emotionalContext',
+    'perceivedBenefits',
+    'readiness',
+    'confidence',
+    'optionsNextSteps'
+  ]);
 
   function classify(value, stepKey) {
     const text = String(value || '').trim();
@@ -49,5 +65,46 @@
     };
   }
 
-  root.MSHGuidedReflection = Object.freeze({ classify, activitySignals });
+  function selectGuidedResumeObjective(reflection) {
+    const objectives = reflection && reflection.objectives;
+    if (!objectives || typeof objectives !== 'object' || Array.isArray(objectives)) return null;
+
+    const activeObjective = OBJECTIVE_PRIORITY.includes(reflection.activeObjective)
+      ? reflection.activeObjective
+      : null;
+    const activeState = activeObjective ? objectives[activeObjective] : null;
+
+    if (
+      activeState &&
+      (
+        activeState.status === 'unresolved' ||
+        (activeState.status === 'partial' && !String(activeState.summary || '').trim())
+      )
+    ) {
+      return activeObjective;
+    }
+
+    const unresolvedObjective = OBJECTIVE_PRIORITY.find(function (key) {
+      return objectives[key] && objectives[key].status === 'unresolved';
+    });
+    if (unresolvedObjective) return unresolvedObjective;
+
+    return OBJECTIVE_PRIORITY.find(function (key) {
+      return objectives[key] && objectives[key].status === 'partial';
+    }) || null;
+  }
+
+  function loadingText(mode) {
+    return mode === 'guided'
+      ? 'Thinking with you...'
+      : 'Reviewing the evidence';
+  }
+
+  root.MSHGuidedReflection = Object.freeze({
+    OBJECTIVE_PRIORITY,
+    classify,
+    activitySignals,
+    selectGuidedResumeObjective,
+    loadingText
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

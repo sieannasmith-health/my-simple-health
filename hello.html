@@ -1490,7 +1490,7 @@ function addMessage(
         chat.scrollHeight;
 
 }
-function showLoadingMessage() {
+function showLoadingMessage(captionText) {
 
     const chat =
         document.getElementById(
@@ -1532,7 +1532,12 @@ loadingGroup.appendChild(bubble);
 
 const caption = document.createElement("div");
 caption.className = "hello-loading-caption";
-caption.textContent = "Reviewing the evidence";
+caption.textContent = captionText || (
+    window.MSHGuidedReflection &&
+    window.MSHGuidedReflection.loadingText
+        ? window.MSHGuidedReflection.loadingText("ask")
+        : "Reviewing the evidence"
+);
 
 loadingGroup.appendChild(caption);
 
@@ -2132,7 +2137,8 @@ async function handleGuidedResponse(
     const activityContext = getHelloActivityContext(localDisposition);
     const data = await requestHelloResponse(value, {
         deferAssistant: true,
-        activityContext
+        activityContext,
+        loadingMode: "guided"
     });
     if (
         !data
@@ -2611,7 +2617,18 @@ async function requestHelloResponse(value, options) {
     }
 
     try {
-        showLoadingMessage();
+        showLoadingMessage(
+            window.MSHGuidedReflection &&
+            window.MSHGuidedReflection.loadingText
+                ? window.MSHGuidedReflection.loadingText(
+                    requestOptions.loadingMode || "ask"
+                )
+                : (
+                    requestOptions.loadingMode === "guided"
+                        ? "Thinking with you..."
+                        : "Reviewing the evidence"
+                )
+        );
 
         const response =
             await fetch(
