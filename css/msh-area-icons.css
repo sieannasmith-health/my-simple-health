@@ -1,0 +1,22 @@
+/* My Simple Health — refined semantic area icons */
+.msh-area-icon{display:inline-grid;place-items:center;width:1.35rem;height:1.35rem;flex:0 0 auto;color:var(--msh-accent,var(--msh-forest,#6f9c72));vertical-align:middle}
+.msh-area-icon svg{display:block;width:100%;height:100%;overflow:visible}
+.msh-area-icon--framed{width:2.9rem;height:2.9rem;padding:.65rem;border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:50%;background:color-mix(in srgb,currentColor 9%,transparent)}
+
+.msh-financial-share-option{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;column-gap:14px}
+.msh-financial-share-option>.msh-area-icon{grid-column:1;grid-row:1;align-self:center}
+.msh-financial-share-option>input{grid-column:3;grid-row:1;align-self:center;margin-top:0!important}
+.msh-financial-share-option>span:not(.msh-area-icon){grid-column:2;grid-row:1}
+.msh-financial-share-permission{display:grid!important;grid-template-columns:auto 1fr;align-items:center;column-gap:10px}
+.msh-financial-share-permission>.msh-area-icon{grid-column:1;grid-row:1}
+.msh-financial-share-permission>select{grid-column:1/-1;margin-top:8px}
+.msh-financial-share-disclosure{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:12px}
+.msh-financial-share-disclosure>.msh-area-icon{margin-top:1px}
+
+.msh-food-action>.msh-area-icon{margin-right:10px}
+.msh-cycle-chips button>.msh-area-icon{margin-right:7px}
+
+@media(max-width:600px){
+  .msh-area-icon--framed{width:2.65rem;height:2.65rem;padding:.6rem}
+  .msh-financial-share-option{column-gap:12px}
+}
