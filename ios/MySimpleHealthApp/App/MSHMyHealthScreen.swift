@@ -161,6 +161,7 @@ struct MSHMyHealthScreen: View {
         return VStack(alignment: .leading, spacing: 28) {
             MSHMetricGrid(
                 metrics: metrics,
+                activity: snapshot.recentActivity,
                 selection: $selectedMetric
             )
 
@@ -621,6 +622,7 @@ private enum MSHMetricSeriesBuilder {
 
 private struct MSHMetricGrid: View {
     let metrics: [MSHMetricSeries]
+    let activity: [MSHRecentHealthActivity]
     @Binding var selection: MSHMetricKind
 
     private let columns = [
@@ -630,14 +632,24 @@ private struct MSHMetricGrid: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(metrics) { metric in
-                Button {
-                    selection = metric.kind
-                } label: {
-                    MSHMetricTile(metric: metric, isSelected: selection == metric.kind)
+                if metric.kind == .sleep {
+                    NavigationLink {
+                        MSHSleepDashboardView(activity: activity)
+                    } label: {
+                        MSHMetricTile(metric: metric, isSelected: selection == metric.kind)
+                    }
+                    .buttonStyle(MSHMetricTileButtonStyle())
+                    .accessibilityLabel("Open Sleep dashboard, \(metric.headline)")
+                } else {
+                    Button {
+                        selection = metric.kind
+                    } label: {
+                        MSHMetricTile(metric: metric, isSelected: selection == metric.kind)
+                    }
+                    .buttonStyle(MSHMetricTileButtonStyle())
+                    .accessibilityLabel("\(metric.kind.title), \(metric.headline)")
+                    .accessibilityValue(selection == metric.kind ? "Selected" : "")
                 }
-                .buttonStyle(MSHMetricTileButtonStyle())
-                .accessibilityLabel("\(metric.kind.title), \(metric.headline)")
-                .accessibilityValue(selection == metric.kind ? "Selected" : "")
             }
         }
     }
