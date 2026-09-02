@@ -131,18 +131,6 @@ enum MSHMyHealthMapper {
         )
     }
 
-    private static func recentActivity(_ record: HealthRecord) -> MSHRecentHealthActivity {
-        let presentation = recordPresentation(record)
-        return MSHRecentHealthActivity(
-            id: record.id,
-            area: presentation.area,
-            title: presentation.title,
-            detail: presentation.detail,
-            systemImage: presentation.systemImage,
-            occurredAt: record.eventStart
-        )
-    }
-
     private static func recordPresentation(_ record: HealthRecord) -> (area: MSHHealthArea, title: String, detail: String?, systemImage: String) {
         let numericDetail = record.value.flatMap { value -> String? in
             guard let unit = record.unit else { return nil }
