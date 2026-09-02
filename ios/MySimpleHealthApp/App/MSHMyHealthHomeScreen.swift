@@ -250,19 +250,27 @@ struct MSHMyHealthHomeScreen: View {
 
         case .movement:
             return (
-                latest.value,
+                displayValue(latest),
                 "Your latest movement measurement is available without turning the home screen into a performance score."
             )
 
         case .heartActivity:
             return (
-                latest.value,
+                displayValue(latest),
                 "This is your latest heart context. The full range and trend live in Explore Your Health."
             )
 
-        default:
-            return (latest.value, "Recent health context is available in the deeper data view.")
+        case .bodyMeasurements:
+            return (displayValue(latest), "Recent body context is available in the deeper data view.")
         }
+    }
+
+    private func displayValue(_ item: MSHRecentHealthActivity) -> String {
+        if let detail = item.detail, !detail.isEmpty { return detail }
+        guard let value = item.numericValue else { return item.title }
+        let number = value.formatted(.number.precision(.fractionLength(0...1)))
+        if let unit = item.unit, !unit.isEmpty { return "\(number) \(unit)" }
+        return number
     }
 
     private func duration(minutes: Double) -> String {
