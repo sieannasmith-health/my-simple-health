@@ -40,19 +40,22 @@ public struct HealthSyncBatch: Sendable {
     public let checkpoints: [String: Data]
     public let completedAt: Date
     public let partialFailures: [String]
+    public let requiresContinuation: Bool
 
     public init(
         records: [HealthRecord],
         deletedSourceRecordIDs: Set<String> = [],
         checkpoints: [String: Data] = [:],
         completedAt: Date = Date(),
-        partialFailures: [String] = []
+        partialFailures: [String] = [],
+        requiresContinuation: Bool = false
     ) {
         self.records = records
         self.deletedSourceRecordIDs = deletedSourceRecordIDs
         self.checkpoints = checkpoints
         self.completedAt = completedAt
         self.partialFailures = partialFailures
+        self.requiresContinuation = requiresContinuation
     }
 }
 
