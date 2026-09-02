@@ -96,18 +96,38 @@ enum MSHMyHealthMapper {
         recentLimit: Int
     ) -> MSHMyHealthSnapshot {
         let status = MSHAppleHealthStatus(syncState: syncState)
-        let boundedRecords = Array(recentRecords.prefix(max(0, recentLimit)))
+        let perAreaLimit = max(0, recentLimit)
+        let balancedRecords = MSHHealthArea.allCases
+            .flatMap { area in
+                recentRecords
+                    .filter { area.includes($0.domain) }
+                    .prefix(perAreaLimit)
+            }
+            .sorted { $0.eventStart > $1.eventStart }
+
         let cards = MSHHealthArea.allCases.map { area in
             MSHHealthAreaCardModel(
                 area: area,
                 isSelected: status.selectedAreas.contains(area),
-                mostRecentActivityAt: boundedRecords.first(where: { area.includes($0.domain) })?.eventStart
+                mostRecentActivityAt: balancedRecords.first(where: { area.includes($0.domain) })?.eventStart
             )
         }
         return MSHMyHealthSnapshot(
             appleHealth: status,
             areaCards: cards,
-            recentActivity: boundedRecords.map(recentActivity)
+            recentActivity: balancedRecords.map(recentActivity)
+        )
+    }
+
+    private static func recentActivity(_ record: HealthRecord) -> MSHRecentHealthActivity {
+        let presentation = recordPresentation(record)
+        return MSHRecentHealthActivity(
+            id: record.id,
+            area: presentation.area,
+            title: presentation.title,
+            detail: presentation.detail,
+            systemImage: presentation.systemImage,
+            occurredAt: record.eventStart
         )
     }
 
