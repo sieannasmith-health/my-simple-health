@@ -6,10 +6,10 @@ struct MSHAccountSessionBar: View {
     @State private var isSigningOut = false
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             if let email = authStore.userEmail, !email.isEmpty {
                 Text(email)
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(MSHColor.secondaryText)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -18,24 +18,23 @@ struct MSHAccountSessionBar: View {
 
             Spacer(minLength: 8)
 
-            Menu {
-                Button(role: .destructive) {
-                    showSignOutConfirmation = true
-                } label: {
-                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                }
+            Button {
+                showSignOutConfirmation = true
             } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(MSHColor.primaryText)
-                    .frame(width: 40, height: 40)
-                    .contentShape(Rectangle())
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(MSHColor.secondaryText)
+                    .frame(width: 34, height: 34)
+                    .background(MSHColor.controlFill)
+                    .clipShape(Circle())
+                    .contentShape(Circle())
             }
+            .buttonStyle(.plain)
             .disabled(isSigningOut)
-            .accessibilityLabel("Account menu")
+            .accessibilityLabel("Sign out")
         }
         .padding(.horizontal, 16)
-        .frame(minHeight: 44)
+        .frame(height: 40)
         .background(MSHColor.surface)
         .overlay(alignment: .bottom) {
             Rectangle()
