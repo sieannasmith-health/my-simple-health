@@ -1,6 +1,8 @@
 // Shared Debug build configuration. Use the live MSH web experience by default
 // so physical-device Debug builds work without a machine-specific setup.
-MSH_WEB_APP_URL = https://mysimplehealth.org/my-health.html
+// In xcconfig files, a literal // starts a comment, so the URL uses the
+// standard $() separator trick to preserve the https:// value.
+MSH_WEB_APP_URL = https:/$()/mysimplehealth.org/my-health.html
 
 // A developer can still override the default locally when intentionally testing
 // a LAN-hosted web build. This file is ignored by git.
