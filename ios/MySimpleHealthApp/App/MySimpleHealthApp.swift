@@ -1,6 +1,7 @@
 import SwiftUI
 import OSLog
 import Darwin
+import FirebaseCore
 
 enum MSHDebugLifecycle {
 #if DEBUG
@@ -48,6 +49,7 @@ struct MySimpleHealthApp: App {
     @UIApplicationDelegateAdaptor(MSHApplicationDelegate.self) private var applicationDelegate
 
     init() {
+        FirebaseApp.configure()
         MSHDebugLifecycle.log("process_launch")
         MSHWebRuntime.logStartupConfiguration()
     }
