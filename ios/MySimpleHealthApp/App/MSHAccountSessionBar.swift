@@ -7,27 +7,22 @@ struct MSHAccountSessionBar: View {
     @State private var isSigningOut = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            if let email = authStore.userEmail, !email.isEmpty {
-                Text(email)
-                    .font(.caption2)
-                    .foregroundStyle(MSHColor.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .accessibilityLabel("Signed in as \(email)")
-            }
-
-            Spacer(minLength: 8)
+        HStack {
+            Spacer(minLength: 0)
 
             Button {
                 showAccountHub = true
             } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 18, weight: .medium))
+                Image(systemName: "person.fill")
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(MSHColor.primaryText)
-                    .frame(width: 34, height: 34)
+                    .frame(width: 36, height: 36)
                     .background(MSHColor.controlFill)
                     .clipShape(Circle())
+                    .overlay {
+                        Circle()
+                            .stroke(MSHColor.border, lineWidth: 0.5)
+                    }
                     .contentShape(Circle())
             }
             .buttonStyle(.plain)
@@ -35,13 +30,8 @@ struct MSHAccountSessionBar: View {
             .accessibilityLabel("Account and sharing")
         }
         .padding(.horizontal, 16)
-        .frame(height: 40)
-        .background(MSHColor.surface)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(MSHColor.border)
-                .frame(height: 0.5)
-        }
+        .frame(height: 44)
+        .background(Color.clear)
         .sheet(isPresented: $showAccountHub) {
             accountHub
                 .presentationDetents([.medium, .large])
