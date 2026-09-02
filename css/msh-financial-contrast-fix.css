@@ -1,0 +1,128 @@
+/* My Simple Health — focused Financial Health dark-mode readability fix */
+[data-theme="dark"] .msh-financial-page,
+[data-theme="dark"] .msh-financial-world {
+  color: #f4f1e8;
+}
+
+[data-theme="dark"] .msh-financial-intro h1,
+[data-theme="dark"] .msh-financial-board-head h2,
+[data-theme="dark"] .msh-financial-summary-grid strong,
+[data-theme="dark"] .msh-income-targets strong,
+[data-theme="dark"] .msh-housing-hero strong,
+[data-theme="dark"] .msh-goal-list strong,
+[data-theme="dark"] .msh-investment-section strong,
+[data-theme="dark"] .msh-financial-toolbar span,
+[data-theme="dark"] .msh-expense-groups h3,
+[data-theme="dark"] .msh-family-context strong {
+  color: #f7f4ec;
+}
+
+[data-theme="dark"] .msh-financial-lede,
+[data-theme="dark"] .msh-financial-toolbar small,
+[data-theme="dark"] .msh-financial-summary-grid span,
+[data-theme="dark"] .msh-income-targets span,
+[data-theme="dark"] .msh-income-targets small,
+[data-theme="dark"] .msh-housing-hero span,
+[data-theme="dark"] .msh-housing-hero small,
+[data-theme="dark"] .msh-detail-grid span,
+[data-theme="dark"] .msh-housing-note p,
+[data-theme="dark"] .msh-emergency-card p,
+[data-theme="dark"] .msh-emergency-card small,
+[data-theme="dark"] .msh-goal-list small,
+[data-theme="dark"] .msh-investment-section span,
+[data-theme="dark"] .msh-investment-section small,
+[data-theme="dark"] .msh-learning-prompts p,
+[data-theme="dark"] .msh-financial-note {
+  color: #c7cec5;
+}
+
+[data-theme="dark"] .msh-financial-board,
+[data-theme="dark"] .msh-financial-summary-grid article,
+[data-theme="dark"] .msh-income-targets > div,
+[data-theme="dark"] .msh-housing-hero > div,
+[data-theme="dark"] .msh-family-context > div,
+[data-theme="dark"] .msh-emergency-card,
+[data-theme="dark"] .msh-investment-section,
+[data-theme="dark"] .msh-expense-groups > section,
+[data-theme="dark"] .msh-goal-list button,
+[data-theme="dark"] .msh-learning-prompts article {
+  background: #182019;
+  border-color: rgba(232, 239, 230, .20);
+}
+
+[data-theme="dark"] .msh-detail-grid > div,
+[data-theme="dark"] .msh-housing-note,
+[data-theme="dark"] .msh-financial-toolbar,
+[data-theme="dark"] .msh-financial-nav button {
+  background: #1d261f;
+  border-color: rgba(232, 239, 230, .18);
+}
+
+[data-theme="dark"] .msh-financial-toolbar button,
+[data-theme="dark"] .msh-financial-board-head > button,
+[data-theme="dark"] .msh-family-context button,
+[data-theme="dark"] .msh-investment-section header button,
+[data-theme="dark"] .msh-financial-nav button {
+  color: #edf1e9;
+  border-color: rgba(232, 239, 230, .28);
+}
+
+/* Sharing sheet shown from Financial Health */
+[data-theme="dark"] .msh-financial-share-sheet {
+  background: #111813;
+  color: #f7f4ec;
+  border-color: rgba(232, 239, 230, .22);
+}
+
+[data-theme="dark"] .msh-financial-share-sheet h2,
+[data-theme="dark"] .msh-financial-share-sheet strong,
+[data-theme="dark"] .msh-financial-share-permission,
+[data-theme="dark"] .msh-financial-share-close {
+  color: #f7f4ec;
+}
+
+[data-theme="dark"] .msh-financial-share-sheet > p,
+[data-theme="dark"] .msh-financial-share-option small,
+[data-theme="dark"] .msh-financial-share-summary,
+[data-theme="dark"] .msh-financial-share-status {
+  color: #c5cec3 !important;
+}
+
+[data-theme="dark"] .msh-financial-share-option {
+  background: #1c251e;
+  border-color: rgba(232, 239, 230, .24);
+}
+
+[data-theme="dark"] .msh-financial-share-option input {
+  accent-color: #74d7a6;
+}
+
+[data-theme="dark"] .msh-financial-share-permission select {
+  background: #141c16;
+  color: #f7f4ec;
+  border-color: rgba(232, 239, 230, .30);
+}
+
+[data-theme="dark"] .msh-financial-share-disclosure {
+  background: #202c22;
+  color: #d0d8ce !important;
+  border: 1px solid rgba(232, 239, 230, .12);
+}
+
+[data-theme="dark"] .msh-financial-share-secondary {
+  color: #f0f3ed;
+  border-color: rgba(232, 239, 230, .30);
+}
+
+[data-theme="dark"] .msh-financial-share-primary {
+  background: #18573d;
+  border-color: #2c7a58;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .msh-native-embedded .msh-financial-shell {
+    padding-top: 30px;
+    padding-bottom: 112px;
+  }
+}
