@@ -12,6 +12,7 @@
 		105237004C94BD66F3297C6C /* MSHAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11472DA81BF6F34067B30F1 /* MSHAuth.swift */; };
 		10801D4CF4DC806BFCCED832 /* MSHMyHealthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */; };
 		12798D94C30D525365CE9F3A /* MSHHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 37897D51A209B111301BBF74 /* MSHHealthCore */; };
+		1281482F1C3920BA86FB9204 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
 		1A49E62E20A10C358297F407 /* MSHMyHealthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A44F38F35A3B1282B9D6B1 /* MSHMyHealthScreen.swift */; };
 		1E04F597A57CB7A720AF7E9C /* MSHMeditateScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614EDADF6355798654BABDA9 /* MSHMeditateScreen.swift */; };
 		1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */; };
@@ -25,7 +26,7 @@
 		59C56071B798F5F2B370CB4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95FE22EF2929B21C0FD523B8 /* GoogleService-Info.plist */; };
 		5A1378B1645E17A7062F40F5 /* MSHMyHealthModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B248761DDAABD299490F9A51 /* MSHMyHealthModel.swift */; };
 		5F996406B20BA241B6DB76BC /* SQLiteHealthRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D893C6BA5C93014EB3ED5A1B /* SQLiteHealthRecordStore.swift */; };
-		701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
+		701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */; };
 		74125FB20DE63614FBC19F48 /* MSHMyHealthHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF8673BD1F027F961A09EC1 /* MSHMyHealthHomeScreen.swift */; };
 		8C3CFE2C4DF260C5A501B749 /* MSHSharedContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */; };
 		8CB37FD6EAE9627C2B53F1FF /* MSHNotificationBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1B265B9AE7A6DEBAE88C00 /* MSHNotificationBridge.swift */; };
@@ -115,7 +116,8 @@
 				FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */,
 				0E782D607237B80CCA2B4DB2 /* FirebaseCore in Frameworks */,
 				1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */,
-				701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */,
+				701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */,
+				1281482F1C3920BA86FB9204 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,6 +234,7 @@
 				7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */,
 				482699F439ED47B5179E8A76 /* FirebaseCore */,
 				4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */,
+				4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */,
 				735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */,
 			);
 			productName = MySimpleHealth;
@@ -635,6 +638,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 		735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -17,17 +17,19 @@ final class MSHSharingTests: XCTestCase {
     }
 
     func testRelationshipResolvesOtherAccountInBothDirections() {
-        let inviter = UUID()
-        let invitee = UUID()
+        let inviter = "inviter-id"
+        let invitee = "invitee-id"
+        let createdAt = Date(timeIntervalSince1970: 0)
+        let acceptedAt = Date(timeIntervalSince1970: 60)
         let relationship = MSHSharingRelationship(
-            id: UUID(),
+            id: "relationship-id",
             inviterID: inviter,
             inviterEmail: "one@example.com",
             inviteeEmail: "two@example.com",
             inviteeID: invitee,
             status: "accepted",
-            createdAt: "2026-09-01T00:00:00Z",
-            acceptedAt: "2026-09-01T00:01:00Z",
+            createdAt: createdAt,
+            acceptedAt: acceptedAt,
             revokedAt: nil
         )
 
@@ -39,15 +41,15 @@ final class MSHSharingTests: XCTestCase {
     }
 
     func testPendingRelationshipCannotBeTreatedAsAccepted() {
-        let inviter = UUID()
+        let inviter = "inviter-id"
         let relationship = MSHSharingRelationship(
-            id: UUID(),
+            id: "relationship-id",
             inviterID: inviter,
             inviterEmail: "one@example.com",
             inviteeEmail: "two@example.com",
             inviteeID: nil,
             status: "pending",
-            createdAt: "2026-09-01T00:00:00Z",
+            createdAt: Date(timeIntervalSince1970: 0),
             acceptedAt: nil,
             revokedAt: nil
         )
