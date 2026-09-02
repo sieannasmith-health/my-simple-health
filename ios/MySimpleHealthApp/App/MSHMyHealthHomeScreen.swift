@@ -107,7 +107,7 @@ struct MSHMyHealthHomeScreen: View {
 
             NavigationLink {
                 MSHImmediateDestination(title: "Explore Your Health") {
-                    MSHMyHealthScreen()
+                    MSHMyHealthScreen(viewModel: viewModel)
                 }
             } label: {
                 HStack(spacing: 14) {
@@ -238,9 +238,9 @@ struct MSHMyHealthHomeScreen: View {
                 let stage = ($0.sleepStage ?? "").lowercased()
                 return !stage.contains("awake") && !stage.contains("inbed") && !stage.contains("in_bed")
             }
-            let latestDay = Calendar.current.startOfDay(for: latest.occurredAt)
+            let latestNight = sleepNightAnchor(for: latest.occurredAt)
             let minutes = asleep
-                .filter { Calendar.current.startOfDay(for: $0.occurredAt) == latestDay }
+                .filter { sleepNightAnchor(for: $0.occurredAt) == latestNight }
                 .compactMap(\.durationMinutes)
                 .reduce(0, +)
             return (
@@ -263,6 +263,15 @@ struct MSHMyHealthHomeScreen: View {
         case .bodyMeasurements:
             return (displayValue(latest), "Recent body context is available in the deeper data view.")
         }
+    }
+
+    private func sleepNightAnchor(for date: Date) -> Date {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let shifted = hour < 12
+            ? (calendar.date(byAdding: .day, value: -1, to: date) ?? date)
+            : date
+        return calendar.startOfDay(for: shifted)
     }
 
     private func displayValue(_ item: MSHRecentHealthActivity) -> String {
