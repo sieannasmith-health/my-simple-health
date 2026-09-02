@@ -26,6 +26,7 @@ private actor MockProvider: HealthDataProvider {
     }
 
     func lastRequestedSyncAreas() -> Set<HealthDataArea>? { requestedSyncAreas.last }
+    func syncRequestCount() -> Int { requestedSyncAreas.count }
 
     func disconnect() async {}
 }
@@ -120,6 +121,50 @@ func interruptedSync() async throws {
     #expect(try await states.load(provider: .appleHealth).checkpoints.isEmpty)
     _ = try await coordinator.sync()
     #expect(try await states.load(provider: .appleHealth).checkpoints["workout"] == Data([9]))
+}
+
+@Test("bounded pages persist and continue until caught up")
+func boundedCatchUp() async throws {
+    let provider = MockProvider(batches: [
+        .success(HealthSyncBatch(
+            records: [record(id: "page-one")],
+            checkpoints: ["steps": Data([1])],
+            requiresContinuation: true
+        )),
+        .success(HealthSyncBatch(
+            records: [record(id: "page-two")],
+            checkpoints: ["steps": Data([2])]
+        ))
+    ])
+    let records = InMemoryHealthRecordRepository()
+    let states = InMemoryHealthSyncStateRepository()
+    let coordinator = HealthSyncCoordinator(provider: provider, records: records, states: states)
+    _ = try await coordinator.connect(areas: [.movement])
+
+    let passes = try await coordinator.syncUntilCaughtUp()
+
+    #expect(passes == 2)
+    #expect(await provider.syncRequestCount() == 2)
+    #expect(try await records.records(provider: .appleHealth).count == 2)
+    #expect(try await states.load(provider: .appleHealth).checkpoints["steps"] == Data([2]))
+}
+
+@Test("catch-up stops if a bounded page does not advance its checkpoint")
+func stalledCatchUpStops() async throws {
+    let provider = MockProvider(batches: [
+        .success(HealthSyncBatch(records: [record(id: "stalled")], requiresContinuation: true)),
+        .success(HealthSyncBatch(records: [record(id: "should-not-run")]))
+    ])
+    let records = InMemoryHealthRecordRepository()
+    let states = InMemoryHealthSyncStateRepository()
+    let coordinator = HealthSyncCoordinator(provider: provider, records: records, states: states)
+    _ = try await coordinator.connect(areas: [.movement])
+
+    let passes = try await coordinator.syncUntilCaughtUp()
+
+    #expect(passes == 1)
+    #expect(await provider.syncRequestCount() == 1)
+    #expect(try await records.records(provider: .appleHealth).count == 1)
 }
 
 @Test("timestamps, timezone, units, and source provenance survive normalization")
