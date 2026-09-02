@@ -334,11 +334,6 @@ private struct MSHToolsScreen: View {
         (.medications, "Manage medication supply, refill timing, and follow-through.", "pills")
     ]
 
-    private let everyday: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.food, "Use your personal food workspace.", "fork.knife"),
-        (.financialHealth, "Understand financial health in the context of your life.", "chart.pie")
-    ]
-
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 30) {
@@ -365,7 +360,34 @@ private struct MSHToolsScreen: View {
                 }
 
                 MSHDestinationGroup(title: "Care", destinations: care)
-                MSHDestinationGroup(title: "Everyday life", destinations: everyday)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    MSHGroupLabel(title: "Everyday life")
+
+                    NavigationLink {
+                        MSHImmediateDestination(title: "Food") {
+                            MSHFoodScreen()
+                        }
+                    } label: {
+                        MSHEditorialDoorway(
+                            title: "Food",
+                            subtitle: "Keep inventory, groceries, product details, and what gets used in one native flow.",
+                            systemImage: "fork.knife"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        MSHWebFeatureScreen(destination: .financialHealth)
+                    } label: {
+                        MSHEditorialDoorway(
+                            title: "Financial Health",
+                            subtitle: "Understand financial health in the context of your life.",
+                            systemImage: "chart.pie"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 18)
