@@ -50,6 +50,7 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
         var deleted = Set<String>()
         var checkpoints = request.checkpoints
         var failures: [String] = []
+        var requiresContinuation = false
         var announcedAreas = Set<HealthDataArea>()
         var mappedRecordCounts: [HealthDataArea: Int] = [:]
 
@@ -65,6 +66,9 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
                     initialLookbackDays: Self.initialLookbackDays(for: descriptor.area)
                 )
                 mshProviderDiagnostic("query_execute_complete", "area=\(descriptor.area.rawValue) key=\(descriptor.key) sampleCount=\(result.samples.count) deletedCount=\(result.deleted.count) hasCheckpoint=\(result.checkpoint != nil)")
+                if result.samples.count >= Self.anchoredQueryLimit || result.deleted.count >= Self.anchoredQueryLimit {
+                    requiresContinuation = true
+                }
                 mshProviderDiagnostic("mapping_start", "area=\(descriptor.area.rawValue) key=\(descriptor.key) sampleCount=\(result.samples.count)")
                 let mapped = result.samples.compactMap { normalize($0, descriptor: descriptor) }
                 mshProviderDiagnostic("mapping_complete", "area=\(descriptor.area.rawValue) key=\(descriptor.key) mappedCount=\(mapped.count)")
@@ -108,8 +112,14 @@ public final class AppleHealthKitProvider: @unchecked Sendable, HealthDataProvid
         for area in request.areas.sorted(by: { $0.rawValue < $1.rawValue }) {
             mshProviderDiagnostic("category_complete", "area=\(area.rawValue) recordCount=\(mappedRecordCounts[area, default: 0])")
         }
-        mshProviderDiagnostic("sync_complete", "recordCount=\(records.count) deletedCount=\(deleted.count) checkpointCount=\(checkpoints.count) failureCount=\(failures.count)")
-        return HealthSyncBatch(records: records, deletedSourceRecordIDs: deleted, checkpoints: checkpoints, partialFailures: failures)
+        mshProviderDiagnostic("sync_complete", "recordCount=\(records.count) deletedCount=\(deleted.count) checkpointCount=\(checkpoints.count) failureCount=\(failures.count) requiresContinuation=\(requiresContinuation)")
+        return HealthSyncBatch(
+            records: records,
+            deletedSourceRecordIDs: deleted,
+            checkpoints: checkpoints,
+            partialFailures: failures,
+            requiresContinuation: requiresContinuation
+        )
     }
 
     public func disconnect() async { /* HealthKit permissions are managed by iOS Settings. */ }
