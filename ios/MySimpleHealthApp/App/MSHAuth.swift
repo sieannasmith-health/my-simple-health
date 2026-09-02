@@ -182,7 +182,7 @@ struct MSHAuthenticatedRootExperience: View {
                         .tint(MSHColor.forest)
                 }
             } else if authStore.isAuthenticated {
-                MSHRootExperience()
+                MSHAppShell()
             } else {
                 MSHAuthGateView(store: authStore)
             }
