@@ -151,6 +151,9 @@ struct MSHAuthenticatedRootExperience: View {
                 }
             } else if authStore.isAuthenticated {
                 MSHAppShell()
+                    .safeAreaInset(edge: .top, spacing: 0) {
+                        MSHAccountSessionBar()
+                    }
             } else {
                 MSHAuthGateView(store: authStore)
             }
