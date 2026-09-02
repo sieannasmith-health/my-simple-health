@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
+    @EnvironmentObject private var authStore: MSHAuthStore
     @AppStorage("msh.displayName") private var displayName = ""
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
@@ -32,7 +33,10 @@ struct MSHMyHealthHomeScreen: View {
             }
             .refreshable { await viewModel.reload() }
         }
-        .task { await viewModel.loadIfNeeded() }
+        .task {
+            seedDisplayNameIfNeeded()
+            await viewModel.loadIfNeeded()
+        }
         .accessibilityIdentifier("my-health-home")
     }
 
@@ -48,7 +52,7 @@ struct MSHMyHealthHomeScreen: View {
                     .foregroundStyle(MSHHomePalette.gold)
             }
 
-            Text("\(greeting), \(displayName.isEmpty ? "there" : displayName).")
+            Text(greetingLine)
                 .font(.system(size: 37, weight: .medium, design: .serif))
                 .foregroundStyle(MSHHomePalette.ink)
                 .minimumScaleFactor(0.78)
@@ -66,6 +70,20 @@ struct MSHMyHealthHomeScreen: View {
         case 17..<22: "Good evening"
         default: "Welcome back"
         }
+    }
+
+    private var greetingLine: String {
+        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "\(greeting)." : "\(greeting), \(trimmed)."
+    }
+
+    private func seedDisplayNameIfNeeded() {
+        guard displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let firebaseName = authStore.user?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !firebaseName.isEmpty else { return }
+
+        let firstName = firebaseName.split(whereSeparator: \Character.isWhitespace).first.map(String.init)
+        displayName = firstName ?? firebaseName
     }
 
     @ViewBuilder
@@ -121,7 +139,7 @@ struct MSHMyHealthHomeScreen: View {
                             .foregroundStyle(MSHHomePalette.ivory)
                         Text("Open Day, Week, and Month charts, Apple Health measurements, Sleep, Heart, Movement, and Body details.")
                             .font(.caption)
-                            .foregroundStyle(MSHHomePalette.ivory.opacity(0.72))
+                            .foregroundStyle(MSHHomePalette.ivory.opacity(0.78))
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -156,9 +174,9 @@ struct MSHMyHealthHomeScreen: View {
                     HStack(spacing: 15) {
                         Image(systemName: "calendar")
                             .font(.title3)
-                            .foregroundStyle(MSHHomePalette.forest)
+                            .foregroundStyle(MSHColor.accent)
                             .frame(width: 42, height: 42)
-                            .background(MSHHomePalette.forest.opacity(0.08))
+                            .background(MSHColor.accent.opacity(0.10))
                             .clipShape(Circle())
 
                         VStack(alignment: .leading, spacing: 3) {
@@ -198,7 +216,7 @@ struct MSHMyHealthHomeScreen: View {
 
     private var loading: some View {
         HStack(spacing: 12) {
-            ProgressView().tint(MSHHomePalette.forest)
+            ProgressView().tint(MSHColor.accent)
             Text("Gathering today’s context…")
                 .font(.system(.body, design: .serif))
                 .foregroundStyle(MSHHomePalette.secondary)
@@ -304,7 +322,7 @@ private struct MSHHomeSummaryRow: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(accent)
                 .frame(width: 36, height: 36)
-                .background(accent.opacity(0.09))
+                .background(accent.opacity(0.13))
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 5) {
@@ -334,10 +352,10 @@ private enum MSHHomePalette {
     static let forestDeep = Color(red: 12 / 255, green: 37 / 255, blue: 26 / 255)
     static let sage = Color(red: 125 / 255, green: 148 / 255, blue: 96 / 255)
     static let ivory = Color(red: 249 / 255, green: 246 / 255, blue: 236 / 255)
-    static let ink = Color(red: 37 / 255, green: 40 / 255, blue: 34 / 255)
-    static let secondary = Color(red: 82 / 255, green: 84 / 255, blue: 75 / 255)
-    static let hairline = Color(red: 216 / 255, green: 211 / 255, blue: 199 / 255)
-    static let wine = Color(red: 132 / 255, green: 61 / 255, blue: 68 / 255)
-    static let plum = Color(red: 102 / 255, green: 78 / 255, blue: 104 / 255)
-    static let gold = Color(red: 154 / 255, green: 126 / 255, blue: 73 / 255)
+    static let ink = MSHColor.primaryText
+    static let secondary = MSHColor.secondaryText
+    static let hairline = MSHColor.border
+    static let wine = Color(red: 170 / 255, green: 82 / 255, blue: 91 / 255)
+    static let plum = Color(red: 132 / 255, green: 102 / 255, blue: 136 / 255)
+    static let gold = Color(red: 174 / 255, green: 144 / 255, blue: 86 / 255)
 }
