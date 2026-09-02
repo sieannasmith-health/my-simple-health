@@ -367,6 +367,10 @@ public enum MSHFinancialCore {
             let typical: Double = median(amounts)
             guard typical > 0 else { continue }
 
+            var typicalDecimal = Decimal(typical)
+            var roundedTypical = Decimal()
+            NSDecimalRound(&roundedTypical, &typicalDecimal, 2, .plain)
+
             let amountErrors: [Double] = amounts.map { amount in
                 abs(amount - typical) / typical
             }
@@ -383,7 +387,7 @@ public enum MSHFinancialCore {
                 accountID: last.accountID,
                 category: last.category ?? MSHFinancialCategory.other,
                 cadence: cadence.name,
-                typicalAmount: Decimal(typical),
+                typicalAmount: roundedTypical,
                 lastObservedAt: lastDate,
                 nextExpectedAt: next,
                 occurrenceCount: sorted.count,
