@@ -7,20 +7,27 @@ struct MSHAccountSessionBar: View {
     @State private var isSigningOut = false
 
     var body: some View {
-        Button {
-            showAccountHub = true
-        } label: {
-            Image(systemName: "person.crop.circle")
-                .font(.system(size: 21, weight: .medium))
-                .foregroundStyle(MSHColor.primaryText)
-                .frame(width: 44, height: 44)
-                .background(MSHColor.controlFill)
-                .clipShape(Circle())
-                .contentShape(Circle())
+        HStack {
+            Spacer(minLength: 0)
+
+            Button {
+                showAccountHub = true
+            } label: {
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: 21, weight: .medium))
+                    .foregroundStyle(MSHColor.primaryText)
+                    .frame(width: 44, height: 44)
+                    .background(MSHColor.controlFill)
+                    .clipShape(Circle())
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(isSigningOut)
+            .accessibilityLabel("Account and sharing")
         }
-        .buttonStyle(.plain)
-        .disabled(isSigningOut)
-        .accessibilityLabel("Account and sharing")
+        .padding(.horizontal, 16)
+        .frame(height: 52)
+        .background(Color.clear)
         .sheet(isPresented: $showAccountHub) {
             accountHub
                 .presentationDetents([.medium, .large])
