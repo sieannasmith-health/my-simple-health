@@ -1,0 +1,40 @@
+/* Focused mobile fixes from physical-device QA. Keep this loaded last. */
+@media (max-width: 600px) {
+  body[data-msh-page='food'] .msh-food { width: calc(100% - 28px) !important; padding-top: 22px !important; padding-bottom: calc(116px + env(safe-area-inset-bottom)) !important; }
+  body[data-msh-page='food'] .msh-food-header { align-items: flex-start !important; }
+  body[data-msh-page='food'] .msh-food-header > div:last-child, body[data-msh-page='food'] .msh-food-row > div:last-child { min-width: 0 !important; }
+  body[data-msh-page='food'] .msh-food-row { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; padding: 17px 0 !important; }
+  body[data-msh-page='food'] .msh-food-row > div:last-child { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+  body[data-msh-page='food'] .msh-food-row .msh-food-secondary, body[data-msh-page='food'] .msh-food-panel .msh-food-secondary, body[data-msh-page='food'] .msh-food-dialog .msh-food-secondary { min-height: 42px !important; padding: 9px 13px !important; font-size: .88rem !important; line-height: 1.15 !important; white-space: normal !important; }
+  body[data-msh-page='food'] .msh-food-panel { padding: 20px 16px !important; border-radius: 18px !important; }
+  body[data-msh-page='food'] .msh-food-panel-head { margin-bottom: 14px !important; }
+  body[data-msh-page='food'] .msh-food-panel-head h2 { margin-top: 12px !important; font-size: 2rem !important; }
+  body[data-msh-page='food'] .msh-food-empty { padding: 26px 4px !important; }
+  body[data-msh-page='food'] .msh-food-dialog { align-items: end !important; padding: 0 !important; }
+  body[data-msh-page='food'] .msh-food-dialog-card { width: 100% !important; max-width: none !important; max-height: min(82vh, 720px) !important; padding: 22px 18px calc(24px + env(safe-area-inset-bottom)) !important; border-radius: 22px 22px 0 0 !important; }
+  body[data-msh-page='food'] .msh-food-dialog-head h2 { font-size: 2rem !important; line-height: 1.05 !important; }
+  body[data-msh-page='food'] .msh-food-form { gap: 12px !important; margin-top: 14px !important; }
+  body[data-msh-page='food'] .msh-food-form input, body[data-msh-page='food'] .msh-food-form select, body[data-msh-page='food'] .msh-food-form textarea { min-height: 48px !important; padding: 11px 12px !important; }
+  body[data-msh-page='food'] .msh-food-primary { min-height: 50px !important; padding: 12px 16px !important; }
+  body[data-msh-page='calendar'] .msh-calendar-main { padding-top: 20px !important; padding-bottom: calc(118px + env(safe-area-inset-bottom)) !important; }
+  body[data-msh-page='calendar'] .msh-cycle-hero { gap: 16px !important; padding: 6px 2px 20px !important; }
+  body[data-msh-page='calendar'] .msh-cycle-hero h1 { margin-bottom: 8px !important; font-size: clamp(2.25rem, 10vw, 3rem) !important; line-height: .98 !important; }
+  body[data-msh-page='calendar'] .msh-cycle-hero > div > p:last-child { font-size: .98rem !important; line-height: 1.5 !important; }
+  body[data-msh-page='calendar'] .msh-kinetic-symbol { width: 54px !important; height: 54px !important; margin: 0 !important; }
+  body[data-msh-page='calendar'] .msh-calendar-today { width: 100% !important; padding: 16px !important; border-radius: 16px !important; }
+  body[data-msh-page='calendar'] .msh-calendar-today strong { font-size: 1.55rem !important; }
+  body[data-msh-page='calendar'] .msh-information-key { gap: 8px 14px !important; margin-top: 14px !important; font-size: .66rem !important; }
+  body[data-msh-page='calendar'] .msh-calendar-view-controls { margin-top: 14px !important; }
+  body[data-msh-page='calendar'] .msh-cycle-tabs { margin: 12px 0 !important; }
+  body[data-msh-page='calendar'] .msh-date-events article, body[data-msh-page='calendar'] .msh-cycle-timeline article { padding: 14px 0 !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet { width: 100% !important; max-width: 100% !important; max-height: 84vh !important; overflow-x: hidden !important; padding: 20px 16px calc(18px + env(safe-area-inset-bottom)) !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet h2 { margin-bottom: 14px !important; font-size: 2rem !important; line-height: 1.05 !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet > header { gap: 12px !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet > header > button { width: 42px !important; min-width: 42px !important; height: 42px !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet .msh-cycle-chips { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; overflow: visible !important; padding-bottom: 0 !important; }
+  body[data-msh-page='calendar'] .msh-calendar-generic-entry .msh-cycle-chips > button, body[data-msh-page='calendar'] .msh-cycle-sheet .msh-cycle-chips label, body[data-msh-page='calendar'] .msh-cycle-sheet .msh-cycle-chips span { width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+  body[data-msh-page='calendar'] .msh-calendar-generic-entry .msh-cycle-chips > button { min-height: 48px !important; justify-content: flex-start !important; padding: 10px 12px !important; white-space: normal !important; text-align: left !important; overflow-wrap: anywhere !important; }
+  body[data-msh-page='calendar'] .msh-calendar-generic-entry .msh-cycle-chips > button > span { display: inline !important; width: auto !important; min-width: 0 !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; font-size: 1rem !important; }
+  body[data-msh-page='calendar'] .msh-cycle-sheet footer { margin: 18px -16px calc(-18px - env(safe-area-inset-bottom)) !important; padding: 13px 16px calc(13px + env(safe-area-inset-bottom)) !important; }
+}
+@media (max-width: 380px) { body[data-msh-page='calendar'] .msh-cycle-sheet .msh-cycle-chips { grid-template-columns: 1fr !important; } }
