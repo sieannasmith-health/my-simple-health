@@ -1,0 +1,87 @@
+/* Calendar health action repair for compact/mobile screens. */
+.msh-calendar-quick-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 22px;
+  padding:0 2px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.msh-calendar-quick-actions::-webkit-scrollbar{display:none}
+.msh-calendar-quick-action{
+  appearance:none;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  padding:0;
+  border:1px solid var(--msh-border-strong);
+  border-radius:50%;
+  background:var(--msh-surface-alt);
+  color:var(--msh-heading);
+  text-decoration:none;
+  cursor:pointer;
+}
+.msh-calendar-quick-action svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.msh-calendar-quick-action:focus-visible{outline:3px solid var(--msh-focus);outline-offset:3px}
+
+/* The generic health-event sheet uses buttons inside .msh-cycle-chips. The base
+   cycle CSS is optimized for radio-label chips and made these buttons overlap. */
+.msh-calendar-generic-entry .msh-cycle-field>.msh-cycle-chips{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  width:100%;
+  overflow:visible;
+  padding:2px 0 8px;
+}
+.msh-calendar-generic-entry .msh-cycle-chips>button{
+  position:relative;
+  width:100%;
+  min-width:0;
+  min-height:104px;
+  margin:0;
+  padding:14px 10px 12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  white-space:normal;
+  text-align:center;
+  line-height:1.2;
+  border:1px solid var(--msh-border-strong);
+  border-radius:18px;
+  background:var(--msh-surface-alt);
+  color:var(--msh-heading);
+  font-size:13px;
+  font-weight:650;
+  overflow:hidden;
+}
+.msh-calendar-generic-entry .msh-health-choice-icon{
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border:1px solid var(--msh-border);
+  border-radius:50%;
+  background:var(--msh-surface);
+  color:var(--msh-accent);
+}
+.msh-calendar-generic-entry .msh-health-choice-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.msh-calendar-generic-entry .msh-health-choice-label{display:block;max-width:100%}
+
+@media(max-width:600px){
+  .msh-calendar-quick-actions{margin-top:-4px;margin-bottom:18px}
+  .msh-calendar-quick-action{width:44px;height:44px}
+  .msh-calendar-generic-entry .msh-cycle-sheet{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .msh-calendar-generic-entry .msh-cycle-field>.msh-cycle-chips{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .msh-calendar-generic-entry .msh-cycle-chips>button{min-height:98px;border-radius:16px;padding:12px 8px 10px}
+  .msh-calendar-generic-entry .msh-cycle-sheet footer{z-index:2}
+}
+@media(max-width:360px){
+  .msh-calendar-generic-entry .msh-cycle-field>.msh-cycle-chips{grid-template-columns:1fr 1fr}
+}
