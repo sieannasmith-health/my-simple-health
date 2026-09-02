@@ -9,6 +9,9 @@ packages:
   Supabase:
     url: https://github.com/supabase/supabase-swift
     exactVersion: 2.54.1
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.0.0
 targets:
   MySimpleHealth:
     type: application
@@ -53,6 +56,10 @@ targets:
         product: MSHAppleHealthKit
       - package: Supabase
         product: Supabase
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAuth
   MySimpleHealthTests:
     type: bundle.unit-test
     platform: iOS
