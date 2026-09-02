@@ -309,39 +309,91 @@ public enum MSHFinancialCore {
     }
 
     public static func detectRecurringPatterns(_ transactions: [MSHFinancialTransaction], rules: [MSHFinancialRule] = [], minimumOccurrences: Int = 3) -> [MSHRecurringPattern] {
-        let classified = transactions.map { classify($0, rules: rules) }
-            .filter { $0.status == .posted && $0.direction == .debit && $0.occurredAt != nil }
-        let grouped = Dictionary(grouping: classified) { "\($0.accountID ?? "any")|\($0.merchantKey)" }
+        let classifiedTransactions: [MSHFinancialTransaction] = transactions.map { transaction in
+            classify(transaction, rules: rules)
+        }
+
+        let eligibleTransactions: [MSHFinancialTransaction] = classifiedTransactions.filter { transaction in
+            transaction.status == MSHTransactionStatus.posted &&
+            transaction.direction == MSHTransactionDirection.debit &&
+            transaction.occurredAt != nil
+        }
+
+        var grouped: [String: [MSHFinancialTransaction]] = [:]
+        for transaction in eligibleTransactions {
+            let accountKey = transaction.accountID ?? "any"
+            let key = "\(accountKey)|\(transaction.merchantKey)"
+            grouped[key, default: []].append(transaction)
+        }
+
         var patterns: [MSHRecurringPattern] = []
+        let requiredOccurrences = Swift.max(2, minimumOccurrences)
 
-        for group in grouped.values where group.count >= max(2, minimumOccurrences) {
-            let sorted = group.sorted { ($0.occurredAt ?? .distantPast) < ($1.occurredAt ?? .distantPast) }
-            let dates = sorted.compactMap(\.occurredAt)
+        for group in grouped.values {
+            guard group.count >= requiredOccurrences else { continue }
+
+            let sorted: [MSHFinancialTransaction] = group.sorted { lhs, rhs in
+                let lhsDate: Date = lhs.occurredAt ?? Date.distantPast
+                let rhsDate: Date = rhs.occurredAt ?? Date.distantPast
+                return lhsDate < rhsDate
+            }
+
+            var dates: [Date] = []
+            dates.reserveCapacity(sorted.count)
+            for transaction in sorted {
+                guard let date = transaction.occurredAt else {
+                    dates.removeAll()
+                    break
+                }
+                dates.append(date)
+            }
             guard dates.count == sorted.count else { continue }
-            let intervals = zip(dates.dropFirst(), dates).map { $0.0.timeIntervalSince($0.1) / 86_400 }
-            guard let cadence = cadence(for: median(intervals)) else { continue }
-            let amounts = sorted.map { NSDecimalNumber(decimal: $0.amount).doubleValue }
-            let typical = median(amounts)
-            guard typical > 0 else { continue }
-            let maxError = amounts.map { abs($0 - typical) / typical }.max() ?? 0
-            guard maxError <= 0.18, let last = sorted.last, let lastDate = last.occurredAt else { continue }
 
-            let next = lastDate.addingTimeInterval(cadence.days * 86_400)
+            var intervals: [Double] = []
+            if dates.count > 1 {
+                intervals.reserveCapacity(dates.count - 1)
+                for index in 1..<dates.count {
+                    let days = dates[index].timeIntervalSince(dates[index - 1]) / 86_400.0
+                    intervals.append(days)
+                }
+            }
+
+            let medianInterval: Double = median(intervals)
+            guard let cadence = cadence(for: medianInterval) else { continue }
+
+            let amounts: [Double] = sorted.map { transaction in
+                NSDecimalNumber(decimal: transaction.amount).doubleValue
+            }
+            let typical: Double = median(amounts)
+            guard typical > 0 else { continue }
+
+            let amountErrors: [Double] = amounts.map { amount in
+                abs(amount - typical) / typical
+            }
+            let maxError: Double = amountErrors.max() ?? 0
+            guard maxError <= 0.18 else { continue }
+            guard let last = sorted.last, let lastDate = last.occurredAt else { continue }
+
+            let next = lastDate.addingTimeInterval(cadence.days * 86_400.0)
+            let confidence = Swift.max(0.0, Swift.min(1.0, 1.0 - cadence.error - Swift.min(maxError, 0.5)))
+
             patterns.append(MSHRecurringPattern(
                 id: "recurring|\(last.accountID ?? "any")|\(last.merchantKey)|\(cadence.name)",
                 merchantName: last.merchantName,
                 accountID: last.accountID,
-                category: last.category ?? .other,
+                category: last.category ?? MSHFinancialCategory.other,
                 cadence: cadence.name,
                 typicalAmount: Decimal(typical),
                 lastObservedAt: lastDate,
                 nextExpectedAt: next,
                 occurrenceCount: sorted.count,
-                confidence: max(0, min(1, 1 - cadence.error - min(maxError, 0.5)))
+                confidence: confidence
             ))
         }
 
-        return patterns.sorted { $0.nextExpectedAt < $1.nextExpectedAt }
+        return patterns.sorted { lhs, rhs in
+            lhs.nextExpectedAt < rhs.nextExpectedAt
+        }
     }
 
     public static func deriveFinancialState(
@@ -358,7 +410,7 @@ public enum MSHFinancialCore {
         let patterns = detectRecurringPatterns(classified, rules: rules)
         let recurringMonthly = patterns.reduce(Decimal.zero) { $0 + monthlyEquivalent($1) }
         let assets = accounts.filter { !$0.isLiability }.reduce(Decimal.zero) { $0 + $1.balance }
-        let liabilities = accounts.filter(\.isLiability).reduce(Decimal.zero) { $0 + abs($1.balance) }
+        let liabilities = accounts.filter { account in account.isLiability }.reduce(Decimal.zero) { $0 + abs($1.balance) }
         let horizon = now.addingTimeInterval(45 * 86_400)
         let upcoming = patterns.filter { $0.nextExpectedAt >= now && $0.nextExpectedAt <= horizon }
         var spendByCategory: [MSHFinancialCategory: Decimal] = [:]
