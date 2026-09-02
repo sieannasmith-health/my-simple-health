@@ -16,6 +16,9 @@
     measurements:'<path d="M5 18a7 7 0 1 1 14 0"/><path d="m12 11 3-3M8 18h8"/>',
     camera:'<path d="M4 8h4l1.5-2h5L16 8h4v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
     grocery:'<path d="M4 5h2l2 10h9l2-7H7"/><circle cx="10" cy="19" r="1"/><circle cx="17" cy="19" r="1"/>',
+    receipt:'<path d="M7 3h10v18l-2-1.4-2 1.4-2-1.4L9 21l-2-1.4z"/><path d="M9 7h6M9 11h6M9 15h3"/>',
+    meal:'<circle cx="12" cy="12" r="5.5"/><path d="M4.5 4v7M2.5 4v4c0 1.4.9 2.5 2 2.5S6.5 9.4 6.5 8V4M4.5 10.5V20M19 4v16M19 4c-1.6 1.3-2.5 3.1-2.5 5.5H19"/>',
+    dateLabel:'<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16M8 14h3M13 14h3"/>',
     plus:'<path d="M12 5v14M5 12h14"/>'
   };
 
