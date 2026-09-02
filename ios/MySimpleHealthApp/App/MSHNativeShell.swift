@@ -181,7 +181,7 @@ private struct MSHSectionNavigation: View {
                         if let notificationRoute {
                             MSHNotificationWebRouteScreen(route: notificationRoute)
                         } else {
-                            MSHMyHealthScreen()
+                            MSHMyHealthHomeScreen()
                         }
                     case .calendar:
                         if let notificationRoute {
