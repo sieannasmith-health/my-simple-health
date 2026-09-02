@@ -3,8 +3,6 @@ import FirebaseAuth
 import FirebaseFirestore
 import Foundation
 
-/// Resource types that may cross an account boundary after an explicit sharing grant.
-/// Raw HealthKit samples are intentionally not represented here.
 enum MSHSharedResourceType: String, Codable, CaseIterable {
     case calendarEvent = "calendar_event"
     case workoutVideo = "workout_video"
@@ -93,6 +91,9 @@ final class MSHSharedContentStore: ObservableObject {
         }
 
         let itemID = Self.itemID(grantID: grant.id, type: type, key: key)
+        let startsValue: Any = startsAt ?? NSNull()
+        let endsValue: Any = endsAt ?? NSNull()
+
         do {
             try await db.collection("sharedItems").document(itemID).setData([
                 "grantID": grant.id,
@@ -102,8 +103,8 @@ final class MSHSharedContentStore: ObservableObject {
                 "resourceKey": key,
                 "payload": payload,
                 "source": source.rawValue,
-                "startsAt": startsAt ?? NSNull(),
-                "endsAt": endsAt ?? NSNull(),
+                "startsAt": startsValue,
+                "endsAt": endsValue,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp()
             ], merge: true)
@@ -125,56 +126,18 @@ final class MSHSharedContentStore: ObservableObject {
         }
     }
 
-    func publishCalendarEvent(
-        id: String,
-        title: String,
-        detail: String?,
-        startsAt: String?,
-        endsAt: String?,
-        grant: MSHSharingGrant
-    ) async -> Bool {
+    func publishCalendarEvent(id: String, title: String, detail: String?, startsAt: String?, endsAt: String?, grant: MSHSharingGrant) async -> Bool {
         var payload = ["title": title]
         if let detail, !detail.isEmpty { payload["detail"] = detail }
-        return await publish(
-            type: .calendarEvent,
-            key: id,
-            payload: payload,
-            source: .msh,
-            startsAt: startsAt,
-            endsAt: endsAt,
-            through: grant
-        )
+        return await publish(type: .calendarEvent, key: id, payload: payload, startsAt: startsAt, endsAt: endsAt, through: grant)
     }
 
-    func publishWorkoutVideo(
-        videoID: String,
-        title: String,
-        videoURL: String,
-        grant: MSHSharingGrant
-    ) async -> Bool {
-        await publish(
-            type: .workoutVideo,
-            key: videoID,
-            payload: ["title": title, "url": videoURL],
-            source: .msh,
-            through: grant
-        )
+    func publishWorkoutVideo(videoID: String, title: String, videoURL: String, grant: MSHSharingGrant) async -> Bool {
+        await publish(type: .workoutVideo, key: videoID, payload: ["title": title, "url": videoURL], through: grant)
     }
 
-    func publishFinancialItem(
-        id: String,
-        label: String,
-        amount: String,
-        period: String,
-        grant: MSHSharingGrant
-    ) async -> Bool {
-        await publish(
-            type: .financialItem,
-            key: id,
-            payload: ["label": label, "amount": amount, "period": period],
-            source: .msh,
-            through: grant
-        )
+    func publishFinancialItem(id: String, label: String, amount: String, period: String, grant: MSHSharingGrant) async -> Bool {
+        await publish(type: .financialItem, key: id, payload: ["label": label, "amount": amount, "period": period], through: grant)
     }
 
     /// Health sharing remains summary-only. There is deliberately no API here for raw
@@ -194,23 +157,9 @@ final class MSHSharedContentStore: ObservableObject {
             return false
         }
 
-        var payload = [
-            "title": title,
-            "value": value,
-            "unit": unit,
-            "window": window
-        ]
-        if let interpretation, !interpretation.isEmpty {
-            payload["interpretation"] = interpretation
-        }
-
-        return await publish(
-            type: .healthMetricSummary,
-            key: metricID,
-            payload: payload,
-            source: source,
-            through: grant
-        )
+        var payload = ["title": title, "value": value, "unit": unit, "window": window]
+        if let interpretation, !interpretation.isEmpty { payload["interpretation"] = interpretation }
+        return await publish(type: .healthMetricSummary, key: metricID, payload: payload, source: source, through: grant)
     }
 
     private static func item(_ document: QueryDocumentSnapshot) -> MSHSharedItem? {
@@ -241,7 +190,6 @@ final class MSHSharedContentStore: ObservableObject {
     }
 
     private static func itemID(grantID: String, type: MSHSharedResourceType, key: String) -> String {
-        let raw = "\(grantID)_\(type.rawValue)_\(key)"
-        return raw.replacingOccurrences(of: "/", with: "_")
+        "\(grantID)_\(type.rawValue)_\(key)".replacingOccurrences(of: "/", with: "_")
     }
 }
