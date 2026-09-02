@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Stable route metadata retained for notification compatibility and migration tests.
 /// Native app tabs do not render these HTML destinations or create web views.
@@ -72,5 +73,78 @@ enum MSHFeatureDestination: String, CaseIterable, Identifiable {
         case .explore: "view=explore"
         default: nil
         }
+    }
+
+    var nativeSystemImage: String {
+        switch self {
+        case .myHealth: "heart.text.square"
+        case .calendar: "calendar"
+        case .movementPlan: "calendar.badge.plus"
+        case .movementLibrary: "figure.run"
+        case .cycle: "drop.circle.fill"
+        case .medications: "pills.fill"
+        case .landscape: "map"
+        case .selfInsight: "sparkles.rectangle.stack"
+        case .explore: "safari"
+        case .horizon: "sun.horizon.fill"
+        case .path: "point.topleft.down.to.point.bottomright.curvepath"
+        case .practice: "leaf.fill"
+        case .discovery: "lightbulb.fill"
+        case .journey: "clock.arrow.circlepath"
+        case .healthStory: "book.pages"
+        case .food: "fork.knife"
+        case .financialHealth: "chart.pie.fill"
+        }
+    }
+}
+
+/// Temporary source-compatibility shim for screens that still reference the old
+/// feature-screen type name. Despite the historical name, this view is 100% SwiftUI:
+/// it does not import WebKit, construct a URL, or load HTML/CSS/JavaScript.
+struct MSHWebFeatureScreen: View {
+    let destination: MSHFeatureDestination
+
+    var body: some View {
+        Group {
+            if destination == .myHealth {
+                MSHConnectedHealthSourcesView()
+            } else {
+                MSHNativeLegacyDestinationScreen(destination: destination)
+            }
+        }
+        .accessibilityIdentifier("native-legacy-feature-\(destination.rawValue)")
+    }
+}
+
+private struct MSHNativeLegacyDestinationScreen: View {
+    let destination: MSHFeatureDestination
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    Image(systemName: destination.nativeSystemImage)
+                        .font(.system(.largeTitle, design: .default, weight: .semibold))
+                        .foregroundStyle(MSHColor.accent)
+                        .frame(width: 64, height: 64)
+                        .background(MSHColor.controlFill)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+
+                    Text(destination.title)
+                        .font(MSHTypography.destinationTitle)
+                        .foregroundStyle(MSHColor.primaryText)
+
+                    Text("This capability now opens as a native SwiftUI surface. Its website route is kept only as migration metadata and is never rendered inside the app.")
+                        .font(MSHTypography.body)
+                        .foregroundStyle(MSHColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(MSHSpacing.large)
+            }
+        }
+        .navigationTitle(destination.title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
