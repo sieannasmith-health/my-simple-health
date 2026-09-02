@@ -75,6 +75,8 @@ final class MSHFoodStore: ObservableObject {
     private let defaults: UserDefaults
     private let inventoryKey = "msh.food.native.inventory.v1"
     private let groceryKey = "msh.food.native.grocery.v1"
+    private let processedPurchasesKey = "msh.food.native.processed-purchases.v1"
+    private var processedPurchaseIDs: Set<UUID> = []
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -100,6 +102,8 @@ final class MSHFoodStore: ObservableObject {
     }
 
     func purchase(_ grocery: MSHGroceryItem, merchant: String? = nil, price: Double? = nil) {
+        guard !processedPurchaseIDs.contains(grocery.id) else { return }
+
         let observation = price.map { MSHFoodPriceObservation(amount: $0, merchant: merchant) }
         if let index = matchingInventoryIndex(productCode: grocery.productCode, name: grocery.name) {
             inventory[index].quantity += grocery.quantity
@@ -116,6 +120,7 @@ final class MSHFoodStore: ObservableObject {
                 )
             )
         }
+        processedPurchaseIDs.insert(grocery.id)
         groceries.removeAll { $0.id == grocery.id }
         persist()
     }
@@ -171,12 +176,17 @@ final class MSHFoodStore: ObservableObject {
            let decoded = try? decoder.decode([MSHGroceryItem].self, from: data) {
             groceries = decoded
         }
+        if let data = defaults.data(forKey: processedPurchasesKey),
+           let decoded = try? decoder.decode([UUID].self, from: data) {
+            processedPurchaseIDs = Set(decoded)
+        }
     }
 
     private func persist() {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(inventory) { defaults.set(data, forKey: inventoryKey) }
         if let data = try? encoder.encode(groceries) { defaults.set(data, forKey: groceryKey) }
+        if let data = try? encoder.encode(Array(processedPurchaseIDs)) { defaults.set(data, forKey: processedPurchasesKey) }
     }
 }
 
