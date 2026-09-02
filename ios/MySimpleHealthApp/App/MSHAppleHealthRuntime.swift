@@ -38,4 +38,18 @@ enum MSHAppleHealthRuntime {
         MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=onboarding")
         return result
     }
+
+    static func refreshConnectedHealth() async throws {
+        let state = try await store.load(provider: .appleHealth)
+        let areas = state.selectedAreas
+        guard !areas.isEmpty else { return }
+        guard UIApplication.shared.applicationState == .active else { return }
+
+        MSHDebugLifecycle.log(
+            "healthkit_sync_started",
+            "trigger=my_health_refresh areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
+        )
+        _ = try await coordinator.sync(areas: areas)
+        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=my_health_refresh")
+    }
 }
