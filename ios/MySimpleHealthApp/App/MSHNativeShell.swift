@@ -429,7 +429,13 @@ private struct MSHDestinationGroup: View {
             ForEach(destinations.indices, id: \.self) { index in
                 let item = destinations[index]
                 NavigationLink {
-                    MSHWebFeatureScreen(destination: item.destination)
+                    if item.destination == .food {
+                        MSHImmediateDestination(title: "Food") {
+                            MSHFoodScreen()
+                        }
+                    } else {
+                        MSHWebFeatureScreen(destination: item.destination)
+                    }
                 } label: {
                     MSHEditorialDoorway(
                         title: item.destination.title,
