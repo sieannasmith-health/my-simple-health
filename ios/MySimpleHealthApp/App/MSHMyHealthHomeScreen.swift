@@ -5,6 +5,7 @@ struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
     @EnvironmentObject private var authStore: MSHAuthStore
     @AppStorage("msh.displayName") private var displayName = ""
+    private let smartLayer = MSHRuleBasedSmartLayer()
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -88,9 +89,10 @@ struct MSHMyHealthHomeScreen: View {
 
     @ViewBuilder
     private func interpretedContent(_ snapshot: MSHMyHealthSnapshot) -> some View {
-        let sleep = summary(for: .sleep, in: snapshot.recentActivity)
-        let movement = summary(for: .movement, in: snapshot.recentActivity)
-        let heart = summary(for: .heartActivity, in: snapshot.recentActivity)
+        let interpretation = smartLayer.evaluate(snapshot: snapshot, now: Date())
+        let sleep = interpretation.summary(for: .sleep) ?? emptySummary(for: .sleep)
+        let movement = interpretation.summary(for: .movement) ?? emptySummary(for: .movement)
+        let heart = interpretation.summary(for: .heartActivity) ?? emptySummary(for: .heartActivity)
 
         VStack(alignment: .leading, spacing: 28) {
             VStack(alignment: .leading, spacing: 0) {
@@ -200,11 +202,20 @@ struct MSHMyHealthHomeScreen: View {
                 .buttonStyle(.plain)
             }
 
-            Text("My Health interprets. Detailed measurements stay one level deeper so your first screen remains about understanding, not monitoring.")
+            Text("My Health interprets through the Smart Layer. Detailed measurements stay one level deeper so your first screen remains about understanding, not monitoring.")
                 .font(.footnote)
                 .foregroundStyle(MSHHomePalette.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private func emptySummary(for area: MSHHealthArea) -> MSHSmartSummary {
+        MSHSmartSummary(
+            area: area,
+            value: "No recent data",
+            context: "Ready when Apple Health has something recent to share.",
+            evidenceRecordIDs: []
+        )
     }
 
     private var divider: some View {
@@ -235,77 +246,6 @@ struct MSHMyHealthHomeScreen: View {
                 .foregroundStyle(MSHHomePalette.secondary)
         }
         .padding(.vertical, 14)
-    }
-
-    private func summary(
-        for area: MSHHealthArea,
-        in activity: [MSHRecentHealthActivity]
-    ) -> (value: String, context: String) {
-        let items = activity
-            .filter { $0.area == area }
-            .sorted { $0.occurredAt > $1.occurredAt }
-
-        guard let latest = items.first else {
-            return ("No recent data", "Ready when Apple Health has something recent to share.")
-        }
-
-        switch area {
-        case .sleep:
-            let asleep = items.filter {
-                guard ($0.durationMinutes ?? 0) > 0 else { return false }
-                let stage = ($0.sleepStage ?? "").lowercased()
-                return !stage.contains("awake") && !stage.contains("inbed") && !stage.contains("in_bed")
-            }
-            let latestNight = sleepNightAnchor(for: latest.occurredAt)
-            let minutes = asleep
-                .filter { sleepNightAnchor(for: $0.occurredAt) == latestNight }
-                .compactMap(\.durationMinutes)
-                .reduce(0, +)
-            return (
-                duration(minutes: minutes),
-                "Your recent sleep is here as context. Open the deeper view when you want the stages and trend."
-            )
-
-        case .movement:
-            return (
-                displayValue(latest),
-                "Your latest movement measurement is available without turning the home screen into a performance score."
-            )
-
-        case .heartActivity:
-            return (
-                displayValue(latest),
-                "This is your latest heart context. The full range and trend live in Explore Your Health."
-            )
-
-        case .bodyMeasurements:
-            return (displayValue(latest), "Recent body context is available in the deeper data view.")
-        }
-    }
-
-    private func sleepNightAnchor(for date: Date) -> Date {
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: date)
-        let shifted = hour < 12
-            ? (calendar.date(byAdding: .day, value: -1, to: date) ?? date)
-            : date
-        return calendar.startOfDay(for: shifted)
-    }
-
-    private func displayValue(_ item: MSHRecentHealthActivity) -> String {
-        if let detail = item.detail, !detail.isEmpty { return detail }
-        guard let value = item.numericValue else { return item.title }
-        let number = value.formatted(.number.precision(.fractionLength(0...1)))
-        if let unit = item.unit, !unit.isEmpty { return "\(number) \(unit)" }
-        return number
-    }
-
-    private func duration(minutes: Double) -> String {
-        guard minutes > 0 else { return "Recent sleep available" }
-        let rounded = Int(minutes.rounded())
-        let hours = rounded / 60
-        let remainder = rounded % 60
-        return hours > 0 ? "\(hours)h \(remainder)m" : "\(remainder)m"
     }
 }
 
