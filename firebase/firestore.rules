@@ -51,6 +51,7 @@ service cloud.firestore {
         (
           resource.data.status == "pending"
           && resource.data.inviteeEmail == email()
+          && request.auth.token.email_verified == true
           && request.resource.data.inviteeID == request.auth.uid
           && request.resource.data.status == "accepted"
           && request.resource.data.inviterID == resource.data.inviterID
