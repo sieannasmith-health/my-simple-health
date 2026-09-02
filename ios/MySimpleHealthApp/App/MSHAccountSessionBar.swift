@@ -13,12 +13,16 @@ struct MSHAccountSessionBar: View {
             Button {
                 showAccountHub = true
             } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 21, weight: .medium))
+                Image(systemName: "person.fill")
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(MSHColor.primaryText)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 36, height: 36)
                     .background(MSHColor.controlFill)
                     .clipShape(Circle())
+                    .overlay {
+                        Circle()
+                            .stroke(MSHColor.border, lineWidth: 0.5)
+                    }
                     .contentShape(Circle())
             }
             .buttonStyle(.plain)
@@ -26,7 +30,7 @@ struct MSHAccountSessionBar: View {
             .accessibilityLabel("Account and sharing")
         }
         .padding(.horizontal, 16)
-        .frame(height: 52)
+        .frame(height: 44)
         .background(Color.clear)
         .sheet(isPresented: $showAccountHub) {
             accountHub
