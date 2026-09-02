@@ -81,6 +81,37 @@ struct MSHRecentHealthActivity: Identifiable, Equatable, Sendable {
     let detail: String?
     let systemImage: String
     let occurredAt: Date
+
+    // Chart-ready values are carried beside the human-readable presentation.
+    // They remain source-derived Apple Health values rather than inferred scores.
+    let numericValue: Double?
+    let unit: String?
+    let durationMinutes: Double?
+    let sleepStage: String?
+
+    init(
+        id: String,
+        area: MSHHealthArea,
+        title: String,
+        detail: String?,
+        systemImage: String,
+        occurredAt: Date,
+        numericValue: Double? = nil,
+        unit: String? = nil,
+        durationMinutes: Double? = nil,
+        sleepStage: String? = nil
+    ) {
+        self.id = id
+        self.area = area
+        self.title = title
+        self.detail = detail
+        self.systemImage = systemImage
+        self.occurredAt = occurredAt
+        self.numericValue = numericValue
+        self.unit = unit
+        self.durationMinutes = durationMinutes
+        self.sleepStage = sleepStage
+    }
 }
 
 struct MSHMyHealthSnapshot: Equatable, Sendable {
@@ -121,13 +152,23 @@ enum MSHMyHealthMapper {
 
     private static func recentActivity(_ record: HealthRecord) -> MSHRecentHealthActivity {
         let presentation = recordPresentation(record)
+        let durationMinutes: Double? = {
+            guard record.recordType == .sleepInterval,
+                  let end = record.eventEnd else { return nil }
+            return max(0, end.timeIntervalSince(record.eventStart) / 60)
+        }()
+
         return MSHRecentHealthActivity(
             id: record.id,
             area: presentation.area,
             title: presentation.title,
             detail: presentation.detail,
             systemImage: presentation.systemImage,
-            occurredAt: record.eventStart
+            occurredAt: record.eventStart,
+            numericValue: record.value,
+            unit: record.unit,
+            durationMinutes: durationMinutes,
+            sleepStage: record.metadata["sleepStage"]
         )
     }
 
@@ -146,16 +187,25 @@ enum MSHMyHealthMapper {
             return (.movement, "Active energy", numericDetail, "flame")
         case .exerciseTime:
             return (.movement, "Exercise time", numericDetail, "timer")
-        case .distanceWalkingRunning, .distanceCycling, .distanceSwimming:
-            return (.movement, "Movement distance", numericDetail, "point.topleft.down.to.point.bottomright.curvepath")
+        case .distanceWalkingRunning:
+            return (.movement, "Walking + running distance", numericDetail, "figure.walk")
+        case .distanceCycling:
+            return (.movement, "Cycling distance", numericDetail, "bicycle")
+        case .distanceSwimming:
+            return (.movement, "Swimming distance", numericDetail, "figure.pool.swim")
         case .heartRate:
             return (.heartActivity, "Heart rate", numericDetail, "heart.fill")
         case .restingHeartRate:
             return (.heartActivity, "Resting heart rate", numericDetail, "heart.text.square")
         case .bodyMass:
-            return (.bodyMeasurements, "Body measurement", numericDetail, "scalemass")
+            return (.bodyMeasurements, "Body mass", numericDetail, "scalemass")
         case .sleepInterval, .sleepSession:
-            return (.sleep, "Sleep", record.metadata["sleepStage"]?.replacingOccurrences(of: "_", with: " ").capitalized, "moon.stars.fill")
+            return (
+                .sleep,
+                "Sleep",
+                record.metadata["sleepStage"]?.replacingOccurrences(of: "_", with: " ").capitalized,
+                "moon.stars.fill"
+            )
         }
     }
 }
