@@ -1,5 +1,5 @@
+import Combine
 import Foundation
-import Supabase
 
 /// Resource types that may cross an account boundary after an explicit sharing grant.
 /// Raw HealthKit samples are intentionally not represented here.
@@ -55,66 +55,22 @@ struct MSHSharedItem: Codable, Identifiable, Equatable {
     }
 }
 
-private struct MSHSharedItemInsert: Encodable {
-    let grantID: UUID
-    let ownerID: UUID
-    let resourceType: MSHSharedResourceType
-    let resourceKey: String
-    let payload: [String: String]
-    let source: MSHSharedContentSource
-    let startsAt: String?
-    let endsAt: String?
-
-    enum CodingKeys: String, CodingKey {
-        case grantID = "grant_id"
-        case ownerID = "owner_id"
-        case resourceType = "resource_type"
-        case resourceKey = "resource_key"
-        case payload
-        case source
-        case startsAt = "starts_at"
-        case endsAt = "ends_at"
-    }
-}
-
+/// The previous implementation wrote directly to Supabase. Firebase now owns identity,
+/// so shared-content transport is intentionally disabled until these operations move
+/// behind the Google backend. Keeping the store API prevents unrelated UI call sites
+/// from becoming coupled to the migration.
 @MainActor
 final class MSHSharedContentStore: ObservableObject {
     @Published private(set) var sharedWithMe: [MSHSharedItem] = []
     @Published var errorMessage: String?
 
-    private let authStore: MSHAuthStore
-
-    init(authStore: MSHAuthStore = .shared) {
-        self.authStore = authStore
-    }
+    private let migrationMessage = "Sharing is temporarily unavailable while it is being connected to the new account system."
 
     func loadSharedWithMe() async {
-        guard authStore.userID != nil else {
-            sharedWithMe = []
-            return
-        }
-
+        sharedWithMe = []
         errorMessage = nil
-        do {
-            let allVisible: [MSHSharedItem] = try await authStore.client
-                .from("msh_shared_items")
-                .select()
-                .order("updated_at", ascending: false)
-                .execute()
-                .value
-
-            guard let userID = authStore.userID else {
-                sharedWithMe = []
-                return
-            }
-            sharedWithMe = allVisible.filter { $0.ownerID != userID }
-        } catch {
-            errorMessage = error.localizedDescription
-        }
     }
 
-    /// Publish one deliberately selected item through an already-active grant.
-    /// The resource type must match the grant category so a Calendar grant cannot be reused for health data, etc.
     func publish(
         type: MSHSharedResourceType,
         key: String,
@@ -124,56 +80,12 @@ final class MSHSharedContentStore: ObservableObject {
         endsAt: String? = nil,
         through grant: MSHSharingGrant
     ) async -> Bool {
-        guard let userID = authStore.userID,
-              grant.ownerID == userID,
-              grant.isActive,
-              grant.category == type.requiredCategory else {
-            errorMessage = "This item is not covered by an active sharing permission."
-            return false
-        }
-
-        let cleanKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanKey.isEmpty else {
-            errorMessage = "Shared items need a stable identifier."
-            return false
-        }
-
-        errorMessage = nil
-        do {
-            let insert = MSHSharedItemInsert(
-                grantID: grant.id,
-                ownerID: userID,
-                resourceType: type,
-                resourceKey: cleanKey,
-                payload: payload,
-                source: source,
-                startsAt: startsAt,
-                endsAt: endsAt
-            )
-
-            try await authStore.client
-                .from("msh_shared_items")
-                .upsert(insert, onConflict: "grant_id,resource_type,resource_key")
-                .execute()
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
-        }
+        errorMessage = migrationMessage
+        return false
     }
 
     func stopSharing(item: MSHSharedItem) async {
-        guard let userID = authStore.userID, item.ownerID == userID else { return }
-        errorMessage = nil
-        do {
-            try await authStore.client
-                .from("msh_shared_items")
-                .delete()
-                .eq("id", value: item.id)
-                .execute()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        errorMessage = migrationMessage
     }
 
     func publishCalendarEvent(
@@ -184,12 +96,10 @@ final class MSHSharedContentStore: ObservableObject {
         endsAt: String?,
         grant: MSHSharingGrant
     ) async -> Bool {
-        var payload = ["title": title]
-        if let detail, !detail.isEmpty { payload["detail"] = detail }
-        return await publish(
+        await publish(
             type: .calendarEvent,
             key: id,
-            payload: payload,
+            payload: ["title": title],
             source: .msh,
             startsAt: startsAt,
             endsAt: endsAt,
@@ -228,8 +138,8 @@ final class MSHSharedContentStore: ObservableObject {
         )
     }
 
-    /// Health sharing only accepts a compact metric summary. There is deliberately no API here
-    /// for arrays of samples, HealthKit identifiers, or the on-device SQLite record store.
+    /// Health sharing remains summary-only. There is deliberately no API here for raw
+    /// HealthKit samples or the on-device health record store.
     func publishHealthMetricSummary(
         metricID: String,
         title: String,
