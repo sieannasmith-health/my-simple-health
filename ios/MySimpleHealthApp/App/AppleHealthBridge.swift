@@ -43,25 +43,25 @@ final class AppleHealthBridge: NSObject, WKScriptMessageHandler {
                     if result.outcome == .completed {
                         try await waitUntilApplicationIsActiveForFirstSync()
 #if DEBUG
-                        print("[MSHHealth] coordinator.sync() started")
+                        print("[MSHHealth] coordinator.syncUntilCaughtUp() started")
 #endif
                         MSHDebugLifecycle.log("healthkit_sync_started", "trigger=connect")
-                        _ = try await coordinator.sync()
+                        let passes = try await coordinator.syncUntilCaughtUp()
 #if DEBUG
-                        print("[MSHHealth] coordinator.sync() finished")
+                        print("[MSHHealth] coordinator.syncUntilCaughtUp() finished after", passes, "passes")
 #endif
-                        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=connect")
+                        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=connect passes=\(passes)")
                     }
                 case "sync":
 #if DEBUG
-                    print("[MSHHealth] coordinator.sync() started")
+                    print("[MSHHealth] coordinator.syncUntilCaughtUp() started")
 #endif
                     MSHDebugLifecycle.log("healthkit_sync_started", "trigger=explicit_sync")
-                    _ = try await coordinator.sync(areas: requestedAreas.isEmpty ? nil : requestedAreas)
+                    let passes = try await coordinator.syncUntilCaughtUp(areas: requestedAreas.isEmpty ? nil : requestedAreas)
 #if DEBUG
-                    print("[MSHHealth] coordinator.sync() finished")
+                    print("[MSHHealth] coordinator.syncUntilCaughtUp() finished after", passes, "passes")
 #endif
-                    MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=explicit_sync")
+                    MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=explicit_sync passes=\(passes)")
                 case "disconnect": try await coordinator.disconnect()
                 case "removeImportedData": try await coordinator.removeImportedRecords()
                 case "manage":
