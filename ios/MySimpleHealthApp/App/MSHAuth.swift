@@ -206,20 +206,40 @@ struct MSHAuthGateView: View {
                     }
 
                     VStack(spacing: 14) {
-                        TextField("Email", text: $email)
+                        TextField(
+                            "",
+                            text: $email,
+                            prompt: Text("Email").foregroundStyle(MSHColor.charcoal.opacity(0.48))
+                        )
                             .textContentType(.emailAddress)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .foregroundStyle(MSHColor.charcoal)
+                            .tint(MSHColor.forest)
                             .padding(.horizontal, 16)
                             .frame(minHeight: 54)
-                            .background(MSHColor.warmWhite)
+                            .background(MSHColor.sage.opacity(0.11))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(MSHColor.forest.opacity(0.16), lineWidth: 1)
+                            }
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                        SecureField("Password", text: $password)
+                        SecureField(
+                            "",
+                            text: $password,
+                            prompt: Text("Password").foregroundStyle(MSHColor.charcoal.opacity(0.48))
+                        )
                             .textContentType(mode == .signIn ? .password : .newPassword)
+                            .foregroundStyle(MSHColor.charcoal)
+                            .tint(MSHColor.forest)
                             .padding(.horizontal, 16)
                             .frame(minHeight: 54)
-                            .background(MSHColor.warmWhite)
+                            .background(MSHColor.sage.opacity(0.11))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(MSHColor.forest.opacity(0.16), lineWidth: 1)
+                            }
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                         Button { submit() } label: {
@@ -233,7 +253,7 @@ struct MSHAuthGateView: View {
                             .background(MSHColor.forest)
                             .overlay {
                                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(MSHColor.charcoal.opacity(0.32), lineWidth: 0.75)
+                                    .stroke(MSHColor.charcoal.opacity(0.22), lineWidth: 0.75)
                             }
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
@@ -251,10 +271,10 @@ struct MSHAuthGateView: View {
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(MSHColor.forest)
                                 .frame(maxWidth: .infinity, minHeight: 54)
-                                .background(MSHColor.warmWhite.opacity(0.9))
+                                .background(MSHColor.sage.opacity(0.08))
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .stroke(MSHColor.forest.opacity(0.18), lineWidth: 1)
+                                        .stroke(MSHColor.forest.opacity(0.24), lineWidth: 1)
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
@@ -292,6 +312,7 @@ struct MSHAuthGateView: View {
             }
         }
         .tint(MSHColor.forest)
+        .preferredColorScheme(.light)
     }
 
     private func submit() {
