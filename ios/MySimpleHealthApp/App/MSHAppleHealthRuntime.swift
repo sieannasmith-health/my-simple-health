@@ -34,8 +34,8 @@ enum MSHAppleHealthRuntime {
             "healthkit_sync_started",
             "trigger=onboarding areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
         )
-        _ = try await coordinator.sync(areas: areas)
-        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=onboarding")
+        let passes = try await coordinator.syncUntilCaughtUp(areas: areas)
+        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=onboarding passes=\(passes)")
         return result
     }
 
@@ -93,10 +93,11 @@ enum MSHAppleHealthRuntime {
             "healthkit_sync_started",
             "trigger=my_health_refresh areas=\(areas.map(\.rawValue).sorted().joined(separator: ",")) localRecordCount=\(localRecordCount)"
         )
-        let batch = try await coordinator.sync(areas: areas)
+        let passes = try await coordinator.syncUntilCaughtUp(areas: areas)
+        let finalState = try await store.load(provider: .appleHealth)
         MSHDebugLifecycle.log(
             "healthkit_sync_finished",
-            "trigger=my_health_refresh imported=\(batch.records.count) partialFailures=\(batch.partialFailures.count)"
+            "trigger=my_health_refresh passes=\(passes) partialFailures=\(finalState.partialFailures.count)"
         )
     }
 }
