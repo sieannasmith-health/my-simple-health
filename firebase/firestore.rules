@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function email() {
+      return signedIn() && request.auth.token.email != null
+        ? request.auth.token.email.lower()
+        : "";
+    }
+
+    function relationshipPath(id) {
+      return /databases/$(database)/documents/sharingRelationships/$(id);
+    }
+
+    function grantPath(id) {
+      return /databases/$(database)/documents/sharingGrants/$(id);
+    }
+
+    function isRelationshipParticipant(data) {
+      return signedIn() && (
+        data.inviterID == request.auth.uid ||
+        data.inviteeID == request.auth.uid ||
+        data.inviteeEmail == email()
+      );
+    }
+
+    function acceptedRelationshipForGrant(data) {
+      let relationship = get(relationshipPath(data.relationshipID));
+      return relationship.data.status == "accepted" &&
+        (
+          relationship.data.inviterID == data.ownerID && relationship.data.inviteeID == data.recipientID ||
+          relationship.data.inviteeID == data.ownerID && relationship.data.inviterID == data.recipientID
+        );
+    }
+
+    match /sharingRelationships/{relationshipID} {
+      allow create: if signedIn()
+        && request.resource.data.inviterID == request.auth.uid
+        && request.resource.data.inviterEmail == email()
+        && request.resource.data.inviteeEmail is string
+        && request.resource.data.inviteeEmail != email()
+        && request.resource.data.status == "pending"
+        && request.resource.data.inviteeID == null;
+
+      allow read: if isRelationshipParticipant(resource.data);
+
+      allow update: if signedIn() && (
+        // Invitee may accept only an invitation addressed to their authenticated email.
+        (
+          resource.data.status == "pending"
+          && resource.data.inviteeEmail == email()
+          && request.resource.data.inviteeID == request.auth.uid
+          && request.resource.data.status == "accepted"
+          && request.resource.data.inviterID == resource.data.inviterID
+          && request.resource.data.inviterEmail == resource.data.inviterEmail
+          && request.resource.data.inviteeEmail == resource.data.inviteeEmail
+        )
+        ||
+        // Either accepted participant may revoke the connection.
+        (
+          (resource.data.inviterID == request.auth.uid || resource.data.inviteeID == request.auth.uid)
+          && request.resource.data.status == "revoked"
+          && request.resource.data.inviterID == resource.data.inviterID
+          && request.resource.data.inviteeID == resource.data.inviteeID
+          && request.resource.data.inviterEmail == resource.data.inviterEmail
+          && request.resource.data.inviteeEmail == resource.data.inviteeEmail
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    match /sharingGrants/{grantID} {
+      allow create: if signedIn()
+        && request.resource.data.ownerID == request.auth.uid
+        && request.resource.data.recipientID is string
+        && request.resource.data.relationshipID is string
+        && request.resource.data.category in ["calendar", "workouts", "finances", "health"]
+        && request.resource.data.permission in ["view", "collaborate"]
+        && (request.resource.data.category != "health" || request.resource.data.permission == "view")
+        && acceptedRelationshipForGrant(request.resource.data);
+
+      allow read: if signedIn()
+        && (resource.data.ownerID == request.auth.uid || resource.data.recipientID == request.auth.uid);
+
+      allow update: if signedIn()
+        && resource.data.ownerID == request.auth.uid
+        && request.resource.data.ownerID == resource.data.ownerID
+        && request.resource.data.recipientID == resource.data.recipientID
+        && request.resource.data.relationshipID == resource.data.relationshipID
+        && request.resource.data.category == resource.data.category
+        && (request.resource.data.category != "health" || request.resource.data.permission == "view")
+        && acceptedRelationshipForGrant(request.resource.data);
+
+      allow delete: if false;
+    }
+
+    match /sharedItems/{itemID} {
+      allow create, update: if signedIn()
+        && request.resource.data.ownerID == request.auth.uid
+        && request.resource.data.grantID is string
+        && request.resource.data.recipientID is string
+        && request.resource.data.resourceType in [
+          "calendar_event",
+          "workout_video",
+          "workout_collection",
+          "financial_item",
+          "health_metric_summary"
+        ]
+        && exists(grantPath(request.resource.data.grantID))
+        && get(grantPath(request.resource.data.grantID)).data.ownerID == request.auth.uid
+        && get(grantPath(request.resource.data.grantID)).data.recipientID == request.resource.data.recipientID
+        && get(grantPath(request.resource.data.grantID)).data.isActive == true
+        && (
+          request.resource.data.resourceType != "health_metric_summary"
+          || (
+            get(grantPath(request.resource.data.grantID)).data.category == "health"
+            && get(grantPath(request.resource.data.grantID)).data.permission == "view"
+          )
+        );
+
+      allow read: if signedIn()
+        && (resource.data.ownerID == request.auth.uid || resource.data.recipientID == request.auth.uid);
+
+      allow delete: if signedIn() && resource.data.ownerID == request.auth.uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
