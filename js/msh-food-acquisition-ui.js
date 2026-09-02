@@ -10,6 +10,8 @@
   let lastLookup = null;
   let scanner = null;
   let stream = null;
+  const nativeBarcodePending = new Map();
+  let nativeBarcodeReceiverInstalled = false;
 
   const esc = value => String(value == null ? '' : value)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -28,6 +30,40 @@
     }
   }
 
+  function nativeBarcodeAvailable() {
+    return Boolean(root.MSH_NATIVE_SHELL && root.webkit?.messageHandlers?.mshNotifications);
+  }
+
+  function installNativeBarcodeReceiver() {
+    if (nativeBarcodeReceiverInstalled) return;
+    const previous = root.MSHNotificationsReceive;
+    root.MSHNotificationsReceive = response => {
+      if (response?.action === 'scanBarcode' && response.requestId && nativeBarcodePending.has(response.requestId)) {
+        const pending = nativeBarcodePending.get(response.requestId);
+        nativeBarcodePending.delete(response.requestId);
+        if (response.error) pending.reject(new Error(response.error));
+        else if (response.barcode) pending.resolve(response.barcode);
+        else pending.reject(new Error('No barcode was returned.'));
+      }
+      if (typeof previous === 'function') previous(response);
+    };
+    nativeBarcodeReceiverInstalled = true;
+  }
+
+  function scanBarcodeNatively() {
+    installNativeBarcodeReceiver();
+    return new Promise((resolve, reject) => {
+      const requestId = `barcode-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      nativeBarcodePending.set(requestId, { resolve, reject });
+      try {
+        root.webkit.messageHandlers.mshNotifications.postMessage({ action:'scanBarcode', requestId });
+      } catch (error) {
+        nativeBarcodePending.delete(requestId);
+        reject(error);
+      }
+    });
+  }
+
   function enhanceAddMenu() {
     const actions = page.querySelector('[data-food-dialog] .msh-food-actions');
     if (!actions || actions.querySelector('[data-food-barcode]')) return;
@@ -35,7 +71,7 @@
     button.type = 'button';
     button.className = 'msh-food-action';
     button.dataset.foodBarcode = '';
-    button.innerHTML = '▥ <strong>Scan barcode</strong><br><small>Look up a packaged food by UPC or GTIN.</small>';
+    button.innerHTML = '▥ <strong>Scan barcode</strong><br><small>Use your iPhone camera or enter a UPC / GTIN.</small>';
     actions.prepend(button);
   }
 
@@ -44,14 +80,15 @@
     lastLookup = null;
     const target = dialog();
     if (!target) return;
-    const canScan = 'BarcodeDetector' in root && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    const canNativeScan = nativeBarcodeAvailable();
+    const canWebScan = 'BarcodeDetector' in root && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
     target.innerHTML = `<div class="msh-food-dialog-card msh-food-barcode-card">
-      <div class="msh-food-dialog-head"><div><h2>Scan a barcode</h2><p>Use the camera when supported, or enter the UPC / GTIN printed below the barcode.</p></div><button class="msh-food-close" type="button" data-acquisition-close aria-label="Close">×</button></div>
+      <div class="msh-food-dialog-head"><div><h2>Scan a barcode</h2><p>Scan with your iPhone camera, or enter the UPC / GTIN printed below the barcode.</p></div><button class="msh-food-close" type="button" data-acquisition-close aria-label="Close">×</button></div>
       ${message ? `<p class="msh-food-acquisition-message">${esc(message)}</p>` : ''}
       <form class="msh-food-form" data-barcode-form>
         <label>UPC / GTIN<input name="code" inputmode="numeric" autocomplete="off" placeholder="e.g. 036000291452" required></label>
         <div class="msh-food-acquisition-actions">
-          ${canScan ? '<button class="msh-food-secondary" type="button" data-start-barcode-camera>Use camera</button>' : ''}
+          ${(canNativeScan || canWebScan) ? '<button class="msh-food-secondary" type="button" data-start-barcode-camera>Scan with camera</button>' : ''}
           <button class="msh-food-primary" type="submit">Look up product</button>
         </div>
       </form>
@@ -138,6 +175,20 @@
   }
 
   async function startCamera() {
+    if (nativeBarcodeAvailable()) {
+      showStatus('Opening camera…');
+      try {
+        const value = await scanBarcodeNatively();
+        const input = page.querySelector('[data-barcode-form] input[name="code"]');
+        if (input) input.value = value;
+        await performLookup(value);
+      } catch (error) {
+        const message = error?.message || 'The barcode could not be scanned.';
+        if (!/canceled/i.test(message)) showStatus(message, 'empty');
+      }
+      return;
+    }
+
     const wrapper = page.querySelector('[data-barcode-camera]');
     const video = wrapper && wrapper.querySelector('video');
     if (!wrapper || !video || !('BarcodeDetector' in root)) return;
