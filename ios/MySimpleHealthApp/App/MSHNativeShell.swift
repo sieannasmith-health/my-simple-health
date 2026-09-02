@@ -242,6 +242,8 @@ private struct MSHNativeFeatureScreen: View {
         switch destination {
         case .cycle:
             MSHNativeCycleScreen()
+        case .food:
+            MSHFoodScreen()
         default:
             MSHNativeFeatureSummaryScreen(destination: destination)
         }
