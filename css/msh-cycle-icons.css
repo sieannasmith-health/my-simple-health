@@ -1,15 +1,15 @@
-/* My Simple Health — original cycle observation icon styling */
+/* My Simple Health — strong, legible cycle observation icon styling */
 :root{
   --msh-cycle-icon-ink:#173d2b;
-  --msh-cycle-icon-accent:#9a5f54;
+  --msh-cycle-icon-accent:#8f4f45;
   --msh-cycle-icon-soft:#eef2ea;
-  --msh-cycle-icon-ring:#d8d3c7;
+  --msh-cycle-icon-ring:#c9c4b8;
 }
 [data-theme="dark"]{
-  --msh-cycle-icon-ink:#e7efe2;
-  --msh-cycle-icon-accent:#d79a8d;
+  --msh-cycle-icon-ink:#edf3e9;
+  --msh-cycle-icon-accent:#e0a092;
   --msh-cycle-icon-soft:#1b241f;
-  --msh-cycle-icon-ring:rgba(245,241,231,.16);
+  --msh-cycle-icon-ring:rgba(245,241,231,.24);
 }
 
 .msh-cycle-picture-choice span{
@@ -17,39 +17,42 @@
   grid-template-rows:auto auto;
   justify-items:center;
   align-content:center;
-  gap:9px;
-  min-width:106px;
-  min-height:112px!important;
-  padding:13px 12px!important;
+  gap:10px;
+  min-width:112px;
+  min-height:124px!important;
+  padding:14px 12px!important;
   border-radius:18px!important;
   background:transparent!important;
-  border:1px solid var(--msh-cycle-icon-ring)!important;
+  border:1.5px solid var(--msh-cycle-icon-ring)!important;
   color:var(--msh-text-primary)!important;
   text-align:center;
-  line-height:1.2;
+  line-height:1.15;
+  font-weight:650!important;
+  letter-spacing:-.01em;
 }
 
 .msh-cycle-picture-choice span>i{
   display:grid;
-  width:54px;
-  height:54px;
+  width:64px;
+  height:64px;
   margin:0;
-  border:1px solid color-mix(in srgb,var(--msh-cycle-icon-ring) 88%,transparent);
-  border-radius:50%;
+  border:2px solid color-mix(in srgb,var(--msh-cycle-icon-ink) 24%,var(--msh-cycle-icon-ring));
+  border-radius:18px;
   background:var(--msh-cycle-icon-soft);
   place-items:center;
   color:var(--msh-cycle-icon-ink);
+  box-shadow:0 1px 0 color-mix(in srgb,var(--msh-cycle-icon-ink) 8%,transparent);
 }
 
 .msh-cycle-original-icon{
-  width:34px!important;
-  height:34px!important;
+  width:42px!important;
+  height:42px!important;
   overflow:visible;
 }
 .msh-cycle-original-icon *{
   fill:none;
   stroke:currentColor;
-  stroke-width:1.8;
+  stroke-width:2.75;
   stroke-linecap:round;
   stroke-linejoin:round;
   vector-effect:non-scaling-stroke;
@@ -61,19 +64,20 @@
 
 .msh-cycle-picture-choice input:checked+span{
   border-color:var(--msh-sage)!important;
-  background:color-mix(in srgb,var(--msh-selected) 72%,transparent)!important;
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--msh-sage) 26%,transparent);
+  background:color-mix(in srgb,var(--msh-selected) 78%,transparent)!important;
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--msh-sage) 34%,transparent);
 }
 .msh-cycle-picture-choice input:checked+span>i{
-  border-color:color-mix(in srgb,var(--msh-sage) 62%,var(--msh-cycle-icon-ring));
-  background:color-mix(in srgb,var(--msh-selected) 86%,var(--msh-surface));
+  border-color:var(--msh-sage);
+  background:color-mix(in srgb,var(--msh-selected) 88%,var(--msh-surface));
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--msh-sage) 12%,transparent);
 }
 .msh-cycle-picture-choice input:focus-visible+span{
-  outline:2px solid var(--msh-focus)!important;
+  outline:3px solid var(--msh-focus)!important;
   outline-offset:3px!important;
 }
 
-/* Flow choices get a warmer reproductive-health accent while retaining the same family. */
+/* Reproductive-health and pain symbols use the warmer accent so they read immediately. */
 .msh-cycle-picture-choice[data-msh-icon="spotting"] .msh-cycle-original-icon,
 .msh-cycle-picture-choice[data-msh-icon="light"] .msh-cycle-original-icon,
 .msh-cycle-picture-choice[data-msh-icon="medium"] .msh-cycle-original-icon,
@@ -81,9 +85,16 @@
 .msh-cycle-picture-choice[data-msh-icon="abdominal-cramps"] .msh-cycle-original-icon,
 .msh-cycle-picture-choice[data-msh-icon="pelvic-pain"] .msh-cycle-original-icon,
 .msh-cycle-picture-choice[data-msh-icon="ovulation-pain"] .msh-cycle-original-icon,
-.msh-cycle-picture-choice[data-msh-icon="breast-tenderness"] .msh-cycle-original-icon{
+.msh-cycle-picture-choice[data-msh-icon="breast-tenderness"] .msh-cycle-original-icon,
+.msh-cycle-picture-choice[data-msh-icon="painful-urination"] .msh-cycle-original-icon{
   color:var(--msh-cycle-icon-accent);
 }
+
+/* Make flow states visually distinct at a glance without relying on tiny interior details. */
+.msh-cycle-picture-choice[data-msh-icon="spotting"] span>i{transform:scale(.92)}
+.msh-cycle-picture-choice[data-msh-icon="light"] span>i{box-shadow:inset 0 -4px 0 color-mix(in srgb,var(--msh-cycle-icon-accent) 10%,transparent)}
+.msh-cycle-picture-choice[data-msh-icon="medium"] span>i{box-shadow:inset 0 -7px 0 color-mix(in srgb,var(--msh-cycle-icon-accent) 15%,transparent)}
+.msh-cycle-picture-choice[data-msh-icon="heavy"] span>i{box-shadow:inset 0 -10px 0 color-mix(in srgb,var(--msh-cycle-icon-accent) 20%,transparent)}
 
 @media(max-width:600px){
   .msh-cycle-chips{
@@ -95,13 +106,19 @@
     scroll-snap-align:start;
   }
   .msh-cycle-picture-choice span{
-    min-width:112px;
-    min-height:116px!important;
-    border-radius:16px!important;
-    font-size:13px!important;
+    min-width:118px;
+    min-height:126px!important;
+    border-radius:17px!important;
+    font-size:14px!important;
+    font-weight:700!important;
   }
   .msh-cycle-picture-choice span>i{
-    width:52px;
-    height:52px;
+    width:64px;
+    height:64px;
+    border-radius:18px;
+  }
+  .msh-cycle-original-icon{
+    width:43px!important;
+    height:43px!important;
   }
 }
