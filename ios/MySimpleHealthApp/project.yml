@@ -16,7 +16,12 @@ targets:
   MySimpleHealth:
     type: application
     platform: iOS
-    sources: [App]
+    sources:
+      - path: App
+        excludes:
+          - MSHWebView.swift
+          - AppleHealthBridge.swift
+          - MSHNotificationBridge.swift
     configFiles:
       Debug: Config/Debug.xcconfig
     attributes:
