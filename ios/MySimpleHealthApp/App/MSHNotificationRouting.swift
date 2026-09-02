@@ -28,15 +28,19 @@ struct MSHWebRoute: RawRepresentable, Hashable, Identifiable, Sendable {
     }
 
     var appSection: MSHAppSection {
-        guard let components = URLComponents(string: rawValue) else { return .calendar }
+        guard let components = URLComponents(string: rawValue) else { return .explore }
         switch components.path {
         case "my-health.html":
             let view = components.queryItems?.first(where: { $0.name == "view" })?.value
-            return view == "explore" ? .tools : .myHealth
-        case "calendar.html": return .calendar
-        case "movement-library.html": return .movement
-        case "my-health-story.html", "health-patterns-preview.html": return .track
-        default: return .tools
+            return view == "explore" ? .explore : .myHealth
+        case "hello.html":
+            return .simple
+        case "my-health-story.html", "health-patterns-preview.html", "my-progress.html":
+            return .progress
+        case "calendar.html", "movement-library.html":
+            return .explore
+        default:
+            return .explore
         }
     }
 }
