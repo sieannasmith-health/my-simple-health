@@ -35,6 +35,11 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: My Simple Health
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: MSH Auth
+            CFBundleURLSchemes:
+              - mysimplehealth
         NSHealthShareUsageDescription: My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.
         UILaunchStoryboardName: LaunchScreen
         UISupportedInterfaceOrientations:
