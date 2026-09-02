@@ -1,0 +1,107 @@
+/* My Simple Health — global surface-aware text contrast contract
+   Neutral copy follows its surface. Accent color is reserved for meaning. */
+:root,
+html[data-theme="light"] {
+  --msh-on-surface-primary:#1d211d;
+  --msh-on-surface-secondary:#555b54;
+  --msh-on-surface-muted:#6a7069;
+}
+
+html[data-theme="dark"] {
+  --msh-on-surface-primary:#f7f5ef;
+  --msh-on-surface-secondary:#d7d4cc;
+  --msh-on-surface-muted:#b8b5ae;
+}
+
+/* Default neutral copy. These rules intentionally win over old page-specific gray/green ink. */
+html[data-theme="dark"] body.msh-app-page {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="dark"] body.msh-app-page :where(h1,h2,h3,h4,h5,h6,strong,label,legend) {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="dark"] body.msh-app-page :where(p,small,.msh-lede,[class*="__description"],[class*="__meta"],[class*="__caption"],[class*="__copy"],[class*="-help"],[class*="-summary"]) {
+  color:var(--msh-on-surface-secondary)!important;
+}
+html[data-theme="dark"] body.msh-app-page :where(input,textarea,select) {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="dark"] body.msh-app-page :where(input,textarea,select)::placeholder {
+  color:var(--msh-on-surface-muted)!important;
+  opacity:1;
+}
+
+html[data-theme="light"] body.msh-app-page {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="light"] body.msh-app-page :where(h1,h2,h3,h4,h5,h6,strong,label,legend) {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="light"] body.msh-app-page :where(p,small,.msh-lede,[class*="__description"],[class*="__meta"],[class*="__caption"],[class*="__copy"],[class*="-help"],[class*="-summary"]) {
+  color:var(--msh-on-surface-secondary)!important;
+}
+html[data-theme="light"] body.msh-app-page :where(input,textarea,select) {
+  color:var(--msh-on-surface-primary)!important;
+}
+
+/* Explicit semantic accent exceptions. Color is intentional here, never the readability layer. */
+body.msh-app-page :where(.msh-eyebrow,[class*="__eyebrow"],[class*="__kicker"],.msh-accent-text,.msh-area-icon) {
+  color:var(--msh-accent)!important;
+}
+body.msh-app-page :where(.msh-gold-text,[class*="--gold"]) {
+  color:var(--msh-gold)!important;
+}
+body.msh-app-page :where(.msh-danger-text,[class*="--danger"]) {
+  color:var(--msh-danger)!important;
+}
+
+/* Financial Health sharing: dark sheet copy must stay readable on every nested surface. */
+html[data-theme="dark"] .msh-financial-share-sheet {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="dark"] .msh-financial-share-sheet > p,
+html[data-theme="dark"] .msh-financial-share-option small,
+html[data-theme="dark"] .msh-financial-share-disclosure,
+html[data-theme="dark"] .msh-financial-share-disclosure span,
+html[data-theme="dark"] .msh-financial-share-status,
+html[data-theme="dark"] .msh-financial-share-summary {
+  color:var(--msh-on-surface-secondary)!important;
+}
+html[data-theme="dark"] .msh-financial-share-option strong,
+html[data-theme="dark"] .msh-financial-share-permission,
+html[data-theme="dark"] .msh-financial-share-permission span,
+html[data-theme="dark"] .msh-financial-share-permission select {
+  color:var(--msh-on-surface-primary)!important;
+}
+
+/* My Health home: the calm entry still needs full legibility. */
+html[data-theme="dark"] [data-msh-page="health"] :where(
+  .msh-my-health-dashboard__intro h1,
+  .msh-my-health-dashboard__intro h2,
+  .msh-my-health-dashboard__intro h3,
+  .msh-health-home h1,
+  .msh-health-home h2,
+  .msh-health-home h3,
+  .msh-health-home strong,
+  .msh-health-context strong,
+  .msh-health-context__value,
+  .msh-date-action-title
+) {
+  color:var(--msh-on-surface-primary)!important;
+}
+html[data-theme="dark"] [data-msh-page="health"] :where(
+  .msh-my-health-dashboard__intro p,
+  .msh-health-home p,
+  .msh-health-context p,
+  .msh-health-context small,
+  .msh-date-action-copy,
+  .msh-date-action-empty
+) {
+  color:var(--msh-on-surface-secondary)!important;
+}
+
+/* Reusable utilities for components that know their actual surface. */
+.msh-on-dark-primary{color:#f7f5ef!important}
+.msh-on-dark-secondary{color:#d7d4cc!important}
+.msh-on-light-primary{color:#1d211d!important}
+.msh-on-light-secondary{color:#555b54!important}
