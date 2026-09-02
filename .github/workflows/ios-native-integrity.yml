@@ -44,6 +44,13 @@ jobs:
           grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
 
+      - name: Upload regenerated project
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-xcode-project
+          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if-no-files-found: error
+
       - name: Build and run unit tests
         working-directory: ios/MySimpleHealthApp
         run: |
@@ -53,11 +60,3 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -configuration Debug \
             test CODE_SIGNING_ALLOWED=NO
-
-      - name: Upload regenerated project
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-xcode-project
-          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
-          if-no-files-found: error
