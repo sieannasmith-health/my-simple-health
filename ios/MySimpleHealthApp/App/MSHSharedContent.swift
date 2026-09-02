@@ -1,4 +1,6 @@
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
 import Foundation
 
 /// Resource types that may cross an account boundary after an explicit sharing grant.
@@ -27,48 +29,45 @@ enum MSHSharedContentSource: String, Codable {
     case connectedSource = "connected_source"
 }
 
-struct MSHSharedItem: Codable, Identifiable, Equatable {
-    let id: UUID
-    let grantID: UUID
-    let ownerID: UUID
+struct MSHSharedItem: Identifiable, Equatable, Sendable {
+    let id: String
+    let grantID: String
+    let ownerID: String
+    let recipientID: String
     let resourceType: MSHSharedResourceType
     let resourceKey: String
     let payload: [String: String]
     let source: MSHSharedContentSource
     let startsAt: String?
     let endsAt: String?
-    let createdAt: String
-    let updatedAt: String
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case grantID = "grant_id"
-        case ownerID = "owner_id"
-        case resourceType = "resource_type"
-        case resourceKey = "resource_key"
-        case payload
-        case source
-        case startsAt = "starts_at"
-        case endsAt = "ends_at"
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-    }
+    let createdAt: Date?
+    let updatedAt: Date?
 }
 
-/// The previous implementation wrote directly to Supabase. Firebase now owns identity,
-/// so shared-content transport is intentionally disabled until these operations move
-/// behind the Google backend. Keeping the store API prevents unrelated UI call sites
-/// from becoming coupled to the migration.
 @MainActor
 final class MSHSharedContentStore: ObservableObject {
     @Published private(set) var sharedWithMe: [MSHSharedItem] = []
     @Published var errorMessage: String?
 
-    private let migrationMessage = "Sharing is temporarily unavailable while it is being connected to the new account system."
+    private let db = Firestore.firestore()
 
     func loadSharedWithMe() async {
-        sharedWithMe = []
-        errorMessage = nil
+        guard let uid = Auth.auth().currentUser?.uid else {
+            sharedWithMe = []
+            return
+        }
+
+        do {
+            let snapshot = try await db.collection("sharedItems")
+                .whereField("recipientID", isEqualTo: uid)
+                .getDocuments()
+            sharedWithMe = snapshot.documents
+                .compactMap(Self.item)
+                .sorted { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func publish(
@@ -80,12 +79,50 @@ final class MSHSharedContentStore: ObservableObject {
         endsAt: String? = nil,
         through grant: MSHSharingGrant
     ) async -> Bool {
-        errorMessage = migrationMessage
-        return false
+        guard let uid = Auth.auth().currentUser?.uid,
+              grant.ownerID == uid,
+              grant.isActive,
+              grant.category == type.requiredCategory else {
+            errorMessage = "This item is not covered by an active sharing permission."
+            return false
+        }
+
+        if type == .healthMetricSummary && grant.permission != .view {
+            errorMessage = "Health summaries use view-only permission."
+            return false
+        }
+
+        let itemID = Self.itemID(grantID: grant.id, type: type, key: key)
+        do {
+            try await db.collection("sharedItems").document(itemID).setData([
+                "grantID": grant.id,
+                "ownerID": uid,
+                "recipientID": grant.recipientID,
+                "resourceType": type.rawValue,
+                "resourceKey": key,
+                "payload": payload,
+                "source": source.rawValue,
+                "startsAt": startsAt ?? NSNull(),
+                "endsAt": endsAt ?? NSNull(),
+                "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp()
+            ], merge: true)
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
     }
 
     func stopSharing(item: MSHSharedItem) async {
-        errorMessage = migrationMessage
+        guard item.ownerID == Auth.auth().currentUser?.uid else { return }
+        do {
+            try await db.collection("sharedItems").document(item.id).delete()
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func publishCalendarEvent(
@@ -96,10 +133,12 @@ final class MSHSharedContentStore: ObservableObject {
         endsAt: String?,
         grant: MSHSharingGrant
     ) async -> Bool {
-        await publish(
+        var payload = ["title": title]
+        if let detail, !detail.isEmpty { payload["detail"] = detail }
+        return await publish(
             type: .calendarEvent,
             key: id,
-            payload: ["title": title],
+            payload: payload,
             source: .msh,
             startsAt: startsAt,
             endsAt: endsAt,
@@ -172,5 +211,37 @@ final class MSHSharedContentStore: ObservableObject {
             source: source,
             through: grant
         )
+    }
+
+    private static func item(_ document: QueryDocumentSnapshot) -> MSHSharedItem? {
+        let data = document.data()
+        guard let grantID = data["grantID"] as? String,
+              let ownerID = data["ownerID"] as? String,
+              let recipientID = data["recipientID"] as? String,
+              let typeRaw = data["resourceType"] as? String,
+              let type = MSHSharedResourceType(rawValue: typeRaw),
+              let resourceKey = data["resourceKey"] as? String,
+              let sourceRaw = data["source"] as? String,
+              let source = MSHSharedContentSource(rawValue: sourceRaw) else { return nil }
+
+        return MSHSharedItem(
+            id: document.documentID,
+            grantID: grantID,
+            ownerID: ownerID,
+            recipientID: recipientID,
+            resourceType: type,
+            resourceKey: resourceKey,
+            payload: data["payload"] as? [String: String] ?? [:],
+            source: source,
+            startsAt: data["startsAt"] as? String,
+            endsAt: data["endsAt"] as? String,
+            createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
+            updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
+        )
+    }
+
+    private static func itemID(grantID: String, type: MSHSharedResourceType, key: String) -> String {
+        let raw = "\(grantID)_\(type.rawValue)_\(key)"
+        return raw.replacingOccurrences(of: "/", with: "_")
     }
 }
