@@ -31,45 +31,25 @@ enum MSHAppSection: String, CaseIterable, Identifiable {
 
     var introduction: String {
         switch self {
-        case .myHealth:
-            "Your personal health picture will come together here."
-        case .calendar:
-            "A calm view of what is happening across your health over time."
-        case .movement:
-            "Movement, workouts, and activity context will live here."
-        case .track:
-            "See how your confirmed health experiences connect and change over time."
-        case .tools:
-            "Personal tools and resources will be available here."
+        case .myHealth: "Your personal health picture will come together here."
+        case .calendar: "A calm view of what is happening across your health over time."
+        case .movement: "Movement, workouts, and activity context will live here."
+        case .track: "See how your confirmed health experiences connect and change over time."
+        case .tools: "Personal tools and resources will be available here."
         }
     }
 
-    var isImplemented: Bool {
-        true
-    }
+    var isImplemented: Bool { true }
 }
 
 enum MSHAppearancePreference: String, CaseIterable, Identifiable {
-    case system
-    case light
-    case dark
-
+    case system, light, dark
     var id: Self { self }
-
     var title: String {
-        switch self {
-        case .system: "System"
-        case .light: "Light"
-        case .dark: "Dark"
-        }
+        switch self { case .system: "System"; case .light: "Light"; case .dark: "Dark" }
     }
-
     var colorScheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
+        switch self { case .system: nil; case .light: .light; case .dark: .dark }
     }
 }
 
@@ -78,22 +58,13 @@ struct MSHAppShell: View {
     @StateObject private var notificationRouter = MSHNotificationRouter.shared
     @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
 
-    private var appearance: MSHAppearancePreference {
-        MSHAppearancePreference(rawValue: appearanceRawValue) ?? .system
-    }
+    private var appearance: MSHAppearancePreference { MSHAppearancePreference(rawValue: appearanceRawValue) ?? .system }
 
     var body: some View {
         TabView(selection: $selection) {
             ForEach(MSHAppSection.allCases) { section in
-                MSHSectionNavigation(
-                    section: section,
-                    notificationRoute: notificationRouter.route?.appSection == section
-                        ? notificationRouter.route
-                        : nil
-                )
-                    .tabItem {
-                        Label(section.title, systemImage: section.systemImage)
-                    }
+                MSHSectionNavigation(section: section, notificationRoute: notificationRouter.route?.appSection == section ? notificationRouter.route : nil)
+                    .tabItem { Label(section.title, systemImage: section.systemImage) }
                     .tag(section)
             }
         }
@@ -102,9 +73,7 @@ struct MSHAppShell: View {
         .toolbarBackground(MSHColor.surface, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
         .onAppear { openNotificationRouteIfNeeded(notificationRouter.route) }
-        .onChange(of: notificationRouter.route) { _, route in
-            openNotificationRouteIfNeeded(route)
-        }
+        .onChange(of: notificationRouter.route) { _, route in openNotificationRouteIfNeeded(route) }
     }
 
     private func openNotificationRouteIfNeeded(_ route: MSHWebRoute?) {
@@ -122,77 +91,53 @@ private struct MSHSectionNavigation: View {
             Group {
                 switch section {
                 case .myHealth:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMyHealthScreen()
-                    }
+                    if let notificationRoute { MSHNotificationWebRouteScreen(route: notificationRoute) }
+                    else { MSHMyHealthEaseInScreen() }
                 case .calendar:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHWebFeatureScreen(destination: .calendar)
-                    }
+                    if let notificationRoute { MSHNotificationWebRouteScreen(route: notificationRoute) }
+                    else { MSHWebFeatureScreen(destination: .calendar) }
                 case .movement:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMovementScreen()
-                    }
+                    if let notificationRoute { MSHNotificationWebRouteScreen(route: notificationRoute) }
+                    else { MSHMovementScreen() }
                 case .tools:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHToolsScreen()
-                    }
-                case .track:
-                    MSHTrackScreen()
+                    if let notificationRoute { MSHNotificationWebRouteScreen(route: notificationRoute) }
+                    else { MSHToolsScreen() }
+                case .track: MSHTrackScreen()
                 }
             }
-                .navigationTitle(section.title)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    if section == .myHealth {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                MSHProfileSettingsScreen()
-                            } label: {
-                                Image(systemName: "person.crop.circle")
-                                    .accessibilityLabel("Profile and Settings")
-                            }
-                        }
-                    }
-
-                    if section == .calendar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                MSHPeopleSharingScreen()
-                            } label: {
-                                Label("Share Calendar", systemImage: "person.2")
-                                    .font(.subheadline.weight(.semibold))
-                            }
-                            .accessibilityLabel("Share Calendar")
-                            .accessibilityIdentifier("calendar-share-button")
+            .navigationTitle(section.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if section == .myHealth {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink { MSHProfileSettingsScreen() } label: {
+                            Image(systemName: "person.crop.circle").accessibilityLabel("Profile and Settings")
                         }
                     }
                 }
+                if section == .calendar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink { MSHPeopleSharingScreen() } label: {
+                            Label("Share Calendar", systemImage: "person.2").font(.subheadline.weight(.semibold))
+                        }
+                        .accessibilityLabel("Share Calendar")
+                        .accessibilityIdentifier("calendar-share-button")
+                    }
+                }
+            }
         }
     }
 }
 
 private struct MSHNotificationWebRouteScreen: View {
     let route: MSHWebRoute
-
     var body: some View {
-        MSHWebView(route: route)
-            .background(MSHColor.canvas)
-            .accessibilityIdentifier("notification-route-\(route.rawValue)")
+        MSHWebView(route: route).background(MSHColor.canvas).accessibilityIdentifier("notification-route-\(route.rawValue)")
     }
 }
 
 struct MSHWebFeatureScreen: View {
     let destination: MSHFeatureDestination
-
     var body: some View {
         MSHWebView(destination: destination)
             .background(MSHColor.canvas)
@@ -208,42 +153,20 @@ private struct MSHMovementScreen: View {
         (.calendar, "See scheduled and completed movement beside other dated health context.", "calendar"),
         (.movementLibrary, "Browse movement, saved workouts, favorites, and the existing YouTube playlist connection in one library.", "figure.run")
     ]
-
     var body: some View {
-        ZStack {
-            MSHColor.canvas.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: MSHSpacing.large) {
-                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
-                        Text("Movement")
-                            .font(MSHTypography.destinationTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        Text("Choose movement, plan it in time, and keep your experience separate from what Apple Health records.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                    }
-
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
-                        NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
-                        } label: {
-                            MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    MSHNativeBoundaryNote(
-                        text: "Recent Apple Health movement remains available in My Health. Calendar requests only the visible date range rather than loading your complete HealthKit history. Apple Health source records stay unchanged; MSH can edit only its own attached context."
-                    )
+        ZStack { MSHColor.canvas.ignoresSafeArea(); ScrollView {
+            VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                    Text("Movement").font(MSHTypography.destinationTitle).foregroundStyle(MSHColor.primaryText)
+                    Text("Choose movement, plan it in time, and keep your experience separate from what Apple Health records.").font(MSHTypography.body).foregroundStyle(MSHColor.secondaryText)
                 }
-                .padding(MSHSpacing.medium)
-            }
-        }
+                ForEach(destinations.indices, id: \.self) { index in
+                    let item = destinations[index]
+                    NavigationLink { MSHWebFeatureScreen(destination: item.destination) } label: { MSHFeatureDoorway(title: item.destination.title, subtitle: item.subtitle, systemImage: item.image) }.buttonStyle(.plain)
+                }
+                MSHNativeBoundaryNote(text: "Recent Apple Health movement remains available in My Health. Calendar requests only the visible date range rather than loading your complete HealthKit history. Apple Health source records stay unchanged; MSH can edit only its own attached context.")
+            }.padding(MSHSpacing.medium)
+        }}
     }
 }
 
@@ -255,45 +178,20 @@ private struct MSHTrackScreen: View {
         (.journey, "See recorded change through time without turning it into a streak or score.", "clock.arrow.circlepath"),
         (.calendar, "Review dated health and life context in the shared time layer.", "calendar")
     ]
-
     var body: some View {
-        ZStack {
-            MSHColor.canvas.ignoresSafeArea()
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
-                        Text("Track")
-                            .font(MSHTypography.destinationTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        Text("See how your health and life picture is changing across domains and through time.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.bottom, MSHSpacing.small)
-
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
-                        NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
-                        } label: {
-                            MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    MSHNativeBoundaryNote(
-                        text: "Track connects existing records and reflections. It does not diagnose, infer causes, or turn a nearby event into an explanation."
-                    )
+        ZStack { MSHColor.canvas.ignoresSafeArea(); ScrollView {
+            LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                    Text("Track").font(MSHTypography.destinationTitle).foregroundStyle(MSHColor.primaryText)
+                    Text("See how your health and life picture is changing across domains and through time.").font(MSHTypography.body).foregroundStyle(MSHColor.secondaryText).fixedSize(horizontal: false, vertical: true)
+                }.padding(.bottom, MSHSpacing.small)
+                ForEach(destinations.indices, id: \.self) { index in
+                    let item = destinations[index]
+                    NavigationLink { MSHWebFeatureScreen(destination: item.destination) } label: { MSHFeatureDoorway(title: item.destination.title, subtitle: item.subtitle, systemImage: item.image) }.buttonStyle(.plain)
                 }
-                .padding(MSHSpacing.medium)
-            }
-        }
-        .accessibilityIdentifier("track-integration-screen")
+                MSHNativeBoundaryNote(text: "Track connects existing records and reflections. It does not diagnose, infer causes, or turn a nearby event into an explanation.")
+            }.padding(MSHSpacing.medium)
+        }}.accessibilityIdentifier("track-integration-screen")
     }
 }
 
@@ -312,179 +210,67 @@ private struct MSHToolsScreen: View {
         (.food, "Use the existing personal food workspace.", "fork.knife"),
         (.financialHealth, "Explore financial health in the context of your life.", "chart.pie")
     ]
-
     var body: some View {
-        ZStack {
-            MSHColor.canvas.ignoresSafeArea()
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
-                        Text("Tools")
-                            .font(MSHTypography.destinationTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        Text("Open a working My Simple Health experience without leaving the native app shell.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                    }
-                    .padding(.bottom, MSHSpacing.small)
-
-                    NavigationLink {
-                        MSHMeditateScreen()
-                    } label: {
-                        MSHFeatureDoorway(
-                            title: "Meditate",
-                            subtitle: "Choose meditation, breathwork, a body scan, or a quiet timer.",
-                            systemImage: "moon.stars"
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
-                        NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
-                        } label: {
-                            MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
+        ZStack { MSHColor.canvas.ignoresSafeArea(); ScrollView {
+            LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                    Text("Tools").font(MSHTypography.destinationTitle).foregroundStyle(MSHColor.primaryText)
+                    Text("Open a working My Simple Health experience without leaving the native app shell.").font(MSHTypography.body).foregroundStyle(MSHColor.secondaryText)
+                }.padding(.bottom, MSHSpacing.small)
+                NavigationLink { MSHMeditateScreen() } label: { MSHFeatureDoorway(title: "Meditate", subtitle: "Choose meditation, breathwork, a body scan, or a quiet timer.", systemImage: "moon.stars") }.buttonStyle(.plain)
+                ForEach(destinations.indices, id: \.self) { index in
+                    let item = destinations[index]
+                    NavigationLink { MSHWebFeatureScreen(destination: item.destination) } label: { MSHFeatureDoorway(title: item.destination.title, subtitle: item.subtitle, systemImage: item.image) }.buttonStyle(.plain)
                 }
-                .padding(MSHSpacing.medium)
-            }
-        }
+            }.padding(MSHSpacing.medium)
+        }}
     }
 }
 
 struct MSHFeatureDoorway: View {
-    let title: String
-    let subtitle: String
-    let systemImage: String
-
+    let title: String; let subtitle: String; let systemImage: String
     var body: some View {
         HStack(spacing: MSHSpacing.medium) {
-            Image(systemName: systemImage)
-                .font(.title3)
-                .foregroundStyle(MSHColor.accent)
-                .frame(width: 42, height: 42)
-                .background(MSHColor.controlFill)
-                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+            Image(systemName: systemImage).font(.title3).foregroundStyle(MSHColor.accent).frame(width: 42, height: 42).background(MSHColor.controlFill).clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
             VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
-                Text(title)
-                    .font(MSHTypography.cardTitle)
-                    .foregroundStyle(MSHColor.primaryText)
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(MSHColor.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(title).font(MSHTypography.cardTitle).foregroundStyle(MSHColor.primaryText)
+                Text(subtitle).font(.subheadline).foregroundStyle(MSHColor.secondaryText).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: MSHSpacing.small)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(MSHColor.secondaryText)
+            Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(MSHColor.secondaryText)
         }
-        .padding(MSHSpacing.medium)
-        .background(MSHColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
-                .stroke(MSHColor.border, lineWidth: 1)
-        }
-        .contentShape(Rectangle())
+        .padding(MSHSpacing.medium).background(MSHColor.surface).clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+        .overlay { RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous).stroke(MSHColor.border, lineWidth: 1) }.contentShape(Rectangle())
     }
 }
 
 private struct MSHNativeBoundaryNote: View {
     let text: String
-
-    var body: some View {
-        Text(text)
-            .font(.footnote)
-            .foregroundStyle(MSHColor.secondaryText)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, MSHSpacing.small)
-    }
+    var body: some View { Text(text).font(.footnote).foregroundStyle(MSHColor.secondaryText).fixedSize(horizontal: false, vertical: true).padding(.horizontal, MSHSpacing.small) }
 }
 
 struct MSHProfileSettingsScreen: View {
     @AppStorage("msh.displayName") private var displayName = ""
     @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
-
     var body: some View {
-        ZStack {
-            MSHColor.canvas.ignoresSafeArea()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: MSHSpacing.large) {
-                    VStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 30, weight: .medium))
-                            .foregroundStyle(MSHColor.accent)
-
-                        Text("Profile & Settings")
-                            .font(MSHTypography.destinationTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-
-                        Text("Keep this space personal and comfortable to return to.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .mshSurface()
-
-                    NavigationLink {
-                        MSHPeopleSharingScreen()
-                    } label: {
-                        MSHFeatureDoorway(
-                            title: "People & Sharing",
-                            subtitle: "Invite someone and choose exactly which Calendar, workout, financial, and health information you share.",
-                            systemImage: "person.2"
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    VStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                        Text("What should we call you?")
-                            .font(MSHTypography.cardTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        TextField("Name or nickname", text: $displayName)
-                            .textInputAutocapitalization(.words)
-                            .padding(.horizontal, MSHSpacing.medium)
-                            .frame(height: 48)
-                            .background(MSHColor.controlFill)
-                            .foregroundStyle(MSHColor.primaryText)
-                            .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous)
-                                    .stroke(MSHColor.border, lineWidth: 1)
-                            }
-                    }
-                    .mshSurface()
-
-                    VStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                        Text("Appearance")
-                            .font(MSHTypography.cardTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        Text("Choose the environment that is easiest for you to read.")
-                            .font(.subheadline)
-                            .foregroundStyle(MSHColor.secondaryText)
-
-                        Picker("Appearance", selection: $appearanceRawValue) {
-                            ForEach(MSHAppearancePreference.allCases) { preference in
-                                Text(preference.title).tag(preference.rawValue)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                    .mshSurface()
-                }
-                .padding(MSHSpacing.medium)
-            }
-        }
-        .navigationTitle("Profile & Settings")
-        .navigationBarTitleDisplayMode(.inline)
+        ZStack { MSHColor.canvas.ignoresSafeArea(); ScrollView {
+            VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                    Image(systemName: "person.crop.circle").font(.system(size: 30, weight: .medium)).foregroundStyle(MSHColor.accent)
+                    Text("Profile & Settings").font(MSHTypography.destinationTitle).foregroundStyle(MSHColor.primaryText)
+                    Text("Keep this space personal and comfortable to return to.").font(MSHTypography.body).foregroundStyle(MSHColor.secondaryText)
+                }.frame(maxWidth: .infinity, alignment: .leading).mshSurface()
+                NavigationLink { MSHPeopleSharingScreen() } label: { MSHFeatureDoorway(title: "People & Sharing", subtitle: "Invite someone and choose exactly which Calendar, workout, financial, and health information you share.", systemImage: "person.2") }.buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                    Text("What should we call you?").font(MSHTypography.cardTitle).foregroundStyle(MSHColor.primaryText)
+                    TextField("Name or nickname", text: $displayName).textInputAutocapitalization(.words).padding(.horizontal, MSHSpacing.medium).frame(height: 48).background(MSHColor.controlFill).foregroundStyle(MSHColor.primaryText).clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous)).overlay { RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous).stroke(MSHColor.border, lineWidth: 1) }
+                }.mshSurface()
+                VStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                    Text("Appearance").font(MSHTypography.cardTitle).foregroundStyle(MSHColor.primaryText)
+                    Text("Choose the environment that is easiest for you to read.").font(.subheadline).foregroundStyle(MSHColor.secondaryText)
+                    Picker("Appearance", selection: $appearanceRawValue) { ForEach(MSHAppearancePreference.allCases) { preference in Text(preference.title).tag(preference.rawValue) } }.pickerStyle(.segmented)
+                }.mshSurface()
+            }.padding(MSHSpacing.medium)
+        }}.navigationTitle("Profile & Settings").navigationBarTitleDisplayMode(.inline)
     }
 }
