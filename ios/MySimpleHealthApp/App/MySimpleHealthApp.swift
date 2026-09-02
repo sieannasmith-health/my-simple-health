@@ -1,6 +1,7 @@
 import SwiftUI
 import OSLog
 import Darwin
+import FirebaseCore
 
 enum MSHDebugLifecycle {
 #if DEBUG
@@ -48,6 +49,7 @@ struct MySimpleHealthApp: App {
     @UIApplicationDelegateAdaptor(MSHApplicationDelegate.self) private var applicationDelegate
 
     init() {
+        FirebaseApp.configure()
         MSHDebugLifecycle.log("process_launch")
         MSHWebRuntime.logStartupConfiguration()
     }
@@ -64,9 +66,7 @@ private struct MSHSceneRoot: View {
     var body: some View {
         MSHAuthenticatedRootExperience()
             .onOpenURL { url in
-                Task { @MainActor in
-                    await MSHAuthStore.shared.handleAuthCallback(url)
-                }
+                MSHAuthStore.shared.handleOpenURL(url)
             }
             .onAppear {
                 MSHDebugLifecycle.log(

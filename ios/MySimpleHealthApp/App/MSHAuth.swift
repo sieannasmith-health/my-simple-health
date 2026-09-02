@@ -1,98 +1,127 @@
+import FirebaseAuth
+import FirebaseCore
 import Foundation
-import Supabase
+import GoogleSignIn
 import SwiftUI
+import UIKit
 
 @MainActor
 final class MSHAuthStore: ObservableObject {
     static let shared = MSHAuthStore()
-    static let authCallbackURL = URL(string: "mysimplehealth://auth-callback")!
 
-    @Published private(set) var session: Session?
+    @Published private(set) var user: User?
     @Published private(set) var isResolvingSession = true
     @Published var errorMessage: String?
     @Published var noticeMessage: String?
 
-    let client: SupabaseClient
-    private var authTask: Task<Void, Never>?
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     private init() {
-        client = SupabaseClient(
-            supabaseURL: URL(string: "https://dcweyvlimvkljlqkzhbs.supabase.co")!,
-            supabaseKey: "sb_publishable_eDu5tCF5ngIB1kPVVud-8w_grUSJhNa"
-        )
+        user = Auth.auth().currentUser
+        isResolvingSession = false
 
-        authTask = Task { [weak self] in
-            guard let self else { return }
-            for await state in client.auth.authStateChanges {
-                switch state.event {
-                case .initialSession, .signedIn, .signedOut, .tokenRefreshed, .userUpdated:
-                    session = state.session
-                    isResolvingSession = false
-                default:
-                    break
-                }
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            Task { @MainActor in
+                self?.user = user
+                self?.isResolvingSession = false
             }
         }
     }
 
     deinit {
-        authTask?.cancel()
+        if let authStateHandle {
+            Auth.auth().removeStateDidChangeListener(authStateHandle)
+        }
     }
 
-    var isAuthenticated: Bool { session != nil }
-    var userEmail: String? { session?.user.email }
-    var userID: UUID? { session?.user.id }
+    var isAuthenticated: Bool { user != nil }
+    var userEmail: String? { user?.email }
+    var userID: String? { user?.uid }
 
     func signIn(email: String, password: String) async {
         noticeMessage = nil
         await perform {
-            _ = try await client.auth.signIn(email: email, password: password)
+            try await withCheckedThrowingContinuation { continuation in
+                Auth.auth().signIn(withEmail: email, password: password) { _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                }
+            }
         }
     }
 
     func createAccount(email: String, password: String) async {
         noticeMessage = nil
         await perform {
-            _ = try await client.auth.signUp(
-                email: email,
-                password: password,
-                redirectTo: Self.authCallbackURL
-            )
+            try await withCheckedThrowingContinuation { continuation in
+                Auth.auth().createUser(withEmail: email, password: password) { _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                }
+            }
         }
         if errorMessage == nil {
-            noticeMessage = "Account created. If email confirmation is required, check your inbox and return to My Simple Health."
+            noticeMessage = "Account created."
         }
     }
 
     func signInWithGoogle() async {
         noticeMessage = nil
         await perform {
-            _ = try await client.auth.signInWithOAuth(
-                provider: .google,
-                redirectTo: Self.authCallbackURL
-            )
+            guard let clientID = FirebaseApp.app()?.options.clientID else {
+                throw MSHAuthError.missingGoogleClientID
+            }
+            guard let presentingViewController = Self.presentingViewController() else {
+                throw MSHAuthError.missingPresentingViewController
+            }
+
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+            try await withCheckedThrowingContinuation { continuation in
+                GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { result, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    guard let googleUser = result?.user,
+                          let idToken = googleUser.idToken?.tokenString else {
+                        continuation.resume(throwing: MSHAuthError.missingGoogleIDToken)
+                        return
+                    }
+
+                    let credential = GoogleAuthProvider.credential(
+                        withIDToken: idToken,
+                        accessToken: googleUser.accessToken.tokenString
+                    )
+
+                    Auth.auth().signIn(with: credential) { _, error in
+                        if let error {
+                            continuation.resume(throwing: error)
+                        } else {
+                            continuation.resume(returning: ())
+                        }
+                    }
+                }
+            }
         }
     }
 
-    func handleAuthCallback(_ url: URL) async {
-        guard url.scheme?.lowercased() == "mysimplehealth",
-              url.host?.lowercased() == "auth-callback" else {
-            return
-        }
-
-        errorMessage = nil
-        do {
-            _ = try await client.auth.session(from: url)
-            noticeMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+    func handleOpenURL(_ url: URL) {
+        _ = GIDSignIn.sharedInstance.handle(url)
     }
 
     func signOut() async {
         noticeMessage = nil
         await perform {
-            try await client.auth.signOut()
+            GIDSignIn.sharedInstance.signOut()
+            try Auth.auth().signOut()
         }
     }
 
@@ -104,6 +133,41 @@ final class MSHAuthStore: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+
+    private static func presentingViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let keyWindow = scenes.flatMap(\.windows).first(where: \.isKeyWindow)
+        var controller = keyWindow?.rootViewController
+
+        while let presented = controller?.presentedViewController {
+            controller = presented
+        }
+
+        if let navigation = controller as? UINavigationController {
+            return navigation.visibleViewController ?? navigation
+        }
+        if let tab = controller as? UITabBarController {
+            return tab.selectedViewController ?? tab
+        }
+        return controller
+    }
+}
+
+private enum MSHAuthError: LocalizedError {
+    case missingGoogleClientID
+    case missingPresentingViewController
+    case missingGoogleIDToken
+
+    var errorDescription: String? {
+        switch self {
+        case .missingGoogleClientID:
+            "Google Sign-In is not configured for this build."
+        case .missingPresentingViewController:
+            "My Simple Health could not open Google Sign-In. Please try again."
+        case .missingGoogleIDToken:
+            "Google did not return a valid sign-in token. Please try again."
+        }
+    }
 }
 
 struct MSHAuthenticatedRootExperience: View {
@@ -113,7 +177,7 @@ struct MSHAuthenticatedRootExperience: View {
 
     var body: some View {
 #if DEBUG
-        // Development-only bypass so the native app remains testable when auth is unavailable.
+        // Development-only bypass so the native app remains testable while backend work is in progress.
         MSHRootExperience()
 #else
         Group {
