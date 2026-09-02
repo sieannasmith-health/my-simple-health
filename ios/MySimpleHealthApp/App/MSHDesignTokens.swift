@@ -14,15 +14,8 @@ enum MSHColor {
     static let warmWhite = Color(red: 0.995, green: 0.99, blue: 0.97)
     static let charcoal = Color(red: 0.14, green: 0.15, blue: 0.14)
 
-    static let accent = adaptive(
-        light: accentLight,
-        dark: accentDark
-    )
-
-    static let canvas = adaptive(
-        light: canvasLight,
-        dark: canvasDark
-    )
+    static let accent = adaptive(light: accentLight, dark: accentDark)
+    static let canvas = adaptive(light: canvasLight, dark: canvasDark)
 
     static let surface = adaptive(
         light: UIColor(red: 1.0, green: 0.995, blue: 0.985, alpha: 1),
@@ -71,9 +64,15 @@ enum MSHRadius {
 }
 
 enum MSHTypography {
+    // Use Apple text styles so the whole native interface supports Dynamic Type,
+    // accessibility sizes, weight changes, and the user's preferred content size.
+    // No remote or web font is required for any tab.
     static let destinationTitle = Font.system(.largeTitle, design: .serif, weight: .semibold)
+    static let sectionTitle = Font.system(.title3, design: .serif, weight: .semibold)
     static let cardTitle = Font.system(.headline, design: .default, weight: .semibold)
     static let body = Font.system(.body, design: .default)
+    static let caption = Font.system(.subheadline, design: .default)
+    static let button = Font.system(.body, design: .default, weight: .semibold)
 }
 
 struct MSHSurfaceModifier: ViewModifier {

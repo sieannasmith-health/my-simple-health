@@ -1,0 +1,63 @@
+name: iOS Native Integrity
+
+on:
+  push:
+    branches:
+      - fix/native-tab-stability
+      - integration/ios-current
+  pull_request:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-native-integrity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-integrity:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify local HealthKit package
+        working-directory: ios/MySimpleHealthHealthKit
+        run: |
+          test -f Package.swift
+          swift package describe
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Regenerate Xcode project from canonical config
+        working-directory: ios/MySimpleHealthApp
+        run: xcodegen generate
+
+      - name: Assert native target excludes web renderer and stale backend packages
+        working-directory: ios/MySimpleHealthApp
+        run: |
+          ! grep -q 'Supabase' MySimpleHealth.xcodeproj/project.pbxproj
+          ! grep -q 'MSHWebView.swift in Sources' MySimpleHealth.xcodeproj/project.pbxproj
+          ! grep -q 'AppleHealthBridge.swift in Sources' MySimpleHealth.xcodeproj/project.pbxproj
+          ! grep -q 'MSHNotificationBridge.swift in Sources' MySimpleHealth.xcodeproj/project.pbxproj
+          ! grep -Eq 'MSHWebView|MSHWebFeatureScreen|MSHNotificationWebRouteScreen' App/MSHNativeShell.swift
+          grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
+          grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
+
+      - name: Build and run unit tests
+        working-directory: ios/MySimpleHealthApp
+        run: |
+          xcodebuild \
+            -project MySimpleHealth.xcodeproj \
+            -scheme MySimpleHealth \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -configuration Debug \
+            test CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload regenerated project
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-xcode-project
+          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if-no-files-found: error
