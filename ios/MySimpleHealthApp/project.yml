@@ -45,6 +45,7 @@ targets:
             CFBundleURLName: Google OAuth
             CFBundleURLSchemes:
               - com.googleusercontent.apps.962838363677-6njo5buhrcn9ne6mbgb8pubehbgnnbtb
+        NSCameraUsageDescription: My Simple Health uses the camera when you choose to scan a food barcode or capture a food photo.
         NSHealthShareUsageDescription: My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.
         UILaunchStoryboardName: LaunchScreen
         UISupportedInterfaceOrientations:

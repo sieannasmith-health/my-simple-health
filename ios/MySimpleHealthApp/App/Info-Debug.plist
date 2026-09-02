@@ -38,6 +38,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>My Simple Health uses the camera when you choose to scan a food barcode or capture a food photo.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.</string>
 	<key>NSLocalNetworkUsageDescription</key>

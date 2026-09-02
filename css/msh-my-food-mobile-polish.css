@@ -1,0 +1,47 @@
+/* My Simple Health — mobile action spacing for My Food */
+@media (max-width: 520px) {
+  .msh-food-header > .msh-food-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 46px;
+    margin-top: 18px;
+    margin-right: 18px;
+    padding: 10px 15px;
+    font-size: .84rem;
+    line-height: 1;
+  }
+
+  .msh-food-header > .msh-food-add + .msh-food-add {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .msh-food-dialog-card .msh-food-primary {
+    width: auto !important;
+    max-width: 240px;
+    min-width: 150px;
+    min-height: 46px;
+    padding: 11px 20px;
+    justify-self: start;
+  }
+
+  .msh-food-dialog-card .msh-food-acquisition-actions {
+    gap: 14px;
+  }
+
+  .msh-food-dialog-card .msh-food-acquisition-actions > * {
+    flex: 0 1 auto;
+  }
+
+  .msh-food-date-preview[hidden] {
+    display: none !important;
+  }
+
+  .msh-food-date-preview {
+    width: 100%;
+    background: var(--food-surface-soft) !important;
+    color: var(--food-ink);
+  }
+}
