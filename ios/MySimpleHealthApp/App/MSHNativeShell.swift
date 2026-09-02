@@ -31,22 +31,15 @@ enum MSHAppSection: String, CaseIterable, Identifiable {
 
     var introduction: String {
         switch self {
-        case .myHealth:
-            "Your personal health picture will come together here."
-        case .calendar:
-            "A calm view of what is happening across your health over time."
-        case .movement:
-            "Movement, workouts, and activity context will live here."
-        case .track:
-            "See how your confirmed health experiences connect and change over time."
-        case .tools:
-            "Personal tools and resources will be available here."
+        case .myHealth: "Your personal health picture will come together here."
+        case .calendar: "A calm view of what is happening across your health over time."
+        case .movement: "Movement, workouts, and activity context will live here."
+        case .track: "See how your confirmed health experiences connect and change over time."
+        case .tools: "Personal tools and resources will be available here."
         }
     }
 
-    var isImplemented: Bool {
-        true
-    }
+    var isImplemented: Bool { true }
 }
 
 enum MSHAppearancePreference: String, CaseIterable, Identifiable {
@@ -85,12 +78,7 @@ struct MSHAppShell: View {
     var body: some View {
         TabView(selection: $selection) {
             ForEach(MSHAppSection.allCases) { section in
-                MSHSectionNavigation(
-                    section: section,
-                    notificationRoute: notificationRouter.route?.appSection == section
-                        ? notificationRouter.route
-                        : nil
-                )
+                MSHSectionNavigation(section: section)
                     .tabItem {
                         Label(section.title, systemImage: section.systemImage)
                     }
@@ -109,105 +97,352 @@ struct MSHAppShell: View {
 
     private func openNotificationRouteIfNeeded(_ route: MSHWebRoute?) {
         guard let route else { return }
+        // Notification routes may still contain legacy web paths for compatibility,
+        // but the app only uses them to choose a native tab. A notification never
+        // creates a WKWebView inside the tab hierarchy.
         selection = route.appSection
     }
 }
 
 private struct MSHSectionNavigation: View {
     let section: MSHAppSection
-    let notificationRoute: MSHWebRoute?
 
     var body: some View {
         NavigationStack {
             Group {
                 switch section {
                 case .myHealth:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMyHealthScreen()
-                    }
+                    MSHMyHealthScreen()
                 case .calendar:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHWebFeatureScreen(destination: .calendar)
-                    }
+                    MSHNativeCalendarScreen()
                 case .movement:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMovementScreen()
-                    }
-                case .tools:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHToolsScreen()
-                    }
+                    MSHMovementScreen()
                 case .track:
                     MSHTrackScreen()
+                case .tools:
+                    MSHToolsScreen()
                 }
             }
-                .navigationTitle(section.title)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    if section == .myHealth {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                MSHProfileSettingsScreen()
-                            } label: {
-                                Image(systemName: "person.crop.circle")
-                                    .accessibilityLabel("Profile and Settings")
-                            }
-                        }
-                    }
-
-                    if section == .calendar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                MSHPeopleSharingScreen()
-                            } label: {
-                                Label("Share Calendar", systemImage: "person.2")
-                                    .font(.subheadline.weight(.semibold))
-                            }
-                            .accessibilityLabel("Share Calendar")
-                            .accessibilityIdentifier("calendar-share-button")
+            .navigationTitle(section.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if section == .myHealth {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            MSHProfileSettingsScreen()
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .accessibilityLabel("Profile and Settings")
                         }
                     }
                 }
+
+                if section == .calendar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            MSHPeopleSharingScreen()
+                        } label: {
+                            Label("Share Calendar", systemImage: "person.2")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .accessibilityLabel("Share Calendar")
+                        .accessibilityIdentifier("calendar-share-button")
+                    }
+                }
+            }
         }
     }
 }
 
-private struct MSHNotificationWebRouteScreen: View {
-    let route: MSHWebRoute
+private enum MSHNativeDestination: String, CaseIterable, Identifiable {
+    case movementPlan
+    case movementLibrary
+    case healthStory
+    case landscape
+    case selfInsight
+    case journey
+    case explore
+    case cycle
+    case medications
+    case horizon
+    case path
+    case practice
+    case discovery
+    case food
+    case financialHealth
 
-    var body: some View {
-        MSHWebView(route: route)
-            .background(MSHColor.canvas)
-            .accessibilityIdentifier("notification-route-\(route.rawValue)")
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .movementPlan: "Plan Movement"
+        case .movementLibrary: "Movement Library & Workouts"
+        case .healthStory: "My Health Story"
+        case .landscape: "Landscape"
+        case .selfInsight: "Self-Insight"
+        case .journey: "Journey"
+        case .explore: "Explore"
+        case .cycle: "Cycle"
+        case .medications: "Medication Continuity"
+        case .horizon: "Horizon"
+        case .path: "Path"
+        case .practice: "Practice"
+        case .discovery: "Discovery"
+        case .food: "Food"
+        case .financialHealth: "Financial Health"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .movementPlan: "Plan movement in time without loading a web calendar."
+        case .movementLibrary: "Browse movement and workout options in the native app."
+        case .healthStory: "Review the health story built from confirmed records and reflections."
+        case .landscape: "See the broader context of your health and life."
+        case .selfInsight: "Use structured reflection when something needs more context."
+        case .journey: "Review what has changed over time without turning it into a score."
+        case .explore: "Browse the native MSH capability directory."
+        case .cycle: "Record cycle context with clear, recognizable native symbols."
+        case .medications: "Keep medication supply and refill continuity visible."
+        case .horizon: "Clarify where you may want to head."
+        case .path: "See what you are intentionally working toward."
+        case .practice: "Return to what you are trying in real life."
+        case .discovery: "Reflect on what your experience is showing you."
+        case .food: "Keep food context in the same native health experience."
+        case .financialHealth: "View financial health in the context of your life."
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .movementPlan: "calendar.badge.plus"
+        case .movementLibrary: "figure.run"
+        case .healthStory: "book.pages"
+        case .landscape: "map"
+        case .selfInsight: "sparkles.rectangle.stack"
+        case .journey: "clock.arrow.circlepath"
+        case .explore: "safari"
+        case .cycle: "drop.circle.fill"
+        case .medications: "pills.fill"
+        case .horizon: "sun.horizon.fill"
+        case .path: "point.topleft.down.to.point.bottomright.curvepath"
+        case .practice: "leaf.fill"
+        case .discovery: "lightbulb.fill"
+        case .food: "fork.knife"
+        case .financialHealth: "chart.pie.fill"
+        }
     }
 }
 
-struct MSHWebFeatureScreen: View {
-    let destination: MSHFeatureDestination
+private struct MSHNativeFeatureScreen: View {
+    let destination: MSHNativeDestination
 
+    @ViewBuilder
     var body: some View {
-        MSHWebView(destination: destination)
-            .background(MSHColor.canvas)
-            .navigationTitle(destination.title)
-            .navigationBarTitleDisplayMode(.inline)
-            .accessibilityIdentifier("native-feature-\(destination.rawValue)")
+        switch destination {
+        case .cycle:
+            MSHNativeCycleScreen()
+        default:
+            MSHNativeFeatureSummaryScreen(destination: destination)
+        }
     }
 }
 
-private struct MSHMovementScreen: View {
-    private let destinations: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.movementPlan, "Plan a workout or movement session, then record how it went. Existing MSH movements can be opened and edited without creating a duplicate.", "calendar.badge.plus"),
-        (.calendar, "See scheduled and completed movement beside other dated health context.", "calendar"),
-        (.movementLibrary, "Browse movement, saved workouts, favorites, and the existing YouTube playlist connection in one library.", "figure.run")
+private struct MSHNativeFeatureSummaryScreen: View {
+    let destination: MSHNativeDestination
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    Image(systemName: destination.systemImage)
+                        .font(.system(.largeTitle, design: .default, weight: .semibold))
+                        .foregroundStyle(MSHColor.accent)
+                        .frame(width: 64, height: 64)
+                        .background(MSHColor.controlFill)
+                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+
+                    Text(destination.title)
+                        .font(MSHTypography.destinationTitle)
+                        .foregroundStyle(MSHColor.primaryText)
+
+                    Text(destination.subtitle)
+                        .font(MSHTypography.body)
+                        .foregroundStyle(MSHColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    MSHNativeBoundaryNote(
+                        text: "This surface is native SwiftUI. Legacy website UI is not embedded in the app tabs. Feature data will move behind native services as each capability reaches parity."
+                    )
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(MSHSpacing.large)
+            }
+        }
+        .navigationTitle(destination.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("native-feature-\(destination.rawValue)")
+    }
+}
+
+private struct MSHNativeCalendarScreen: View {
+    @State private var selectedDate = Date()
+    @State private var snapshot: MSHMyHealthSnapshot?
+    @State private var loadError: String?
+    @State private var isLoading = false
+
+    private let dataSource = MSHMyHealthDataSource.live()
+
+    private var activityForSelectedDate: [MSHRecentHealthActivity] {
+        guard let snapshot else { return [] }
+        return snapshot.recentActivity.filter {
+            Calendar.current.isDate($0.occurredAt, inSameDayAs: selectedDate)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: MSHSpacing.large) {
+                    DatePicker(
+                        "Date",
+                        selection: $selectedDate,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .tint(MSHColor.accent)
+                    .padding(MSHSpacing.small)
+                    .background(MSHColor.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.large, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: MSHRadius.large, style: .continuous)
+                            .stroke(MSHColor.border, lineWidth: 0.75)
+                    }
+
+                    HStack(spacing: MSHSpacing.small) {
+                        NavigationLink {
+                            MSHNativeCycleScreen()
+                        } label: {
+                            Label("Cycle", systemImage: "drop.circle.fill")
+                                .font(MSHTypography.button)
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                                .background(MSHColor.controlFill)
+                                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            Task { await reload() }
+                        } label: {
+                            Label("Refresh", systemImage: "arrow.clockwise")
+                                .font(MSHTypography.button)
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                                .background(MSHColor.controlFill)
+                                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isLoading)
+                    }
+                    .foregroundStyle(MSHColor.accent)
+
+                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                        Text(selectedDate.formatted(date: .complete, time: .omitted))
+                            .font(MSHTypography.sectionTitle)
+                            .foregroundStyle(MSHColor.primaryText)
+
+                        if isLoading && snapshot == nil {
+                            ProgressView("Loading recent health context…")
+                                .tint(MSHColor.accent)
+                        } else if let loadError {
+                            Label(loadError, systemImage: "exclamationmark.triangle")
+                                .font(MSHTypography.body)
+                                .foregroundStyle(MSHColor.secondaryText)
+                        } else if activityForSelectedDate.isEmpty {
+                            Text("No recent Apple Health activity is stored for this date.")
+                                .font(MSHTypography.body)
+                                .foregroundStyle(MSHColor.secondaryText)
+                        } else {
+                            ForEach(activityForSelectedDate) { activity in
+                                HStack(spacing: MSHSpacing.medium) {
+                                    Image(systemName: activity.systemImage)
+                                        .font(.title3.weight(.semibold))
+                                        .foregroundStyle(MSHColor.accent)
+                                        .frame(width: 42, height: 42)
+                                        .background(MSHColor.controlFill)
+                                        .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(activity.title)
+                                            .font(MSHTypography.cardTitle)
+                                            .foregroundStyle(MSHColor.primaryText)
+                                        if let detail = activity.detail {
+                                            Text(detail)
+                                                .font(MSHTypography.caption)
+                                                .foregroundStyle(MSHColor.secondaryText)
+                                        }
+                                        Text(activity.occurredAt.formatted(date: .omitted, time: .shortened))
+                                            .font(MSHTypography.caption)
+                                            .foregroundStyle(MSHColor.secondaryText)
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(MSHSpacing.medium)
+                                .background(MSHColor.surface)
+                                .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                            }
+                        }
+                    }
+                }
+                .padding(MSHSpacing.medium)
+            }
+        }
+        .task { await reload() }
+        .accessibilityIdentifier("native-calendar-screen")
+    }
+
+    @MainActor
+    private func reload() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            async let status = dataSource.loadStatus()
+            async let recent = dataSource.loadRecentActivity(limit: 20)
+            let (resolvedStatus, resolvedRecent) = try await (status, recent)
+            snapshot = MSHMyHealthMapper.snapshot(
+                syncState: resolvedStatus,
+                recentRecords: resolvedRecent,
+                recentLimit: 20
+            )
+            loadError = nil
+        } catch {
+            loadError = "Recent health context could not be loaded."
+        }
+    }
+}
+
+private struct MSHNativeCycleScreen: View {
+    private struct CycleItem: Identifiable {
+        let id: String
+        let title: String
+        let systemImage: String
+        let note: String
+    }
+
+    private let items: [CycleItem] = [
+        .init(id: "flow", title: "Flow", systemImage: "drop.fill", note: "Bleeding and flow"),
+        .init(id: "cramps", title: "Cramps", systemImage: "waveform.path.ecg", note: "Pelvic or abdominal discomfort"),
+        .init(id: "ovulation", title: "Ovulation", systemImage: "circle.circle.fill", note: "Ovulation context"),
+        .init(id: "breast", title: "Breast tenderness", systemImage: "figure.arms.open", note: "Tenderness or sensitivity"),
+        .init(id: "headache", title: "Headache", systemImage: "brain.head.profile", note: "Headache or migraine"),
+        .init(id: "mood", title: "Mood", systemImage: "face.smiling.inverse", note: "Mood and emotional changes"),
+        .init(id: "fatigue", title: "Fatigue", systemImage: "battery.25percent", note: "Energy and fatigue"),
+        .init(id: "digestion", title: "Digestion", systemImage: "stomach", note: "Bloating, nausea, or digestion"),
+        .init(id: "medication", title: "Medication", systemImage: "pills.fill", note: "Medication or contraception")
     ]
+
+    private let columns = [GridItem(.adaptive(minimum: 145), spacing: MSHSpacing.small)]
 
     var body: some View {
         ZStack {
@@ -215,102 +450,82 @@ private struct MSHMovementScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MSHSpacing.large) {
                     VStack(alignment: .leading, spacing: MSHSpacing.small) {
-                        Text("Movement")
+                        Text("Cycle")
                             .font(MSHTypography.destinationTitle)
                             .foregroundStyle(MSHColor.primaryText)
-                        Text("Choose movement, plan it in time, and keep your experience separate from what Apple Health records.")
+                        Text("Clear symbols first, labels always. Nothing should require decoding a tiny abstract shape.")
                             .font(MSHTypography.body)
                             .foregroundStyle(MSHColor.secondaryText)
                     }
 
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
-                        NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
-                        } label: {
-                            MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
-                            )
+                    LazyVGrid(columns: columns, spacing: MSHSpacing.small) {
+                        ForEach(items) { item in
+                            VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                                Image(systemName: item.systemImage)
+                                    .font(.system(size: 30, weight: .bold))
+                                    .foregroundStyle(MSHColor.accent)
+                                    .frame(width: 58, height: 58)
+                                    .background(MSHColor.controlFill)
+                                    .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                                Text(item.title)
+                                    .font(MSHTypography.cardTitle)
+                                    .foregroundStyle(MSHColor.primaryText)
+                                Text(item.note)
+                                    .font(MSHTypography.caption)
+                                    .foregroundStyle(MSHColor.secondaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+                            .padding(MSHSpacing.medium)
+                            .background(MSHColor.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
+                                    .stroke(MSHColor.border, lineWidth: 0.75)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
-
-                    MSHNativeBoundaryNote(
-                        text: "Recent Apple Health movement remains available in My Health. Calendar requests only the visible date range rather than loading your complete HealthKit history. Apple Health source records stay unchanged; MSH can edit only its own attached context."
-                    )
                 }
                 .padding(MSHSpacing.medium)
             }
         }
+        .navigationTitle("Cycle")
+        .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("native-cycle-screen")
+    }
+}
+
+private struct MSHMovementScreen: View {
+    private let destinations: [MSHNativeDestination] = [.movementPlan, .movementLibrary]
+
+    var body: some View {
+        MSHNativeDirectoryScreen(
+            title: "Movement",
+            introduction: "Choose movement, plan it in time, and keep your experience separate from what Apple Health records.",
+            destinations: destinations,
+            footer: "Recent Apple Health movement remains available in My Health. Native screens use bounded on-device data rather than loading a complete HealthKit history."
+        )
     }
 }
 
 private struct MSHTrackScreen: View {
-    private let destinations: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.healthStory, "Review the living story compiled from your confirmed Landscape, direction, practices, reflections, Calendar, and Journey records.", "book.pages"),
-        (.landscape, "Revisit the whole-health and life domains that form your current picture.", "map"),
-        (.selfInsight, "Use structured reflection when one part of your experience needs more context.", "sparkles.rectangle.stack"),
-        (.journey, "See recorded change through time without turning it into a streak or score.", "clock.arrow.circlepath"),
-        (.calendar, "Review dated health and life context in the shared time layer.", "calendar")
-    ]
+    private let destinations: [MSHNativeDestination] = [.healthStory, .landscape, .selfInsight, .journey]
 
     var body: some View {
-        ZStack {
-            MSHColor.canvas.ignoresSafeArea()
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
-                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
-                        Text("Track")
-                            .font(MSHTypography.destinationTitle)
-                            .foregroundStyle(MSHColor.primaryText)
-                        Text("See how your health and life picture is changing across domains and through time.")
-                            .font(MSHTypography.body)
-                            .foregroundStyle(MSHColor.secondaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.bottom, MSHSpacing.small)
-
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
-                        NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
-                        } label: {
-                            MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    MSHNativeBoundaryNote(
-                        text: "Track connects existing records and reflections. It does not diagnose, infer causes, or turn a nearby event into an explanation."
-                    )
-                }
-                .padding(MSHSpacing.medium)
-            }
-        }
+        MSHNativeDirectoryScreen(
+            title: "Track",
+            introduction: "See how your health and life picture is changing across domains and through time.",
+            destinations: destinations,
+            footer: "Track connects confirmed records and reflections without treating a nearby event as proof of a cause."
+        )
         .accessibilityIdentifier("track-integration-screen")
     }
 }
 
 private struct MSHToolsScreen: View {
-    private let destinations: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.explore, "Browse the current My Health directory and choose where you want to go next.", "safari"),
-        (.landscape, "See the broader picture of where you are.", "map"),
-        (.selfInsight, "Choose a working self-reflection instrument.", "sparkles.rectangle.stack"),
-        (.cycle, "Open Cycle as a layer of the shared Calendar.", "circle.dotted.circle"),
-        (.medications, "Track medication supply, refill timing, and reviewable outreach actions.", "pills"),
-        (.horizon, "Explore where you may want to head.", "sun.horizon"),
-        (.path, "See what you are intentionally working toward.", "point.topleft.down.to.point.bottomright.curvepath"),
-        (.practice, "Return to what you are trying in real life.", "leaf"),
-        (.discovery, "Reflect on what experience is showing you.", "lightbulb"),
-        (.journey, "See what has unfolded over time.", "clock.arrow.circlepath"),
-        (.food, "Use the existing personal food workspace.", "fork.knife"),
-        (.financialHealth, "Explore financial health in the context of your life.", "chart.pie")
+    private let destinations: [MSHNativeDestination] = [
+        .explore, .landscape, .selfInsight, .cycle, .medications,
+        .horizon, .path, .practice, .discovery, .journey, .food, .financialHealth
     ]
 
     var body: some View {
@@ -322,7 +537,7 @@ private struct MSHToolsScreen: View {
                         Text("Tools")
                             .font(MSHTypography.destinationTitle)
                             .foregroundStyle(MSHColor.primaryText)
-                        Text("Open a working My Simple Health experience without leaving the native app shell.")
+                        Text("Native capabilities that support your health without embedding the mobile website.")
                             .font(MSHTypography.body)
                             .foregroundStyle(MSHColor.secondaryText)
                     }
@@ -334,24 +549,66 @@ private struct MSHToolsScreen: View {
                         MSHFeatureDoorway(
                             title: "Meditate",
                             subtitle: "Choose meditation, breathwork, a body scan, or a quiet timer.",
-                            systemImage: "moon.stars"
+                            systemImage: "moon.stars.fill"
                         )
                     }
                     .buttonStyle(.plain)
 
-                    ForEach(destinations.indices, id: \.self) { index in
-                        let item = destinations[index]
+                    ForEach(destinations) { destination in
                         NavigationLink {
-                            MSHWebFeatureScreen(destination: item.destination)
+                            MSHNativeFeatureScreen(destination: destination)
                         } label: {
                             MSHFeatureDoorway(
-                                title: item.destination.title,
-                                subtitle: item.subtitle,
-                                systemImage: item.image
+                                title: destination.title,
+                                subtitle: destination.subtitle,
+                                systemImage: destination.systemImage
                             )
                         }
                         .buttonStyle(.plain)
                     }
+                }
+                .padding(MSHSpacing.medium)
+            }
+        }
+    }
+}
+
+private struct MSHNativeDirectoryScreen: View {
+    let title: String
+    let introduction: String
+    let destinations: [MSHNativeDestination]
+    let footer: String
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: MSHSpacing.medium) {
+                    VStack(alignment: .leading, spacing: MSHSpacing.small) {
+                        Text(title)
+                            .font(MSHTypography.destinationTitle)
+                            .foregroundStyle(MSHColor.primaryText)
+                        Text(introduction)
+                            .font(MSHTypography.body)
+                            .foregroundStyle(MSHColor.secondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.bottom, MSHSpacing.small)
+
+                    ForEach(destinations) { destination in
+                        NavigationLink {
+                            MSHNativeFeatureScreen(destination: destination)
+                        } label: {
+                            MSHFeatureDoorway(
+                                title: destination.title,
+                                subtitle: destination.subtitle,
+                                systemImage: destination.systemImage
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    MSHNativeBoundaryNote(text: footer)
                 }
                 .padding(MSHSpacing.medium)
             }
@@ -367,9 +624,9 @@ struct MSHFeatureDoorway: View {
     var body: some View {
         HStack(spacing: MSHSpacing.medium) {
             Image(systemName: systemImage)
-                .font(.title3)
+                .font(.title3.weight(.semibold))
                 .foregroundStyle(MSHColor.accent)
-                .frame(width: 42, height: 42)
+                .frame(width: 44, height: 44)
                 .background(MSHColor.controlFill)
                 .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
             VStack(alignment: .leading, spacing: MSHSpacing.xSmall) {
@@ -377,7 +634,7 @@ struct MSHFeatureDoorway: View {
                     .font(MSHTypography.cardTitle)
                     .foregroundStyle(MSHColor.primaryText)
                 Text(subtitle)
-                    .font(.subheadline)
+                    .font(MSHTypography.caption)
                     .foregroundStyle(MSHColor.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -391,7 +648,7 @@ struct MSHFeatureDoorway: View {
         .clipShape(RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: MSHRadius.medium, style: .continuous)
-                .stroke(MSHColor.border, lineWidth: 1)
+                .stroke(MSHColor.border, lineWidth: 0.75)
         }
         .contentShape(Rectangle())
     }
@@ -402,7 +659,7 @@ private struct MSHNativeBoundaryNote: View {
 
     var body: some View {
         Text(text)
-            .font(.footnote)
+            .font(MSHTypography.caption)
             .foregroundStyle(MSHColor.secondaryText)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, MSHSpacing.small)
@@ -452,8 +709,9 @@ struct MSHProfileSettingsScreen: View {
                             .foregroundStyle(MSHColor.primaryText)
                         TextField("Name or nickname", text: $displayName)
                             .textInputAutocapitalization(.words)
+                            .font(MSHTypography.body)
                             .padding(.horizontal, MSHSpacing.medium)
-                            .frame(height: 48)
+                            .frame(minHeight: 48)
                             .background(MSHColor.controlFill)
                             .foregroundStyle(MSHColor.primaryText)
                             .clipShape(RoundedRectangle(cornerRadius: MSHRadius.small, style: .continuous))
@@ -469,7 +727,7 @@ struct MSHProfileSettingsScreen: View {
                             .font(MSHTypography.cardTitle)
                             .foregroundStyle(MSHColor.primaryText)
                         Text("Choose the environment that is easiest for you to read.")
-                            .font(.subheadline)
+                            .font(MSHTypography.caption)
                             .foregroundStyle(MSHColor.secondaryText)
 
                         Picker("Appearance", selection: $appearanceRawValue) {
