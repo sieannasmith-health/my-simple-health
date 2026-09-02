@@ -1,99 +1,159 @@
+import FirebaseAuth
+import FirebaseCore
 import Foundation
-import Supabase
+import GoogleSignIn
 import SwiftUI
+import UIKit
 
 @MainActor
 final class MSHAuthStore: ObservableObject {
     static let shared = MSHAuthStore()
 
-    @Published private(set) var session: Session?
+    @Published private(set) var user: User?
     @Published private(set) var isResolvingSession = true
     @Published var errorMessage: String?
+    @Published var noticeMessage: String?
 
-    let client: SupabaseClient
-    private var authTask: Task<Void, Never>?
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     private init() {
-        client = SupabaseClient(
-            supabaseURL: URL(string: "https://dcweyvlimvkljlqkzhbs.supabase.co")!,
-            supabaseKey: "sb_publishable_eDu5tCF5ngIB1kPVVud-8w_grUSJhNa"
-        )
+        user = Auth.auth().currentUser
+        isResolvingSession = false
 
-        authTask = Task { [weak self] in
-            guard let self else { return }
-            for await state in client.auth.authStateChanges {
-                switch state.event {
-                case .initialSession, .signedIn, .signedOut, .tokenRefreshed, .userUpdated:
-                    session = state.session
-                    isResolvingSession = false
-                default:
-                    break
-                }
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            Task { @MainActor in
+                self?.user = user
+                self?.isResolvingSession = false
             }
         }
     }
 
     deinit {
-        authTask?.cancel()
+        if let authStateHandle {
+            Auth.auth().removeStateDidChangeListener(authStateHandle)
+        }
     }
 
-    var isAuthenticated: Bool { session != nil }
-    var userEmail: String? { session?.user.email }
-    var userID: UUID? { session?.user.id }
+    var isAuthenticated: Bool { user != nil }
+    var userEmail: String? { user?.email }
+    var userID: String? { user?.uid }
 
     func signIn(email: String, password: String) async {
+        noticeMessage = nil
         await perform {
-            _ = try await client.auth.signIn(email: email, password: password)
+            try await withCheckedThrowingContinuation { continuation in
+                Auth.auth().signIn(withEmail: email, password: password) { _, error in
+                    if let error { continuation.resume(throwing: error) }
+                    else { continuation.resume(returning: ()) }
+                }
+            }
         }
     }
 
     func createAccount(email: String, password: String) async {
+        noticeMessage = nil
         await perform {
-            _ = try await client.auth.signUp(email: email, password: password)
+            try await withCheckedThrowingContinuation { continuation in
+                Auth.auth().createUser(withEmail: email, password: password) { _, error in
+                    if let error { continuation.resume(throwing: error) }
+                    else { continuation.resume(returning: ()) }
+                }
+            }
         }
+        if errorMessage == nil { noticeMessage = "Account created." }
     }
 
     func signInWithGoogle() async {
+        noticeMessage = nil
         await perform {
-            _ = try await client.auth.signInWithOAuth(
-    provider: .google,
-    redirectTo: URL(string: "mysimplehealth://auth-callback")!
-)
+            guard let clientID = FirebaseApp.app()?.options.clientID else {
+                throw MSHAuthError.missingGoogleClientID
+            }
+            guard let presentingViewController = Self.presentingViewController() else {
+                throw MSHAuthError.missingPresentingViewController
+            }
+
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+            try await withCheckedThrowingContinuation { continuation in
+                GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { result, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    guard let googleUser = result?.user,
+                          let idToken = googleUser.idToken?.tokenString else {
+                        continuation.resume(throwing: MSHAuthError.missingGoogleIDToken)
+                        return
+                    }
+
+                    let credential = GoogleAuthProvider.credential(
+                        withIDToken: idToken,
+                        accessToken: googleUser.accessToken.tokenString
+                    )
+
+                    Auth.auth().signIn(with: credential) { _, error in
+                        if let error { continuation.resume(throwing: error) }
+                        else { continuation.resume(returning: ()) }
+                    }
+                }
+            }
         }
     }
 
+    func handleOpenURL(_ url: URL) {
+        _ = GIDSignIn.sharedInstance.handle(url)
+    }
+
     func signOut() async {
+        noticeMessage = nil
         await perform {
-            try await client.auth.signOut()
+            GIDSignIn.sharedInstance.signOut()
+            try Auth.auth().signOut()
         }
     }
 
     private func perform(_ operation: () async throws -> Void) async {
         errorMessage = nil
-        do {
-            try await operation()
-        } catch {
-            errorMessage = error.localizedDescription
+        do { try await operation() }
+        catch { errorMessage = error.localizedDescription }
+    }
+
+    private static func presentingViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let keyWindow = scenes.flatMap(\.windows).first(where: \.isKeyWindow)
+        var controller = keyWindow?.rootViewController
+        while let presented = controller?.presentedViewController { controller = presented }
+        if let navigation = controller as? UINavigationController { return navigation.visibleViewController ?? navigation }
+        if let tab = controller as? UITabBarController { return tab.selectedViewController ?? tab }
+        return controller
+    }
+}
+
+private enum MSHAuthError: LocalizedError {
+    case missingGoogleClientID
+    case missingPresentingViewController
+    case missingGoogleIDToken
+
+    var errorDescription: String? {
+        switch self {
+        case .missingGoogleClientID: "Google Sign-In is not configured for this build."
+        case .missingPresentingViewController: "My Simple Health could not open Google Sign-In. Please try again."
+        case .missingGoogleIDToken: "Google did not return a valid sign-in token. Please try again."
         }
     }
 }
 
 struct MSHAuthenticatedRootExperience: View {
-#if !DEBUG
     @StateObject private var authStore = MSHAuthStore.shared
-#endif
 
     var body: some View {
-#if DEBUG
-        // Development-only bypass so the native app remains testable when auth is unavailable.
-        MSHRootExperience()
-#else
         Group {
             if authStore.isResolvingSession {
                 ZStack {
                     MSHColor.cream.ignoresSafeArea()
-                    ProgressView()
-                        .tint(MSHColor.forest)
+                    ProgressView().tint(MSHColor.forest)
                 }
             } else if authStore.isAuthenticated {
                 MSHRootExperience()
@@ -102,7 +162,6 @@ struct MSHAuthenticatedRootExperience: View {
             }
         }
         .environmentObject(authStore)
-#endif
     }
 }
 
@@ -135,21 +194,17 @@ struct MSHAuthGateView: View {
     var body: some View {
         ZStack {
             MSHColor.cream.ignoresSafeArea()
-
             ScrollView {
                 VStack(spacing: 24) {
                     Spacer(minLength: 52)
-
                     VStack(spacing: 10) {
                         Text("My Simple Health")
                             .font(.system(size: 18, weight: .semibold, design: .serif))
                             .foregroundStyle(MSHColor.forest)
-
                         Text(mode.title)
                             .font(.system(size: 34, weight: .medium, design: .serif))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(MSHColor.charcoal)
-
                         Text("Your health information stays connected to your account and your choices.")
                             .font(.body)
                             .multilineTextAlignment(.center)
@@ -173,9 +228,7 @@ struct MSHAuthGateView: View {
                             .background(MSHColor.warmWhite)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                        Button {
-                            submit()
-                        } label: {
+                        Button { submit() } label: {
                             HStack {
                                 if isWorking { ProgressView().tint(MSHColor.warmWhite) }
                                 Text(mode.actionTitle)
@@ -214,15 +267,16 @@ struct MSHAuthGateView: View {
                         .disabled(isWorking)
 
                         if let error = store.errorMessage {
-                            Text(error)
-                                .font(.footnote)
-                                .foregroundStyle(.red)
-                                .multilineTextAlignment(.center)
+                            Text(error).font(.footnote).foregroundStyle(.red).multilineTextAlignment(.center)
+                        }
+                        if let notice = store.noticeMessage {
+                            Text(notice).font(.footnote).foregroundStyle(MSHColor.charcoal.opacity(0.72)).multilineTextAlignment(.center)
                         }
                     }
 
                     Button(mode == .signIn ? "New to MSH? Create an account" : "Already have an account? Log in") {
                         store.errorMessage = nil
+                        store.noticeMessage = nil
                         mode = mode == .signIn ? .createAccount : .signIn
                     }
                     .font(.callout.weight(.semibold))
@@ -252,10 +306,8 @@ struct MSHAuthGateView: View {
         isWorking = true
         Task {
             switch mode {
-            case .signIn:
-                await store.signIn(email: cleanEmail, password: password)
-            case .createAccount:
-                await store.createAccount(email: cleanEmail, password: password)
+            case .signIn: await store.signIn(email: cleanEmail, password: password)
+            case .createAccount: await store.createAccount(email: cleanEmail, password: password)
             }
             isWorking = false
         }

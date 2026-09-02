@@ -25,19 +25,9 @@
 			<string>Google OAuth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.393412854054-03ej5aindksoog3uivrhd8tg59bphv4m</string>
+				<string>com.googleusercontent.apps.962838363677-6njo5buhrcn9ne6mbgb8pubehbgnnbtb</string>
 			</array>
 		</dict>
-<dict>
-    <key>CFBundleTypeRole</key>
-    <string>Editor</string>
-    <key>CFBundleURLName</key>
-    <string>MSH Auth</string>
-    <key>CFBundleURLSchemes</key>
-    <array>
-        <string>mysimplehealth</string>
-    </array>
-</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
