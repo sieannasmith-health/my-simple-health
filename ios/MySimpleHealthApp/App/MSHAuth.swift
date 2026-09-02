@@ -41,7 +41,7 @@ final class MSHAuthStore: ObservableObject {
     func signIn(email: String, password: String) async {
         noticeMessage = nil
         await perform {
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 Auth.auth().signIn(withEmail: email, password: password) { _, error in
                     if let error { continuation.resume(throwing: error) }
                     else { continuation.resume(returning: ()) }
@@ -53,7 +53,7 @@ final class MSHAuthStore: ObservableObject {
     func createAccount(email: String, password: String) async {
         noticeMessage = nil
         await perform {
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 Auth.auth().createUser(withEmail: email, password: password) { _, error in
                     if let error { continuation.resume(throwing: error) }
                     else { continuation.resume(returning: ()) }
@@ -75,7 +75,7 @@ final class MSHAuthStore: ObservableObject {
 
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
 
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { result, error in
                     if let error {
                         continuation.resume(throwing: error)
