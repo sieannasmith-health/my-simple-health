@@ -1,0 +1,83 @@
+/* My Simple Health — production Financial Health dark-mode readability */
+[data-theme="dark"] .msh-financial-page,
+[data-theme="dark"] .msh-financial-world,
+[data-theme="dark"] .msh-financial-share-sheet {
+  color:#f7f4ec;
+}
+
+[data-theme="dark"] .msh-financial-intro h1,
+[data-theme="dark"] .msh-financial-share-sheet h2,
+[data-theme="dark"] .msh-financial-share-sheet strong,
+[data-theme="dark"] .msh-financial-share-permission,
+[data-theme="dark"] .msh-financial-share-close {
+  color:#fbf8f0 !important;
+}
+
+[data-theme="dark"] .msh-financial-lede,
+[data-theme="dark"] .msh-financial-share-sheet > p,
+[data-theme="dark"] .msh-financial-share-option small,
+[data-theme="dark"] .msh-financial-share-summary,
+[data-theme="dark"] .msh-financial-share-status,
+[data-theme="dark"] .msh-financial-share-disclosure,
+[data-theme="dark"] .msh-financial-note {
+  color:#d7ddd5 !important;
+  opacity:1 !important;
+}
+
+[data-theme="dark"] .msh-financial-share-sheet {
+  background:#111813 !important;
+  border-color:rgba(238,243,236,.24) !important;
+}
+
+[data-theme="dark"] .msh-financial-share-option {
+  background:#1b241e !important;
+  border-color:rgba(238,243,236,.24) !important;
+}
+
+[data-theme="dark"] .msh-financial-share-option:has(input:checked) {
+  background:#202d24 !important;
+  border-color:rgba(151,207,167,.48) !important;
+}
+
+[data-theme="dark"] .msh-financial-share-option input {
+  accent-color:#8fcf9e;
+  outline-color:#d7ddd5;
+}
+
+[data-theme="dark"] .msh-financial-share-permission select {
+  background:#171f19 !important;
+  color:#fbf8f0 !important;
+  border-color:rgba(238,243,236,.30) !important;
+}
+
+[data-theme="dark"] .msh-financial-share-disclosure {
+  background:#222d24 !important;
+  border:1px solid rgba(238,243,236,.16) !important;
+}
+
+[data-theme="dark"] .msh-financial-share-primary {
+  background:#1d6849 !important;
+  border-color:#3b8967 !important;
+  color:#fff !important;
+}
+
+[data-theme="dark"] .msh-financial-share-secondary {
+  color:#f4f2eb !important;
+  border-color:rgba(238,243,236,.30) !important;
+}
+
+@media (max-width:700px) {
+  .msh-native-embedded .msh-financial-shell {
+    padding-top:42px !important;
+    padding-bottom:calc(132px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .msh-native-embedded .msh-financial-intro {
+    margin-top:0 !important;
+  }
+
+  .msh-native-embedded .msh-financial-share-sheet {
+    max-height:calc(100dvh - 210px) !important;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom)) !important;
+  }
+}
