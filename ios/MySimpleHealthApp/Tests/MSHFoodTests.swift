@@ -1,7 +1,6 @@
 import XCTest
 @testable import MySimpleHealth
 
-@MainActor
 final class MSHFoodTests: XCTestCase {
     private var suiteName: String!
     private var defaults: UserDefaults!
@@ -20,6 +19,7 @@ final class MSHFoodTests: XCTestCase {
         super.tearDown()
     }
 
+    @MainActor
     func testPurchasedGroceryMovesIntoInventoryAndKeepsProductCode() {
         let store = MSHFoodStore(defaults: defaults)
         let grocery = MSHGroceryItem(name: "Greek yogurt", quantity: 2, unit: "cup", productCode: "012345678905")
@@ -35,6 +35,7 @@ final class MSHFoodTests: XCTestCase {
         XCTAssertEqual(store.inventory[0].provenance, "grocery_purchase")
     }
 
+    @MainActor
     func testSameGroceryPurchaseIsIdempotent() {
         let store = MSHFoodStore(defaults: defaults)
         let grocery = MSHGroceryItem(name: "Oats", quantity: 1, unit: "bag")
@@ -47,6 +48,7 @@ final class MSHFoodTests: XCTestCase {
         XCTAssertEqual(store.inventory[0].quantity, 1)
     }
 
+    @MainActor
     func testProductCodeMatchesExistingInventoryEvenWhenNamesDiffer() {
         let store = MSHFoodStore(defaults: defaults)
         store.addFood(MSHFoodItem(name: "Organic rolled oats", quantity: 1, unit: "bag", productCode: "012345678905"))
@@ -60,6 +62,7 @@ final class MSHFoodTests: XCTestCase {
         XCTAssertEqual(store.inventory[0].name, "Organic rolled oats")
     }
 
+    @MainActor
     func testDuplicateActiveRestockIsSuppressed() {
         let store = MSHFoodStore(defaults: defaults)
         let food = MSHFoodItem(name: "Milk", quantity: 1, unit: "carton", productCode: "012345678905")
@@ -72,6 +75,7 @@ final class MSHFoodTests: XCTestCase {
         XCTAssertEqual(store.groceries.count, 1)
     }
 
+    @MainActor
     func testStorePersistsInventoryGroceriesAndProcessedPurchases() {
         let grocery = MSHGroceryItem(name: "Rice", quantity: 1, unit: "bag")
         do {
@@ -92,6 +96,7 @@ final class MSHFoodTests: XCTestCase {
         XCTAssertEqual(rice?.quantity, 1)
     }
 
+    @MainActor
     func testUseSoonReturnsExpiringItemsOnly() {
         let store = MSHFoodStore(defaults: defaults)
         let soon = Calendar.current.date(byAdding: .day, value: 2, to: Date())!
