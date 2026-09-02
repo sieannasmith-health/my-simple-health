@@ -49,9 +49,12 @@ struct MySimpleHealthApp: App {
     @UIApplicationDelegateAdaptor(MSHApplicationDelegate.self) private var applicationDelegate
 
     init() {
-        FirebaseApp.configure()
+        // Firebase can be touched by the app delegate and SwiftUI lifecycle during launch.
+        // Configure it exactly once so repeated startup paths cannot race or crash.
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
         MSHDebugLifecycle.log("process_launch")
-        MSHWebRuntime.logStartupConfiguration()
     }
 
     var body: some Scene {
