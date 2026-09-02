@@ -19,7 +19,8 @@
 
   const esc = value => String(value == null ? '' : value)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    .replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
+  const icon = (name, extraClass='') => root.MSHAreaIcons?.svg(name, extraClass) || '';
 
   function dialog() { return page.querySelector('[data-food-dialog]'); }
   function open(markup) {
@@ -74,7 +75,7 @@
     button.className = 'msh-food-action';
     button.type = 'button';
     button.dataset.addFoodDate = '';
-    button.innerHTML = '📅 <strong>Add expiration / date label</strong><br><small>Take a photo or enter the printed date manually.</small>';
+    button.innerHTML = `${icon('dateLabel','msh-area-icon--framed')}<strong>Add expiration / date label</strong><br><small>Take a photo or enter the printed date manually.</small>`;
     actions.appendChild(button);
   }
 
