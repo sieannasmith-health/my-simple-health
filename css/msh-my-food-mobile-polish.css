@@ -1,0 +1,11 @@
+/* My Simple Health — mobile action spacing for My Food */
+@media (max-width: 520px) {
+  .msh-food-header > .msh-food-add {
+    margin-top: 18px;
+    padding: 11px 16px;
+  }
+
+  .msh-food-header > .msh-food-add + .msh-food-add {
+    margin-left: 12px;
+  }
+}
