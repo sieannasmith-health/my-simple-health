@@ -10,7 +10,8 @@
 
   const esc = value => String(value == null ? '' : value)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    .replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
+  const icon = (name, extraClass='') => root.MSHAreaIcons?.svg(name, extraClass) || '';
 
   function dialog() { return page.querySelector('[data-food-dialog]'); }
   function dialogHead(title, copy) {
@@ -34,7 +35,7 @@
     button.className = 'msh-food-action';
     button.type = 'button';
     button.dataset.addReceipt = '';
-    button.innerHTML = '🧾 <strong>Add a receipt</strong><br><small>Turn a grocery receipt into one reviewed purchase.</small>';
+    button.innerHTML = `${icon('receipt','msh-area-icon--framed')}<strong>Add a receipt</strong><br><small>Turn a grocery receipt into one reviewed purchase.</small>`;
     actions.appendChild(button);
   }
 

@@ -8,7 +8,8 @@
   const consumption = root.MSHFoodConsumption;
   const esc = value => String(value == null ? '' : value)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    .replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
+  const icon = (name, extraClass='') => root.MSHAreaIcons?.svg(name, extraClass) || '';
 
   function dialog() { return page.querySelector('[data-food-dialog]'); }
   function dialogHead(title, copy) {
@@ -60,7 +61,7 @@
     button.className = 'msh-food-action';
     button.type = 'button';
     button.dataset.logFood = '';
-    button.innerHTML = '🍽️ <strong>Log food eaten</strong><br><small>Quick, specific, or measured.</small>';
+    button.innerHTML = `${icon('meal','msh-area-icon--framed')}<strong>Log food eaten</strong><br><small>Quick, specific, or measured.</small>`;
     actions.appendChild(button);
   }
 
