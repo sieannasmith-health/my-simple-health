@@ -57,18 +57,22 @@ final class MSHNotificationRouter: ObservableObject {
     }
 }
 
-final class MSHApplicationDelegate: NSObject, UIApplicationDelegate, @MainActor UNUserNotificationCenterDelegate {
+final class MSHApplicationDelegate: NSObject, UIApplicationDelegate {
+    private let notificationDelegate = MSHNotificationDelegate()
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().delegate = notificationDelegate
 #if DEBUG
         MSHNotificationDebugHarness.runIfRequested()
 #endif
         return true
     }
+}
 
+private final class MSHNotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
@@ -91,7 +95,9 @@ final class MSHApplicationDelegate: NSObject, UIApplicationDelegate, @MainActor 
             "id=\(identifier) route=\(routeValue ?? "nil") action=\(actionIdentifier)"
         )
         if let routeValue, let route = MSHWebRoute(rawValue: routeValue) {
-            MSHNotificationRouter.shared.open(route)
+            Task { @MainActor in
+                MSHNotificationRouter.shared.open(route)
+            }
         }
         completionHandler()
     }

@@ -1,5 +1,5 @@
 import FirebaseAuth
-import FirebaseFirestore
+@preconcurrency import FirebaseFirestore
 import Foundation
 import SwiftUI
 
@@ -35,6 +35,10 @@ enum MSHSharingCategory: String, CaseIterable, Codable, Identifiable {
         case .finances: ["mode": "selected_household_items"]
         case .health: ["mode": "approved_metric_summaries"]
         }
+    }
+
+    var allowsCollaboration: Bool {
+        self != .health
     }
 }
 

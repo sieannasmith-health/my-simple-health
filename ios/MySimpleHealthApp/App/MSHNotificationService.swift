@@ -118,18 +118,32 @@ protocol MSHUserNotificationCenter: Sendable {
     func removePendingRequests(withIdentifiers identifiers: [String]) async
 }
 
-extension UNUserNotificationCenter: MSHUserNotificationCenter {
+final class MSHSystemNotificationCenter: MSHUserNotificationCenter, @unchecked Sendable {
+    private let center = UNUserNotificationCenter.current()
+
     func authorizationStatus() async -> UNAuthorizationStatus {
-        await notificationSettings().authorizationStatus
+        await center.notificationSettings().authorizationStatus
+    }
+
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        try await center.requestAuthorization(options: options)
+    }
+
+    func add(_ request: UNNotificationRequest) async throws {
+        try await center.add(request)
+    }
+
+    func pendingNotificationRequests() async -> [UNNotificationRequest] {
+        await center.pendingNotificationRequests()
     }
 
     func removePendingRequests(withIdentifiers identifiers: [String]) async {
-        removePendingNotificationRequests(withIdentifiers: identifiers)
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 }
 
 actor MSHNotificationService {
-    static let shared = MSHNotificationService(center: UNUserNotificationCenter.current())
+    static let shared = MSHNotificationService(center: MSHSystemNotificationCenter())
 
     private enum UserInfoKey {
         static let route = "mshRoute"
