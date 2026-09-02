@@ -44,8 +44,63 @@ jobs:
           grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
 
+      - name: Upload regenerated project
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-xcode-project
+          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
+          if-no-files-found: error
+
+      - name: Select available iPhone simulator
+        id: simulator
+        run: |
+          SIMULATOR_UDID="$(python3 - <<'PY'
+          import json
+          import subprocess
+
+          payload = json.loads(subprocess.check_output([
+              'xcrun', 'simctl', 'list', 'devices', 'available', '-j'
+          ]))
+
+          preferred = []
+          fallback = []
+          for runtime, devices in payload.get('devices', {}).items():
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if not device.get('isAvailable'):
+                      continue
+                  name = device.get('name', '')
+                  udid = device.get('udid')
+                  if not udid or not name.startswith('iPhone'):
+                      continue
+                  fallback.append((name, udid))
+                  if name in ('iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro', 'iPhone 15'):
+                      preferred.append((name, udid))
+
+          candidates = preferred or fallback
+          if not candidates:
+              raise SystemExit('No available iPhone simulator found on runner')
+
+          print(candidates[0][1])
+          PY
+          )"
+          echo "udid=$SIMULATOR_UDID" >> "$GITHUB_OUTPUT"
+          echo "Using simulator $SIMULATOR_UDID"
+          xcrun simctl list devices available
+
+      - name: Build and run unit tests
+        working-directory: ios/MySimpleHealthApp
+        run: |
+          xcodebuild \
+            -project MySimpleHealth.xcodeproj \
+            -scheme MySimpleHealth \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -configuration Debug \
+            test CODE_SIGNING_ALLOWED=NO
+
       - name: Synchronize checked-in Xcode project
-        if: github.event_name == 'push' && github.ref_name == 'integration/ios-current'
+        if: success() && github.event_name == 'push' && github.ref_name == 'integration/ios-current'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -54,20 +109,3 @@ jobs:
             git commit -m "Regenerate native iOS project"
             git push
           fi
-
-      - name: Upload regenerated project
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-xcode-project
-          path: ios/MySimpleHealthApp/MySimpleHealth.xcodeproj/project.pbxproj
-          if-no-files-found: error
-
-      - name: Build and run unit tests
-        working-directory: ios/MySimpleHealthApp
-        run: |
-          xcodebuild \
-            -project MySimpleHealth.xcodeproj \
-            -scheme MySimpleHealth \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            -configuration Debug \
-            test CODE_SIGNING_ALLOWED=NO
