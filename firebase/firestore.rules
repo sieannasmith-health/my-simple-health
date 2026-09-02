@@ -7,7 +7,7 @@ service cloud.firestore {
 
     function email() {
       return signedIn() && request.auth.token.email != null
-        ? request.auth.token.email.lower()
+        ? request.auth.token.email
         : "";
     }
 
@@ -31,8 +31,8 @@ service cloud.firestore {
       let relationship = get(relationshipPath(data.relationshipID));
       return relationship.data.status == "accepted" &&
         (
-          relationship.data.inviterID == data.ownerID && relationship.data.inviteeID == data.recipientID ||
-          relationship.data.inviteeID == data.ownerID && relationship.data.inviterID == data.recipientID
+          (relationship.data.inviterID == data.ownerID && relationship.data.inviteeID == data.recipientID) ||
+          (relationship.data.inviteeID == data.ownerID && relationship.data.inviterID == data.recipientID)
         );
     }
 
@@ -48,7 +48,6 @@ service cloud.firestore {
       allow read: if isRelationshipParticipant(resource.data);
 
       allow update: if signedIn() && (
-        // Invitee may accept only an invitation addressed to their authenticated email.
         (
           resource.data.status == "pending"
           && resource.data.inviteeEmail == email()
@@ -59,7 +58,6 @@ service cloud.firestore {
           && request.resource.data.inviteeEmail == resource.data.inviteeEmail
         )
         ||
-        // Either accepted participant may revoke the connection.
         (
           (resource.data.inviterID == request.auth.uid || resource.data.inviteeID == request.auth.uid)
           && request.resource.data.status == "revoked"
