@@ -42,7 +42,10 @@ actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
     }
 
     func loadStatus() async throws -> HealthSyncState {
-        try await stateReader.load(provider: .appleHealth)
+        // My Health should refresh already-selected HealthKit areas when the
+        // dashboard loads, not only during onboarding.
+        try? await MSHAppleHealthRuntime.refreshConnectedHealth()
+        return try await stateReader.load(provider: .appleHealth)
     }
 
     func loadRecentActivity(limit: Int) async throws -> [HealthRecord] {
@@ -61,6 +64,8 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
         }
     }
 
+    // This is a per-domain cap. Keeping the limit bounded prevents high-frequency
+    // metrics such as heart rate and steps from crowding Sleep off the dashboard.
     static let maximumLimit = 20
 
     private let databaseURL: URL
@@ -74,19 +79,36 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
         guard boundedLimit > 0, FileManager.default.fileExists(atPath: databaseURL.path) else { return [] }
 
         var database: OpaquePointer?
-        let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX
+        let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
         guard sqlite3_open_v2(databaseURL.path, &database, flags, nil) == SQLITE_OK,
               let database else {
             defer { if let database { sqlite3_close(database) } }
-            throw ReaderError.sqlite("The on-device health record store could not be opened for reading.")
+            throw ReaderError.sqlite("The on-device health record store could not be opened.")
         }
         defer { sqlite3_close(database) }
 
+        // Older builds created derived sleep-session rows from only the intervals
+        // present in a single incremental HealthKit batch. Those partial sessions
+        // could overwrite a complete night. Remove only those MSH-generated rows;
+        // raw HealthKit sleep intervals remain untouched and are the source of truth.
+        try purgeLegacyDerivedSleepSessions(provider: provider, database: database)
+
         let sql = """
-            SELECT payload FROM health_records
-            WHERE provider = ? AND lifecycle_status = ?
+            WITH ranked AS (
+                SELECT payload, domain, event_start,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY domain
+                           ORDER BY event_start DESC
+                       ) AS domain_rank
+                FROM health_records
+                WHERE provider = ?
+                  AND lifecycle_status = ?
+                  AND NOT (domain = ? AND record_type = ?)
+            )
+            SELECT payload
+            FROM ranked
+            WHERE domain_rank <= ?
             ORDER BY event_start DESC
-            LIMIT ?
             """
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
@@ -97,12 +119,14 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
 
         guard sqlite3_bind_text(statement, 1, provider.rawValue, -1, sqliteTransient) == SQLITE_OK,
               sqlite3_bind_text(statement, 2, HealthRecordLifecycle.active.rawValue, -1, sqliteTransient) == SQLITE_OK,
-              sqlite3_bind_int(statement, 3, Int32(boundedLimit)) == SQLITE_OK else {
+              sqlite3_bind_text(statement, 3, HealthDomain.sleep.rawValue, -1, sqliteTransient) == SQLITE_OK,
+              sqlite3_bind_text(statement, 4, HealthRecordType.sleepSession.rawValue, -1, sqliteTransient) == SQLITE_OK,
+              sqlite3_bind_int(statement, 5, Int32(boundedLimit)) == SQLITE_OK else {
             throw ReaderError.sqlite(String(cString: sqlite3_errmsg(database)))
         }
 
         var records: [HealthRecord] = []
-        records.reserveCapacity(boundedLimit)
+        records.reserveCapacity(boundedLimit * 4)
         while true {
             let result = sqlite3_step(statement)
             if result == SQLITE_DONE { return records }
@@ -113,6 +137,29 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
             let count = Int(sqlite3_column_bytes(statement, 0))
             let payload = Data(bytes: bytes, count: count)
             records.append(try JSONDecoder.health.decode(HealthRecord.self, from: payload))
+        }
+    }
+
+    private func purgeLegacyDerivedSleepSessions(provider: HealthProvider, database: OpaquePointer) throws {
+        let sql = """
+            DELETE FROM health_records
+            WHERE provider = ?
+              AND domain = ?
+              AND record_type = ?
+              AND source_record_id LIKE 'sleep-session:%'
+            """
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
+              let statement else {
+            throw ReaderError.sqlite(String(cString: sqlite3_errmsg(database)))
+        }
+        defer { sqlite3_finalize(statement) }
+
+        guard sqlite3_bind_text(statement, 1, provider.rawValue, -1, sqliteTransient) == SQLITE_OK,
+              sqlite3_bind_text(statement, 2, HealthDomain.sleep.rawValue, -1, sqliteTransient) == SQLITE_OK,
+              sqlite3_bind_text(statement, 3, HealthRecordType.sleepSession.rawValue, -1, sqliteTransient) == SQLITE_OK,
+              sqlite3_step(statement) == SQLITE_DONE else {
+            throw ReaderError.sqlite(String(cString: sqlite3_errmsg(database)))
         }
     }
 
