@@ -6,9 +6,6 @@ options:
 packages:
   MySimpleHealthHealthKit:
     path: ../MySimpleHealthHealthKit
-  Supabase:
-    url: https://github.com/supabase/supabase-swift
-    exactVersion: 2.54.1
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
     from: 12.0.0
@@ -62,8 +59,6 @@ targets:
         product: MSHHealthCore
       - package: MySimpleHealthHealthKit
         product: MSHAppleHealthKit
-      - package: Supabase
-        product: Supabase
       - package: Firebase
         product: FirebaseCore
       - package: Firebase
