@@ -1,3 +1,5 @@
+@import url("msh-mobile-ui-regressions.css");
+
 /* MSH mobile form stabilization: preserve iPhone viewport while editing. */
 @media (max-width: 768px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
