@@ -44,9 +44,7 @@ enum MSHAppSection: String, CaseIterable, Identifiable {
         }
     }
 
-    var isImplemented: Bool {
-        true
-    }
+    var isImplemented: Bool { true }
 }
 
 enum MSHAppearancePreference: String, CaseIterable, Identifiable {
@@ -91,12 +89,13 @@ struct MSHAppShell: View {
                         ? notificationRouter.route
                         : nil
                 )
-                    .tabItem {
-                        Label(section.title, systemImage: section.systemImage)
-                    }
-                    .tag(section)
+                .tabItem {
+                    Label(section.title, systemImage: section.systemImage)
+                }
+                .tag(section)
             }
         }
+        .background(MSHColor.canvas.ignoresSafeArea())
         .toolbar(.hidden, for: .tabBar)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             MSHBottomTabBar(selection: $selection)
@@ -186,64 +185,75 @@ private struct MSHSectionNavigation: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                switch section {
-                case .myHealth:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMyHealthScreen()
+            ZStack {
+                MSHColor.canvas.ignoresSafeArea()
+
+                Group {
+                    switch section {
+                    case .myHealth:
+                        if let notificationRoute {
+                            MSHNotificationWebRouteScreen(route: notificationRoute)
+                        } else {
+                            MSHMyHealthScreen()
+                        }
+                    case .calendar:
+                        if let notificationRoute {
+                            MSHNotificationWebRouteScreen(route: notificationRoute)
+                        } else {
+                            MSHWebFeatureScreen(destination: .calendar)
+                        }
+                    case .movement:
+                        if let notificationRoute {
+                            MSHNotificationWebRouteScreen(route: notificationRoute)
+                        } else {
+                            MSHMovementScreen()
+                        }
+                    case .tools:
+                        if let notificationRoute {
+                            MSHNotificationWebRouteScreen(route: notificationRoute)
+                        } else {
+                            MSHToolsScreen()
+                        }
+                    case .track:
+                        MSHTrackScreen()
                     }
-                case .calendar:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHWebFeatureScreen(destination: .calendar)
-                    }
-                case .movement:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHMovementScreen()
-                    }
-                case .tools:
-                    if let notificationRoute {
-                        MSHNotificationWebRouteScreen(route: notificationRoute)
-                    } else {
-                        MSHToolsScreen()
-                    }
-                case .track:
-                    MSHTrackScreen()
                 }
             }
-                .navigationTitle(section.title)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    if section == .myHealth {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
+            .navigationTitle(section.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                if section == .myHealth {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            MSHImmediateDestination(title: "Profile & Settings") {
                                 MSHProfileSettingsScreen()
-                            } label: {
-                                Image(systemName: "person.crop.circle")
-                                    .accessibilityLabel("Profile and Settings")
                             }
-                        }
-                    }
-
-                    if section == .calendar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                MSHPeopleSharingScreen()
-                            } label: {
-                                Label("Share Calendar", systemImage: "person.2")
-                                    .font(.subheadline.weight(.semibold))
-                            }
-                            .accessibilityLabel("Share Calendar")
-                            .accessibilityIdentifier("calendar-share-button")
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .accessibilityLabel("Profile and Settings")
                         }
                     }
                 }
+
+                if section == .calendar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            MSHImmediateDestination(title: "People & Sharing") {
+                                MSHPeopleSharingScreen()
+                            }
+                        } label: {
+                            Label("Share Calendar", systemImage: "person.2")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .accessibilityLabel("Share Calendar")
+                        .accessibilityIdentifier("calendar-share-button")
+                    }
+                }
+            }
         }
+        .mshNavigationSurface()
     }
 }
 
@@ -251,9 +261,13 @@ private struct MSHNotificationWebRouteScreen: View {
     let route: MSHWebRoute
 
     var body: some View {
-        MSHWebView(route: route)
-            .background(MSHColor.canvas)
-            .accessibilityIdentifier("notification-route-\(route.rawValue)")
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            MSHWebView(route: route)
+        }
+        .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .accessibilityIdentifier("notification-route-\(route.rawValue)")
     }
 }
 
@@ -261,11 +275,17 @@ struct MSHWebFeatureScreen: View {
     let destination: MSHFeatureDestination
 
     var body: some View {
-        MSHWebView(destination: destination)
-            .background(MSHColor.canvas)
-            .navigationTitle(destination.title)
-            .navigationBarTitleDisplayMode(.inline)
-            .accessibilityIdentifier("native-feature-\(destination.rawValue)")
+        MSHImmediateDestination(title: destination.title) {
+            ZStack {
+                MSHColor.canvas.ignoresSafeArea()
+                MSHWebView(destination: destination)
+            }
+        }
+        .navigationTitle(destination.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .accessibilityIdentifier("native-feature-\(destination.rawValue)")
     }
 }
 
@@ -396,7 +416,9 @@ private struct MSHToolsScreen: View {
                     .padding(.bottom, MSHSpacing.small)
 
                     NavigationLink {
-                        MSHMeditateScreen()
+                        MSHImmediateDestination(title: "Meditate") {
+                            MSHMeditateScreen()
+                        }
                     } label: {
                         MSHFeatureDoorway(
                             title: "Meditate",
@@ -503,7 +525,9 @@ struct MSHProfileSettingsScreen: View {
                     .mshSurface()
 
                     NavigationLink {
-                        MSHPeopleSharingScreen()
+                        MSHImmediateDestination(title: "People & Sharing") {
+                            MSHPeopleSharingScreen()
+                        }
                     } label: {
                         MSHFeatureDoorway(
                             title: "People & Sharing",
@@ -553,5 +577,7 @@ struct MSHProfileSettingsScreen: View {
         }
         .navigationTitle("Profile & Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
     }
 }
