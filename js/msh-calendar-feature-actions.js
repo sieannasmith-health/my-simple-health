@@ -7,13 +7,13 @@
 
   const ACTIONS = Object.freeze({
     event: { label: 'Add event', category: 'event', title: 'Event', fieldLabel: 'Event', placeholder: 'Birthday, celebration, work, travel…', detailLabel: 'Notes' },
-    movement: { label: 'Movement', category: 'movement', native: 'movement', icon: '↗' },
-    cycle: { label: 'Cycle', category: 'cycle', native: 'cycle', icon: '◐' },
-    symptoms: { label: 'Symptoms', category: 'symptom', title: 'Symptoms', fieldLabel: 'Symptom', placeholder: 'What are you experiencing?', detailLabel: 'Notes', icon: '✦' },
+    movement: { label: 'Movement', category: 'movement', native: 'movement', icon: 'movement' },
+    cycle: { label: 'Cycle', category: 'cycle', native: 'cycle', icon: 'cycle' },
+    symptoms: { label: 'Symptoms', category: 'symptom', title: 'Symptoms', fieldLabel: 'Symptom', placeholder: 'What are you experiencing?', detailLabel: 'Notes', icon: 'symptoms' },
     medications: { label: 'Add medication', category: 'medication', title: 'Medication', fieldLabel: 'Rx Name', placeholder: 'Medication name', detailLabel: 'Dose, timing, or notes' },
-    sexualHealth: { label: 'Sexual health', category: 'sexualHealth', title: 'Sexual health', special: 'sexualHealth', icon: '♡' },
+    sexualHealth: { label: 'Sexual health', category: 'sexualHealth', title: 'Sexual health', special: 'sexualHealth', icon: 'sexualHealth' },
     care: { label: 'Add appointment', category: 'care', title: 'Appointment', fieldLabel: 'Appointment', placeholder: 'Doctor, dentist, therapy, or other care', detailLabel: 'Location or notes' },
-    measurements: { label: 'Measurement', category: 'measurement', title: 'Measurement', fieldLabel: 'Measurement', placeholder: 'Blood pressure, weight, temperature…', detailLabel: 'Value or notes', icon: '⌁' },
+    measurements: { label: 'Measurement', category: 'measurement', title: 'Measurement', fieldLabel: 'Measurement', placeholder: 'Blood pressure, weight, temperature…', detailLabel: 'Value or notes', icon: 'measurements' },
     observations: { label: 'Add observation', category: 'note', title: 'Observation', fieldLabel: 'Observation', placeholder: 'What did you notice?', detailLabel: 'Notes', allowPhoto: true }
   });
 
@@ -37,6 +37,10 @@
     return String(value == null ? '' : value)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  function icon(name, extraClass='') {
+    return window.MSHAreaIcons?.svg(name, extraClass) || '';
   }
 
   function selectedDate() {
@@ -80,14 +84,14 @@
 
   function healthChoiceMarkup(key) {
     const item = ACTIONS[key];
-    const icon = item.icon ? `<span aria-hidden="true">${esc(item.icon)}</span> ` : '';
+    const areaIcon = item.icon ? icon(item.icon) : '';
     if (item.native === 'movement') {
-      return `<button type="button" class="msh-button-secondary" data-add-movement data-close-after-native>${icon}${esc(item.label)}</button>`;
+      return `<button type="button" class="msh-button-secondary" data-add-movement data-close-after-native>${areaIcon}<span>${esc(item.label)}</span></button>`;
     }
     if (item.native === 'cycle') {
-      return `<button type="button" class="msh-button-secondary" data-open-sheet data-close-after-native>${icon}${esc(item.label)}</button>`;
+      return `<button type="button" class="msh-button-secondary" data-open-sheet data-close-after-native>${areaIcon}<span>${esc(item.label)}</span></button>`;
     }
-    return `<button type="button" class="msh-button-secondary" data-add-calendar-layer="${esc(key)}">${icon}${esc(item.label)}</button>`;
+    return `<button type="button" class="msh-button-secondary" data-add-calendar-layer="${esc(key)}">${areaIcon}<span>${esc(item.label)}</span></button>`;
   }
 
   function openHealthEventSheet() {
@@ -214,7 +218,7 @@
         id: `calendar_sexualHealth_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         date,
         category: 'sexualHealth',
-        title: '♡ Sexual health',
+        title: 'Sexual health',
         detail: '',
         sexualActivity: choice,
         sexualActivityLabel: label,

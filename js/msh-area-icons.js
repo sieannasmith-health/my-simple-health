@@ -1,4 +1,4 @@
-/* My Simple Health — refined semantic area icons (no emoji rendering) */
+/* My Simple Health — refined semantic area icons */
 (function(global){
   'use strict';
 
@@ -24,60 +24,5 @@
     return `<span class="msh-area-icon ${extraClass}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${body}</svg></span>`;
   }
 
-  function decorateFinancial(root=document){
-    root.querySelectorAll('.msh-financial-share-option').forEach(option=>{
-      if(option.querySelector('.msh-area-icon')) return;
-      const key=option.querySelector('input[name="scope"]')?.value;
-      if(!key) return;
-      option.insertAdjacentHTML('afterbegin',svg(key,'msh-area-icon--framed'));
-    });
-    const permission=root.querySelector('.msh-financial-share-permission');
-    if(permission && !permission.querySelector('.msh-area-icon')) permission.insertAdjacentHTML('afterbegin',svg('lock'));
-    const disclosure=root.querySelector('.msh-financial-share-disclosure');
-    if(disclosure && !disclosure.querySelector('.msh-area-icon')) disclosure.insertAdjacentHTML('afterbegin',svg('shield','msh-area-icon--framed'));
-  }
-
-  function stripLeadingGlyph(button){
-    for(const node of [...button.childNodes]){
-      if(node.nodeType===Node.TEXT_NODE){
-        node.textContent=node.textContent.replace(/^\s*(📷|🛒|↗|◐|✦|♡|⌁|＋|\+)\s*/u,'');
-        if(!node.textContent) node.remove();
-        break;
-      }
-    }
-  }
-
-  function decorateFood(root=document){
-    root.querySelectorAll('.msh-food-action').forEach(button=>{
-      if(button.querySelector('.msh-area-icon')) return;
-      let name='plus';
-      if(button.matches('[data-add-meal]')) name='camera';
-      else if(button.matches('[data-add-grocery]')) name='grocery';
-      stripLeadingGlyph(button);
-      button.insertAdjacentHTML('afterbegin',svg(name,'msh-area-icon--framed'));
-    });
-  }
-
-  function decorateCalendar(root=document){
-    root.querySelectorAll('.msh-cycle-chips button').forEach(button=>{
-      if(button.querySelector('.msh-area-icon')) return;
-      let name=null;
-      if(button.matches('[data-add-movement]')) name='movement';
-      else if(button.matches('[data-open-sheet]')) name='cycle';
-      else {
-        const layer=button.dataset.addCalendarLayer;
-        name=({symptoms:'symptoms',sexualHealth:'sexualHealth',measurements:'measurements'})[layer]||null;
-      }
-      if(!name) return;
-      stripLeadingGlyph(button);
-      button.insertAdjacentHTML('afterbegin',svg(name));
-    });
-  }
-
-  function decorate(){decorateFinancial();decorateFood();decorateCalendar();}
-  const observer=new MutationObserver(decorate);
-  if(document.documentElement){observer.observe(document.documentElement,{childList:true,subtree:true});}
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',decorate,{once:true}); else decorate();
-
-  global.MSHAreaIcons=Object.freeze({svg,decorate});
+  global.MSHAreaIcons=Object.freeze({svg,names:Object.freeze(Object.keys(paths))});
 })(window);

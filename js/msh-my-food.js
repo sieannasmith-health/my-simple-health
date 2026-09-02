@@ -11,6 +11,7 @@
   const esc = value => String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   const now = () => new Date().toISOString();
   const foodState = state => state.food || { foods:[], onHand:[], meals:[], recipes:[], groceries:[] };
+  const icon = (name, extraClass='') => window.MSHAreaIcons?.svg(name, extraClass) || '';
 
   function ensureSeed() {
     MSHStorage.updateState(state => {
@@ -77,7 +78,7 @@
   function render() {
     const food = getFood();
     const body = view === 'foods' ? foodsView(food) : view === 'onhand' ? onHandView(food) : view === 'groceries' ? groceriesView(food) : view === 'recipes' ? recipesView(food) : home(food);
-    root.innerHTML = `<div class="msh-food"><header class="msh-food-header"><div><p>My Health / My Food</p><h1>My Food</h1><div class="msh-food-lede">Know your food. Remember what you make. Use what you have.</div></div><button class="msh-food-add" type="button" data-open-add>＋ Add</button></header>${body}<div class="msh-food-dialog" data-food-dialog hidden></div></div>`;
+    root.innerHTML = `<div class="msh-food"><header class="msh-food-header"><div><p>My Health / My Food</p><h1>My Food</h1><div class="msh-food-lede">Know your food. Remember what you make. Use what you have.</div></div><button class="msh-food-add" type="button" data-open-add>${icon('plus')}<span>Add</span></button></header>${body}<div class="msh-food-dialog" data-food-dialog hidden></div></div>`;
     if (window.MSHRoutes) MSHRoutes.decorate(root);
   }
 
@@ -86,7 +87,7 @@
   const dialogHead = (title,copy) => `<div class="msh-food-dialog-head"><div><h2>${title}</h2>${copy ? `<p>${copy}</p>` : ''}</div><button class="msh-food-close" type="button" data-close-dialog aria-label="Close">×</button></div>`;
 
   function addMenu() {
-    openDialog(`${dialogHead('Add to My Food','Choose the smallest thing that matches what happened.')}<div class="msh-food-actions"><button class="msh-food-action" data-add-meal>📷 <strong>Capture a meal</strong><br><small>Take a photo, upload one, or add the meal in your own words.</small></button><button class="msh-food-action" data-add-food>＋ <strong>Add food</strong><br><small>Add something to the foods you use.</small></button><button class="msh-food-action" data-add-grocery>🛒 <strong>Add grocery</strong><br><small>Remember what you need next.</small></button></div>`);
+    openDialog(`${dialogHead('Add to My Food','Choose the smallest thing that matches what happened.')}<div class="msh-food-actions"><button class="msh-food-action" data-add-meal>${icon('camera','msh-area-icon--framed')}<strong>Capture a meal</strong><br><small>Take a photo, upload one, or add the meal in your own words.</small></button><button class="msh-food-action" data-add-food>${icon('plus','msh-area-icon--framed')}<strong>Add food</strong><br><small>Add something to the foods you use.</small></button><button class="msh-food-action" data-add-grocery>${icon('grocery','msh-area-icon--framed')}<strong>Add grocery</strong><br><small>Remember what you need next.</small></button></div>`);
   }
 
   function mealForm() {
