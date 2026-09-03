@@ -7,62 +7,53 @@ struct MSHAccountSessionBar: View {
     @State private var isSigningOut = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            if let email = authStore.userEmail, !email.isEmpty {
-                Text(email)
-                    .font(.caption2)
-                    .foregroundStyle(MSHColor.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .accessibilityLabel("Signed in as \(email)")
-            }
-
-            Spacer(minLength: 8)
-
-            Button {
-                showAccountHub = true
-            } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(MSHColor.primaryText)
-                    .frame(width: 34, height: 34)
-                    .background(MSHColor.controlFill)
-                    .clipShape(Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .disabled(isSigningOut)
-            .accessibilityLabel("Account and sharing")
-        }
-        .padding(.horizontal, 16)
-        .frame(height: 40)
-        .background(MSHColor.surface)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(MSHColor.border)
-                .frame(height: 0.5)
-        }
-        .sheet(isPresented: $showAccountHub) {
-            accountHub
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-        }
-        .confirmationDialog(
-            "Sign out of My Simple Health?",
-            isPresented: $showSignOutConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Sign Out", role: .destructive) {
-                Task {
-                    isSigningOut = true
-                    await authStore.signOut()
-                    isSigningOut = false
+        Color.clear
+            .frame(height: 0)
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    showAccountHub = true
+                } label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(.ultraThinMaterial)
+                        .overlay {
+                            Circle()
+                                .stroke(Color.white.opacity(0.22), lineWidth: 0.8)
+                        }
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+                        .contentShape(Circle())
                 }
+                .buttonStyle(.plain)
+                .disabled(isSigningOut)
+                .accessibilityLabel("Account and sharing")
+                .padding(.trailing, 16)
+                .padding(.top, 8)
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("You can sign back in at any time.")
-        }
+            .zIndex(20)
+            .sheet(isPresented: $showAccountHub) {
+                accountHub
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
+            .confirmationDialog(
+                "Sign out of My Simple Health?",
+                isPresented: $showSignOutConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Sign Out", role: .destructive) {
+                    Task {
+                        isSigningOut = true
+                        await authStore.signOut()
+                        isSigningOut = false
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("You can sign back in at any time.")
+            }
     }
 
     private var accountHub: some View {
