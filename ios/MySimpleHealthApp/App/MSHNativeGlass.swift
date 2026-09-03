@@ -102,7 +102,6 @@ struct MSHNativeGlassButtonStyle<S: InsettableShape>: ButtonStyle {
     let shape: S
     let tint: Color
     let foreground: Color
-    let haptic: MSHNativeHaptic
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -130,7 +129,7 @@ struct MSHNativeGlassButton<Label: View, S: InsettableShape>: View {
     let foreground: Color
     let haptic: MSHNativeHaptic
     let action: () -> Void
-    @ViewBuilder let label: () -> Label
+    private let label: () -> Label
 
     init(
         shape: S,
@@ -159,8 +158,7 @@ struct MSHNativeGlassButton<Label: View, S: InsettableShape>: View {
             MSHNativeGlassButtonStyle(
                 shape: shape,
                 tint: tint,
-                foreground: foreground,
-                haptic: haptic
+                foreground: foreground
             )
         )
     }
