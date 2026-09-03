@@ -39,23 +39,99 @@ struct MSHAppShell: View {
 
 struct MSHBottomTabBar: View {
     @Binding var selection: MSHAppSection
+
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 2) {
             ForEach(MSHAppSection.allCases) { section in
-                Button { selection = section } label: {
+                Button {
+                    if selection != section { MSHNativeHaptic.selection.play() }
+                    selection = section
+                } label: {
                     VStack(spacing: 3) {
-                        Image(systemName: section.systemImage).font(.system(size: section == .simple ? 20 : 19, weight: .medium)).frame(height: 22)
-                        Text(section.title).font(.caption2.weight(selection == section ? .semibold : .regular)).lineLimit(1).minimumScaleFactor(0.82)
-                    }.foregroundStyle(selection == section ? MSHColor.accent : MSHColor.secondaryText).frame(maxWidth: .infinity).frame(minHeight: 48).contentShape(Rectangle())
-                }.buttonStyle(MSHBottomTabButtonStyle()).accessibilityLabel(section.title).accessibilityValue(selection == section ? "Selected" : "").accessibilityAddTraits(selection == section ? .isSelected : []).accessibilityIdentifier("msh-tab-\(section.rawValue)")
+                        Image(systemName: section.systemImage)
+                            .font(.system(size: section == .simple ? 20 : 19, weight: .medium))
+                            .frame(height: 22)
+                        Text(section.title)
+                            .font(.caption2.weight(selection == section ? .semibold : .regular))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                    }
+                    .foregroundStyle(selection == section ? Color.white : Color.white.opacity(0.66))
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
+                    .contentShape(Rectangle())
+                    .background {
+                        if selection == section {
+                            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                .fill(Color.white.opacity(0.025))
+                                .mshNativeGlass(
+                                    in: RoundedRectangle(cornerRadius: 15, style: .continuous),
+                                    tint: section == .simple ? MSHColor.sage : MSHColor.powder,
+                                    edgeStrength: section == .simple ? 1.18 : 0.94,
+                                    shadowStrength: 0.72,
+                                    glowStrength: section == .simple ? 0.48 : 0.32
+                                )
+                                .padding(.horizontal, 3)
+                                .padding(.vertical, 2)
+                        }
+                    }
+                }
+                .buttonStyle(MSHBottomTabButtonStyle(isSelected: selection == section))
+                .accessibilityLabel(section.title)
+                .accessibilityValue(selection == section ? "Selected" : "")
+                .accessibilityAddTraits(selection == section ? .isSelected : [])
+                .accessibilityIdentifier("msh-tab-\(section.rawValue)")
             }
-        }.padding(.horizontal, 6).padding(.top, 4).padding(.bottom, 2).background { MSHColor.surface.ignoresSafeArea(edges: .bottom) }.overlay(alignment: .top) { Rectangle().fill(MSHColor.border).frame(height: 0.5) }.accessibilityElement(children: .contain).accessibilityIdentifier("msh-bottom-tab-bar")
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 6)
+        .padding(.bottom, 4)
+        .background {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.08), Color.black.opacity(0.10)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .ignoresSafeArea(edges: .bottom)
+        }
+        .overlay(alignment: .top) {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.78, green: 0.46, blue: 1.0).opacity(0.46),
+                    Color.white.opacity(0.58),
+                    Color(red: 0.42, green: 0.82, blue: 1.0).opacity(0.46)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(height: 0.8)
+            .blur(radius: 0.15)
+        }
+        .shadow(color: Color(red: 0.44, green: 0.78, blue: 1.0).opacity(0.11), radius: 12, y: -2)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("msh-bottom-tab-bar")
     }
 }
 
 private struct MSHBottomTabButtonStyle: ButtonStyle {
+    let isSelected: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    func makeBody(configuration: Configuration) -> some View { configuration.label.background { RoundedRectangle(cornerRadius: 12).fill(MSHColor.controlFill.opacity(configuration.isPressed ? 0.72 : 0)).padding(.horizontal, 3).padding(.vertical, 2) }.scaleEffect(configuration.isPressed ? 0.97 : 1).animation(reduceMotion ? nil : .easeOut(duration: configuration.isPressed ? 0.08 : 0.1), value: configuration.isPressed) }
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.055 : 1)
+            .brightness(configuration.isPressed ? 0.06 : 0)
+            .shadow(
+                color: Color(red: 0.48, green: 0.82, blue: 1.0).opacity(configuration.isPressed ? 0.24 : (isSelected ? 0.10 : 0)),
+                radius: configuration.isPressed ? 14 : 7,
+                y: configuration.isPressed ? 0 : 2
+            )
+            .animation(reduceMotion ? nil : .spring(response: 0.19, dampingFraction: 0.75), value: configuration.isPressed)
+    }
 }
 
 private struct MSHSectionNavigation: View {
