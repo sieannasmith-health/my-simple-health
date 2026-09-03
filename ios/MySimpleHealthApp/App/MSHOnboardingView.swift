@@ -2,6 +2,9 @@ import SwiftUI
 
 private enum MSHOnboardingStep: Int, CaseIterable {
     case launch
+    case atmosphere
+    case fragmentation
+    case coherence
     case welcome
     case appleHealth
     case notifications
@@ -40,6 +43,18 @@ private struct MSHOnboardingFlow: View {
                 switch step {
                 case .launch:
                     MSHLaunchExperience()
+                case .atmosphere:
+                    MSHOnboardingOpeningStoryboard.Atmosphere {
+                        advance(to: .fragmentation)
+                    }
+                case .fragmentation:
+                    MSHOnboardingOpeningStoryboard.Fragmentation {
+                        advance(to: .coherence)
+                    }
+                case .coherence:
+                    MSHOnboardingOpeningStoryboard.Coherence {
+                        advance(to: .welcome)
+                    }
                 case .welcome:
                     welcome
                 case .appleHealth:
@@ -53,19 +68,16 @@ private struct MSHOnboardingFlow: View {
                 }
             }
             .id(step)
-            .transition(reduceMotion ? .opacity : .asymmetric(
-                insertion: .opacity.combined(with: .move(edge: .trailing)),
-                removal: .opacity
-            ))
+            .transition(reduceMotion ? .opacity : .opacity)
         }
-        .tint(MSHOnboardingPalette.forest)
+        .tint(MSHOnboardingPalette.sage)
         .onAppear {
             store.markStarted()
             guard step == .launch else { return }
             launchTask = Task { @MainActor in
-                try? await Task.sleep(for: reduceMotion ? .milliseconds(120) : .milliseconds(650))
+                try? await Task.sleep(for: reduceMotion ? .milliseconds(120) : .milliseconds(700))
                 guard !Task.isCancelled else { return }
-                advance(to: .welcome)
+                advance(to: .atmosphere)
             }
         }
         .onDisappear { launchTask?.cancel() }
@@ -90,7 +102,7 @@ private struct MSHOnboardingFlow: View {
 
                 Link("Already have an account? Log in", destination: URL(string: "https://mysimplehealth.org/login")!)
                     .font(.callout.weight(.semibold))
-                    .foregroundStyle(MSHOnboardingPalette.forest)
+                    .foregroundStyle(MSHOnboardingPalette.charcoal)
                     .frame(minHeight: 44)
 
                 HStack(spacing: 24) {
@@ -98,7 +110,7 @@ private struct MSHOnboardingFlow: View {
                     Link("Terms", destination: URL(string: "https://mysimplehealth.org/terms.html")!)
                 }
                 .font(.footnote)
-                .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.72))
+                .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.66))
                 .padding(.top, 6)
             }
         }
@@ -159,13 +171,13 @@ private struct MSHOnboardingFlow: View {
                                 .font(.footnote.weight(.semibold))
                         }
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(MSHOnboardingPalette.forest)
+                        .foregroundStyle(MSHOnboardingPalette.charcoal)
                         .padding(.horizontal, 18)
                         .frame(maxWidth: .infinity, minHeight: 54)
-                        .background(MSHOnboardingPalette.warmWhite.opacity(0.82))
+                        .background(MSHOnboardingPalette.warmWhite.opacity(0.88))
                         .overlay {
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(MSHOnboardingPalette.forest.opacity(0.16), lineWidth: 1)
+                                .stroke(MSHOnboardingPalette.stone, lineWidth: 1)
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     }
@@ -219,7 +231,7 @@ private struct MSHOnboardingFlow: View {
 
     private func advance(to nextStep: MSHOnboardingStep) {
         errorMessage = nil
-        withAnimation(reduceMotion ? .easeOut(duration: 0.12) : .easeInOut(duration: 0.32)) {
+        withAnimation(reduceMotion ? .easeOut(duration: 0.12) : .easeInOut(duration: 0.42)) {
             step = nextStep
         }
     }
@@ -232,18 +244,18 @@ private struct MSHLaunchExperience: View {
     var body: some View {
         VStack(spacing: 18) {
             Circle()
-                .fill(MSHOnboardingPalette.sage.opacity(0.2))
+                .fill(MSHOnboardingPalette.sage.opacity(0.16))
                 .frame(width: 62, height: 62)
                 .overlay {
                     Circle()
-                        .stroke(MSHOnboardingPalette.forest.opacity(0.36), lineWidth: 1)
+                        .stroke(MSHOnboardingPalette.sage.opacity(0.42), lineWidth: 1)
                         .padding(8)
                 }
                 .scaleEffect(isVisible ? 1 : 0.94)
 
             Text("My Simple Health")
                 .font(.system(size: 32, weight: .medium, design: .serif))
-                .foregroundStyle(MSHOnboardingPalette.forest)
+                .foregroundStyle(MSHOnboardingPalette.charcoal)
         }
         .opacity(isVisible ? 1 : 0)
         .onAppear {
@@ -276,13 +288,13 @@ private struct MSHOnboardingPage<Actions: View>: View {
 
                 Text(title)
                     .font(.system(size: 42, weight: .medium, design: .serif))
-                    .foregroundStyle(MSHOnboardingPalette.forest)
+                    .foregroundStyle(MSHOnboardingPalette.charcoal)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
 
                 Text(message)
                     .font(.title3)
-                    .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.84))
+                    .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.78))
                     .lineSpacing(5)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 22)
@@ -314,7 +326,7 @@ private struct MSHPrimaryButton: View {
             .font(.headline)
             .foregroundStyle(MSHOnboardingPalette.warmWhite)
             .frame(maxWidth: .infinity, minHeight: 54)
-            .background(MSHOnboardingPalette.forest)
+            .background(MSHOnboardingPalette.charcoal)
             .clipShape(Capsule())
         }
         .buttonStyle(MSHQuietButtonStyle())
@@ -330,7 +342,7 @@ private struct MSHSecondaryButton: View {
     var body: some View {
         Button(title, action: action)
             .font(.body.weight(.semibold))
-            .foregroundStyle(MSHOnboardingPalette.forest)
+            .foregroundStyle(MSHOnboardingPalette.charcoal)
             .frame(maxWidth: .infinity, minHeight: 50)
             .buttonStyle(MSHQuietButtonStyle())
             .disabled(disabled)
@@ -349,9 +361,9 @@ private struct MSHQuietButtonStyle: ButtonStyle {
 }
 
 private enum MSHOnboardingPalette {
-    static let cream = Color(red: 245 / 255, green: 241 / 255, blue: 231 / 255)
-    static let forest = Color(red: 23 / 255, green: 61 / 255, blue: 43 / 255)
+    static let cream = Color(red: 248 / 255, green: 247 / 255, blue: 243 / 255)
     static let warmWhite = Color(red: 252 / 255, green: 251 / 255, blue: 247 / 255)
-    static let charcoal = Color(red: 37 / 255, green: 40 / 255, blue: 34 / 255)
-    static let sage = Color(red: 125 / 255, green: 148 / 255, blue: 96 / 255)
+    static let charcoal = Color(red: 31 / 255, green: 30 / 255, blue: 29 / 255)
+    static let sage = Color(red: 149 / 255, green: 153 / 255, blue: 129 / 255)
+    static let stone = Color(red: 224 / 255, green: 223 / 255, blue: 220 / 255)
 }
