@@ -391,12 +391,12 @@ private struct MSHCoherenceInsightCard: View {
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .background(MSHOpeningPalette.ivory.opacity(0.28), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(MSHOpeningPalette.stone.opacity(0.72), lineWidth: 0.8)
-        }
+        .mshNativeGlass(
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous),
+            tint: insight.tint.color,
+            edgeStrength: 0.88,
+            shadowStrength: 0.55
+        )
     }
 }
 
@@ -451,13 +451,12 @@ private struct MSHOnboardingFragmentView: View {
         }
         .padding(.horizontal, 12)
         .frame(height: 38)
-        .background(.ultraThinMaterial, in: Capsule())
-        .background(fragment.tint.color.opacity(0.14), in: Capsule())
-        .overlay {
-            Capsule()
-                .stroke(fragment.tint.color.opacity(0.34), lineWidth: 0.8)
-        }
-        .shadow(color: MSHOpeningPalette.espresso.opacity(0.07), radius: 9, y: 4)
+        .mshNativeGlass(
+            in: Capsule(),
+            tint: fragment.tint.color,
+            edgeStrength: 0.94,
+            shadowStrength: 0.72
+        )
         .accessibilityLabel(fragment.title)
     }
 }
@@ -498,34 +497,22 @@ private struct MSHOpeningContinueButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        MSHNativeGlassButton(
+            shape: Capsule(),
+            tint: MSHOpeningPalette.ivory,
+            foreground: MSHOpeningPalette.charcoal,
+            haptic: .softImpact,
+            action: action
+        ) {
             HStack(spacing: 8) {
                 Text(title)
                 Image(systemName: "arrow.right")
                     .font(.footnote.weight(.semibold))
             }
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(MSHOpeningPalette.ivory)
             .padding(.horizontal, 22)
             .frame(height: 48)
-            .background(MSHOpeningPalette.charcoal, in: Capsule())
-            .overlay {
-                Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.8)
-            }
         }
-        .buttonStyle(.plain)
         .accessibilityLabel(title)
     }
-}
-
-private enum MSHOpeningPalette {
-    static let ivory = Color(red: 248 / 255, green: 247 / 255, blue: 243 / 255)
-    static let stone = Color(red: 224 / 255, green: 223 / 255, blue: 220 / 255)
-    static let charcoal = Color(red: 31 / 255, green: 30 / 255, blue: 29 / 255)
-    static let espresso = Color(red: 33 / 255, green: 30 / 255, blue: 30 / 255)
-    static let sage = Color(red: 149 / 255, green: 153 / 255, blue: 129 / 255)
-    static let powder = Color(red: 197 / 255, green: 207 / 255, blue: 218 / 255)
-    static let clay = Color(red: 97 / 255, green: 66 / 255, blue: 47 / 255)
-    static let mushroom = Color(red: 210 / 255, green: 192 / 255, blue: 175 / 255)
-    static let secondaryText = Color(red: 105 / 255, green: 101 / 255, blue: 96 / 255)
 }
