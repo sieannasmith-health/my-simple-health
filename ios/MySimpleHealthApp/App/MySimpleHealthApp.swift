@@ -64,7 +64,7 @@ private struct MSHSceneRoot: View {
     @StateObject private var lifecycle = MSHSceneLifecycleProbe()
 
     var body: some View {
-        MSHAuthenticatedRootExperience()
+        MSHRootExperience()
             .onOpenURL { url in
                 MSHAuthStore.shared.handleOpenURL(url)
             }
