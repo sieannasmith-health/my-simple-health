@@ -1,78 +1,94 @@
 import SwiftUI
+import UIKit
 
 /// Production SwiftUI implementation of onboarding storyboard moments 1–3:
 /// atmosphere → fragmentation → coherence.
-///
-/// The fragments are real SwiftUI views rather than a prerecorded animation so
-/// later onboarding work can personalize emphasis without replacing the motion system.
 struct MSHOnboardingOpeningStoryboard {
     struct Atmosphere: View {
         let onContinue: () -> Void
 
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
-        @State private var reveal = false
+        @State private var eyebrowVisible = false
+        @State private var titleVisible = false
         @State private var showContinue = false
 
         var body: some View {
-            ZStack {
-                MSHOpeningEnvironment(desaturated: true, warmth: 0.08)
+            GeometryReader { proxy in
+                ZStack {
+                    MSHOpeningEnvironment(desaturated: true, warmth: 0.08)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
 
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(0.20),
-                        Color.black.opacity(0.06),
-                        Color.black.opacity(0.28)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.20),
+                            Color.black.opacity(0.06),
+                            Color.black.opacity(0.28)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea()
 
-                VStack(spacing: 14) {
-                    Spacer()
+                    VStack(spacing: 14) {
+                        Spacer()
 
-                    Text("MY SIMPLE HEALTH")
-                        .font(.system(size: 14, weight: .semibold))
-                        .tracking(3.2)
-                        .foregroundStyle(.white.opacity(0.82))
+                        Text("MY SIMPLE HEALTH")
+                            .font(.system(size: 14, weight: .semibold))
+                            .tracking(3.2)
+                            .foregroundStyle(.white.opacity(0.82))
+                            .opacity(eyebrowVisible ? 1 : 0)
+                            .offset(y: eyebrowVisible ? 0 : 7)
 
-                    Text("Your health. Your space.")
-                        .font(.system(size: 38, weight: .regular, design: .serif))
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 34)
+                        Text("Your health. Your space.")
+                            .font(.system(size: 38, weight: .regular, design: .serif))
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 26)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(titleVisible ? 1 : 0)
+                            .offset(y: titleVisible ? 0 : 9)
 
-                    Spacer()
+                        Spacer()
 
-                    if showContinue {
                         MSHOpeningContinueButton(title: "Continue", action: onContinue)
-                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            .opacity(showContinue ? 1 : 0)
+                            .offset(y: showContinue ? 0 : 8)
+                            .allowsHitTesting(showContinue)
                             .padding(.bottom, 34)
                     }
+                    .padding(.horizontal, 22)
                 }
-                .opacity(reveal ? 1 : 0)
-                .scaleEffect(reveal ? 1 : 0.985)
-                .padding(.horizontal, 22)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
             }
-            .onAppear {
-                if reduceMotion {
-                    reveal = true
-                    showContinue = true
-                    return
-                }
-
-                withAnimation(.easeOut(duration: 0.85)) {
-                    reveal = true
-                }
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(1250))
-                    withAnimation(.easeOut(duration: 0.45)) {
-                        showContinue = true
-                    }
-                }
-            }
+            .onAppear { runSequence() }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("onboarding-opening-atmosphere")
+        }
+
+        private func runSequence() {
+            if reduceMotion {
+                eyebrowVisible = true
+                titleVisible = true
+                showContinue = true
+                return
+            }
+
+            withAnimation(.easeOut(duration: 0.72)) {
+                eyebrowVisible = true
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(180))
+                withAnimation(.easeOut(duration: 0.92)) {
+                    titleVisible = true
+                }
+                try? await Task.sleep(for: .milliseconds(760))
+                withAnimation(.easeOut(duration: 0.62)) {
+                    showContinue = true
+                }
+            }
         }
     }
 
@@ -81,24 +97,27 @@ struct MSHOnboardingOpeningStoryboard {
 
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
         @State private var revealFragments = false
-        @State private var revealStatement = false
+        @State private var statementVisible = false
+        @State private var supportVisible = false
         @State private var showContinue = false
 
         private let fragments: [MSHOnboardingFragment] = [
-            .init("6h 42m sleep", symbol: "moon.stars", tint: .powder, x: 0.25, y: 0.18, delay: 0.00, rotation: -2.0),
-            .init("Appointment Thursday", symbol: "calendar", tint: .stone, x: 0.70, y: 0.23, delay: 0.12, rotation: 1.5),
-            .init("$186 groceries", symbol: "basket", tint: .mushroom, x: 0.31, y: 0.39, delay: 0.22, rotation: 1.0),
-            .init("Refill in 5 days", symbol: "pills", tint: .powder, x: 0.73, y: 0.43, delay: 0.32, rotation: -1.5),
-            .init("3 workouts this week", symbol: "figure.walk", tint: .sage, x: 0.24, y: 0.60, delay: 0.42, rotation: -1.0),
-            .init("Lab result", symbol: "doc.text.magnifyingglass", tint: .stone, x: 0.74, y: 0.64, delay: 0.52, rotation: 1.5),
-            .init("Money", symbol: "dollarsign", tint: .mushroom, x: 0.40, y: 0.76, delay: 0.62, rotation: 1.0),
-            .init("Food", symbol: "fork.knife", tint: .clay, x: 0.68, y: 0.78, delay: 0.70, rotation: -1.0)
+            .init("6h 42m sleep", symbol: "moon.stars", tint: .powder, x: 0.23, y: 0.17, delay: 0.00, rotation: -2.0),
+            .init("Appointment Thursday", symbol: "calendar", tint: .stone, x: 0.69, y: 0.22, delay: 0.12, rotation: 1.5),
+            .init("$186 groceries", symbol: "basket", tint: .mushroom, x: 0.30, y: 0.38, delay: 0.22, rotation: 1.0),
+            .init("Refill in 5 days", symbol: "pills", tint: .powder, x: 0.72, y: 0.43, delay: 0.32, rotation: -1.5),
+            .init("3 workouts this week", symbol: "figure.walk", tint: .sage, x: 0.24, y: 0.59, delay: 0.42, rotation: -1.0),
+            .init("Lab result", symbol: "doc.text.magnifyingglass", tint: .stone, x: 0.73, y: 0.63, delay: 0.52, rotation: 1.5),
+            .init("Money", symbol: "dollarsign", tint: .mushroom, x: 0.40, y: 0.73, delay: 0.62, rotation: 1.0),
+            .init("Food", symbol: "fork.knife", tint: .clay, x: 0.68, y: 0.76, delay: 0.70, rotation: -1.0)
         ]
 
         var body: some View {
             GeometryReader { proxy in
                 ZStack {
                     MSHOpeningEnvironment(desaturated: true, warmth: 0.03)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
 
                     Color.white.opacity(0.50)
                         .ignoresSafeArea()
@@ -110,68 +129,77 @@ struct MSHOnboardingOpeningStoryboard {
                                 y: proxy.size.height * fragment.y
                             )
                             .rotationEffect(.degrees(reduceMotion ? 0 : fragment.rotation))
-                            .offset(y: revealFragments ? 0 : 18)
+                            .offset(y: revealFragments ? 0 : 14)
                             .opacity(revealFragments ? 1 : 0)
-                            .scaleEffect(revealFragments ? 1 : 0.94)
+                            .scaleEffect(revealFragments ? 1 : 0.96)
                             .animation(
-                                reduceMotion
-                                    ? nil
-                                    : .spring(response: 0.72, dampingFraction: 0.88)
-                                        .delay(fragment.delay),
+                                reduceMotion ? nil : .easeOut(duration: 0.68).delay(fragment.delay),
                                 value: revealFragments
                             )
                     }
 
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         Spacer()
 
-                        if revealStatement {
-                            Text("Your health doesn’t happen in pieces.")
-                                .font(.system(size: 34, weight: .regular, design: .serif))
-                                .foregroundStyle(MSHOpeningPalette.charcoal)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 34)
-                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        Text("Your health doesn’t happen in pieces.")
+                            .font(.system(size: 32, weight: .regular, design: .serif))
+                            .foregroundStyle(MSHOpeningPalette.charcoal)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 28)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(statementVisible ? 1 : 0)
+                            .offset(y: statementVisible ? 0 : 8)
 
-                            Text("The information may arrive separately. Your life doesn’t.")
-                                .font(.subheadline)
-                                .foregroundStyle(MSHOpeningPalette.secondaryText)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 40)
-                                .transition(.opacity)
-                        }
+                        Text("The information may arrive separately. Your life doesn’t.")
+                            .font(.subheadline)
+                            .foregroundStyle(MSHOpeningPalette.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 36)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(supportVisible ? 1 : 0)
+                            .offset(y: supportVisible ? 0 : 6)
 
-                        if showContinue {
-                            MSHOpeningContinueButton(title: "Continue", action: onContinue)
-                                .padding(.top, 4)
-                                .transition(.opacity)
-                        }
+                        MSHOpeningContinueButton(title: "Continue", action: onContinue)
+                            .padding(.top, 6)
+                            .opacity(showContinue ? 1 : 0)
+                            .offset(y: showContinue ? 0 : 8)
+                            .allowsHitTesting(showContinue)
                     }
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 28)
+                    .frame(width: proxy.size.width)
                 }
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
             }
-            .onAppear {
-                revealFragments = true
-
-                if reduceMotion {
-                    revealStatement = true
-                    showContinue = true
-                    return
-                }
-
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(980))
-                    withAnimation(.easeOut(duration: 0.55)) {
-                        revealStatement = true
-                    }
-                    try? await Task.sleep(for: .milliseconds(650))
-                    withAnimation(.easeOut(duration: 0.35)) {
-                        showContinue = true
-                    }
-                }
-            }
+            .onAppear { runSequence() }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("onboarding-fragmentation")
+        }
+
+        private func runSequence() {
+            revealFragments = true
+
+            if reduceMotion {
+                statementVisible = true
+                supportVisible = true
+                showContinue = true
+                return
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(980))
+                withAnimation(.easeOut(duration: 0.88)) {
+                    statementVisible = true
+                }
+                try? await Task.sleep(for: .milliseconds(220))
+                withAnimation(.easeOut(duration: 0.72)) {
+                    supportVisible = true
+                }
+                try? await Task.sleep(for: .milliseconds(620))
+                withAnimation(.easeOut(duration: 0.58)) {
+                    showContinue = true
+                }
+            }
         }
     }
 
@@ -180,16 +208,17 @@ struct MSHOnboardingOpeningStoryboard {
 
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
         @State private var connected = false
-        @State private var revealCopy = false
+        @State private var titleVisible = false
+        @State private var supportVisible = false
         @State private var showContinue = false
 
         private let fragments: [MSHOnboardingFragment] = [
-            .init("Sleep", symbol: "moon.stars", tint: .powder, x: 0.28, y: 0.31, delay: 0.00, rotation: 0),
-            .init("Busy week", symbol: "calendar.badge.clock", tint: .stone, x: 0.50, y: 0.31, delay: 0.08, rotation: 0),
-            .init("Calendar", symbol: "calendar", tint: .sage, x: 0.72, y: 0.31, delay: 0.16, rotation: 0),
-            .init("Medication", symbol: "pills", tint: .powder, x: 0.28, y: 0.50, delay: 0.20, rotation: 0),
-            .init("Refill", symbol: "clock", tint: .stone, x: 0.50, y: 0.50, delay: 0.28, rotation: 0),
-            .init("Thursday", symbol: "sun.max", tint: .sage, x: 0.72, y: 0.50, delay: 0.36, rotation: 0),
+            .init("Sleep", symbol: "moon.stars", tint: .powder, x: 0.28, y: 0.33, delay: 0.00, rotation: 0),
+            .init("Busy week", symbol: "calendar.badge.clock", tint: .stone, x: 0.50, y: 0.33, delay: 0.08, rotation: 0),
+            .init("Calendar", symbol: "calendar", tint: .sage, x: 0.72, y: 0.33, delay: 0.16, rotation: 0),
+            .init("Medication", symbol: "pills", tint: .powder, x: 0.28, y: 0.51, delay: 0.20, rotation: 0),
+            .init("Refill", symbol: "clock", tint: .stone, x: 0.50, y: 0.51, delay: 0.28, rotation: 0),
+            .init("Thursday", symbol: "sun.max", tint: .sage, x: 0.72, y: 0.51, delay: 0.36, rotation: 0),
             .init("Food", symbol: "fork.knife", tint: .clay, x: 0.28, y: 0.69, delay: 0.40, rotation: 0),
             .init("Household", symbol: "house", tint: .mushroom, x: 0.50, y: 0.69, delay: 0.48, rotation: 0),
             .init("This month", symbol: "calendar.circle", tint: .sage, x: 0.72, y: 0.69, delay: 0.56, rotation: 0)
@@ -199,6 +228,8 @@ struct MSHOnboardingOpeningStoryboard {
             GeometryReader { proxy in
                 ZStack {
                     MSHOpeningEnvironment(desaturated: !connected, warmth: connected ? 0.20 : 0.05)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
 
                     LinearGradient(
                         colors: [
@@ -218,81 +249,91 @@ struct MSHOnboardingOpeningStoryboard {
                             .position(
                                 x: connected
                                     ? proxy.size.width * fragment.x
-                                    : proxy.size.width * (0.5 + (fragment.x - 0.5) * 1.34),
+                                    : proxy.size.width * (0.5 + (fragment.x - 0.5) * 1.30),
                                 y: connected
                                     ? proxy.size.height * fragment.y
-                                    : proxy.size.height * (0.50 + (fragment.y - 0.50) * 1.18)
+                                    : proxy.size.height * (0.50 + (fragment.y - 0.50) * 1.14)
                             )
-                            .opacity(connected ? 1 : 0.72)
-                            .scaleEffect(connected ? 1 : 0.92)
+                            .opacity(connected ? 1 : 0.70)
+                            .scaleEffect(connected ? 1 : 0.94)
                             .animation(
-                                reduceMotion
-                                    ? nil
-                                    : .spring(response: 0.9, dampingFraction: 0.86)
-                                        .delay(fragment.delay),
+                                reduceMotion ? nil : .easeInOut(duration: 0.92).delay(fragment.delay),
                                 value: connected
                             )
                     }
 
-                    VStack(spacing: 12) {
-                        if revealCopy {
-                            Text("Neither should the way you understand it.")
-                                .font(.system(size: 34, weight: .regular, design: .serif))
-                                .foregroundStyle(MSHOpeningPalette.charcoal)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 30)
+                    VStack(spacing: 10) {
+                        Text("Neither should the way you understand it.")
+                            .font(.system(size: 31, weight: .regular, design: .serif))
+                            .foregroundStyle(MSHOpeningPalette.charcoal)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 26)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(titleVisible ? 1 : 0)
+                            .offset(y: titleVisible ? 0 : 8)
 
-                            Text("My Simple Health brings the pieces together.")
-                                .font(.subheadline)
-                                .foregroundStyle(MSHOpeningPalette.secondaryText)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 38)
-                        }
+                        Text("My Simple Health brings the pieces together.")
+                            .font(.subheadline)
+                            .foregroundStyle(MSHOpeningPalette.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 34)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(supportVisible ? 1 : 0)
+                            .offset(y: supportVisible ? 0 : 6)
 
                         Spacer()
 
-                        if showContinue {
-                            MSHOpeningContinueButton(title: "Continue", action: onContinue)
-                                .transition(.opacity)
-                        }
+                        MSHOpeningContinueButton(title: "Continue", action: onContinue)
+                            .opacity(showContinue ? 1 : 0)
+                            .offset(y: showContinue ? 0 : 8)
+                            .allowsHitTesting(showContinue)
                     }
-                    .padding(.top, 62)
-                    .padding(.bottom, 30)
-                    .padding(.horizontal, 22)
+                    .padding(.top, 60)
+                    .padding(.bottom, 28)
+                    .frame(width: proxy.size.width)
                 }
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
             }
-            .onAppear {
-                if reduceMotion {
-                    connected = true
-                    revealCopy = true
-                    showContinue = true
-                    return
-                }
-
-                withAnimation(.easeInOut(duration: 0.9)) {
-                    connected = true
-                }
-
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(850))
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        revealCopy = true
-                    }
-                    try? await Task.sleep(for: .milliseconds(700))
-                    withAnimation(.easeOut(duration: 0.35)) {
-                        showContinue = true
-                    }
-                }
-            }
+            .onAppear { runSequence() }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("onboarding-coherence")
+        }
+
+        private func runSequence() {
+            if reduceMotion {
+                connected = true
+                titleVisible = true
+                supportVisible = true
+                showContinue = true
+                return
+            }
+
+            withAnimation(.easeInOut(duration: 0.95)) {
+                connected = true
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(760))
+                withAnimation(.easeOut(duration: 0.88)) {
+                    titleVisible = true
+                }
+                try? await Task.sleep(for: .milliseconds(220))
+                withAnimation(.easeOut(duration: 0.72)) {
+                    supportVisible = true
+                }
+                try? await Task.sleep(for: .milliseconds(650))
+                withAnimation(.easeOut(duration: 0.58)) {
+                    showContinue = true
+                }
+            }
         }
 
         private func coherenceLines(in size: CGSize) -> some View {
             Canvas { context, _ in
                 let rows: [[CGPoint]] = [
-                    [CGPoint(x: size.width * 0.28, y: size.height * 0.31), CGPoint(x: size.width * 0.50, y: size.height * 0.31), CGPoint(x: size.width * 0.72, y: size.height * 0.31)],
-                    [CGPoint(x: size.width * 0.28, y: size.height * 0.50), CGPoint(x: size.width * 0.50, y: size.height * 0.50), CGPoint(x: size.width * 0.72, y: size.height * 0.50)],
+                    [CGPoint(x: size.width * 0.28, y: size.height * 0.33), CGPoint(x: size.width * 0.50, y: size.height * 0.33), CGPoint(x: size.width * 0.72, y: size.height * 0.33)],
+                    [CGPoint(x: size.width * 0.28, y: size.height * 0.51), CGPoint(x: size.width * 0.50, y: size.height * 0.51), CGPoint(x: size.width * 0.72, y: size.height * 0.51)],
                     [CGPoint(x: size.width * 0.28, y: size.height * 0.69), CGPoint(x: size.width * 0.50, y: size.height * 0.69), CGPoint(x: size.width * 0.72, y: size.height * 0.69)]
                 ]
 
@@ -301,7 +342,7 @@ struct MSHOnboardingOpeningStoryboard {
                     path.move(to: row[0])
                     path.addLine(to: row[1])
                     path.addLine(to: row[2])
-                    context.stroke(path, with: .color(MSHOpeningPalette.sage.opacity(0.38)), lineWidth: 1)
+                    context.stroke(path, with: .color(MSHOpeningPalette.sage.opacity(0.34)), lineWidth: 1)
                 }
             }
             .allowsHitTesting(false)
@@ -365,9 +406,9 @@ private struct MSHOnboardingFragmentView: View {
         .background(fragment.tint.color.opacity(0.14), in: Capsule())
         .overlay {
             Capsule()
-                .stroke(fragment.tint.color.opacity(0.38), lineWidth: 0.8)
+                .stroke(fragment.tint.color.opacity(0.34), lineWidth: 0.8)
         }
-        .shadow(color: MSHOpeningPalette.espresso.opacity(0.08), radius: 10, y: 5)
+        .shadow(color: MSHOpeningPalette.espresso.opacity(0.07), radius: 9, y: 4)
         .accessibilityLabel(fragment.title)
     }
 }
@@ -377,21 +418,26 @@ private struct MSHOpeningEnvironment: View {
     let warmth: Double
 
     var body: some View {
-        Group {
-            if UIImage(named: "MySpaceWarmHouse") != nil {
-                Image("MySpaceWarmHouse")
-                    .resizable()
-                    .scaledToFill()
-                    .saturation(desaturated ? 0.40 : 0.86)
-                    .contrast(desaturated ? 0.92 : 1.0)
-                    .overlay(MSHOpeningPalette.mushroom.opacity(warmth))
-            } else {
-                LinearGradient(
-                    colors: [MSHOpeningPalette.ivory, MSHOpeningPalette.stone, MSHOpeningPalette.mushroom],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .saturation(desaturated ? 0.45 : 0.85)
+        GeometryReader { proxy in
+            Group {
+                if UIImage(named: "MySpaceWarmHouse") != nil {
+                    Image("MySpaceWarmHouse")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
+                        .saturation(desaturated ? 0.40 : 0.86)
+                        .contrast(desaturated ? 0.92 : 1.0)
+                        .overlay(MSHOpeningPalette.mushroom.opacity(warmth))
+                } else {
+                    LinearGradient(
+                        colors: [MSHOpeningPalette.ivory, MSHOpeningPalette.stone, MSHOpeningPalette.mushroom],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .saturation(desaturated ? 0.45 : 0.85)
+                }
             }
         }
         .ignoresSafeArea()
