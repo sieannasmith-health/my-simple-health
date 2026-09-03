@@ -1,38 +1,144 @@
 import SwiftUI
+import UIKit
+
+enum MSHMySpace: String, CaseIterable, Identifiable {
+    case warmHouse
+    case gardenHouse
+    case libraryHouse
+    case coastalRetreat
+    case meditationRetreat
+    case quietMinimal
+    case executiveStudy
+    case sunsetHouse
+    case cityAtNight
+    case morningHighRise
+    case plain
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .warmHouse: "Warm House"
+        case .gardenHouse: "Garden House"
+        case .libraryHouse: "Library House"
+        case .coastalRetreat: "Coastal Retreat"
+        case .meditationRetreat: "Meditation Retreat"
+        case .quietMinimal: "Quiet Minimal"
+        case .executiveStudy: "Executive Study"
+        case .sunsetHouse: "Sunset House"
+        case .cityAtNight: "City at Night"
+        case .morningHighRise: "Morning High-Rise"
+        case .plain: "Plain"
+        }
+    }
+
+    var assetName: String? {
+        switch self {
+        case .warmHouse: "MySpaceWarmHouse"
+        case .gardenHouse: "MySpaceGardenHouse"
+        case .libraryHouse: "MySpaceLibraryHouse"
+        case .coastalRetreat: "MySpaceCoastalRetreat"
+        case .meditationRetreat: "MySpaceMeditationRetreat"
+        case .quietMinimal: "MySpaceQuietMinimal"
+        case .executiveStudy: "MySpaceExecutiveStudy"
+        case .sunsetHouse: "MySpaceSunsetHouse"
+        case .cityAtNight: "MySpaceCityAtNight"
+        case .morningHighRise: "MySpaceMorningHighRise"
+        case .plain: nil
+        }
+    }
+
+    var focalAlignment: Alignment {
+        switch self {
+        case .gardenHouse, .coastalRetreat, .sunsetHouse: .leading
+        case .executiveStudy, .quietMinimal: .center
+        case .warmHouse, .libraryHouse, .meditationRetreat, .cityAtNight, .morningHighRise, .plain: .center
+        }
+    }
+}
+
+enum MSHSpaceLighting: String, CaseIterable, Identifiable {
+    case light
+    case dim
+    case dark
+    case auto
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .light: "Light"
+        case .dim: "Dim"
+        case .dark: "Dark"
+        case .auto: "Auto"
+        }
+    }
+}
 
 @MainActor
 struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
     @EnvironmentObject private var authStore: MSHAuthStore
+    @Environment(\.colorScheme) private var systemColorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @AppStorage("msh.displayName") private var displayName = ""
+    @AppStorage("msh.mySpace") private var mySpaceRawValue = MSHMySpace.warmHouse.rawValue
+    @AppStorage("msh.mySpaceLighting") private var lightingRawValue = MSHSpaceLighting.auto.rawValue
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
+    private var selectedSpace: MSHMySpace {
+        MSHMySpace(rawValue: mySpaceRawValue) ?? .warmHouse
+    }
+
+    private var selectedLighting: MSHSpaceLighting {
+        MSHSpaceLighting(rawValue: lightingRawValue) ?? .auto
+    }
+
+    private var resolvedDarkPresentation: Bool {
+        switch selectedLighting {
+        case .light: false
+        case .dim, .dark: true
+        case .auto: systemColorScheme == .dark
+        }
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             MSHColor.canvas.ignoresSafeArea()
+            environmentLayer
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
-                    header
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    hero
 
-                    switch viewModel.loadState {
-                    case .loading:
-                        loading
-                    case .loaded(let snapshot):
-                        interpretedContent(snapshot)
-                    case .failed:
-                        failed
+                    VStack(alignment: .leading, spacing: 30) {
+                        switch viewModel.loadState {
+                        case .loading:
+                            loading
+                        case .loaded(let snapshot):
+                            interpretedContent(snapshot)
+                        case .failed:
+                            failed
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 26)
+                    .padding(.bottom, 36)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(MSHColor.canvas)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 36)
             }
             .refreshable { await viewModel.reload() }
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                mySpaceMenu
+            }
+        }
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task {
             seedDisplayNameIfNeeded()
             await viewModel.loadIfNeeded()
@@ -40,27 +146,141 @@ struct MSHMyHealthHomeScreen: View {
         .accessibilityIdentifier("my-health-home")
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                Rectangle()
-                    .fill(MSHHomePalette.gold)
-                    .frame(width: 28, height: 1)
+    @ViewBuilder
+    private var environmentLayer: some View {
+        if let assetName = selectedSpace.assetName,
+           UIImage(named: assetName) != nil {
+            GeometryReader { proxy in
+                Image(assetName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: 620, alignment: selectedSpace.focalAlignment)
+                    .clipped()
+                    .overlay(lightingOverlay)
+                    .overlay(readabilityGradient)
+                    .accessibilityHidden(true)
+            }
+            .frame(height: 620)
+            .ignoresSafeArea(edges: .top)
+        } else {
+            MSHColor.canvas
+                .frame(height: 620)
+                .ignoresSafeArea(edges: .top)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private var lightingOverlay: some View {
+        let opacity: Double = {
+            switch selectedLighting {
+            case .light: 0.03
+            case .dim: 0.28
+            case .dark: 0.48
+            case .auto: systemColorScheme == .dark ? 0.38 : 0.08
+            }
+        }()
+
+        return Color.black.opacity(opacity)
+    }
+
+    private var readabilityGradient: some View {
+        LinearGradient(
+            colors: [
+                Color.black.opacity(selectedSpace == .plain ? 0 : 0.18),
+                Color.black.opacity(selectedSpace == .plain ? 0 : 0.06),
+                MSHColor.canvas.opacity(0.10),
+                MSHColor.canvas.opacity(0.94),
+                MSHColor.canvas
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer(minLength: 0)
+
+            VStack(alignment: .leading, spacing: 15) {
                 Text("MY HEALTH")
                     .font(.caption2.weight(.semibold))
                     .tracking(2.4)
-                    .foregroundStyle(MSHHomePalette.gold)
+                    .foregroundStyle(heroSecondaryText)
+
+                Text(greetingLine)
+                    .font(.system(size: 42, weight: .medium, design: .serif))
+                    .foregroundStyle(heroPrimaryText)
+                    .minimumScaleFactor(0.72)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Here’s what’s useful for you right now.")
+                    .font(.system(size: 18, design: .serif))
+                    .foregroundStyle(heroSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 54)
+        }
+        .frame(height: selectedSpace == .plain ? 260 : 500)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            if selectedSpace == .plain {
+                MSHColor.canvas
+            } else if reduceTransparency {
+                Color.black.opacity(resolvedDarkPresentation ? 0.58 : 0.32)
+            }
+        }
+    }
+
+    private var heroPrimaryText: Color {
+        selectedSpace == .plain ? MSHColor.primaryText : .white
+    }
+
+    private var heroSecondaryText: Color {
+        selectedSpace == .plain ? MSHColor.secondaryText : .white.opacity(0.88)
+    }
+
+    private var mySpaceMenu: some View {
+        Menu {
+            Section("My Space") {
+                ForEach(MSHMySpace.allCases) { space in
+                    Button {
+                        mySpaceRawValue = space.rawValue
+                    } label: {
+                        if space == selectedSpace {
+                            Label(space.title, systemImage: "checkmark")
+                        } else {
+                            Text(space.title)
+                        }
+                    }
+                }
             }
 
-            Text(greetingLine)
-                .font(.system(size: 37, weight: .medium, design: .serif))
-                .foregroundStyle(MSHHomePalette.ink)
-                .minimumScaleFactor(0.78)
-
-            Text("Here’s what matters today.")
-                .font(.system(size: 18, design: .serif))
-                .foregroundStyle(MSHHomePalette.secondary)
+            Section("Lighting") {
+                ForEach(MSHSpaceLighting.allCases) { lighting in
+                    Button {
+                        lightingRawValue = lighting.rawValue
+                    } label: {
+                        if lighting == selectedLighting {
+                            Label(lighting.title, systemImage: "checkmark")
+                        } else {
+                            Text(lighting.title)
+                        }
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: "circle.lefthalf.filled")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(selectedSpace == .plain ? MSHColor.primaryText : Color.white)
+                .frame(width: 34, height: 34)
+                .background(
+                    Circle()
+                        .fill(selectedSpace == .plain ? MSHColor.controlFill : Color.black.opacity(0.22))
+                )
         }
+        .accessibilityLabel("My Space and lighting")
+        .accessibilityHint("Choose the environment and lighting used on My Health")
     }
 
     private var greeting: String {
@@ -92,17 +312,27 @@ struct MSHMyHealthHomeScreen: View {
         let movement = summary(for: .movement, in: snapshot.recentActivity)
         let heart = summary(for: .heartActivity, in: snapshot.recentActivity)
 
-        VStack(alignment: .leading, spacing: 28) {
-            VStack(alignment: .leading, spacing: 0) {
-                MSHHomeSummaryRow(
+        VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("USEFUL RIGHT NOW")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(1.8)
+                    .foregroundStyle(MSHHomePalette.gold)
+
+                MSHPrimaryInsight(
                     title: "Sleep",
                     value: sleep.value,
                     context: sleep.context,
-                    icon: "moon.stars.fill",
-                    accent: MSHHomePalette.plum
+                    icon: "moon.stars.fill"
                 )
+            }
 
-                divider
+            VStack(alignment: .leading, spacing: 0) {
+                Text("IN BALANCE")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(1.8)
+                    .foregroundStyle(MSHHomePalette.gold)
+                    .padding(.bottom, 4)
 
                 MSHHomeSummaryRow(
                     title: "Movement",
@@ -306,6 +536,43 @@ struct MSHMyHealthHomeScreen: View {
         let hours = rounded / 60
         let remainder = rounded % 60
         return hours > 0 ? "\(hours)h \(remainder)m" : "\(remainder)m"
+    }
+}
+
+private struct MSHPrimaryInsight: View {
+    let title: String
+    let value: String
+    let context: String
+    let icon: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(MSHHomePalette.plum)
+                    .frame(width: 38, height: 38)
+                    .background(MSHHomePalette.plum.opacity(0.12))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(.title3, design: .serif, weight: .medium))
+                        .foregroundStyle(MSHHomePalette.ink)
+                    Text(value)
+                        .font(.system(size: 31, weight: .medium, design: .serif))
+                        .foregroundStyle(MSHHomePalette.ink)
+                }
+
+                Spacer(minLength: 8)
+            }
+
+            Text(context)
+                .font(.subheadline)
+                .foregroundStyle(MSHHomePalette.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 6)
     }
 }
 
