@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import PhotosUI
 
 enum MSHMySpace: String, CaseIterable, Identifiable {
     case warmHouse, gardenHouse, libraryHouse, coastalRetreat, meditationRetreat
@@ -49,14 +50,54 @@ enum MSHMySpace: String, CaseIterable, Identifiable {
 
 enum MSHSpaceLighting: String, CaseIterable, Identifiable {
     case light, dim, dark, auto
+
     var id: Self { self }
+
     var title: String {
         switch self {
-        case .light: "Light"
-        case .dim: "Dim"
-        case .dark: "Dark"
-        case .auto: "Auto"
+        case .light: "Bright"
+        case .dim: "Soft"
+        case .dark: "Dim"
+        case .auto: "Follow iPhone"
         }
+    }
+
+    var symbol: String {
+        switch self {
+        case .light: "sun.max.fill"
+        case .dim: "sun.haze.fill"
+        case .dark: "moon.fill"
+        case .auto: "iphone"
+        }
+    }
+}
+
+private enum MSHPersonalEnvironmentStore {
+    private static let filename = "msh-personal-environment.jpg"
+
+    private static var fileURL: URL? {
+        guard let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory.appendingPathComponent(filename)
+    }
+
+    static func load() -> UIImage? {
+        guard let url = fileURL,
+              let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data)
+    }
+
+    static func save(_ image: UIImage) {
+        guard let url = fileURL,
+              let data = image.jpegData(compressionQuality: 0.90) else { return }
+        try? data.write(to: url, options: .atomic)
+    }
+
+    static func remove() {
+        guard let url = fileURL else { return }
+        try? FileManager.default.removeItem(at: url)
     }
 }
 
@@ -68,6 +109,9 @@ struct MSHMyHealthHomeScreen: View {
     @AppStorage("msh.displayName") private var displayName = ""
     @AppStorage("msh.mySpace") private var mySpaceRawValue = MSHMySpace.warmHouse.rawValue
     @AppStorage("msh.mySpaceLighting") private var lightingRawValue = MSHSpaceLighting.auto.rawValue
+    @AppStorage("msh.usePersonalEnvironment") private var usePersonalEnvironment = false
+    @State private var isEnvironmentPresented = false
+    @State private var personalEnvironmentImage: UIImage?
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -100,14 +144,57 @@ struct MSHMyHealthHomeScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .task {
             seedDisplayNameIfNeeded()
+            loadPersonalEnvironmentIfNeeded()
             await viewModel.loadIfNeeded()
+        }
+        .sheet(isPresented: $isEnvironmentPresented) {
+            MSHDigitalEnvironmentSheet(
+                selectedSpace: selectedSpace,
+                selectedLighting: selectedLighting,
+                personalImage: personalEnvironmentImage,
+                usingPersonalImage: usePersonalEnvironment,
+                onSelectSpace: { space in
+                    mySpaceRawValue = space.rawValue
+                    usePersonalEnvironment = false
+                },
+                onSelectLighting: { lighting in
+                    lightingRawValue = lighting.rawValue
+                },
+                onSelectPersonalImage: { image in
+                    MSHPersonalEnvironmentStore.save(image)
+                    personalEnvironmentImage = image
+                    usePersonalEnvironment = true
+                },
+                onUsePersonalImage: {
+                    if personalEnvironmentImage != nil {
+                        usePersonalEnvironment = true
+                    }
+                },
+                onRemovePersonalImage: {
+                    MSHPersonalEnvironmentStore.remove()
+                    personalEnvironmentImage = nil
+                    usePersonalEnvironment = false
+                }
+            )
         }
         .accessibilityIdentifier("my-health-home")
     }
 
     @ViewBuilder
     private var ambientBackground: some View {
-        if let assetName = selectedSpace.assetName, UIImage(named: assetName) != nil {
+        if usePersonalEnvironment, let personalEnvironmentImage {
+            GeometryReader { proxy in
+                Image(uiImage: personalEnvironmentImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: max(proxy.size.height, 900), alignment: .center)
+                    .clipped()
+                    .overlay(environmentTone)
+                    .overlay(backgroundDepth)
+                    .blur(radius: 0.25)
+            }
+            .ignoresSafeArea()
+        } else if let assetName = selectedSpace.assetName, UIImage(named: assetName) != nil {
             GeometryReader { proxy in
                 Image(assetName)
                     .resizable()
@@ -115,13 +202,7 @@ struct MSHMyHealthHomeScreen: View {
                     .frame(width: proxy.size.width, height: max(proxy.size.height, 900), alignment: selectedSpace.focalAlignment)
                     .clipped()
                     .overlay(environmentTone)
-                    .overlay(
-                        LinearGradient(
-                            colors: [Color.black.opacity(0.05), Color.black.opacity(0.12), Color.black.opacity(0.24)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                    .overlay(backgroundDepth)
                     .blur(radius: 0.25)
             }
             .ignoresSafeArea()
@@ -131,8 +212,17 @@ struct MSHMyHealthHomeScreen: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .overlay(environmentTone)
             .ignoresSafeArea()
         }
+    }
+
+    private var backgroundDepth: some View {
+        LinearGradient(
+            colors: [Color.black.opacity(0.05), Color.black.opacity(0.12), Color.black.opacity(0.24)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 
     private var environmentTone: some View {
@@ -140,7 +230,7 @@ struct MSHMyHealthHomeScreen: View {
             switch selectedLighting {
             case .light: 0.03
             case .dim: 0.14
-            case .dark: 0.27
+            case .dark: 0.30
             case .auto: systemColorScheme == .dark ? 0.20 : 0.07
             }
         }()
@@ -149,10 +239,33 @@ struct MSHMyHealthHomeScreen: View {
 
     private var hero: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("MY HEALTH")
-                .font(.caption2.weight(.semibold))
-                .tracking(2.2)
-                .foregroundStyle(.white.opacity(0.82))
+            HStack(alignment: .center) {
+                Text("MY HEALTH")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(2.2)
+                    .foregroundStyle(.white.opacity(0.82))
+
+                Spacer()
+
+                Button {
+                    MSHNativeHaptic.softImpact.fire()
+                    isEnvironmentPresented = true
+                } label: {
+                    Image(systemName: "house.and.flag.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .mshNativeGlass(
+                            in: Circle(),
+                            tint: MSHColor.mushroom,
+                            edgeStrength: 0.96,
+                            shadowStrength: 0.72,
+                            glowStrength: 0.24
+                        )
+                }
+                .buttonStyle(MSHMyHealthLiftButtonStyle())
+                .accessibilityLabel("Choose your digital environment")
+            }
 
             Text(greetingLine)
                 .font(.system(size: 42, weight: .regular, design: .serif))
@@ -328,36 +441,12 @@ struct MSHMyHealthHomeScreen: View {
             )
     }
 
-    private var mySpaceMenu: some View {
-        Menu {
-            Section("My Space") {
-                ForEach(MSHMySpace.allCases) { space in
-                    Button {
-                        mySpaceRawValue = space.rawValue
-                    } label: {
-                        if space == selectedSpace { Label(space.title, systemImage: "checkmark") }
-                        else { Text(space.title) }
-                    }
-                }
-            }
-            Section("Lighting") {
-                ForEach(MSHSpaceLighting.allCases) { lighting in
-                    Button {
-                        lightingRawValue = lighting.rawValue
-                    } label: {
-                        if lighting == selectedLighting { Label(lighting.title, systemImage: "checkmark") }
-                        else { Text(lighting.title) }
-                    }
-                }
-            }
-        } label: {
-            Image(systemName: "circle.lefthalf.filled")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 36, height: 36)
-                .mshNativeGlass(in: Circle(), tint: MSHColor.powder, edgeStrength: 1.10, shadowStrength: 0.90, glowStrength: 0.34)
+    private func loadPersonalEnvironmentIfNeeded() {
+        guard personalEnvironmentImage == nil else { return }
+        personalEnvironmentImage = MSHPersonalEnvironmentStore.load()
+        if personalEnvironmentImage == nil {
+            usePersonalEnvironment = false
         }
-        .accessibilityLabel("My Space and lighting")
     }
 
     private var greeting: String {
@@ -454,6 +543,316 @@ struct MSHMyHealthHomeScreen: View {
         let hours = rounded / 60
         let remainder = rounded % 60
         return hours > 0 ? "\(hours)h \(remainder)m" : "\(remainder)m"
+    }
+}
+
+@MainActor
+private struct MSHDigitalEnvironmentSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedPhotoItem: PhotosPickerItem?
+
+    let selectedSpace: MSHMySpace
+    let selectedLighting: MSHSpaceLighting
+    let personalImage: UIImage?
+    let usingPersonalImage: Bool
+    let onSelectSpace: (MSHMySpace) -> Void
+    let onSelectLighting: (MSHSpaceLighting) -> Void
+    let onSelectPersonalImage: (UIImage) -> Void
+    let onUsePersonalImage: () -> Void
+    let onRemovePersonalImage: () -> Void
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                MSHColor.ivory.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 28) {
+                        introduction
+                        meaningfulSection
+                        mshSpacesSection
+                        lightingSection
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 36)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(MSHColor.charcoal)
+                }
+            }
+        }
+        .onChange(of: selectedPhotoItem) { _, item in
+            guard let item else { return }
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else { return }
+                onSelectPersonalImage(image)
+            }
+        }
+    }
+
+    private var introduction: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("THIS IS YOUR WORKSPACE")
+                .font(.caption2.weight(.semibold))
+                .tracking(2.0)
+                .foregroundStyle(MSHColor.clay.opacity(0.82))
+
+            Text("Make it feel like home.")
+                .font(.system(size: 38, weight: .regular, design: .serif))
+                .foregroundStyle(MSHColor.charcoal)
+
+            Text("Add something meaningful that keeps you motivated.")
+                .font(.body)
+                .foregroundStyle(MSHColor.charcoal.opacity(0.68))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var meaningfulSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("SOMETHING MEANINGFUL")
+
+            if let personalImage {
+                ZStack(alignment: .bottomLeading) {
+                    Image(uiImage: personalImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 190)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.54)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(usingPersonalImage ? "Your current environment" : "Your photo")
+                                .font(.headline)
+                            Text("A place, person, memory or goal that means something to you.")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.80))
+                        }
+                        Spacer()
+                        if usingPersonalImage {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title3)
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .padding(16)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(Color.white.opacity(usingPersonalImage ? 0.82 : 0.22), lineWidth: 1.2)
+                )
+                .onTapGesture {
+                    onUsePersonalImage()
+                    MSHNativeHaptic.selection.fire()
+                }
+            }
+
+            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                HStack(spacing: 12) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.headline)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(personalImage == nil ? "Choose from Photos" : "Choose a different photo")
+                            .font(.headline)
+                        Text("Your image stays on this iPhone.")
+                            .font(.caption)
+                            .foregroundStyle(MSHColor.charcoal.opacity(0.58))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(MSHColor.charcoal)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .mshNativeGlass(
+                    in: RoundedRectangle(cornerRadius: 20, style: .continuous),
+                    tint: MSHColor.warmWhite,
+                    edgeStrength: 0.52,
+                    shadowStrength: 0.20,
+                    glowStrength: 0.03
+                )
+            }
+
+            if personalImage != nil {
+                Button("Remove personal photo", role: .destructive) {
+                    onRemovePersonalImage()
+                    MSHNativeHaptic.selection.fire()
+                }
+                .font(.caption.weight(.medium))
+            }
+        }
+    }
+
+    private var mshSpacesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("MSH SPACES")
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(MSHMySpace.allCases.filter { $0 != .plain }) { space in
+                    Button {
+                        onSelectSpace(space)
+                        MSHNativeHaptic.selection.fire()
+                    } label: {
+                        spaceTile(space)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Button {
+                    onSelectSpace(.plain)
+                    MSHNativeHaptic.selection.fire()
+                } label: {
+                    VStack(alignment: .leading, spacing: 9) {
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [MSHColor.ivory, MSHColor.stone.opacity(0.72)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(height: 106)
+                            .overlay {
+                                Image(systemName: "rectangle.portrait")
+                                    .font(.title2)
+                                    .foregroundStyle(MSHColor.charcoal.opacity(0.38))
+                            }
+
+                        HStack {
+                            Text("Plain")
+                                .font(.subheadline.weight(.medium))
+                            Spacer()
+                            if !usingPersonalImage && selectedSpace == .plain {
+                                Image(systemName: "checkmark.circle.fill")
+                            }
+                        }
+                        .foregroundStyle(MSHColor.charcoal)
+                    }
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 19, style: .continuous)
+                            .fill(Color.white.opacity(0.36))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func spaceTile(_ space: MSHMySpace) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Group {
+                if let assetName = space.assetName, UIImage(named: assetName) != nil {
+                    Image(assetName)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    MSHColor.stone
+                }
+            }
+            .frame(height: 106)
+            .frame(maxWidth: .infinity)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+
+            HStack(spacing: 6) {
+                Text(space.title)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+                Spacer(minLength: 2)
+                if !usingPersonalImage && selectedSpace == space {
+                    Image(systemName: "checkmark.circle.fill")
+                }
+            }
+            .foregroundStyle(MSHColor.charcoal)
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 19, style: .continuous)
+                .fill(Color.white.opacity(0.36))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 19, style: .continuous)
+                        .stroke(
+                            !usingPersonalImage && selectedSpace == space ? MSHColor.sage.opacity(0.72) : Color.black.opacity(0.05),
+                            lineWidth: !usingPersonalImage && selectedSpace == space ? 1.3 : 0.7
+                        )
+                )
+        )
+    }
+
+    private var lightingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("ROOM LIGHTING")
+
+            Text("Control the light in your digital environment without changing your iPhone’s actual screen brightness.")
+                .font(.caption)
+                .foregroundStyle(MSHColor.charcoal.opacity(0.58))
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(MSHSpaceLighting.allCases) { lighting in
+                    Button {
+                        onSelectLighting(lighting)
+                        MSHNativeHaptic.selection.fire()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: lighting.symbol)
+                                .frame(width: 24)
+                            Text(lighting.title)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.76)
+                            Spacer(minLength: 0)
+                            if selectedLighting == lighting {
+                                Image(systemName: "checkmark")
+                                    .font(.caption.weight(.bold))
+                            }
+                        }
+                        .foregroundStyle(MSHColor.charcoal)
+                        .padding(.horizontal, 13)
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                        .background(
+                            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                .fill(selectedLighting == lighting ? MSHColor.mushroom.opacity(0.30) : Color.white.opacity(0.30))
+                        )
+                        .mshNativeGlass(
+                            in: RoundedRectangle(cornerRadius: 17, style: .continuous),
+                            tint: selectedLighting == lighting ? MSHColor.mushroom : MSHColor.warmWhite,
+                            edgeStrength: selectedLighting == lighting ? 0.88 : 0.42,
+                            shadowStrength: selectedLighting == lighting ? 0.40 : 0.16,
+                            glowStrength: selectedLighting == lighting ? 0.12 : 0.02
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2.weight(.semibold))
+            .tracking(1.55)
+            .foregroundStyle(MSHColor.charcoal.opacity(0.58))
     }
 }
 
