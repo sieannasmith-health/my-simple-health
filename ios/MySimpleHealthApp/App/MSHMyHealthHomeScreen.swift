@@ -248,7 +248,7 @@ struct MSHMyHealthHomeScreen: View {
                 Spacer()
 
                 Button {
-                    MSHNativeHaptic.softImpact.fire()
+                    MSHNativeHaptic.softImpact.play()
                     isEnvironmentPresented = true
                 } label: {
                     Image(systemName: "house.and.flag.fill")
@@ -546,7 +546,6 @@ struct MSHMyHealthHomeScreen: View {
     }
 }
 
-@MainActor
 private struct MSHDigitalEnvironmentSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPhotoItem: PhotosPickerItem?
@@ -592,7 +591,7 @@ private struct MSHDigitalEnvironmentSheet: View {
         }
         .onChange(of: selectedPhotoItem) { _, item in
             guard let item else { return }
-            Task {
+            Task { @MainActor in
                 guard let data = try? await item.loadTransferable(type: Data.self),
                       let image = UIImage(data: data) else { return }
                 onSelectPersonalImage(image)
@@ -661,7 +660,7 @@ private struct MSHDigitalEnvironmentSheet: View {
                 )
                 .onTapGesture {
                     onUsePersonalImage()
-                    MSHNativeHaptic.selection.fire()
+                    MSHNativeHaptic.selection.play()
                 }
             }
 
@@ -683,19 +682,21 @@ private struct MSHDigitalEnvironmentSheet: View {
                 .foregroundStyle(MSHColor.charcoal)
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .mshNativeGlass(
-                    in: RoundedRectangle(cornerRadius: 20, style: .continuous),
-                    tint: MSHColor.warmWhite,
-                    edgeStrength: 0.52,
-                    shadowStrength: 0.20,
-                    glowStrength: 0.03
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white.opacity(0.64))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(Color.black.opacity(0.07), lineWidth: 0.7)
+                        )
+                        .shadow(color: Color.black.opacity(0.05), radius: 10, y: 4)
                 )
             }
 
             if personalImage != nil {
                 Button("Remove personal photo", role: .destructive) {
                     onRemovePersonalImage()
-                    MSHNativeHaptic.selection.fire()
+                    MSHNativeHaptic.selection.play()
                 }
                 .font(.caption.weight(.medium))
             }
@@ -710,7 +711,7 @@ private struct MSHDigitalEnvironmentSheet: View {
                 ForEach(MSHMySpace.allCases.filter { $0 != .plain }) { space in
                     Button {
                         onSelectSpace(space)
-                        MSHNativeHaptic.selection.fire()
+                        MSHNativeHaptic.selection.play()
                     } label: {
                         spaceTile(space)
                     }
@@ -719,7 +720,7 @@ private struct MSHDigitalEnvironmentSheet: View {
 
                 Button {
                     onSelectSpace(.plain)
-                    MSHNativeHaptic.selection.fire()
+                    MSHNativeHaptic.selection.play()
                 } label: {
                     VStack(alignment: .leading, spacing: 9) {
                         RoundedRectangle(cornerRadius: 15, style: .continuous)
@@ -812,7 +813,7 @@ private struct MSHDigitalEnvironmentSheet: View {
                 ForEach(MSHSpaceLighting.allCases) { lighting in
                     Button {
                         onSelectLighting(lighting)
-                        MSHNativeHaptic.selection.fire()
+                        MSHNativeHaptic.selection.play()
                     } label: {
                         HStack(spacing: 10) {
                             Image(systemName: lighting.symbol)
@@ -834,12 +835,12 @@ private struct MSHDigitalEnvironmentSheet: View {
                             RoundedRectangle(cornerRadius: 17, style: .continuous)
                                 .fill(selectedLighting == lighting ? MSHColor.mushroom.opacity(0.30) : Color.white.opacity(0.30))
                         )
-                        .mshNativeGlass(
-                            in: RoundedRectangle(cornerRadius: 17, style: .continuous),
-                            tint: selectedLighting == lighting ? MSHColor.mushroom : MSHColor.warmWhite,
-                            edgeStrength: selectedLighting == lighting ? 0.88 : 0.42,
-                            shadowStrength: selectedLighting == lighting ? 0.40 : 0.16,
-                            glowStrength: selectedLighting == lighting ? 0.12 : 0.02
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                .stroke(
+                                    selectedLighting == lighting ? MSHColor.sage.opacity(0.62) : Color.black.opacity(0.05),
+                                    lineWidth: selectedLighting == lighting ? 1.1 : 0.7
+                                )
                         )
                     }
                     .buttonStyle(.plain)
