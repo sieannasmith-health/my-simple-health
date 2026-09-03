@@ -1,7 +1,6 @@
 import SwiftUI
 
 private enum MSHOnboardingStep: Int, CaseIterable {
-    case launch
     case atmosphere
     case fragmentation
     case coherence
@@ -30,10 +29,9 @@ struct MSHRootExperience: View {
 private struct MSHOnboardingFlow: View {
     @ObservedObject var store: MSHOnboardingStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var step = MSHOnboardingStep.launch
+    @State private var step = MSHOnboardingStep.atmosphere
     @State private var isWorking = false
     @State private var errorMessage: String?
-    @State private var launchTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -41,8 +39,6 @@ private struct MSHOnboardingFlow: View {
 
             Group {
                 switch step {
-                case .launch:
-                    MSHLaunchExperience()
                 case .atmosphere:
                     MSHOnboardingOpeningStoryboard.Atmosphere {
                         advance(to: .fragmentation)
@@ -68,19 +64,10 @@ private struct MSHOnboardingFlow: View {
                 }
             }
             .id(step)
-            .transition(reduceMotion ? .opacity : .opacity)
+            .transition(.opacity)
         }
         .tint(MSHOnboardingPalette.sage)
-        .onAppear {
-            store.markStarted()
-            guard step == .launch else { return }
-            launchTask = Task { @MainActor in
-                try? await Task.sleep(for: reduceMotion ? .milliseconds(120) : .milliseconds(700))
-                guard !Task.isCancelled else { return }
-                advance(to: .atmosphere)
-            }
-        }
-        .onDisappear { launchTask?.cancel() }
+        .onAppear { store.markStarted() }
         .alert("We couldn't complete that request", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
@@ -193,7 +180,7 @@ private struct MSHOnboardingFlow: View {
             title: "Your health starts here.",
             message: "Your starting point is only a doorway. My Health remains the place where your broader picture comes together."
         ) {
-            MSHPrimaryButton(title: "Go to My Health") { store.complete() }
+            MSHPrimaryButton(title: "Continue to account") { store.complete() }
         }
     }
 
@@ -234,38 +221,6 @@ private struct MSHOnboardingFlow: View {
         withAnimation(reduceMotion ? .easeOut(duration: 0.12) : .easeInOut(duration: 0.42)) {
             step = nextStep
         }
-    }
-}
-
-private struct MSHLaunchExperience: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isVisible = false
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Circle()
-                .fill(MSHOnboardingPalette.sage.opacity(0.16))
-                .frame(width: 62, height: 62)
-                .overlay {
-                    Circle()
-                        .stroke(MSHOnboardingPalette.sage.opacity(0.42), lineWidth: 1)
-                        .padding(8)
-                }
-                .scaleEffect(isVisible ? 1 : 0.94)
-
-            Text("My Simple Health")
-                .font(.system(size: 32, weight: .medium, design: .serif))
-                .foregroundStyle(MSHOnboardingPalette.charcoal)
-        }
-        .opacity(isVisible ? 1 : 0)
-        .onAppear {
-            if reduceMotion {
-                isVisible = true
-            } else {
-                withAnimation(.easeOut(duration: 0.45)) { isVisible = true }
-            }
-        }
-        .accessibilityElement(children: .combine)
     }
 }
 
