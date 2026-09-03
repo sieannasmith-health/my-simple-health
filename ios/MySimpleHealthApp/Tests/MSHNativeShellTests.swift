@@ -5,18 +5,18 @@ final class MSHNativeShellTests: XCTestCase {
     func testPrimaryNavigationHasExpectedSectionsInOrder() {
         XCTAssertEqual(
             MSHAppSection.allCases,
-            [.myHealth, .calendar, .movement, .track, .tools]
+            [.myHealth, .explore, .simple, .progress, .me]
         )
         XCTAssertEqual(
             MSHAppSection.allCases.map(\.title),
-            ["My Health", "Calendar", "Movement", "Track", "Tools"]
+            ["My Health", "Explore", "Simple", "Progress", "Me"]
         )
     }
 
     func testCriticalTabPathCanReturnToMyHealthWithoutChangingArchitecture() {
         let path = MSHAppSection.allCases + [.myHealth]
 
-        XCTAssertEqual(path, [.myHealth, .calendar, .movement, .track, .tools, .myHealth])
+        XCTAssertEqual(path, [.myHealth, .explore, .simple, .progress, .me, .myHealth])
         XCTAssertTrue(path.allSatisfy(\.isImplemented))
     }
 
@@ -45,15 +45,15 @@ final class MSHNativeShellTests: XCTestCase {
         XCTAssertTrue(sections.allSatisfy { !$0.introduction.isEmpty })
     }
 
-    func testIntegratedShellPreservesFiveTabsAndUsesRealDestinations() {
+    func testIntegratedShellPreservesFiveTabsAndUsesProductDestinations() {
         XCTAssertTrue(MSHAppSection.myHealth.isImplemented)
-        XCTAssertTrue(MSHAppSection.calendar.isImplemented)
-        XCTAssertTrue(MSHAppSection.movement.isImplemented)
-        XCTAssertTrue(MSHAppSection.track.isImplemented)
-        XCTAssertTrue(MSHAppSection.tools.isImplemented)
+        XCTAssertTrue(MSHAppSection.explore.isImplemented)
+        XCTAssertTrue(MSHAppSection.simple.isImplemented)
+        XCTAssertTrue(MSHAppSection.progress.isImplemented)
+        XCTAssertTrue(MSHAppSection.me.isImplemented)
     }
 
-    func testCalendarAndMovementRoutesUseWorkingExistingFeatures() {
+    func testCalendarAndMovementRoutesRemainAvailableUnderExplore() {
         XCTAssertEqual(MSHFeatureDestination.calendar.path, "calendar.html")
         XCTAssertNil(MSHFeatureDestination.calendar.query)
         XCTAssertEqual(MSHFeatureDestination.movementPlan.path, "calendar.html")
@@ -61,7 +61,7 @@ final class MSHNativeShellTests: XCTestCase {
         XCTAssertEqual(MSHFeatureDestination.movementLibrary.path, "movement-library.html")
     }
 
-    func testToolsMapToCanonicalExistingRoutes() {
+    func testExploreCapabilitiesMapToCanonicalExistingRoutes() {
         let routes: [MSHFeatureDestination: String] = [
             .landscape: "health-landscape.html",
             .selfInsight: "assessments.html",
@@ -95,11 +95,20 @@ final class MSHNativeShellTests: XCTestCase {
     }
 
     func testCrossDomainRoutesOpenInTheExpectedPrimaryTab() {
-        XCTAssertEqual(MSHWebRoute(destination: .healthStory).appSection, .track)
-        XCTAssertEqual(MSHWebRoute(destination: .cycle).appSection, .calendar)
-        XCTAssertEqual(MSHWebRoute(destination: .movementLibrary).appSection, .movement)
-        XCTAssertEqual(MSHWebRoute(destination: .medications).appSection, .tools)
-        XCTAssertEqual(MSHWebRoute(destination: .explore).appSection, .tools)
+        XCTAssertEqual(MSHWebRoute(destination: .healthStory).appSection, .progress)
+        XCTAssertEqual(MSHWebRoute(destination: .cycle).appSection, .explore)
+        XCTAssertEqual(MSHWebRoute(destination: .movementLibrary).appSection, .explore)
+        XCTAssertEqual(MSHWebRoute(destination: .medications).appSection, .explore)
+        XCTAssertEqual(MSHWebRoute(destination: .explore).appSection, .explore)
+        XCTAssertEqual(MSHWebRoute(rawValue: "hello.html")?.appSection, .simple)
+    }
+
+    func testSimpleKeepsLegacyRouteInternalWhileUsingNewProductIdentity() {
+        let route = MSHWebRoute(rawValue: "hello.html")
+
+        XCTAssertNotNil(route)
+        XCTAssertEqual(route?.appSection, .simple)
+        XCTAssertEqual(MSHAppSection.simple.title, "Simple")
     }
 
     func testEveryNativeFeatureDestinationHasAUniqueRouteIdentity() {
@@ -107,7 +116,6 @@ final class MSHNativeShellTests: XCTestCase {
             [$0.path, $0.query].compactMap { $0 }.joined(separator: "?")
         }
         XCTAssertEqual(Set(identities).count, identities.count)
-        XCTAssertFalse(identities.contains("hello.html"))
         XCTAssertFalse(identities.contains("health-patterns-preview.html"))
     }
 }

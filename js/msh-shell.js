@@ -55,7 +55,7 @@
   }
 
   function renderUtilityFooter() {
-    return `<footer class="msh-app-utility-footer"><div class="msh-app-utility-footer-inner"><span>Educational support, not diagnosis or medical care.</span><nav class="msh-app-utility-links" aria-label="My Simple Health information"><a href="index.html" data-msh-route="publicHome">MSH Home</a><a href="resources.html" data-msh-route="publicResources">Resources</a><a href="support.html" data-msh-route="support">Help & Support</a><a href="privacy.html" data-msh-route="privacy">Privacy</a></nav></div></footer>`;
+    return `<footer class="msh-app-utility-footer"><div class="msh-app-utility-footer-inner"><span>Educational support, not diagnosis or medical care.</span><nav class="msh-app-utility-links" aria-label="My Simple Health information"><a href="privacy.html" data-msh-route="privacy">Privacy</a><a href="support.html" data-msh-route="support">Support</a></nav></div></footer>`;
   }
 
   function themeControl() {

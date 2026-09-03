@@ -14,19 +14,8 @@
                     <view key="view" contentMode="scaleToFill" id="MSH-launch-view">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="My Simple Health" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MSH-launch-title">
-                                <rect key="frame" x="86.66666666666667" y="407.66666666666669" width="219.66666666666663" height="37"/>
-                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="30"/>
-                                <color key="textColor" red="0.09019607843" green="0.2392156863" blue="0.168627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            </label>
-                        </subviews>
                         <viewLayoutGuide key="safeArea" id="MSH-launch-safe-area"/>
-                        <color key="backgroundColor" red="0.9607843137" green="0.9450980392" blue="0.9058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="MSH-launch-title" firstAttribute="centerX" secondItem="MSH-launch-view" secondAttribute="centerX" id="MSH-launch-center-x"/>
-                            <constraint firstItem="MSH-launch-title" firstAttribute="centerY" secondItem="MSH-launch-view" secondAttribute="centerY" id="MSH-launch-center-y"/>
-                        </constraints>
+                        <color key="backgroundColor" red="0.1294117647" green="0.1176470588" blue="0.1176470588" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MSH-launch-responder" userLabel="First Responder" sceneMemberID="firstResponder"/>

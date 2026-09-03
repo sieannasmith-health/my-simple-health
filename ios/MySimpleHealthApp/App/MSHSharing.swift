@@ -1,3 +1,4 @@
+import CryptoKit
 import FirebaseAuth
 import FirebaseFirestore
 import Foundation
@@ -70,6 +71,70 @@ struct MSHSharingRelationship: Identifiable, Equatable, Sendable {
     var isRevoked: Bool { status == "revoked" }
 }
 
+enum MSHSharingRelationshipPolicy {
+    static func logicalKey(for relationship: MSHSharingRelationship) -> String {
+        "\(relationship.inviterID)|\(relationship.inviteeEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())"
+    }
+
+    static func documentID(inviterID: String, inviteeEmail: String) -> String {
+        let normalized = "\(inviterID)|\(inviteeEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())"
+        let digest = SHA256.hash(data: Data(normalized.utf8))
+        return "relationship_" + digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    static func collapse(_ relationships: [MSHSharingRelationship]) -> [MSHSharingRelationship] {
+        var revoked: [MSHSharingRelationship] = []
+        var activeByKey: [String: MSHSharingRelationship] = [:]
+
+        for relationship in relationships {
+            guard !relationship.isRevoked else {
+                revoked.append(relationship)
+                continue
+            }
+
+            let key = logicalKey(for: relationship)
+            guard let existing = activeByKey[key] else {
+                activeByKey[key] = relationship
+                continue
+            }
+
+            if preferred(relationship, over: existing) {
+                activeByKey[key] = relationship
+            }
+        }
+
+        return Array(activeByKey.values) + revoked
+    }
+
+    static func duplicateActiveIDs(
+        in relationships: [MSHSharingRelationship],
+        keeping keptRelationships: [MSHSharingRelationship]
+    ) -> [String] {
+        let keptActiveIDs = Set(keptRelationships.filter { !$0.isRevoked }.map(\.id))
+        return relationships
+            .filter { !$0.isRevoked && !keptActiveIDs.contains($0.id) }
+            .map(\.id)
+    }
+
+    private static func preferred(_ candidate: MSHSharingRelationship, over existing: MSHSharingRelationship) -> Bool {
+        let candidateRank = stateRank(candidate)
+        let existingRank = stateRank(existing)
+        if candidateRank != existingRank { return candidateRank > existingRank }
+
+        let candidateDate = candidate.acceptedAt ?? candidate.createdAt ?? .distantPast
+        let existingDate = existing.acceptedAt ?? existing.createdAt ?? .distantPast
+        if candidateDate != existingDate { return candidateDate > existingDate }
+
+        return candidate.id > existing.id
+    }
+
+    private static func stateRank(_ relationship: MSHSharingRelationship) -> Int {
+        if relationship.isAccepted { return 2 }
+        if relationship.isPending { return 1 }
+        return 0
+    }
+}
+
 struct MSHSharingGrant: Identifiable, Equatable, Sendable {
     let id: String
     let relationshipID: String
@@ -111,39 +176,44 @@ final class MSHSharingStore: ObservableObject {
         defer { isLoading = false }
 
         do {
-            async let sent = db.collection("sharingRelationships")
+            let sentSnapshot = try await db.collection("sharingRelationships")
                 .whereField("inviterID", isEqualTo: uid)
                 .getDocuments()
 
-            let receivedTask: Task<QuerySnapshot, Error>? = currentEmail.map { email in
-                Task {
-                    try await db.collection("sharingRelationships")
-                        .whereField("inviteeEmail", isEqualTo: email)
-                        .getDocuments()
-                }
+            var receivedSnapshot: QuerySnapshot?
+            if let email = currentEmail {
+                receivedSnapshot = try await db.collection("sharingRelationships")
+                    .whereField("inviteeEmail", isEqualTo: email)
+                    .getDocuments()
             }
 
-            async let ownedGrants = db.collection("sharingGrants")
+            let ownerGrantSnapshot = try await db.collection("sharingGrants")
                 .whereField("ownerID", isEqualTo: uid)
                 .getDocuments()
-            async let receivedGrants = db.collection("sharingGrants")
+            let recipientGrantSnapshot = try await db.collection("sharingGrants")
                 .whereField("recipientID", isEqualTo: uid)
                 .getDocuments()
 
-            let sentSnapshot = try await sent
-            let receivedSnapshot = try await receivedTask?.value
-            let ownerGrantSnapshot = try await ownedGrants
-            let recipientGrantSnapshot = try await receivedGrants
-
-            relationships = dedupe(
+            let loadedRelationships = dedupeByID(
                 sentSnapshot.documents.compactMap(Self.relationship) +
                 (receivedSnapshot?.documents.compactMap(Self.relationship) ?? [])
-            ).sorted { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
+            )
+            let collapsedRelationships = MSHSharingRelationshipPolicy.collapse(loadedRelationships)
+
+            relationships = collapsedRelationships
+                .filter { !$0.isRevoked }
+                .sorted { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
 
             grants = dedupeGrants(
                 ownerGrantSnapshot.documents.compactMap(Self.grant) +
                 recipientGrantSnapshot.documents.compactMap(Self.grant)
             )
+
+            let duplicateIDs = MSHSharingRelationshipPolicy.duplicateActiveIDs(
+                in: loadedRelationships,
+                keeping: collapsedRelationships
+            )
+            await revokeLegacyDuplicates(ids: duplicateIDs)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -162,22 +232,33 @@ final class MSHSharingStore: ObservableObject {
             return false
         }
 
-        if relationships.contains(where: {
-            $0.inviterID == user.uid &&
-            $0.inviteeEmail.lowercased() == inviteeEmail &&
-            !$0.isRevoked
-        }) {
-            errorMessage = "That person is already listed under Shared with."
-            return false
-        }
-
         errorMessage = nil
         noticeMessage = nil
         isSendingInvite = true
         defer { isSendingInvite = false }
 
         do {
-            let document = db.collection("sharingRelationships").document()
+            // Always check Firestore, not only the currently loaded UI state.
+            let sentSnapshot = try await db.collection("sharingRelationships")
+                .whereField("inviterID", isEqualTo: user.uid)
+                .getDocuments()
+            let sentRelationships = sentSnapshot.documents.compactMap(Self.relationship)
+            let existing = MSHSharingRelationshipPolicy.collapse(sentRelationships).first {
+                !$0.isRevoked && $0.inviteeEmail.lowercased() == inviteeEmail
+            }
+            if existing != nil {
+                errorMessage = "That person is already listed under Shared with."
+                await load()
+                return false
+            }
+
+            // Deterministic IDs make repeated or simultaneous sends idempotent.
+            let relationshipID = MSHSharingRelationshipPolicy.documentID(
+                inviterID: user.uid,
+                inviteeEmail: inviteeEmail
+            )
+            let document = db.collection("sharingRelationships").document(relationshipID)
+
             try await document.setData([
                 "inviterID": user.uid,
                 "inviterEmail": inviterEmail,
@@ -386,6 +467,20 @@ final class MSHSharingStore: ObservableObject {
         }
     }
 
+    private func revokeLegacyDuplicates(ids: [String]) async {
+        guard !ids.isEmpty else { return }
+        for id in ids {
+            do {
+                try await db.collection("sharingRelationships").document(id).updateData([
+                    "status": "revoked",
+                    "revokedAt": FieldValue.serverTimestamp()
+                ])
+            } catch {
+                // The visible list is already deduplicated. Cleanup can retry next load.
+            }
+        }
+    }
+
     private static func relationship(_ document: QueryDocumentSnapshot) -> MSHSharingRelationship? {
         let data = document.data()
         guard let inviterID = data["inviterID"] as? String,
@@ -433,7 +528,7 @@ final class MSHSharingStore: ObservableObject {
         )
     }
 
-    private func dedupe(_ values: [MSHSharingRelationship]) -> [MSHSharingRelationship] {
+    private func dedupeByID(_ values: [MSHSharingRelationship]) -> [MSHSharingRelationship] {
         Array(Dictionary(uniqueKeysWithValues: values.map { ($0.id, $0) }).values)
     }
 

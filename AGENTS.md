@@ -4,9 +4,17 @@ This repository is the shared source of truth for My Simple Health (MSH). Any Co
 
 ## Product purpose
 
-My Simple Health is a health education and health promotion platform designed to help people understand their health as a coherent whole. It should support science-based self-exploration, practical health understanding, and continuity across a person's experiences over time.
+My Simple Health helps people steward their health and life by helping them see what is happening, understand it in context, anticipate what may be ahead, and make informed decisions for themselves.
 
-MSH should not feel like a conventional metric tracker, medical record, or collection of disconnected wellness widgets.
+MSH should not feel like a conventional metric tracker, medical record, optimization system, or collection of disconnected wellness widgets. It should mirror behavior and context without judgment and reduce the work required to make sense of a person's health and life.
+
+The durable product relationship is:
+
+**MSH mirrors. Simple helps you make sense of it. You decide.**
+
+The person remains the steward and decision-maker. A change, deviation, missed practice, unusual expense, or lower metric is not automatically a failure or a problem.
+
+See `docs/SIMPLE_PRODUCT_CONTRACT.md` before making changes to product behavior, recommendations, notifications, AI behavior, or top-level navigation.
 
 ## Core experience model
 
@@ -22,6 +30,16 @@ Use the following conceptual map when deciding where functionality belongs:
 
 These are parts of one system. Preserve continuity between them rather than designing isolated modules.
 
+The intended top-level mobile architecture is:
+
+- My Health → selective synthesis of what is useful now
+- Explore → broader MSH capabilities, health areas, resources, assessments, and tools
+- Simple → dedicated conversation with the intelligence that is also available throughout MSH
+- Progress → change over time, including what happened, what changed, what was tried, and what was learned
+- Me → account, preferences, connected sources, people and sharing, permissions, privacy, and settings
+
+Do not delete underlying Journey, Calendar, Movement, Food, Financial Health, or other functionality merely because it is no longer a top-level tab. Map existing capabilities into the architecture deliberately.
+
 ## Design principles
 
 - Prefer sparse simplicity and readability.
@@ -31,6 +49,10 @@ These are parts of one system. Preserve continuity between them rather than desi
 - Avoid redundancy, generic wellness jargon, unnecessary nesting, and decorative complexity.
 - Use Tim Peters' Zen of Python as a design heuristic: simple over complex, explicit over implicit, flat over unnecessarily nested, readability matters.
 - Do not redesign unrelated pages when implementing a scoped task.
+- Let focused and reflective experiences breathe. Empty space is not a defect that must be filled with another card.
+- Prefer one clear primary purpose and one clear primary action per focused screen.
+- Explain why a permission is useful before invoking an operating-system permission prompt when practical.
+- Do not reward engagement for engagement's sake. Streaks, scores, badges, and alerts need a stewardship reason to exist.
 
 ## Science and health principles
 
@@ -45,6 +67,8 @@ When academic, epidemiologic, behavioral, measurement, public-health, or researc
 Do not make MSH look or behave like a clinical research system merely because rigorous methods inform the infrastructure.
 
 Do not automatically infer causation from temporal associations or user-entered experiences.
+
+Foresight must distinguish observed facts, user-provided context, inference, plausible future implications, and uncertainty. Do not present a forecast or inferred relationship as certain merely because the system can calculate it.
 
 ## Calendar
 
@@ -66,17 +90,38 @@ For example: save a YouTube workout or custom routine → schedule it → open i
 
 Do not rebuild Calendar to add Movement functionality.
 
-## Resources
+## Resources and Explore
 
-Resources is the expanding toolbox surrounding the core My Health system. Activities, explainers, reflections, assessments, practical tools, planners, calculators, and guides can live there without becoming permanent top-level product architecture.
+Explore is the broader discovery layer around the selective My Health home. Resources, activities, explainers, reflections, assessments, practical tools, planners, calculators, guides, and focused health capabilities can live there without becoming permanent top-level product architecture.
 
 A resource may create a doorway back into My Health when useful, but should not force a goal, project, or behavior change.
 
-## AI / companion behavior
+My Health should become more selective as MSH becomes more capable. Do not respond to every new capability by adding another permanent card to My Health.
 
-Do not make a mascot or physical companion being a current product dependency. A small companion may be revisited later as a delight layer, but it is not a current priority.
+## Simple — intelligence within MSH
 
-Avoid building core product architecture around an AI coach unless a task explicitly restores that priority.
+Simple is the intelligence within My Simple Health. It replaces the former user-facing name “Hello.” Existing internal `hello` routes, filenames, API names, tests, or identifiers may remain temporarily when renaming them would add migration risk; do not expose those legacy names to users in newly written UI.
+
+Simple can serve as a:
+
+- **Teacher** — helps a person understand information, evidence, terminology, patterns, options, and why something may matter.
+- **Helper** — reduces mental and administrative burden through organizing, remembering, connecting, summarizing, preparing, and assisting with user-chosen actions.
+- **Advocate** — helps the person protect their interests, prepare questions, understand choices, navigate systems and barriers, find resources, and keep their priorities visible.
+
+Simple works through:
+
+- **Foresight** — what may be ahead?
+- **Discernment** — what actually deserves attention?
+- **Guidance** — what could the person do if they choose?
+- **Education** — why does this matter and how does it work?
+
+The approach should be comfortable, calm, nonjudgmental, practical, and evidence-oriented.
+
+Simple may notice, connect, explain, anticipate, ask, teach, guide, prepare, and help. The person decides what matters and what to do.
+
+Do not turn Simple into a mascot, a separate AI product, or a dependency-producing coach. The dedicated Simple tab is one conversational surface; Simple should also be available contextually throughout MSH when useful.
+
+Discernment includes restraint. Detection alone is not a reason to surface an insight. “Nothing needs your attention right now,” reassurance, or silence can be correct behavior.
 
 ## Collaboration rules
 
@@ -106,11 +151,12 @@ Supabase may be used for persistent application data, but schema changes must be
 
 Before making a substantial change:
 
-1. Read this file.
+1. Read this file and `docs/SIMPLE_PRODUCT_CONTRACT.md`.
 2. Inspect the existing implementation before proposing a redesign.
 3. Identify the narrowest product/system boundary required by the task.
 4. Preserve existing behavior outside that boundary.
 5. Check whether the task changes data structures, persistence, routing, or cross-page state.
+6. For recommendations, insights, notifications, or AI behaviors, verify that the behavior mirrors or assists rather than judges, and that agency stays with the person.
 
 ## Definition of done
 
@@ -121,4 +167,5 @@ A change is done when:
 - unrelated parts of MSH were not redesigned,
 - any persistence/schema implications are documented,
 - the branch is reviewable as a focused PR,
-- and the implementation still feels like one coherent My Simple Health system.
+- the implementation still feels like one coherent My Simple Health system,
+- and the change increases the person's ability to understand or steward their health and life without unnecessarily increasing dependence on MSH.

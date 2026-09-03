@@ -69,4 +69,84 @@ final class MSHSharingTests: XCTestCase {
         XCTAssertFalse(relationship.isPending)
         XCTAssertTrue(relationship.isRevoked)
     }
+
+    func testDuplicatePendingRelationshipsCollapseToNewest() {
+        let older = MSHSharingRelationship(
+            id: "older",
+            inviterID: "inviter-id",
+            inviterEmail: "one@example.com",
+            inviteeEmail: "Two@Example.com",
+            inviteeID: nil,
+            status: "pending",
+            createdAt: Date(timeIntervalSince1970: 1),
+            acceptedAt: nil,
+            revokedAt: nil
+        )
+        let newer = MSHSharingRelationship(
+            id: "newer",
+            inviterID: "inviter-id",
+            inviterEmail: "one@example.com",
+            inviteeEmail: "two@example.com",
+            inviteeID: nil,
+            status: "pending",
+            createdAt: Date(timeIntervalSince1970: 2),
+            acceptedAt: nil,
+            revokedAt: nil
+        )
+
+        let collapsed = MSHSharingRelationshipPolicy.collapse([older, newer])
+        let active = collapsed.filter { !$0.isRevoked }
+
+        XCTAssertEqual(active.count, 1)
+        XCTAssertEqual(active.first?.id, "newer")
+        XCTAssertEqual(
+            MSHSharingRelationshipPolicy.duplicateActiveIDs(in: [older, newer], keeping: collapsed),
+            ["older"]
+        )
+    }
+
+    func testAcceptedRelationshipWinsOverNewerPendingDuplicate() {
+        let accepted = MSHSharingRelationship(
+            id: "accepted",
+            inviterID: "inviter-id",
+            inviterEmail: "one@example.com",
+            inviteeEmail: "two@example.com",
+            inviteeID: "invitee-id",
+            status: "accepted",
+            createdAt: Date(timeIntervalSince1970: 1),
+            acceptedAt: Date(timeIntervalSince1970: 2),
+            revokedAt: nil
+        )
+        let pending = MSHSharingRelationship(
+            id: "pending",
+            inviterID: "inviter-id",
+            inviterEmail: "one@example.com",
+            inviteeEmail: "two@example.com",
+            inviteeID: nil,
+            status: "pending",
+            createdAt: Date(timeIntervalSince1970: 3),
+            acceptedAt: nil,
+            revokedAt: nil
+        )
+
+        let collapsed = MSHSharingRelationshipPolicy.collapse([accepted, pending])
+        let active = collapsed.filter { !$0.isRevoked }
+
+        XCTAssertEqual(active.count, 1)
+        XCTAssertEqual(active.first?.id, "accepted")
+    }
+
+    func testRelationshipDocumentIDIsStableAcrossEmailCase() {
+        let first = MSHSharingRelationshipPolicy.documentID(
+            inviterID: "inviter-id",
+            inviteeEmail: "Two@Example.com"
+        )
+        let second = MSHSharingRelationshipPolicy.documentID(
+            inviterID: "inviter-id",
+            inviteeEmail: "two@example.com"
+        )
+
+        XCTAssertEqual(first, second)
+        XCTAssertTrue(first.hasPrefix("relationship_"))
+    }
 }
