@@ -12,11 +12,13 @@
 		105237004C94BD66F3297C6C /* MSHAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11472DA81BF6F34067B30F1 /* MSHAuth.swift */; };
 		10801D4CF4DC806BFCCED832 /* MSHMyHealthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */; };
 		12798D94C30D525365CE9F3A /* MSHHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 37897D51A209B111301BBF74 /* MSHHealthCore */; };
+		1281482F1C3920BA86FB9204 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
 		1A49E62E20A10C358297F407 /* MSHMyHealthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A44F38F35A3B1282B9D6B1 /* MSHMyHealthScreen.swift */; };
 		1E04F597A57CB7A720AF7E9C /* MSHMeditateScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614EDADF6355798654BABDA9 /* MSHMeditateScreen.swift */; };
 		1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */; };
 		26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */; };
 		291AF110FED7BF3DF8C97BEB /* MSHNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A2EC03C77F19D427EFAA87F /* MSHNotificationService.swift */; };
+		2D3C34EC2AAF739E8DC097BB /* MSHSharingUXContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */; };
 		3ADD0323DC0F51D0B774E7BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B3DB5402D73C03AA7ED2892 /* Assets.xcassets */; };
 		448443CE62E04BDFC2C3EF8E /* MSHSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C51FE87388D0DA401E52BF /* MSHSharing.swift */; };
 		492DF631BD0F38AB33E0AAFB /* MSHConnectedHealthSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D44D8E1F47728D3F41AC810 /* MSHConnectedHealthSources.swift */; };
@@ -25,7 +27,7 @@
 		59C56071B798F5F2B370CB4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95FE22EF2929B21C0FD523B8 /* GoogleService-Info.plist */; };
 		5A1378B1645E17A7062F40F5 /* MSHMyHealthModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B248761DDAABD299490F9A51 /* MSHMyHealthModel.swift */; };
 		5F996406B20BA241B6DB76BC /* SQLiteHealthRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D893C6BA5C93014EB3ED5A1B /* SQLiteHealthRecordStore.swift */; };
-		701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
+		701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */; };
 		74125FB20DE63614FBC19F48 /* MSHMyHealthHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF8673BD1F027F961A09EC1 /* MSHMyHealthHomeScreen.swift */; };
 		8C3CFE2C4DF260C5A501B749 /* MSHSharedContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */; };
 		8CB37FD6EAE9627C2B53F1FF /* MSHNotificationBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1B265B9AE7A6DEBAE88C00 /* MSHNotificationBridge.swift */; };
@@ -63,6 +65,7 @@
 /* Begin PBXFileReference section */
 		02F39427D0DBB5BFBC9645A3 /* MSHMyHealthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthTests.swift; sourceTree = "<group>"; };
 		077848C501B8EB7E9C8A5214 /* MSHNavigationPerformance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNavigationPerformance.swift; sourceTree = "<group>"; };
+		0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharingUXContractTests.swift; sourceTree = "<group>"; };
 		0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStoreTests.swift; sourceTree = "<group>"; };
 		0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharedContentTests.swift; sourceTree = "<group>"; };
 		0AA05488D28DF0D6053601B6 /* MSHWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHWebView.swift; sourceTree = "<group>"; };
@@ -115,7 +118,8 @@
 				FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */,
 				0E782D607237B80CCA2B4DB2 /* FirebaseCore in Frameworks */,
 				1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */,
-				701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */,
+				701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */,
+				1281482F1C3920BA86FB9204 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +192,7 @@
 				463C60E260C799F4ED741DA6 /* MSHOnboardingTests.swift */,
 				0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */,
 				9AE3CB1B800CE43B7A5FE5CC /* MSHSharingTests.swift */,
+				0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -232,6 +237,7 @@
 				7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */,
 				482699F439ED47B5179E8A76 /* FirebaseCore */,
 				4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */,
+				4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */,
 				735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */,
 			);
 			productName = MySimpleHealth;
@@ -354,6 +360,7 @@
 				FC602CCB9C3F6C73FEEC0B34 /* MSHOnboardingTests.swift in Sources */,
 				8C3CFE2C4DF260C5A501B749 /* MSHSharedContentTests.swift in Sources */,
 				9A776D3B1E0EE520E0DB2926 /* MSHSharingTests.swift in Sources */,
+				2D3C34EC2AAF739E8DC097BB /* MSHSharingUXContractTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,8 +622,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.0.0;
+				kind = exactVersion;
+				version = 12.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -635,6 +642,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 		735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
