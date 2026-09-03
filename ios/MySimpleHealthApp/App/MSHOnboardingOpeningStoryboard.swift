@@ -491,48 +491,102 @@ private struct MSHOpeningThresholdEnvironment: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.80, green: 0.74, blue: 0.65),
-                        Color(red: 0.66, green: 0.57, blue: 0.47),
-                        Color(red: 0.43, green: 0.35, blue: 0.29)
+                        Color(red: 0.91, green: 0.87, blue: 0.80),
+                        Color(red: 0.78, green: 0.70, blue: 0.61),
+                        Color(red: 0.47, green: 0.39, blue: 0.32)
                     ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
 
-                RoundedRectangle(cornerRadius: 46, style: .continuous)
-                    .fill(Color.white.opacity(0.10))
-                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.68)
-                    .offset(x: proxy.size.width * 0.11, y: -proxy.size.height * 0.02)
-                    .blur(radius: 0.4)
+                // Warm plaster wall with a distinct architectural alcove.
+                RoundedRectangle(cornerRadius: 58, style: .continuous)
+                    .fill(Color(red: 0.83, green: 0.76, blue: 0.66).opacity(0.92))
+                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.72)
+                    .offset(x: proxy.size.width * 0.08, y: -proxy.size.height * 0.02)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 58, style: .continuous)
+                            .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                    }
+                    .shadow(color: .black.opacity(0.12), radius: 28, x: 0, y: 18)
 
-                Capsule()
-                    .fill(Color.white.opacity(0.14))
-                    .frame(width: proxy.size.width * 0.62, height: proxy.size.height * 0.94)
-                    .rotationEffect(.degrees(8))
-                    .offset(x: proxy.size.width * 0.42, y: -proxy.size.height * 0.06)
-                    .blur(radius: 22)
-
+                // Stone floor plane gives the threshold a real architectural horizon.
                 LinearGradient(
                     colors: [
-                        Color.white.opacity(0.22),
                         Color.clear,
-                        Color.black.opacity(0.20)
+                        Color(red: 0.54, green: 0.45, blue: 0.37).opacity(0.22),
+                        Color(red: 0.31, green: 0.25, blue: 0.21).opacity(0.48)
                     ],
-                    startPoint: .topTrailing,
-                    endPoint: .bottomLeading
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
+                .frame(height: proxy.size.height * 0.40)
+                .frame(maxHeight: .infinity, alignment: .bottom)
 
+                // Dark wood reveals on both sides keep the scene architectural without
+                // resembling any selectable My Space room.
                 Rectangle()
-                    .fill(Color(red: 0.25, green: 0.19, blue: 0.15).opacity(0.30))
-                    .frame(width: proxy.size.width * 0.16)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.22, green: 0.16, blue: 0.12),
+                                Color(red: 0.34, green: 0.25, blue: 0.19)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: proxy.size.width * 0.10)
                     .frame(maxHeight: .infinity)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Rectangle()
-                    .fill(Color(red: 0.30, green: 0.23, blue: 0.18).opacity(0.22))
-                    .frame(width: proxy.size.width * 0.11)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.29, green: 0.21, blue: 0.16),
+                                Color(red: 0.18, green: 0.13, blue: 0.10)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: proxy.size.width * 0.08)
                     .frame(maxHeight: .infinity)
                     .frame(maxWidth: .infinity, alignment: .trailing)
+
+                // Directional daylight reads like a real opening rather than a soft blob.
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.34),
+                        Color.white.opacity(0.08),
+                        Color.clear
+                    ],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
+                )
+                .blendMode(.screen)
+
+                // Thin horizontal seams imply large-format stone/plaster panels.
+                VStack(spacing: proxy.size.height * 0.12) {
+                    ForEach(0..<6, id: \.self) { _ in
+                        Rectangle()
+                            .fill(Color.white.opacity(0.035))
+                            .frame(height: 0.7)
+                    }
+                }
+                .padding(.horizontal, proxy.size.width * 0.12)
+                .offset(y: proxy.size.height * 0.04)
+
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.08),
+                        Color.clear,
+                        Color.black.opacity(0.18)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
