@@ -44,6 +44,11 @@
     .msh-calendar-top-icons button { appearance:none; border:1px solid color-mix(in srgb,currentColor 18%,transparent); background:color-mix(in srgb,var(--msh-surface,#fff) 8%,transparent); color:inherit; width:46px; min-width:46px; height:46px; padding:7px; border-radius:14px; display:grid; place-items:center; cursor:pointer; }
     .msh-calendar-top-icons button span { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
     .msh-calendar-top-icons .msh-cycle-original-icon { width:28px; height:28px; }
+
+    /* Category markers belong beside Calendar labels, never on top of their text. */
+    .msh-date-events article > span { position: relative; }
+    .msh-date-events article > span::before { display: none !important; content: none !important; }
+
     @media (max-width:600px) {
       .msh-calendar-hero-tools { width:100%; justify-content:space-between; }
       .msh-calendar-top-icons { gap:6px; }
