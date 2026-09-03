@@ -102,6 +102,7 @@ private struct MSHOnboardingFlow: View {
                 selected: { discoverySource == $0 },
                 allowsMultiple: false
             ) { option in
+                MSHNativeHaptic.selection.play()
                 discoverySource = option
             }
 
@@ -122,6 +123,7 @@ private struct MSHOnboardingFlow: View {
                 selected: { intent == $0 },
                 allowsMultiple: false
             ) { option in
+                MSHNativeHaptic.selection.play()
                 intent = option
             }
 
@@ -139,8 +141,10 @@ private struct MSHOnboardingFlow: View {
         ) {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 ForEach(focusOptions, id: \.self) { option in
+                    let isSelected = selectedFocus.contains(option)
                     Button {
-                        if selectedFocus.contains(option) {
+                        MSHNativeHaptic.selection.play()
+                        if isSelected {
                             selectedFocus.remove(option)
                         } else {
                             selectedFocus.insert(option)
@@ -150,7 +154,7 @@ private struct MSHOnboardingFlow: View {
                             Text(option)
                                 .font(.subheadline.weight(.semibold))
                             Spacer(minLength: 4)
-                            if selectedFocus.contains(option) {
+                            if isSelected {
                                 Image(systemName: "checkmark")
                                     .font(.caption.weight(.bold))
                             }
@@ -158,33 +162,38 @@ private struct MSHOnboardingFlow: View {
                         .foregroundStyle(MSHOnboardingPalette.charcoal)
                         .padding(.horizontal, 14)
                         .frame(maxWidth: .infinity, minHeight: 50)
-                        .background(
-                            selectedFocus.contains(option)
-                                ? MSHOnboardingPalette.sage.opacity(0.20)
-                                : MSHOnboardingPalette.warmWhite.opacity(0.84)
+                        .mshNativeGlass(
+                            in: RoundedRectangle(cornerRadius: 16, style: .continuous),
+                            tint: focusTint(for: option),
+                            edgeStrength: isSelected ? 1.05 : 0.26,
+                            shadowStrength: isSelected ? 0.60 : 0.12,
+                            glowStrength: isSelected ? 0.22 : 0.02
                         )
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(
-                                    selectedFocus.contains(option)
-                                        ? MSHOnboardingPalette.sage.opacity(0.70)
-                                        : MSHOnboardingPalette.stone,
-                                    lineWidth: 1
-                                )
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(MSHQuietButtonStyle())
                 }
             }
 
-            Button("Nothing specific right now") {
+            Button {
+                MSHNativeHaptic.selection.play()
                 selectedFocus.removeAll()
                 advance(to: .saveSpace)
+            } label: {
+                Text("Nothing specific right now")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.72))
+                    .padding(.horizontal, 18)
+                    .frame(minHeight: 42)
+                    .mshNativeGlass(
+                        in: Capsule(),
+                        tint: MSHOnboardingPalette.sage,
+                        edgeStrength: 0.30,
+                        shadowStrength: 0.10,
+                        glowStrength: 0.02
+                    )
             }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.72))
-            .frame(maxWidth: .infinity, minHeight: 44)
+            .buttonStyle(MSHQuietButtonStyle())
+            .frame(maxWidth: .infinity)
 
             MSHPrimaryButton(title: "Continue", enabled: !selectedFocus.isEmpty) {
                 advance(to: .saveSpace)
@@ -212,6 +221,27 @@ private struct MSHOnboardingFlow: View {
                     store.complete()
                 }
             }
+        }
+    }
+
+    private func focusTint(for option: String) -> Color {
+        switch option {
+        case "Sleep":
+            MSHOpeningPalette.powder
+        case "Movement", "Mind":
+            MSHOpeningPalette.sage
+        case "Food":
+            MSHOpeningPalette.clay
+        case "Money", "Relationships":
+            MSHOpeningPalette.mushroom
+        case "Healthcare", "Medications":
+            MSHOpeningPalette.powder
+        case "Environment", "Routines":
+            MSHOpeningPalette.sage
+        case "Life context", "Health":
+            MSHOpeningPalette.stone
+        default:
+            MSHOnboardingPalette.sage
         }
     }
 
@@ -277,6 +307,30 @@ private struct MSHEditorialQuestionPage<Actions: View>: View {
             .padding(.horizontal, 26)
             .frame(maxWidth: .infinity)
         }
+        .background {
+            ZStack {
+                MSHOnboardingPalette.cream
+                RadialGradient(
+                    colors: [
+                        MSHOpeningPalette.powder.opacity(0.055),
+                        Color.clear
+                    ],
+                    center: .topTrailing,
+                    startRadius: 10,
+                    endRadius: 360
+                )
+                RadialGradient(
+                    colors: [
+                        MSHOpeningPalette.mushroom.opacity(0.045),
+                        Color.clear
+                    ],
+                    center: .bottomLeading,
+                    startRadius: 10,
+                    endRadius: 420
+                )
+            }
+            .ignoresSafeArea()
+        }
         .scrollBounceBehavior(.basedOnSize)
         .onAppear { reveal() }
     }
@@ -311,6 +365,7 @@ private struct MSHChoiceList: View {
     var body: some View {
         VStack(spacing: 9) {
             ForEach(options, id: \.self) { option in
+                let isSelected = selected(option)
                 Button {
                     onSelect(option)
                 } label: {
@@ -319,7 +374,7 @@ private struct MSHChoiceList: View {
                             .font(.body.weight(.medium))
                             .multilineTextAlignment(.leading)
                         Spacer()
-                        if selected(option) {
+                        if isSelected {
                             Image(systemName: allowsMultiple ? "checkmark.square.fill" : "checkmark")
                                 .font(.subheadline.weight(.bold))
                                 .foregroundStyle(MSHOnboardingPalette.sage)
@@ -328,21 +383,13 @@ private struct MSHChoiceList: View {
                     .foregroundStyle(MSHOnboardingPalette.charcoal)
                     .padding(.horizontal, 16)
                     .frame(maxWidth: .infinity, minHeight: 54)
-                    .background(
-                        selected(option)
-                            ? MSHOnboardingPalette.sage.opacity(0.16)
-                            : MSHOnboardingPalette.warmWhite.opacity(0.82)
+                    .mshNativeGlass(
+                        in: RoundedRectangle(cornerRadius: 17, style: .continuous),
+                        tint: isSelected ? MSHOnboardingPalette.sage : MSHOpeningPalette.stone,
+                        edgeStrength: isSelected ? 0.98 : 0.22,
+                        shadowStrength: isSelected ? 0.50 : 0.08,
+                        glowStrength: isSelected ? 0.18 : 0.01
                     )
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 17, style: .continuous)
-                            .stroke(
-                                selected(option)
-                                    ? MSHOnboardingPalette.sage.opacity(0.62)
-                                    : MSHOnboardingPalette.stone,
-                                lineWidth: 1
-                            )
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
                 }
                 .buttonStyle(MSHQuietButtonStyle())
             }
@@ -356,19 +403,38 @@ private struct MSHPrimaryButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Text(title)
-                Image(systemName: "arrow.right")
+        Group {
+            if enabled {
+                MSHNativeGlassButton(
+                    shape: Capsule(),
+                    tint: MSHOpeningPalette.mushroom,
+                    foreground: MSHOnboardingPalette.charcoal,
+                    haptic: .softImpact,
+                    action: action
+                ) {
+                    HStack(spacing: 10) {
+                        Text(title)
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 54)
+                }
+            } else {
+                HStack(spacing: 10) {
+                    Text(title)
+                    Image(systemName: "arrow.right")
+                }
+                .font(.headline)
+                .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.40))
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(MSHOnboardingPalette.stone.opacity(0.55), in: Capsule())
+                .overlay {
+                    Capsule()
+                        .stroke(MSHOnboardingPalette.stone.opacity(0.88), lineWidth: 0.8)
+                }
+                .accessibilityHidden(true)
             }
-            .font(.headline)
-            .foregroundStyle(MSHOnboardingPalette.warmWhite)
-            .frame(maxWidth: .infinity, minHeight: 54)
-            .background(MSHOnboardingPalette.charcoal.opacity(enabled ? 1 : 0.34))
-            .clipShape(Capsule())
         }
-        .buttonStyle(MSHQuietButtonStyle())
-        .disabled(!enabled)
     }
 }
 
@@ -377,9 +443,13 @@ private struct MSHQuietButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .opacity(configuration.isPressed ? 0.82 : 1)
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.99 : 1)
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: configuration.isPressed)
+            .opacity(configuration.isPressed ? 0.90 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.018 : 1)
+            .brightness(configuration.isPressed ? 0.018 : 0)
+            .animation(
+                reduceMotion ? nil : .spring(response: 0.20, dampingFraction: 0.80),
+                value: configuration.isPressed
+            )
     }
 }
 
