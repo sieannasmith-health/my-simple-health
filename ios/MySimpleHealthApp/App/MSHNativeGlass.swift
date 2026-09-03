@@ -21,7 +21,7 @@ enum MSHNativeHaptic {
         case .softImpact:
             let generator = UIImpactFeedbackGenerator(style: .soft)
             generator.prepare()
-            generator.impactOccurred(intensity: 0.76)
+            generator.impactOccurred(intensity: 0.78)
         case .confirmation:
             let generator = UINotificationFeedbackGenerator()
             generator.prepare()
@@ -47,106 +47,145 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 } else {
                     shape
                         .fill(.ultraThinMaterial)
+                        // Clear optical body: less flat gray, more light passing through.
                         .overlay {
-                            shape.fill(Color.white.opacity(0.07 + (0.11 * glowStrength)))
+                            shape.fill(Color.white.opacity(0.045 + (0.055 * glowStrength)))
+                        }
+                        // Local category tint lives inside the glass instead of only on the border.
+                        .overlay {
+                            shape.fill(tint.opacity(0.070 + (0.045 * glowStrength)))
+                        }
+                        // Internal refraction blooms. These are intentionally asymmetric so the
+                        // surface feels like thick coated glass catching light rather than a flat fill.
+                        .overlay {
+                            shape.fill(
+                                RadialGradient(
+                                    colors: [
+                                        Color(red: 0.46, green: 0.82, blue: 1.0)
+                                            .opacity(0.18 + (0.12 * glowStrength)),
+                                        Color.white.opacity(0.05),
+                                        Color.clear
+                                    ],
+                                    center: .topLeading,
+                                    startRadius: 4,
+                                    endRadius: 170
+                                )
+                            )
                         }
                         .overlay {
-                            shape.fill(tint.opacity(0.050 + (0.030 * glowStrength)))
+                            shape.fill(
+                                RadialGradient(
+                                    colors: [
+                                        Color(red: 0.86, green: 0.50, blue: 1.0)
+                                            .opacity(0.16 + (0.14 * glowStrength)),
+                                        tint.opacity(0.08 + (0.06 * glowStrength)),
+                                        Color.clear
+                                    ],
+                                    center: .bottomTrailing,
+                                    startRadius: 2,
+                                    endRadius: 185
+                                )
+                            )
                         }
                         .overlay {
                             shape.fill(
                                 LinearGradient(
                                     colors: [
-                                        tint.opacity(0.14 + (0.06 * glowStrength)),
-                                        Color.white.opacity(0.055 + (0.08 * glowStrength)),
-                                        Color(red: 0.72, green: 0.82, blue: 1.0).opacity(0.08 + (0.10 * glowStrength)),
-                                        Color(red: 0.92, green: 0.75, blue: 1.0).opacity(0.07 + (0.11 * glowStrength)),
-                                        Color.white.opacity(0.03)
+                                        Color.white.opacity(0.15 + (0.08 * glowStrength)),
+                                        Color.clear,
+                                        Color(red: 1.0, green: 0.82, blue: 0.67)
+                                            .opacity(0.07 + (0.05 * glowStrength))
                                     ],
-                                    startPoint: .topLeading,
+                                    startPoint: .top,
                                     endPoint: .bottomTrailing
                                 )
                             )
                         }
                 }
             }
-            // Crisp pearl rim keeps the object reading as glass rather than a colored pill.
+            // Pearl/specular rim: bright enough to describe a physically thick glass edge.
             .overlay {
                 shape.strokeBorder(
                     LinearGradient(
                         colors: [
                             Color.white.opacity(1.0 * edgeStrength),
-                            Color.white.opacity(0.36 * edgeStrength),
-                            Color.white.opacity(0.92 * edgeStrength)
+                            Color.white.opacity(0.52 * edgeStrength),
+                            Color.white.opacity(0.24 * edgeStrength),
+                            Color.white.opacity(0.94 * edgeStrength)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: 1.00
+                    lineWidth: 1.10
                 )
             }
-            // MSH optical coating: selective cyan, violet, pearl, and local category tint.
+            // MSH optical coating: selective cyan, violet, warm pearl, and local tint.
             .overlay {
                 shape.strokeBorder(
                     AngularGradient(
                         colors: [
                             Color.clear,
-                            Color(red: 0.45, green: 0.78, blue: 1.0).opacity(0.82 * edgeStrength),
+                            Color(red: 0.36, green: 0.82, blue: 1.0).opacity(0.94 * edgeStrength),
                             Color.clear,
-                            tint.opacity(0.52 * edgeStrength),
-                            Color.white.opacity(0.18 * edgeStrength),
+                            tint.opacity(0.60 * edgeStrength),
+                            Color.white.opacity(0.20 * edgeStrength),
                             Color.clear,
-                            Color(red: 0.80, green: 0.48, blue: 1.0).opacity(0.80 * edgeStrength),
-                            Color(red: 1.0, green: 0.82, blue: 0.67).opacity(0.38 * edgeStrength),
+                            Color(red: 0.78, green: 0.40, blue: 1.0).opacity(0.92 * edgeStrength),
+                            Color(red: 1.0, green: 0.77, blue: 0.58).opacity(0.46 * edgeStrength),
                             Color.clear
                         ],
                         center: .center,
-                        startAngle: .degrees(-32),
-                        endAngle: .degrees(328)
+                        startAngle: .degrees(-28),
+                        endAngle: .degrees(332)
                     ),
-                    lineWidth: 1.65
+                    lineWidth: 1.85
                 )
-                .blur(radius: 0.18)
+                .blur(radius: 0.12)
             }
-            // A broader, softer fringe makes the coating visible without becoming a rainbow border.
+            // Outer halo: visible enough to feel futuristic, still localized rather than rainbow.
             .overlay {
                 shape.strokeBorder(
                     AngularGradient(
                         colors: [
                             Color.clear,
-                            Color(red: 0.50, green: 0.76, blue: 1.0).opacity(0.22 * edgeStrength),
+                            Color(red: 0.38, green: 0.76, blue: 1.0).opacity(0.34 * edgeStrength),
                             Color.clear,
-                            Color(red: 0.86, green: 0.60, blue: 1.0).opacity(0.21 * edgeStrength),
+                            Color(red: 0.88, green: 0.50, blue: 1.0).opacity(0.32 * edgeStrength),
+                            Color.clear,
+                            tint.opacity(0.18 * edgeStrength),
                             Color.clear
                         ],
                         center: .center
                     ),
-                    lineWidth: 2.8
+                    lineWidth: 3.4
                 )
-                .blur(radius: 1.25)
+                .blur(radius: 1.55)
             }
+            // Fine top highlight reinforces a real specular cap.
             .overlay(alignment: .top) {
                 shape
-                    .strokeBorder(Color.white.opacity(0.84 * edgeStrength), lineWidth: 0.72)
-                    .blur(radius: 0.10)
+                    .strokeBorder(Color.white.opacity(0.92 * edgeStrength), lineWidth: 0.78)
+                    .blur(radius: 0.08)
             }
             .shadow(
-                color: tint.opacity(0.09 + (0.08 * glowStrength)),
-                radius: 9 + (7 * glowStrength),
+                color: tint.opacity(0.11 + (0.10 * glowStrength)),
+                radius: 10 + (9 * glowStrength),
                 y: 1
             )
             .shadow(
-                color: Color(red: 0.55, green: 0.73, blue: 1.0).opacity(0.12 + (0.13 * glowStrength)),
-                radius: 10 + (8 * glowStrength),
+                color: Color(red: 0.44, green: 0.76, blue: 1.0)
+                    .opacity(0.15 + (0.16 * glowStrength)),
+                radius: 12 + (10 * glowStrength),
                 y: 1
             )
             .shadow(
-                color: Color(red: 0.82, green: 0.55, blue: 1.0).opacity(0.09 + (0.12 * glowStrength)),
-                radius: 12 + (8 * glowStrength),
+                color: Color(red: 0.82, green: 0.45, blue: 1.0)
+                    .opacity(0.12 + (0.15 * glowStrength)),
+                radius: 14 + (10 * glowStrength),
                 y: 2
             )
             .shadow(
-                color: Color.black.opacity(0.07 * shadowStrength),
+                color: Color.black.opacity(0.065 * shadowStrength),
                 radius: 14,
                 y: 6
             )
@@ -186,33 +225,33 @@ struct MSHNativeGlassButtonStyle<S: InsettableShape>: ButtonStyle {
             .mshNativeGlass(
                 in: shape,
                 tint: tint,
-                edgeStrength: configuration.isPressed ? 1.95 : 1.22,
-                shadowStrength: configuration.isPressed ? 1.46 : 1.0,
-                glowStrength: configuration.isPressed ? 1.35 : 0.34
+                edgeStrength: configuration.isPressed ? 2.05 : 1.28,
+                shadowStrength: configuration.isPressed ? 1.50 : 1.0,
+                glowStrength: configuration.isPressed ? 1.55 : 0.42
             )
             .overlay {
                 if configuration.isPressed {
                     shape.fill(
                         RadialGradient(
                             colors: [
-                                Color.white.opacity(0.34),
-                                tint.opacity(0.16),
-                                Color(red: 0.58, green: 0.78, blue: 1.0).opacity(0.17),
-                                Color(red: 0.86, green: 0.62, blue: 1.0).opacity(0.13),
+                                Color.white.opacity(0.40),
+                                tint.opacity(0.22),
+                                Color(red: 0.48, green: 0.82, blue: 1.0).opacity(0.22),
+                                Color(red: 0.84, green: 0.48, blue: 1.0).opacity(0.18),
                                 Color.clear
                             ],
                             center: .topLeading,
                             startRadius: 2,
-                            endRadius: 170
+                            endRadius: 180
                         )
                     )
                     .allowsHitTesting(false)
                 }
             }
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.042 : 1)
-            .brightness(configuration.isPressed ? 0.075 : 0)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.045 : 1)
+            .brightness(configuration.isPressed ? 0.085 : 0)
             .animation(
-                reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.74),
+                reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.72),
                 value: configuration.isPressed
             )
     }
