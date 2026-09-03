@@ -118,3 +118,10 @@ extension View {
         modifier(MSHSurfaceModifier())
     }
 }
+
+extension MSHNativeHaptic {
+    @MainActor
+    func fire() {
+        play()
+    }
+}
