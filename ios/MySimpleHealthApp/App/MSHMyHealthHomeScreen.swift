@@ -106,10 +106,7 @@ struct MSHMyHealthHomeScreen: View {
             }
             .refreshable { await viewModel.reload() }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { mySpaceMenu }
-        }
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             seedDisplayNameIfNeeded()
             await viewModel.loadIfNeeded()
