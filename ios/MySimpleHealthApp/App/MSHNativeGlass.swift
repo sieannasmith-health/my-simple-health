@@ -43,12 +43,15 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
             .background {
                 if reduceTransparency {
                     shape
-                        .fill(Color.white.opacity(0.90))
+                        .fill(Color.white.opacity(0.92))
                 } else {
                     shape
                         .fill(.ultraThinMaterial)
                         .overlay {
-                            shape.fill(tint.opacity(0.075))
+                            shape.fill(Color.white.opacity(0.14))
+                        }
+                        .overlay {
+                            shape.fill(tint.opacity(0.025))
                         }
                 }
             }
@@ -56,26 +59,27 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 shape.strokeBorder(
                     AngularGradient(
                         colors: [
-                            Color.white.opacity(0.72 * edgeStrength),
-                            Color(red: 0.76, green: 0.83, blue: 1.0).opacity(0.22 * edgeStrength),
-                            Color(red: 0.92, green: 0.80, blue: 1.0).opacity(0.17 * edgeStrength),
-                            tint.opacity(0.20 * edgeStrength),
-                            Color.white.opacity(0.62 * edgeStrength)
+                            Color.white.opacity(0.92 * edgeStrength),
+                            Color(red: 0.74, green: 0.84, blue: 1.0).opacity(0.34 * edgeStrength),
+                            Color.white.opacity(0.62 * edgeStrength),
+                            Color(red: 0.92, green: 0.79, blue: 1.0).opacity(0.28 * edgeStrength),
+                            tint.opacity(0.16 * edgeStrength),
+                            Color.white.opacity(0.86 * edgeStrength)
                         ],
                         center: .center
                     ),
-                    lineWidth: 0.8
+                    lineWidth: 1.05
                 )
             }
             .overlay(alignment: .top) {
                 shape
-                    .strokeBorder(Color.white.opacity(0.32 * edgeStrength), lineWidth: 0.55)
-                    .blur(radius: 0.2)
+                    .strokeBorder(Color.white.opacity(0.58 * edgeStrength), lineWidth: 0.72)
+                    .blur(radius: 0.15)
             }
             .shadow(
-                color: Color.black.opacity(0.10 * shadowStrength),
-                radius: 12,
-                y: 5
+                color: Color.black.opacity(0.09 * shadowStrength),
+                radius: 14,
+                y: 6
             )
     }
 }
@@ -111,11 +115,11 @@ struct MSHNativeGlassButtonStyle<S: InsettableShape>: ButtonStyle {
             .mshNativeGlass(
                 in: shape,
                 tint: tint,
-                edgeStrength: configuration.isPressed ? 1.35 : 1.0,
-                shadowStrength: configuration.isPressed ? 1.25 : 1.0
+                edgeStrength: configuration.isPressed ? 1.45 : 1.0,
+                shadowStrength: configuration.isPressed ? 1.30 : 1.0
             )
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.025 : 1)
-            .brightness(configuration.isPressed ? 0.025 : 0)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.028 : 1)
+            .brightness(configuration.isPressed ? 0.035 : 0)
             .animation(
                 reduceMotion ? nil : .spring(response: 0.22, dampingFraction: 0.82),
                 value: configuration.isPressed
