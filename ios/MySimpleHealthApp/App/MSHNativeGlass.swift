@@ -40,6 +40,8 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
+        let editorialGlass = shadowStrength <= 0.60 && glowStrength <= 0.22
+
         content
             .background {
                 if reduceTransparency {
@@ -47,23 +49,36 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 } else {
                     shape
                         .fill(.ultraThinMaterial)
-                        // Clear optical body: less flat gray, more light passing through.
+                        .opacity(editorialGlass ? 0.50 : 1.0)
                         .overlay {
-                            shape.fill(Color.white.opacity(0.045 + (0.055 * glowStrength)))
+                            shape.fill(
+                                Color.white.opacity(
+                                    editorialGlass
+                                        ? 0.28
+                                        : 0.045 + (0.055 * glowStrength)
+                                )
+                            )
                         }
-                        // Local category tint lives inside the glass instead of only on the border.
                         .overlay {
-                            shape.fill(tint.opacity(0.070 + (0.045 * glowStrength)))
+                            shape.fill(
+                                tint.opacity(
+                                    editorialGlass
+                                        ? 0.020 + (0.022 * glowStrength)
+                                        : 0.070 + (0.045 * glowStrength)
+                                )
+                            )
                         }
-                        // Internal refraction blooms. These are intentionally asymmetric so the
-                        // surface feels like thick coated glass catching light rather than a flat fill.
                         .overlay {
                             shape.fill(
                                 RadialGradient(
                                     colors: [
                                         Color(red: 0.46, green: 0.82, blue: 1.0)
-                                            .opacity(0.18 + (0.12 * glowStrength)),
-                                        Color.white.opacity(0.05),
+                                            .opacity(
+                                                editorialGlass
+                                                    ? 0.045 + (0.055 * glowStrength)
+                                                    : 0.18 + (0.12 * glowStrength)
+                                            ),
+                                        Color.white.opacity(editorialGlass ? 0.035 : 0.05),
                                         Color.clear
                                     ],
                                     center: .topLeading,
@@ -77,8 +92,12 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                                 RadialGradient(
                                     colors: [
                                         Color(red: 0.86, green: 0.50, blue: 1.0)
-                                            .opacity(0.16 + (0.14 * glowStrength)),
-                                        tint.opacity(0.08 + (0.06 * glowStrength)),
+                                            .opacity(
+                                                editorialGlass
+                                                    ? 0.038 + (0.050 * glowStrength)
+                                                    : 0.16 + (0.14 * glowStrength)
+                                            ),
+                                        tint.opacity(editorialGlass ? 0.018 : 0.08 + (0.06 * glowStrength)),
                                         Color.clear
                                     ],
                                     center: .bottomTrailing,
@@ -91,10 +110,10 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                             shape.fill(
                                 LinearGradient(
                                     colors: [
-                                        Color.white.opacity(0.15 + (0.08 * glowStrength)),
+                                        Color.white.opacity(editorialGlass ? 0.18 : 0.15 + (0.08 * glowStrength)),
                                         Color.clear,
                                         Color(red: 1.0, green: 0.82, blue: 0.67)
-                                            .opacity(0.07 + (0.05 * glowStrength))
+                                            .opacity(editorialGlass ? 0.025 : 0.07 + (0.05 * glowStrength))
                                     ],
                                     startPoint: .top,
                                     endPoint: .bottomTrailing
@@ -108,15 +127,15 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 shape.strokeBorder(
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(1.0 * edgeStrength),
-                            Color.white.opacity(0.52 * edgeStrength),
-                            Color.white.opacity(0.24 * edgeStrength),
-                            Color.white.opacity(0.94 * edgeStrength)
+                            Color.white.opacity((editorialGlass ? 0.78 : 1.0) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.34 : 0.52) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.16 : 0.24) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.70 : 0.94) * edgeStrength)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: 1.10
+                    lineWidth: editorialGlass ? 0.90 : 1.10
                 )
             }
             // MSH optical coating: selective cyan, violet, warm pearl, and local tint.
@@ -125,20 +144,23 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                     AngularGradient(
                         colors: [
                             Color.clear,
-                            Color(red: 0.36, green: 0.82, blue: 1.0).opacity(0.94 * edgeStrength),
+                            Color(red: 0.36, green: 0.82, blue: 1.0)
+                                .opacity((editorialGlass ? 0.54 : 0.94) * edgeStrength),
                             Color.clear,
-                            tint.opacity(0.60 * edgeStrength),
-                            Color.white.opacity(0.20 * edgeStrength),
+                            tint.opacity((editorialGlass ? 0.26 : 0.60) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.12 : 0.20) * edgeStrength),
                             Color.clear,
-                            Color(red: 0.78, green: 0.40, blue: 1.0).opacity(0.92 * edgeStrength),
-                            Color(red: 1.0, green: 0.77, blue: 0.58).opacity(0.46 * edgeStrength),
+                            Color(red: 0.78, green: 0.40, blue: 1.0)
+                                .opacity((editorialGlass ? 0.52 : 0.92) * edgeStrength),
+                            Color(red: 1.0, green: 0.77, blue: 0.58)
+                                .opacity((editorialGlass ? 0.18 : 0.46) * edgeStrength),
                             Color.clear
                         ],
                         center: .center,
                         startAngle: .degrees(-28),
                         endAngle: .degrees(332)
                     ),
-                    lineWidth: 1.85
+                    lineWidth: editorialGlass ? 1.30 : 1.85
                 )
                 .blur(radius: 0.12)
             }
@@ -148,46 +170,50 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                     AngularGradient(
                         colors: [
                             Color.clear,
-                            Color(red: 0.38, green: 0.76, blue: 1.0).opacity(0.34 * edgeStrength),
+                            Color(red: 0.38, green: 0.76, blue: 1.0)
+                                .opacity((editorialGlass ? 0.14 : 0.34) * edgeStrength),
                             Color.clear,
-                            Color(red: 0.88, green: 0.50, blue: 1.0).opacity(0.32 * edgeStrength),
+                            Color(red: 0.88, green: 0.50, blue: 1.0)
+                                .opacity((editorialGlass ? 0.13 : 0.32) * edgeStrength),
                             Color.clear,
-                            tint.opacity(0.18 * edgeStrength),
+                            tint.opacity((editorialGlass ? 0.08 : 0.18) * edgeStrength),
                             Color.clear
                         ],
                         center: .center
                     ),
-                    lineWidth: 3.4
+                    lineWidth: editorialGlass ? 2.20 : 3.40
                 )
-                .blur(radius: 1.55)
+                .blur(radius: editorialGlass ? 1.05 : 1.55)
             }
-            // Fine top highlight reinforces a real specular cap.
             .overlay(alignment: .top) {
                 shape
-                    .strokeBorder(Color.white.opacity(0.92 * edgeStrength), lineWidth: 0.78)
+                    .strokeBorder(
+                        Color.white.opacity((editorialGlass ? 0.66 : 0.92) * edgeStrength),
+                        lineWidth: editorialGlass ? 0.60 : 0.78
+                    )
                     .blur(radius: 0.08)
             }
             .shadow(
-                color: tint.opacity(0.11 + (0.10 * glowStrength)),
-                radius: 10 + (9 * glowStrength),
+                color: tint.opacity((editorialGlass ? 0.025 : 0.11) + ((editorialGlass ? 0.035 : 0.10) * glowStrength)),
+                radius: editorialGlass ? 6 : 10 + (9 * glowStrength),
                 y: 1
             )
             .shadow(
                 color: Color(red: 0.44, green: 0.76, blue: 1.0)
-                    .opacity(0.15 + (0.16 * glowStrength)),
-                radius: 12 + (10 * glowStrength),
+                    .opacity((editorialGlass ? 0.035 : 0.15) + ((editorialGlass ? 0.04 : 0.16) * glowStrength)),
+                radius: editorialGlass ? 7 : 12 + (10 * glowStrength),
                 y: 1
             )
             .shadow(
                 color: Color(red: 0.82, green: 0.45, blue: 1.0)
-                    .opacity(0.12 + (0.15 * glowStrength)),
-                radius: 14 + (10 * glowStrength),
+                    .opacity((editorialGlass ? 0.028 : 0.12) + ((editorialGlass ? 0.04 : 0.15) * glowStrength)),
+                radius: editorialGlass ? 8 : 14 + (10 * glowStrength),
                 y: 2
             )
             .shadow(
-                color: Color.black.opacity(0.065 * shadowStrength),
-                radius: 14,
-                y: 6
+                color: Color.black.opacity((editorialGlass ? 0.025 : 0.065) * shadowStrength),
+                radius: editorialGlass ? 8 : 14,
+                y: editorialGlass ? 3 : 6
             )
     }
 }
