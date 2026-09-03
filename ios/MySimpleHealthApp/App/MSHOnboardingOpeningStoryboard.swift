@@ -15,47 +15,69 @@ struct MSHOnboardingOpeningStoryboard {
         var body: some View {
             GeometryReader { proxy in
                 ZStack {
-                    MSHOpeningEnvironment(desaturated: true, warmth: 0.08)
+                    MSHOpeningThresholdEnvironment()
 
                     LinearGradient(
                         colors: [
-                            Color.black.opacity(0.22),
-                            Color.black.opacity(0.05),
-                            Color.black.opacity(0.30)
+                            Color.black.opacity(0.04),
+                            Color.clear,
+                            Color.black.opacity(0.10)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                     .ignoresSafeArea()
 
-                    VStack(spacing: 14) {
-                        Spacer()
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 110)
 
-                        Text("MY SIMPLE HEALTH")
-                            .font(.system(size: 14, weight: .semibold))
-                            .tracking(3.2)
-                            .foregroundStyle(.white.opacity(0.84))
-                            .opacity(eyebrowVisible ? 1 : 0)
-                            .offset(y: eyebrowVisible ? 0 : 7)
+                        VStack(spacing: 26) {
+                            Text("MY SIMPLE HEALTH")
+                                .font(.system(size: 13, weight: .semibold))
+                                .tracking(3.4)
+                                .foregroundStyle(.white.opacity(0.92))
+                                .padding(.horizontal, 22)
+                                .frame(height: 42)
+                                .mshNativeGlass(
+                                    in: Capsule(),
+                                    tint: MSHOpeningPalette.ivory,
+                                    edgeStrength: 0.90,
+                                    shadowStrength: 0.72,
+                                    glowStrength: 0.26
+                                )
+                                .opacity(eyebrowVisible ? 1 : 0)
+                                .offset(y: eyebrowVisible ? 0 : 7)
 
-                        Text("Your health. Your space.")
-                            .font(.system(size: 38, weight: .regular, design: .serif))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 30)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .opacity(titleVisible ? 1 : 0)
-                            .offset(y: titleVisible ? 0 : 9)
+                            Text("Your health.\nYour space.")
+                                .font(.system(size: 44, weight: .regular, design: .serif))
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 18)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .opacity(titleVisible ? 1 : 0)
+                                .offset(y: titleVisible ? 0 : 9)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 38)
+                        .frame(maxWidth: 354)
+                        .mshNativeGlass(
+                            in: RoundedRectangle(cornerRadius: 34, style: .continuous),
+                            tint: MSHOpeningPalette.ivory,
+                            edgeStrength: 1.16,
+                            shadowStrength: 1.12,
+                            glowStrength: 0.38
+                        )
 
                         Spacer()
 
                         MSHOpeningContinueButton(title: "Continue", action: onContinue)
                             .opacity(showContinue ? 1 : 0)
-                            .offset(y: showContinue ? 0 : 8)
+                            .offset(y: showContinue ? 0 : 10)
                             .allowsHitTesting(showContinue)
-                            .padding(.bottom, 56)
+                            .padding(.bottom, 54)
                     }
-                    .padding(.horizontal, 22)
+                    .padding(.horizontal, 18)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
             }
@@ -83,7 +105,7 @@ struct MSHOnboardingOpeningStoryboard {
                     titleVisible = true
                 }
                 try? await Task.sleep(for: .milliseconds(760))
-                withAnimation(.easeOut(duration: 0.62)) {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.80)) {
                     showContinue = true
                 }
             }
@@ -461,6 +483,63 @@ private struct MSHOnboardingFragmentView: View {
     }
 }
 
+/// A neutral architectural threshold for first launch. It deliberately does not use
+/// any of the rooms a person can later choose as My Space.
+private struct MSHOpeningThresholdEnvironment: View {
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.80, green: 0.74, blue: 0.65),
+                        Color(red: 0.66, green: 0.57, blue: 0.47),
+                        Color(red: 0.43, green: 0.35, blue: 0.29)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                RoundedRectangle(cornerRadius: 46, style: .continuous)
+                    .fill(Color.white.opacity(0.10))
+                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.68)
+                    .offset(x: proxy.size.width * 0.11, y: -proxy.size.height * 0.02)
+                    .blur(radius: 0.4)
+
+                Capsule()
+                    .fill(Color.white.opacity(0.14))
+                    .frame(width: proxy.size.width * 0.62, height: proxy.size.height * 0.94)
+                    .rotationEffect(.degrees(8))
+                    .offset(x: proxy.size.width * 0.42, y: -proxy.size.height * 0.06)
+                    .blur(radius: 22)
+
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.22),
+                        Color.clear,
+                        Color.black.opacity(0.20)
+                    ],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
+                )
+
+                Rectangle()
+                    .fill(Color(red: 0.25, green: 0.19, blue: 0.15).opacity(0.30))
+                    .frame(width: proxy.size.width * 0.16)
+                    .frame(maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Rectangle()
+                    .fill(Color(red: 0.30, green: 0.23, blue: 0.18).opacity(0.22))
+                    .frame(width: proxy.size.width * 0.11)
+                    .frame(maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .ignoresSafeArea()
+    }
+}
+
 private struct MSHOpeningEnvironment: View {
     let desaturated: Bool
     let warmth: Double
@@ -504,14 +583,14 @@ private struct MSHOpeningContinueButton: View {
             haptic: .softImpact,
             action: action
         ) {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Text(title)
                 Image(systemName: "arrow.right")
-                    .font(.footnote.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
             }
-            .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 22)
-            .frame(height: 48)
+            .font(.headline.weight(.semibold))
+            .padding(.horizontal, 30)
+            .frame(height: 58)
         }
         .accessibilityLabel(title)
     }
