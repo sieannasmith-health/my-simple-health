@@ -383,7 +383,7 @@ private struct MSHQuietButtonStyle: ButtonStyle {
     }
 }
 
-private enum MSHOnboardingPalette {
+enum MSHOnboardingPalette {
     static let cream = Color(red: 248 / 255, green: 247 / 255, blue: 243 / 255)
     static let warmWhite = Color(red: 252 / 255, green: 251 / 255, blue: 247 / 255)
     static let charcoal = Color(red: 31 / 255, green: 30 / 255, blue: 29 / 255)
