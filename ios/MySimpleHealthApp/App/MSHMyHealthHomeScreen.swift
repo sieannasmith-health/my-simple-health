@@ -65,7 +65,6 @@ struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
     @EnvironmentObject private var authStore: MSHAuthStore
     @Environment(\.colorScheme) private var systemColorScheme
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @AppStorage("msh.displayName") private var displayName = ""
     @AppStorage("msh.mySpace") private var mySpaceRawValue = MSHMySpace.warmHouse.rawValue
     @AppStorage("msh.mySpaceLighting") private var lightingRawValue = MSHSpaceLighting.auto.rawValue
@@ -76,14 +75,6 @@ struct MSHMyHealthHomeScreen: View {
 
     private var selectedSpace: MSHMySpace { MSHMySpace(rawValue: mySpaceRawValue) ?? .warmHouse }
     private var selectedLighting: MSHSpaceLighting { MSHSpaceLighting(rawValue: lightingRawValue) ?? .auto }
-
-    private var resolvedDarkPresentation: Bool {
-        switch selectedLighting {
-        case .light: false
-        case .dim, .dark: true
-        case .auto: systemColorScheme == .dark
-        }
-    }
 
     var body: some View {
         ZStack {
@@ -126,12 +117,12 @@ struct MSHMyHealthHomeScreen: View {
                     .overlay(environmentTone)
                     .overlay(
                         LinearGradient(
-                            colors: [Color.black.opacity(0.08), Color.black.opacity(0.18), Color.black.opacity(0.34)],
+                            colors: [Color.black.opacity(0.05), Color.black.opacity(0.12), Color.black.opacity(0.24)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
-                    .blur(radius: 0.4)
+                    .blur(radius: 0.25)
             }
             .ignoresSafeArea()
         } else {
@@ -147,10 +138,10 @@ struct MSHMyHealthHomeScreen: View {
     private var environmentTone: some View {
         let opacity: Double = {
             switch selectedLighting {
-            case .light: 0.05
-            case .dim: 0.18
-            case .dark: 0.31
-            case .auto: systemColorScheme == .dark ? 0.24 : 0.10
+            case .light: 0.03
+            case .dim: 0.14
+            case .dark: 0.27
+            case .auto: systemColorScheme == .dark ? 0.20 : 0.07
             }
         }()
         return Color.black.opacity(opacity)
@@ -161,7 +152,7 @@ struct MSHMyHealthHomeScreen: View {
             Text("MY HEALTH")
                 .font(.caption2.weight(.semibold))
                 .tracking(2.2)
-                .foregroundStyle(.white.opacity(0.78))
+                .foregroundStyle(.white.opacity(0.82))
 
             Text(greetingLine)
                 .font(.system(size: 42, weight: .regular, design: .serif))
@@ -170,21 +161,24 @@ struct MSHMyHealthHomeScreen: View {
 
             Text("Here’s what’s useful for you right now.")
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.84))
+                .foregroundStyle(.white.opacity(0.88))
 
-            Button(action: {}) {
+            MSHNativeGlassButton(
+                shape: Capsule(),
+                tint: MSHColor.sage,
+                foreground: .white,
+                haptic: .softImpact,
+                action: {}
+            ) {
                 HStack(spacing: 8) {
                     Text("Ask Simple")
                     Image(systemName: "sparkles")
                 }
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white)
+                .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 18)
-                .frame(height: 42)
-                .background(.ultraThinMaterial, in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.28), lineWidth: 0.8))
+                .frame(height: 44)
             }
-            .buttonStyle(.plain)
+            .accessibilityIdentifier("ask-simple")
         }
         .padding(.horizontal, 20)
         .padding(.top, 72)
@@ -199,7 +193,7 @@ struct MSHMyHealthHomeScreen: View {
         let heart = summary(for: .heartActivity, in: snapshot.recentActivity)
 
         VStack(alignment: .leading, spacing: 18) {
-            ambientGlass {
+            ambientGlass(tint: MSHColor.powder, glow: 0.30) {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         Text("AT A GLANCE")
@@ -208,39 +202,43 @@ struct MSHMyHealthHomeScreen: View {
                         Spacer()
                         Text("View all insights →").font(.caption)
                     }
-                    .foregroundStyle(.white.opacity(0.78))
+                    .foregroundStyle(.white.opacity(0.84))
 
                     HStack(alignment: .top, spacing: 10) {
-                        MSHGlassMetric(title: "Sleep", value: sleep.value, icon: "moon.stars", note: sleep.context)
-                        MSHGlassMetric(title: "Movement", value: movement.value, icon: "figure.walk", note: movement.context)
+                        MSHGlassMetric(title: "Sleep", value: sleep.value, icon: "moon.stars", note: sleep.context, tint: MSHColor.powder)
+                        MSHGlassMetric(title: "Movement", value: movement.value, icon: "figure.walk", note: movement.context, tint: MSHColor.sage)
                     }
                     HStack(alignment: .top, spacing: 10) {
-                        MSHGlassMetric(title: "Heart", value: heart.value, icon: "heart", note: heart.context)
-                        MSHGlassMetric(title: "Mind", value: "Calm", icon: "leaf", note: "A quieter place to reflect on what you’re noticing.")
+                        MSHGlassMetric(title: "Heart", value: heart.value, icon: "heart", note: heart.context, tint: MSHColor.clay)
+                        MSHGlassMetric(title: "Mind", value: "Calm", icon: "leaf", note: "A quieter place to reflect on what you’re noticing.", tint: MSHColor.sage)
                     }
                 }
             }
 
-            ambientGlass {
+            ambientGlass(tint: MSHColor.powder, glow: 0.34) {
                 HStack(alignment: .top, spacing: 14) {
                     Image(systemName: "calendar")
                         .font(.headline)
-                        .foregroundStyle(.white.opacity(0.86))
+                        .foregroundStyle(.white.opacity(0.90))
                     VStack(alignment: .leading, spacing: 5) {
                         Text("LOOKING AHEAD")
                             .font(.caption2.weight(.semibold))
                             .tracking(1.5)
                         Text("Your calendar keeps appointments, planned movement, medication actions and other dated health activity together.")
                             .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.80))
+                            .foregroundStyle(.white.opacity(0.84))
                     }
                     Spacer(minLength: 4)
                     NavigationLink {
                         MSHWebFeatureScreen(destination: .calendar)
                     } label: {
                         Image(systemName: "arrow.right")
-                            .foregroundStyle(.white.opacity(0.85))
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 42, height: 42)
+                            .mshNativeGlass(in: Circle(), tint: MSHColor.powder, edgeStrength: 1.18, shadowStrength: 0.95, glowStrength: 0.46)
                     }
+                    .buttonStyle(MSHMyHealthLiftButtonStyle())
                 }
                 .foregroundStyle(.white)
             }
@@ -250,20 +248,20 @@ struct MSHMyHealthHomeScreen: View {
                     Text("YOUR HEALTH")
                         .font(.caption2.weight(.semibold))
                         .tracking(1.6)
-                        .foregroundStyle(.white.opacity(0.80))
+                        .foregroundStyle(.white.opacity(0.84))
                     Spacer()
                     Text("Lifestyle + data")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.62))
+                        .foregroundStyle(.white.opacity(0.68))
                 }
 
                 HStack(spacing: 10) {
-                    MSHLifestyleTile(title: "Sleep", subtitle: "Patterns and quality", systemImage: "bed.double")
-                    MSHLifestyleTile(title: "Movement", subtitle: "Activity and workouts", systemImage: "dumbbell")
+                    MSHLifestyleTile(title: "Sleep", subtitle: "Patterns and quality", systemImage: "bed.double", tint: MSHColor.powder)
+                    MSHLifestyleTile(title: "Movement", subtitle: "Activity and workouts", systemImage: "dumbbell", tint: MSHColor.sage)
                 }
                 HStack(spacing: 10) {
-                    MSHLifestyleTile(title: "Nutrition", subtitle: "Meals and hydration", systemImage: "fork.knife")
-                    MSHLifestyleTile(title: "Wellbeing", subtitle: "Mood and reflection", systemImage: "book.closed")
+                    MSHLifestyleTile(title: "Nutrition", subtitle: "Meals and hydration", systemImage: "fork.knife", tint: MSHColor.mushroom)
+                    MSHLifestyleTile(title: "Wellbeing", subtitle: "Mood and reflection", systemImage: "book.closed", tint: MSHColor.sage)
                 }
             }
 
@@ -272,7 +270,7 @@ struct MSHMyHealthHomeScreen: View {
                     MSHMyHealthScreen(viewModel: viewModel)
                 }
             } label: {
-                ambientGlass {
+                ambientGlass(tint: MSHColor.sage, glow: 0.34) {
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("EXPLORE YOUR HEALTH")
@@ -282,7 +280,7 @@ struct MSHMyHealthHomeScreen: View {
                                 .font(.system(.title3, design: .serif))
                             Text("Day, Week and Month charts, Apple Health measurements, Sleep, Heart, Movement and Body details.")
                                 .font(.caption)
-                                .foregroundStyle(.white.opacity(0.76))
+                                .foregroundStyle(.white.opacity(0.80))
                         }
                         Spacer()
                         Image(systemName: "chart.xyaxis.line")
@@ -291,48 +289,43 @@ struct MSHMyHealthHomeScreen: View {
                     .foregroundStyle(.white)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(MSHMyHealthLiftButtonStyle())
             .accessibilityIdentifier("explore-your-health")
 
-            ambientGlass {
+            ambientGlass(tint: MSHColor.mushroom, glow: 0.26) {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("SIMPLE’S INSIGHT")
                         .font(.caption2.weight(.semibold))
                         .tracking(1.6)
-                        .foregroundStyle(.white.opacity(0.72))
+                        .foregroundStyle(.white.opacity(0.76))
                     Text("Your health can be understood without turning your life into a health project.")
                         .font(.system(size: 24, design: .serif))
                         .foregroundStyle(.white)
                     Text("Simple can help connect the data to your actual routines, environment, priorities and lived experience.")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.79))
+                        .foregroundStyle(.white.opacity(0.82))
                 }
             }
         }
     }
 
-    private func ambientGlass<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
+    private func ambientGlass<Content: View>(
+        tint: Color = .white,
+        glow: Double = 0.28,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+        return content()
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                if reduceTransparency {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .fill(Color.black.opacity(resolvedDarkPresentation ? 0.60 : 0.42))
-                } else {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                .fill(Color.black.opacity(resolvedDarkPresentation ? 0.18 : 0.08))
-                        )
-                }
-            }
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(.white.opacity(0.18), lineWidth: 0.8)
+            .background(shape.fill(Color.black.opacity(0.10)))
+            .mshNativeGlass(
+                in: shape,
+                tint: tint,
+                edgeStrength: 0.92,
+                shadowStrength: 0.88,
+                glowStrength: glow
             )
-            .shadow(color: .black.opacity(0.10), radius: 18, y: 8)
     }
 
     private var mySpaceMenu: some View {
@@ -361,9 +354,8 @@ struct MSHMyHealthHomeScreen: View {
             Image(systemName: "circle.lefthalf.filled")
                 .font(.system(size: 17, weight: .medium))
                 .foregroundStyle(.white)
-                .frame(width: 34, height: 34)
-                .background(.ultraThinMaterial, in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.22), lineWidth: 0.7))
+                .frame(width: 36, height: 36)
+                .mshNativeGlass(in: Circle(), tint: MSHColor.powder, edgeStrength: 1.10, shadowStrength: 0.90, glowStrength: 0.34)
         }
         .accessibilityLabel("My Space and lighting")
     }
@@ -391,26 +383,26 @@ struct MSHMyHealthHomeScreen: View {
     }
 
     private var loading: some View {
-        ambientGlass {
+        ambientGlass(tint: MSHColor.powder) {
             HStack(spacing: 12) {
                 ProgressView().tint(.white)
                 Text("Gathering today’s context…")
                     .font(.system(.body, design: .serif))
-                    .foregroundStyle(.white.opacity(0.86))
+                    .foregroundStyle(.white.opacity(0.88))
             }
         }
         .padding(.horizontal, 16)
     }
 
     private var failed: some View {
-        ambientGlass {
+        ambientGlass(tint: MSHColor.clay) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your health overview is temporarily unavailable")
                     .font(.system(.headline, design: .serif))
                     .foregroundStyle(.white)
                 Text("Pull down to try again. Your records remain on this iPhone.")
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.76))
+                    .foregroundStyle(.white.opacity(0.80))
             }
         }
         .padding(.horizontal, 16)
@@ -470,15 +462,17 @@ private struct MSHGlassMetric: View {
     let value: String
     let icon: String
     let note: String
+    let tint: Color
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                 Text(title)
             }
             .font(.caption.weight(.medium))
-            .foregroundStyle(.white.opacity(0.82))
+            .foregroundStyle(.white.opacity(0.86))
 
             Text(value)
                 .font(.system(size: 24, weight: .regular, design: .serif))
@@ -488,13 +482,13 @@ private struct MSHGlassMetric: View {
 
             Text(note)
                 .font(.caption2)
-                .foregroundStyle(.white.opacity(0.64))
+                .foregroundStyle(.white.opacity(0.68))
                 .lineLimit(3)
         }
         .padding(13)
         .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
-        .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.12), lineWidth: 0.7))
+        .background(shape.fill(Color.white.opacity(0.025)))
+        .mshNativeGlass(in: shape, tint: tint, edgeStrength: 0.56, shadowStrength: 0.42, glowStrength: 0.16)
     }
 }
 
@@ -502,8 +496,10 @@ private struct MSHLifestyleTile: View {
     let title: String
     let subtitle: String
     let systemImage: String
+    let tint: Color
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: systemImage)
                 .font(.headline)
@@ -512,12 +508,28 @@ private struct MSHLifestyleTile: View {
                 .font(.system(.headline, design: .serif))
             Text(subtitle)
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.67))
+                .foregroundStyle(.white.opacity(0.70))
         }
         .foregroundStyle(.white)
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.15), lineWidth: 0.7))
+        .background(shape.fill(Color.white.opacity(0.03)))
+        .mshNativeGlass(in: shape, tint: tint, edgeStrength: 0.68, shadowStrength: 0.52, glowStrength: 0.20)
+    }
+}
+
+private struct MSHMyHealthLiftButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 1.035 : 1)
+            .brightness(configuration.isPressed ? 0.055 : 0)
+            .shadow(
+                color: Color(red: 0.48, green: 0.82, blue: 1.0).opacity(configuration.isPressed ? 0.26 : 0.08),
+                radius: configuration.isPressed ? 18 : 8,
+                y: configuration.isPressed ? 1 : 4
+            )
+            .animation(reduceMotion ? nil : .spring(response: 0.20, dampingFraction: 0.76), value: configuration.isPressed)
     }
 }
