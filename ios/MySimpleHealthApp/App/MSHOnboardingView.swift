@@ -20,7 +20,7 @@ struct MSHRootExperience: View {
             if onboardingStore.shouldPresentOnboarding {
                 MSHOnboardingFlow(store: onboardingStore)
             } else {
-                MSHAppShell()
+                MSHAuthenticatedRootExperience()
             }
         }
         .environmentObject(onboardingStore)
