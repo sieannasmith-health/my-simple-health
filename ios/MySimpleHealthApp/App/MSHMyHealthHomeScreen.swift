@@ -93,6 +93,12 @@ struct MSHMyHealthHomeScreen: View {
         let heart = summary(for: .heartActivity, in: snapshot.recentActivity)
 
         VStack(alignment: .leading, spacing: 28) {
+            if !snapshot.appleHealth.isConnected {
+                MSHAppleHealthProgressiveSetupCard {
+                    await viewModel.reload()
+                }
+            }
+
             VStack(alignment: .leading, spacing: 0) {
                 MSHHomeSummaryRow(
                     title: "Sleep",
@@ -306,6 +312,100 @@ struct MSHMyHealthHomeScreen: View {
         let hours = rounded / 60
         let remainder = rounded % 60
         return hours > 0 ? "\(hours)h \(remainder)m" : "\(remainder)m"
+    }
+}
+
+private struct MSHAppleHealthProgressiveSetupCard: View {
+    @AppStorage("msh.appleHealth.progressiveSetup.dismissed") private var isDismissed = false
+    @State private var isWorking = false
+    @State private var errorMessage: String?
+
+    let onConnected: @MainActor () async -> Void
+
+    var body: some View {
+        if !isDismissed {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 14) {
+                    Image(systemName: "heart.text.square")
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(MSHHomePalette.wine)
+                        .frame(width: 42, height: 42)
+                        .background(MSHHomePalette.wine.opacity(0.10))
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Bring in Apple Health when you’re ready")
+                            .font(.system(.headline, design: .serif))
+                            .foregroundStyle(MSHHomePalette.ink)
+                        Text("MSH works without it. Connecting can add movement, sleep, heart, and body context to My Health. You choose what Apple Health shares.")
+                            .font(.subheadline)
+                            .foregroundStyle(MSHHomePalette.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                HStack(spacing: 12) {
+                    Button {
+                        connect()
+                    } label: {
+                        HStack(spacing: 8) {
+                            if isWorking { ProgressView().tint(MSHHomePalette.ivory) }
+                            Text(isWorking ? "Connecting…" : "Connect Apple Health")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MSHHomePalette.ivory)
+                        .frame(maxWidth: .infinity, minHeight: 46)
+                        .background(MSHHomePalette.forest)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isWorking)
+                    .accessibilityIdentifier("apple-health-progressive-connect")
+
+                    Button("Not now") {
+                        isDismissed = true
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MSHHomePalette.secondary)
+                    .frame(minHeight: 46)
+                    .disabled(isWorking)
+                    .accessibilityIdentifier("apple-health-progressive-dismiss")
+                }
+            }
+            .padding(18)
+            .background(MSHColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(MSHHomePalette.hairline, lineWidth: 1)
+            }
+            .alert("Apple Health couldn’t connect", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "Please try again when you’re ready.")
+            }
+        }
+    }
+
+    private func connect() {
+        guard !isWorking else { return }
+        isWorking = true
+        Task { @MainActor in
+            do {
+                let result = try await MSHAppleHealthRuntime.connectForProgressiveSetup()
+                if result.outcome == .completed {
+                    isDismissed = true
+                    await onConnected()
+                }
+                isWorking = false
+            } catch {
+                isWorking = false
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 }
 
