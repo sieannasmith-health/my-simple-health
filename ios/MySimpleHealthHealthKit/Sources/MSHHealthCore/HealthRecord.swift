@@ -2,6 +2,7 @@ import Foundation
 
 public enum HealthProvider: String, Codable, Sendable {
     case appleHealth = "apple_health"
+    case fhir = "fhir"
 }
 
 public enum HealthDomain: String, Codable, Sendable {
@@ -9,6 +10,9 @@ public enum HealthDomain: String, Codable, Sendable {
     case cardio
     case body
     case sleep
+    case clinical
+    case medications
+    case care
 }
 
 public enum HealthDataArea: String, Codable, CaseIterable, Hashable, Sendable {
@@ -16,6 +20,11 @@ public enum HealthDataArea: String, Codable, CaseIterable, Hashable, Sendable {
     case sleep
     case heartActivity = "heart_activity"
     case bodyMeasurements = "body_measurements"
+    case conditions
+    case medications
+    case allergies
+    case labsAndResults = "labs_and_results"
+    case careHistory = "care_history"
 }
 
 public enum HealthRecordType: String, Codable, Sendable {
@@ -32,6 +41,13 @@ public enum HealthRecordType: String, Codable, Sendable {
     case bodyMass = "body.body_mass"
     case sleepInterval = "sleep.interval"
     case sleepSession = "sleep.session"
+    case clinicalCondition = "clinical.condition"
+    case clinicalAllergy = "clinical.allergy"
+    case clinicalObservation = "clinical.observation"
+    case clinicalDiagnosticReport = "clinical.diagnostic_report"
+    case medicationRequest = "medications.request"
+    case clinicalEncounter = "care.encounter"
+    case clinicalCarePlan = "care.care_plan"
 }
 
 public enum HealthRecordLifecycle: String, Codable, Sendable {
@@ -143,8 +159,46 @@ public enum HealthRecordFactory {
         metadata: [String: String] = [:],
         importedAt: Date = Date()
     ) -> HealthRecord {
+        imported(
+            provider: .appleHealth,
+            sourceSystem: "healthkit",
+            sourceRecordID: sourceRecordID,
+            domain: domain,
+            recordType: recordType,
+            value: value,
+            unit: unit,
+            start: start,
+            end: end,
+            timezone: timezone,
+            sourceName: sourceName,
+            sourceBundleIdentifier: sourceBundleIdentifier,
+            sourceVersion: sourceVersion,
+            sourceDevice: sourceDevice,
+            metadata: metadata,
+            importedAt: importedAt
+        )
+    }
+
+    public static func imported(
+        provider: HealthProvider,
+        sourceSystem: String,
+        sourceRecordID: String,
+        domain: HealthDomain,
+        recordType: HealthRecordType,
+        value: Double?,
+        unit: String?,
+        start: Date,
+        end: Date?,
+        timezone: TimeZone,
+        sourceName: String? = nil,
+        sourceBundleIdentifier: String? = nil,
+        sourceVersion: String? = nil,
+        sourceDevice: String? = nil,
+        metadata: [String: String] = [:],
+        importedAt: Date = Date()
+    ) -> HealthRecord {
         HealthRecord(
-            id: "apple_health:\(sourceRecordID)",
+            id: "\(provider.rawValue):\(sourceRecordID)",
             domain: domain,
             recordType: recordType,
             value: value,
@@ -153,8 +207,8 @@ public enum HealthRecordFactory {
             eventEnd: end,
             timezoneIdentifier: timezone.identifier,
             source: HealthRecordSource(
-                provider: .appleHealth,
-                sourceSystem: "healthkit",
+                provider: provider,
+                sourceSystem: sourceSystem,
                 sourceRecordID: sourceRecordID,
                 sourceName: sourceName,
                 sourceBundleIdentifier: sourceBundleIdentifier,
