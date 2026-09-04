@@ -10,19 +10,6 @@ struct MSHPlaidConnectionSummary: Identifiable, Equatable {
     let lastSuccessfulSyncAt: Date?
 }
 
-private final class MSHPlaidListenerHandle {
-    var registration: ListenerRegistration?
-
-    func remove() {
-        registration?.remove()
-        registration = nil
-    }
-
-    deinit {
-        registration?.remove()
-    }
-}
-
 @MainActor
 final class MSHPlaidConnectionController: ObservableObject {
     @Published private(set) var connections: [MSHPlaidConnectionSummary] = []
@@ -35,11 +22,11 @@ final class MSHPlaidConnectionController: ObservableObject {
 
     private let functions = Functions.functions(region: "us-central1")
     private let db = Firestore.firestore()
-    private let listenerHandle = MSHPlaidListenerHandle()
+    private var listener: ListenerRegistration?
 
     func start() {
-        guard listenerHandle.registration == nil, let uid = Auth.auth().currentUser?.uid else { return }
-        listenerHandle.registration = db.collection("users")
+        guard listener == nil, let uid = Auth.auth().currentUser?.uid else { return }
+        listener = db.collection("users")
             .document(uid)
             .collection("plaidConnections")
             .addSnapshotListener { [weak self] snapshot, error in
@@ -64,7 +51,8 @@ final class MSHPlaidConnectionController: ObservableObject {
     }
 
     func stop() {
-        listenerHandle.remove()
+        listener?.remove()
+        listener = nil
     }
 
     func beginConnection() {
