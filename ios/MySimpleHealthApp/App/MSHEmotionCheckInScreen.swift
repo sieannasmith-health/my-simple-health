@@ -224,9 +224,10 @@ private struct MSHGlassEmotionOrb: View {
             let seconds = timeline.date.timeIntervalSinceReferenceDate
             let phase = reduceMotion ? 0 : seconds
             let state = MSHEmotionState(valence: valence)
-            let breath = reduceMotion ? 1 : 1 + sin(phase * 0.72) * 0.008
-            let driftX = reduceMotion ? 0 : sin(phase * 0.31) * 5
-            let driftY = reduceMotion ? 0 : cos(phase * 0.27) * 4
+            let breath = CGFloat(reduceMotion ? 1 : 1 + sin(phase * 0.72) * 0.008)
+            let driftX = CGFloat(reduceMotion ? 0 : sin(phase * 0.31) * 5)
+            let driftY = CGFloat(reduceMotion ? 0 : cos(phase * 0.27) * 4)
+            let verticalScale = CGFloat(state.verticalScale)
 
             ZStack {
                 Circle()
@@ -312,7 +313,7 @@ private struct MSHGlassEmotionOrb: View {
                 MSHEmotionFace(valence: valence)
                     .padding(54)
             }
-            .scaleEffect(x: breath, y: breath * state.verticalScale)
+            .scaleEffect(x: breath, y: breath * verticalScale)
             .animation(reduceMotion ? nil : .interactiveSpring(response: 0.34, dampingFraction: 0.82), value: valence)
         }
     }
@@ -327,20 +328,23 @@ private struct MSHEmotionFace: View {
             let ink = Color.black.opacity(0.70)
             let eyeWidth = size.width * 0.17
             let eyeY = center.y - size.height * 0.10
-            let tilt = valence * size.height * 0.018
+            let tilt = CGFloat(valence) * size.height * 0.018
 
-            for direction in [-1.0, 1.0] {
+            for direction in [CGFloat(-1), CGFloat(1)] {
                 let eyeX = center.x + direction * size.width * 0.22
                 var eye = Path()
                 eye.move(to: CGPoint(x: eyeX - eyeWidth / 2, y: eyeY - direction * tilt))
                 eye.addQuadCurve(
                     to: CGPoint(x: eyeX + eyeWidth / 2, y: eyeY + direction * tilt),
-                    control: CGPoint(x: eyeX, y: eyeY - max(valence, 0) * size.height * 0.025)
+                    control: CGPoint(
+                        x: eyeX,
+                        y: eyeY - CGFloat(max(valence, 0)) * size.height * 0.025
+                    )
                 )
                 context.stroke(eye, with: .color(ink), style: StrokeStyle(lineWidth: 5.2, lineCap: .round))
             }
 
-            let mouthWidth = size.width * (0.25 + abs(valence) * 0.055)
+            let mouthWidth = size.width * CGFloat(0.25 + abs(valence) * 0.055)
             let mouthY = center.y + size.height * 0.16
             var mouth = Path()
             mouth.move(to: CGPoint(x: center.x - mouthWidth / 2, y: mouthY))
@@ -489,10 +493,10 @@ private extension Color {
 
         let f = CGFloat(fraction)
         return Color(
-            red: fr + (tr - fr) * f,
-            green: fg + (tg - fg) * f,
-            blue: fb + (tb - fb) * f,
-            opacity: fa + (ta - fa) * f
+            red: Double(fr + (tr - fr) * f),
+            green: Double(fg + (tg - fg) * f),
+            blue: Double(fb + (tb - fb) * f),
+            opacity: Double(fa + (ta - fa) * f)
         )
     }
 }
