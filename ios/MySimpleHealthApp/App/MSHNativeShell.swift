@@ -544,6 +544,17 @@ struct MSHProfileSettingsScreen: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink {
+                        MSHFamilyEventsScreen()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Family Events",
+                            subtitle: "Remember birthdays and prepare the messages you choose to send.",
+                            systemImage: "birthday.cake"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     VStack(alignment: .leading, spacing: MSHSpacing.medium) {
                         Text("What should we call you?")
                             .font(MSHTypography.cardTitle)

@@ -7,8 +7,8 @@ struct MSHMyHealthHomeScreen: View {
     @AppStorage("msh.displayName") private var displayName = ""
     @AppStorage(MSHCycleAudiencePreference.storageKey) private var cycleAudienceRawValue = MSHCycleAudiencePreference.unspecified.rawValue
 
-    init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(viewModel: MSHMyHealthViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? MSHMyHealthViewModel())
     }
 
     private var cycleAudience: MSHCycleAudiencePreference {
