@@ -120,7 +120,7 @@ struct MSHAppleHealthSetupView: View {
                 .padding(.vertical, 6)
             }
 
-            Section("Health areas") {
+            Section {
                 ForEach(MSHHealthArea.allCases) { area in
                     Toggle(isOn: selectionBinding(for: area)) {
                         Label(area.title, systemImage: area.systemImage)
@@ -128,6 +128,8 @@ struct MSHAppleHealthSetupView: View {
                     .disabled(isLoading || isConnecting)
                     .accessibilityIdentifier("apple-health-area-\(area.healthDataArea.rawValue)")
                 }
+            } header: {
+                Text("Health areas")
             } footer: {
                 Text("Apple shows its permission sheet only after you tap Connect. MSH reads the areas you approve and does not write health data back to Apple Health.")
             }
