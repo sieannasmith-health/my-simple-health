@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "736NRP69T9.org.mysimplehealth.app"
+        ],
+        "components": [
+          {
+            "/": "/plaid/*",
+            "comment": "Plaid OAuth return for My Simple Health"
+          }
+        ]
+      }
+    ]
+  }
+}
