@@ -49,12 +49,12 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 } else {
                     shape
                         .fill(.ultraThinMaterial)
-                        .opacity(editorialGlass ? 0.42 : 1.0)
+                        .opacity(editorialGlass ? 0.30 : 1.0)
                         .overlay {
                             shape.fill(
                                 Color.black.opacity(
                                     editorialGlass
-                                        ? 0.030 + (0.018 * glowStrength)
+                                        ? 0.018 + (0.010 * glowStrength)
                                         : 0.0
                                 )
                             )
@@ -63,7 +63,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                             shape.fill(
                                 Color.white.opacity(
                                     editorialGlass
-                                        ? 0.12
+                                        ? 0.075
                                         : 0.045 + (0.055 * glowStrength)
                                 )
                             )
@@ -72,7 +72,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                             shape.fill(
                                 tint.opacity(
                                     editorialGlass
-                                        ? 0.008 + (0.010 * glowStrength)
+                                        ? 0.004 + (0.006 * glowStrength)
                                         : 0.070 + (0.045 * glowStrength)
                                 )
                             )
@@ -84,10 +84,10 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                                         Color(red: 0.46, green: 0.82, blue: 1.0)
                                             .opacity(
                                                 editorialGlass
-                                                    ? 0.016 + (0.025 * glowStrength)
+                                                    ? 0.007 + (0.012 * glowStrength)
                                                     : 0.18 + (0.12 * glowStrength)
                                             ),
-                                        Color.white.opacity(editorialGlass ? 0.018 : 0.05),
+                                        Color.white.opacity(editorialGlass ? 0.010 : 0.05),
                                         Color.clear
                                     ],
                                     center: .topLeading,
@@ -103,10 +103,10 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                                         Color(red: 0.86, green: 0.50, blue: 1.0)
                                             .opacity(
                                                 editorialGlass
-                                                    ? 0.012 + (0.022 * glowStrength)
+                                                    ? 0.005 + (0.010 * glowStrength)
                                                     : 0.16 + (0.14 * glowStrength)
                                             ),
-                                        tint.opacity(editorialGlass ? 0.008 : 0.08 + (0.06 * glowStrength)),
+                                        tint.opacity(editorialGlass ? 0.004 : 0.08 + (0.06 * glowStrength)),
                                         Color.clear
                                     ],
                                     center: .bottomTrailing,
@@ -119,10 +119,10 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                             shape.fill(
                                 LinearGradient(
                                     colors: [
-                                        Color.white.opacity(editorialGlass ? 0.13 : 0.15 + (0.08 * glowStrength)),
+                                        Color.white.opacity(editorialGlass ? 0.085 : 0.15 + (0.08 * glowStrength)),
                                         Color.clear,
                                         Color(red: 1.0, green: 0.82, blue: 0.67)
-                                            .opacity(editorialGlass ? 0.012 : 0.07 + (0.05 * glowStrength))
+                                            .opacity(editorialGlass ? 0.006 : 0.07 + (0.05 * glowStrength))
                                     ],
                                     startPoint: .top,
                                     endPoint: .bottomTrailing
@@ -135,15 +135,15 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 shape.strokeBorder(
                     LinearGradient(
                         colors: [
-                            Color.white.opacity((editorialGlass ? 0.76 : 1.0) * edgeStrength),
-                            Color.white.opacity((editorialGlass ? 0.30 : 0.52) * edgeStrength),
-                            Color.white.opacity((editorialGlass ? 0.12 : 0.24) * edgeStrength),
-                            Color.white.opacity((editorialGlass ? 0.66 : 0.94) * edgeStrength)
+                            Color.white.opacity((editorialGlass ? 0.48 : 1.0) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.17 : 0.52) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.06 : 0.24) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.38 : 0.94) * edgeStrength)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: editorialGlass ? 0.86 : 1.10
+                    lineWidth: editorialGlass ? 0.70 : 1.10
                 )
             }
             .overlay {
@@ -152,24 +152,24 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                         colors: [
                             Color.clear,
                             Color(red: 0.36, green: 0.82, blue: 1.0)
-                                .opacity((editorialGlass ? 0.34 : 0.94) * edgeStrength),
+                                .opacity((editorialGlass ? 0.14 : 0.94) * edgeStrength),
                             Color.clear,
-                            tint.opacity((editorialGlass ? 0.12 : 0.60) * edgeStrength),
-                            Color.white.opacity((editorialGlass ? 0.10 : 0.20) * edgeStrength),
+                            tint.opacity((editorialGlass ? 0.055 : 0.60) * edgeStrength),
+                            Color.white.opacity((editorialGlass ? 0.05 : 0.20) * edgeStrength),
                             Color.clear,
                             Color(red: 0.78, green: 0.40, blue: 1.0)
-                                .opacity((editorialGlass ? 0.30 : 0.92) * edgeStrength),
+                                .opacity((editorialGlass ? 0.12 : 0.92) * edgeStrength),
                             Color(red: 1.0, green: 0.77, blue: 0.58)
-                                .opacity((editorialGlass ? 0.12 : 0.46) * edgeStrength),
+                                .opacity((editorialGlass ? 0.045 : 0.46) * edgeStrength),
                             Color.clear
                         ],
                         center: .center,
                         startAngle: .degrees(-28),
                         endAngle: .degrees(332)
                     ),
-                    lineWidth: editorialGlass ? 1.18 : 1.85
+                    lineWidth: editorialGlass ? 0.92 : 1.85
                 )
-                .blur(radius: 0.10)
+                .blur(radius: 0.08)
             }
             .overlay {
                 shape.strokeBorder(
@@ -177,49 +177,49 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                         colors: [
                             Color.clear,
                             Color(red: 0.38, green: 0.76, blue: 1.0)
-                                .opacity((editorialGlass ? 0.08 : 0.34) * edgeStrength),
+                                .opacity((editorialGlass ? 0.025 : 0.34) * edgeStrength),
                             Color.clear,
                             Color(red: 0.88, green: 0.50, blue: 1.0)
-                                .opacity((editorialGlass ? 0.07 : 0.32) * edgeStrength),
+                                .opacity((editorialGlass ? 0.022 : 0.32) * edgeStrength),
                             Color.clear,
-                            tint.opacity((editorialGlass ? 0.04 : 0.18) * edgeStrength),
+                            tint.opacity((editorialGlass ? 0.018 : 0.18) * edgeStrength),
                             Color.clear
                         ],
                         center: .center
                     ),
-                    lineWidth: editorialGlass ? 1.9 : 3.40
+                    lineWidth: editorialGlass ? 1.35 : 3.40
                 )
-                .blur(radius: editorialGlass ? 0.88 : 1.55)
+                .blur(radius: editorialGlass ? 0.65 : 1.55)
             }
             .overlay(alignment: .top) {
                 shape
                     .strokeBorder(
-                        Color.white.opacity((editorialGlass ? 0.56 : 0.92) * edgeStrength),
-                        lineWidth: editorialGlass ? 0.54 : 0.78
+                        Color.white.opacity((editorialGlass ? 0.34 : 0.92) * edgeStrength),
+                        lineWidth: editorialGlass ? 0.44 : 0.78
                     )
-                    .blur(radius: 0.08)
+                    .blur(radius: 0.06)
             }
             .shadow(
-                color: tint.opacity((editorialGlass ? 0.012 : 0.11) + ((editorialGlass ? 0.020 : 0.10) * glowStrength)),
-                radius: editorialGlass ? 5 : 10 + (9 * glowStrength),
+                color: tint.opacity((editorialGlass ? 0.004 : 0.11) + ((editorialGlass ? 0.008 : 0.10) * glowStrength)),
+                radius: editorialGlass ? 3 : 10 + (9 * glowStrength),
                 y: 1
             )
             .shadow(
                 color: Color(red: 0.44, green: 0.76, blue: 1.0)
-                    .opacity((editorialGlass ? 0.020 : 0.15) + ((editorialGlass ? 0.025 : 0.16) * glowStrength)),
-                radius: editorialGlass ? 6 : 12 + (10 * glowStrength),
+                    .opacity((editorialGlass ? 0.006 : 0.15) + ((editorialGlass ? 0.010 : 0.16) * glowStrength)),
+                radius: editorialGlass ? 4 : 12 + (10 * glowStrength),
                 y: 1
             )
             .shadow(
                 color: Color(red: 0.82, green: 0.45, blue: 1.0)
-                    .opacity((editorialGlass ? 0.015 : 0.12) + ((editorialGlass ? 0.022 : 0.15) * glowStrength)),
-                radius: editorialGlass ? 6 : 14 + (10 * glowStrength),
-                y: 2
+                    .opacity((editorialGlass ? 0.004 : 0.12) + ((editorialGlass ? 0.008 : 0.15) * glowStrength)),
+                radius: editorialGlass ? 4 : 14 + (10 * glowStrength),
+                y: 1
             )
             .shadow(
-                color: Color.black.opacity((editorialGlass ? 0.045 : 0.065) * shadowStrength),
-                radius: editorialGlass ? 8 : 14,
-                y: editorialGlass ? 4 : 6
+                color: Color.black.opacity((editorialGlass ? 0.030 : 0.065) * shadowStrength),
+                radius: editorialGlass ? 6 : 14,
+                y: editorialGlass ? 3 : 6
             )
     }
 }
