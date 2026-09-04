@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum MSHAppSection: String, CaseIterable, Identifiable {
     case myHealth, explore, simple, progress, me
@@ -62,6 +63,7 @@ enum MSHAppearancePreference: String, CaseIterable, Identifiable {
 
 struct MSHAppShell: View {
     @State private var selection: MSHAppSection = .myHealth
+    @State private var isKeyboardVisible = false
     @StateObject private var notificationRouter = MSHNotificationRouter.shared
     @AppStorage("msh.appearance") private var appearanceRawValue = MSHAppearancePreference.system.rawValue
 
@@ -83,12 +85,25 @@ struct MSHAppShell: View {
         .background(MSHColor.canvas.ignoresSafeArea())
         .toolbar(.hidden, for: .tabBar)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            MSHBottomTabBar(selection: $selection)
+            if !isKeyboardVisible {
+                MSHBottomTabBar(selection: $selection)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .preferredColorScheme(appearance.colorScheme)
         .onAppear { openNotificationRouteIfNeeded(notificationRouter.route) }
         .onChange(of: notificationRouter.route) { _, route in
             openNotificationRouteIfNeeded(route)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.18)) {
+                isKeyboardVisible = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.18)) {
+                isKeyboardVisible = false
+            }
         }
     }
 
@@ -343,17 +358,13 @@ private struct MSHSimpleScreen: View {
                             .opacity(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.38 : 1)
                             .accessibilityLabel("Send to Simple")
                         }
-
-                        Text("The native conversation surface is now the app destination. Simple’s existing intelligence will be connected here without reopening the legacy web experience.")
-                            .font(.footnote)
-                            .foregroundStyle(MSHColor.secondaryText)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 18)
                 .padding(.bottom, 36)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .accessibilityIdentifier("simple-conversation-screen")
     }
