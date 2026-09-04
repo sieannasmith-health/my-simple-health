@@ -12,6 +12,9 @@ packages:
   GoogleSignIn:
     url: https://github.com/google/GoogleSignIn-iOS
     from: 9.2.0
+  PlaidLink:
+    url: https://github.com/plaid/plaid-link-ios-spm
+    exactVersion: 7.0.5
 targets:
   MySimpleHealth:
     type: application
@@ -68,8 +71,12 @@ targets:
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseFunctions
       - package: GoogleSignIn
         product: GoogleSignIn
+      - package: PlaidLink
+        product: LinkKit
   MySimpleHealthTests:
     type: bundle.unit-test
     platform: iOS
