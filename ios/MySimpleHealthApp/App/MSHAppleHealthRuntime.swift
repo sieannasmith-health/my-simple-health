@@ -13,8 +13,7 @@ enum MSHAppleHealthRuntime {
         states: store
     )
 
-    static func connectForOnboarding() async throws -> HealthAuthorizationResult {
-        let areas = Set(HealthDataArea.allCases)
+    static func connect(areas: Set<HealthDataArea>) async throws -> HealthAuthorizationResult {
         let result = try await coordinator.connect(areas: areas)
         guard result.outcome == .completed else { return result }
 
@@ -32,10 +31,10 @@ enum MSHAppleHealthRuntime {
 
         MSHDebugLifecycle.log(
             "healthkit_sync_started",
-            "trigger=onboarding areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
+            "trigger=progressive_setup areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
         )
         let passes = try await coordinator.syncUntilCaughtUp(areas: areas)
-        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=onboarding passes=\(passes)")
+        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=progressive_setup passes=\(passes)")
         return result
     }
 
@@ -43,33 +42,10 @@ enum MSHAppleHealthRuntime {
         guard UIApplication.shared.applicationState == .active else { return }
 
         var state = try await store.load(provider: .appleHealth)
-        var areas = state.selectedAreas
+        let areas = state.selectedAreas
 
-        // Recover installations that still have HealthKit authorization but lost the
-        // local selected-area state during the auth/backend migration. HealthKit does
-        // not re-prompt for permissions the user has already answered.
-        if areas.isEmpty {
-            let requestedAreas = Set(HealthDataArea.allCases)
-            MSHDebugLifecycle.log(
-                "healthkit_connection_repair_started",
-                "trigger=my_health_refresh"
-            )
-            let authorization = try await coordinator.connect(areas: requestedAreas)
-            guard authorization.outcome == .completed else {
-                MSHDebugLifecycle.log(
-                    "healthkit_connection_repair_skipped",
-                    "reason=authorization_not_completed"
-                )
-                return
-            }
-            state = try await store.load(provider: .appleHealth)
-            areas = state.selectedAreas
-            MSHDebugLifecycle.log(
-                "healthkit_connection_repair_finished",
-                "areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
-            )
-        }
-
+        // Never turn a routine dashboard refresh into a permission prompt.
+        // Initial authorization only happens through the explicit progressive setup.
         guard !areas.isEmpty else { return }
 
         // A checkpoint can survive while the local SQLite cache is empty. In that
