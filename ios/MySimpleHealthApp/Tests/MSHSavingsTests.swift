@@ -3,22 +3,19 @@ import XCTest
 
 @MainActor
 final class MSHSavingsTests: XCTestCase {
+    private let suiteName = "MSHSavingsTests"
     private var defaults: UserDefaults!
 
     override func setUp() {
         super.setUp()
-        defaults = UserDefaults(suiteName: "MSHSavingsTests-\(UUID().uuidString)")!
-        defaults.removePersistentDomain(forName: defaultsSuiteName)
+        defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
     }
 
     override func tearDown() {
-        defaults.removePersistentDomain(forName: defaultsSuiteName)
+        defaults.removePersistentDomain(forName: suiteName)
         defaults = nil
         super.tearDown()
-    }
-
-    private var defaultsSuiteName: String {
-        defaults?.volatileDomainNames.first(where: { $0.hasPrefix("MSHSavingsTests-") }) ?? ""
     }
 
     func testSavingOfferTeachesCategoryPreference() {
