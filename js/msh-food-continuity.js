@@ -43,6 +43,7 @@
     grocery.purchasedAt = timestamp;
 
     if (Lifecycle) {
+      const displayLocation = settings.location || grocery.storageLocation || 'Unsorted';
       const result = Lifecycle.receivePurchase(next, {
         productId:grocery.productId || null,
         name:grocery.name,
@@ -50,7 +51,7 @@
         category:grocery.category || null,
         quantity:settings.quantity || grocery.quantity || 1,
         unit:settings.unit || grocery.unit || null,
-        location:settings.location || grocery.storageLocation || 'other',
+        location:displayLocation,
         purchasedAt:timestamp,
         purchasePrice:settings.purchasePrice == null ? grocery.actualPrice == null ? grocery.estimatedPrice : grocery.actualPrice : settings.purchasePrice,
         unitPrice:grocery.unitPrice == null ? null : grocery.unitPrice,
@@ -65,11 +66,13 @@
       });
       const savedGrocery = result.state.food.groceries.find(item => item.id === groceryId);
       if (savedGrocery && result.product && !savedGrocery.productId) savedGrocery.productId = result.product.id;
+      const savedStock = result.state.food.onHand.find(item => item.inventoryLotId === result.lot?.id) || null;
+      if (savedStock) savedStock.location = displayLocation;
       return {
         state:result.state,
         grocery:clone(savedGrocery || grocery),
         food:result.food,
-        stock:result.stock,
+        stock:clone(savedStock || result.stock),
         inventoryLot:result.lot,
         acquisition:result.acquisition || null,
         inventoryCreated:result.created
