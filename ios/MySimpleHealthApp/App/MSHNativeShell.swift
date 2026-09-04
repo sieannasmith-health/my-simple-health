@@ -2,40 +2,40 @@ import SwiftUI
 
 enum MSHAppSection: String, CaseIterable, Identifiable {
     case myHealth
-    case calendar
-    case movement
-    case track
-    case tools
+    case explore
+    case simple
+    case progress
+    case me
 
     var id: Self { self }
 
     var title: String {
         switch self {
         case .myHealth: "My Health"
-        case .calendar: "Calendar"
-        case .movement: "Movement"
-        case .track: "Track"
-        case .tools: "Tools"
+        case .explore: "Explore"
+        case .simple: "Simple"
+        case .progress: "Progress"
+        case .me: "Me"
         }
     }
 
     var systemImage: String {
         switch self {
         case .myHealth: "heart.text.square"
-        case .calendar: "calendar"
-        case .movement: "figure.walk.motion"
-        case .track: "plus.circle"
-        case .tools: "square.grid.2x2"
+        case .explore: "safari"
+        case .simple: "sparkles"
+        case .progress: "chart.line.uptrend.xyaxis"
+        case .me: "person.crop.circle"
         }
     }
 
     var introduction: String {
         switch self {
-        case .myHealth: "Understand what is happening across your health."
-        case .calendar: "See when health and life happen."
-        case .movement: "Move in ways that work for you."
-        case .track: "Notice what is changing over time."
-        case .tools: "Open focused tools when you need them."
+        case .myHealth: "See what is useful for you right now."
+        case .explore: "Explore everything My Simple Health can help with."
+        case .simple: "Make sense of what is happening with Simple."
+        case .progress: "See what has changed, what you tried, and what you learned."
+        case .me: "Manage your account, connections, sharing, and preferences."
         }
     }
 
@@ -117,7 +117,7 @@ struct MSHBottomTabBar: View {
                 } label: {
                     VStack(spacing: 3) {
                         Image(systemName: section.systemImage)
-                            .font(.system(size: 19, weight: .medium))
+                            .font(.system(size: section == .simple ? 20 : 19, weight: .medium))
                             .frame(height: 22)
                         Text(section.title)
                             .font(.caption2.weight(selection == section ? .semibold : .regular))
@@ -183,26 +183,26 @@ private struct MSHSectionNavigation: View {
                         } else {
                             MSHMyHealthHomeScreen()
                         }
-                    case .calendar:
+                    case .explore:
                         if let notificationRoute {
                             MSHNotificationWebRouteScreen(route: notificationRoute)
                         } else {
-                            MSHWebFeatureScreen(destination: .calendar)
+                            MSHExploreScreen()
                         }
-                    case .movement:
+                    case .simple:
                         if let notificationRoute {
                             MSHNotificationWebRouteScreen(route: notificationRoute)
                         } else {
-                            MSHMovementScreen()
+                            MSHSimpleScreen()
                         }
-                    case .track:
-                        MSHTrackScreen()
-                    case .tools:
+                    case .progress:
                         if let notificationRoute {
                             MSHNotificationWebRouteScreen(route: notificationRoute)
                         } else {
-                            MSHToolsScreen()
+                            MSHProgressScreen()
                         }
+                    case .me:
+                        MSHProfileSettingsScreen()
                     }
                 }
             }
@@ -210,35 +210,6 @@ private struct MSHSectionNavigation: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(MSHColor.canvas, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                if section == .myHealth {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink {
-                            MSHImmediateDestination(title: "Profile & Settings") {
-                                MSHProfileSettingsScreen()
-                            }
-                        } label: {
-                            Image(systemName: "person.crop.circle")
-                                .accessibilityLabel("Profile and Settings")
-                        }
-                    }
-                }
-
-                if section == .calendar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink {
-                            MSHImmediateDestination(title: "People & Sharing") {
-                                MSHPeopleSharingScreen()
-                            }
-                        } label: {
-                            Label("Share Calendar", systemImage: "person.2")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .accessibilityLabel("Share Calendar")
-                        .accessibilityIdentifier("calendar-share-button")
-                    }
-                }
-            }
         }
         .mshNavigationSurface()
     }
@@ -255,6 +226,18 @@ private struct MSHNotificationWebRouteScreen: View {
         .toolbarBackground(MSHColor.canvas, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .accessibilityIdentifier("notification-route-\(route.rawValue)")
+    }
+}
+
+private struct MSHSimpleScreen: View {
+    private let route = MSHWebRoute(rawValue: "hello.html")!
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            MSHWebView(route: route)
+        }
+        .accessibilityIdentifier("simple-conversation-screen")
     }
 }
 
@@ -292,7 +275,7 @@ private struct MSHMovementScreen: View {
     }
 }
 
-private struct MSHTrackScreen: View {
+private struct MSHProgressScreen: View {
     private let reflection: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
         (.healthStory, "See the living story your confirmed health experiences are creating.", "book.pages"),
         (.landscape, "Return to the whole-health picture of where you are now.", "map"),
@@ -311,12 +294,12 @@ private struct MSHTrackScreen: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 30) {
                 MSHEditorialHeader(
-                    eyebrow: "TRACK",
-                    title: "Notice what is changing.",
-                    subtitle: "Your reflections, direction, and lived experience belong together here."
+                    eyebrow: "PROGRESS",
+                    title: "See how things are changing.",
+                    subtitle: "What happened, what you tried, and what you learned belong together here."
                 )
 
-                MSHDestinationGroup(title: "Your picture", destinations: reflection)
+                MSHDestinationGroup(title: "Your picture over time", destinations: reflection)
                 MSHDestinationGroup(title: "Your direction", destinations: direction)
             }
             .padding(.horizontal, 20)
@@ -324,11 +307,17 @@ private struct MSHTrackScreen: View {
             .padding(.bottom, 36)
         }
         .background(MSHColor.canvas)
-        .accessibilityIdentifier("track-integration-screen")
+        .accessibilityIdentifier("progress-integration-screen")
     }
 }
 
-private struct MSHToolsScreen: View {
+private struct MSHExploreScreen: View {
+    private let timeAndMovement: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
+        (.calendar, "See health and life together in time.", "calendar"),
+        (.movementPlan, "Plan movement in the context of your real schedule.", "figure.walk.motion"),
+        (.movementLibrary, "Return to workouts, classes, videos, routines, and favorites.", "figure.run")
+    ]
+
     private let care: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
         (.cycle, "Keep cycle context close to the rest of your health.", "circle.dotted.circle"),
         (.medications, "Manage medication supply, refill timing, and follow-through.", "pills")
@@ -336,17 +325,25 @@ private struct MSHToolsScreen: View {
 
     private let everyday: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
         (.food, "Use your personal food workspace.", "fork.knife"),
-        (.financialHealth, "Understand financial health in the context of your life.", "chart.pie")
+        (.financialHealth, "See where money is going and understand it in the context of your life.", "chart.pie")
+    ]
+
+    private let understanding: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
+        (.landscape, "Explore the whole-health picture of where you are now.", "map"),
+        (.selfInsight, "Look more closely when one part of your experience needs context.", "sparkles.rectangle.stack")
     ]
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 30) {
                 MSHEditorialHeader(
-                    eyebrow: "TOOLS",
-                    title: "Useful when you need them.",
-                    subtitle: "Focused capabilities stay here instead of competing with your everyday health view."
+                    eyebrow: "EXPLORE",
+                    title: "Everything is here when you want it.",
+                    subtitle: "My Health stays selective. Explore is where you can browse the broader capabilities of My Simple Health."
                 )
+
+                MSHDestinationGroup(title: "Health in time", destinations: timeAndMovement)
+                MSHDestinationGroup(title: "Understand your health", destinations: understanding)
 
                 VStack(alignment: .leading, spacing: 0) {
                     MSHGroupLabel(title: "Wellbeing")
@@ -372,6 +369,7 @@ private struct MSHToolsScreen: View {
             .padding(.bottom, 36)
         }
         .background(MSHColor.canvas)
+        .accessibilityIdentifier("explore-integration-screen")
     }
 }
 
@@ -514,9 +512,9 @@ struct MSHProfileSettingsScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     MSHEditorialHeader(
-                        eyebrow: "PROFILE",
-                        title: "Make this space yours.",
-                        subtitle: "Your preferences and sharing controls live here."
+                        eyebrow: "ME",
+                        title: "Your space.",
+                        subtitle: "Your account, preferences, connections, and sharing controls live here."
                     )
 
                     NavigationLink {
@@ -566,7 +564,7 @@ struct MSHProfileSettingsScreen: View {
                 .padding(.bottom, 36)
             }
         }
-        .navigationTitle("Profile & Settings")
+        .navigationTitle("Me")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(MSHColor.canvas, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
