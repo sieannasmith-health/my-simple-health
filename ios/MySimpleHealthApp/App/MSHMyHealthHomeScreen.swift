@@ -246,6 +246,43 @@ struct MSHMyHealthHomeScreen: View {
                     .foregroundStyle(MSHHomePalette.gold)
 
                 NavigationLink {
+                    MSHEmotionCheckInScreen()
+                } label: {
+                    HStack(spacing: 15) {
+                        Image(systemName: "circle.lefthalf.filled")
+                            .font(.title3)
+                            .foregroundStyle(MSHHomePalette.gold)
+                            .frame(width: 42, height: 42)
+                            .background(MSHHomePalette.gold.opacity(0.10))
+                            .clipShape(Circle())
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("How are you feeling?")
+                                .font(.system(.headline, design: .serif))
+                                .foregroundStyle(MSHHomePalette.ink)
+                            Text("Take a moment to notice how things feel right now.")
+                                .font(.caption)
+                                .foregroundStyle(MSHHomePalette.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 6)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(MSHHomePalette.secondary)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("emotion-check-in-doorway")
+
+                Rectangle()
+                    .fill(MSHHomePalette.hairline)
+                    .frame(height: 1)
+                    .padding(.leading, 57)
+
+                NavigationLink {
                     MSHWebFeatureScreen(destination: .calendar)
                 } label: {
                     HStack(spacing: 15) {
