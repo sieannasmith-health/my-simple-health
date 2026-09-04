@@ -71,7 +71,8 @@ final class MSHCycleTests: XCTestCase {
         XCTAssertEqual(prediction?.averageCycleLength, 28)
         XCTAssertEqual(prediction?.averagePeriodLength, 4)
         XCTAssertEqual(prediction?.confidence, "Low")
-        XCTAssertEqual(calendar.dateComponents([.day], from: date("2026-06-26"), to: prediction!.nextPeriodStart).day, 28)
+        let latestRecordedDay = calendar.startOfDay(for: date("2026-06-26"))
+        XCTAssertEqual(calendar.dateComponents([.day], from: latestRecordedDay, to: prediction!.nextPeriodStart).day, 28)
         XCTAssertNotNil(prediction?.estimatedOvulation)
         XCTAssertNotNil(prediction?.fertileWindowStart)
     }
