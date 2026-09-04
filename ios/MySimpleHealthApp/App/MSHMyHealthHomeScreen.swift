@@ -378,12 +378,40 @@ struct MSHMyHealthHomeScreen: View {
                 }
 
                 HStack(spacing: 10) {
-                    MSHLifestyleTile(title: "Sleep", subtitle: "Patterns and quality", systemImage: "bed.double", tint: MSHColor.powder, foreground: primaryContentColor)
-                    MSHLifestyleTile(title: "Movement", subtitle: "Activity and workouts", systemImage: "dumbbell", tint: MSHColor.sage, foreground: primaryContentColor)
+                    NavigationLink {
+                        MSHImmediateDestination(title: "Sleep") {
+                            MSHMyHealthScreen(viewModel: viewModel)
+                        }
+                    } label: {
+                        MSHLifestyleTile(title: "Sleep", subtitle: "Patterns and quality", systemImage: "bed.double", tint: MSHColor.powder, foreground: primaryContentColor)
+                    }
+                    .buttonStyle(MSHMyHealthLiftButtonStyle())
+                    .accessibilityIdentifier("my-health-sleep")
+
+                    NavigationLink {
+                        MSHNativeFeatureScreen(destination: .movementPlan)
+                    } label: {
+                        MSHLifestyleTile(title: "Movement", subtitle: "Activity and workouts", systemImage: "dumbbell", tint: MSHColor.sage, foreground: primaryContentColor)
+                    }
+                    .buttonStyle(MSHMyHealthLiftButtonStyle())
+                    .accessibilityIdentifier("my-health-movement")
                 }
                 HStack(spacing: 10) {
-                    MSHLifestyleTile(title: "Nutrition", subtitle: "Meals and hydration", systemImage: "fork.knife", tint: MSHColor.mushroom, foreground: primaryContentColor)
-                    MSHLifestyleTile(title: "Wellbeing", subtitle: "Mood and reflection", systemImage: "book.closed", tint: MSHColor.sage, foreground: primaryContentColor)
+                    NavigationLink {
+                        MSHNativeFeatureScreen(destination: .food)
+                    } label: {
+                        MSHLifestyleTile(title: "Nutrition", subtitle: "Meals and hydration", systemImage: "fork.knife", tint: MSHColor.mushroom, foreground: primaryContentColor)
+                    }
+                    .buttonStyle(MSHMyHealthLiftButtonStyle())
+                    .accessibilityIdentifier("my-health-nutrition")
+
+                    NavigationLink {
+                        MSHNativeFeatureScreen(destination: .selfInsight)
+                    } label: {
+                        MSHLifestyleTile(title: "Wellbeing", subtitle: "Mood and reflection", systemImage: "book.closed", tint: MSHColor.sage, foreground: primaryContentColor)
+                    }
+                    .buttonStyle(MSHMyHealthLiftButtonStyle())
+                    .accessibilityIdentifier("my-health-wellbeing")
                 }
             }
 
@@ -911,8 +939,14 @@ private struct MSHLifestyleTile: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.headline)
+            HStack(alignment: .top) {
+                Image(systemName: systemImage)
+                    .font(.headline)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(foreground.opacity(0.58))
+            }
             Spacer(minLength: 10)
             Text(title)
                 .font(.system(.headline, design: .serif))
@@ -925,6 +959,7 @@ private struct MSHLifestyleTile: View {
         .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
         .background(shape.fill(Color.white.opacity(0.025)))
         .mshNativeGlass(in: shape, tint: tint, edgeStrength: 0.32, shadowStrength: 0.16, glowStrength: 0.01)
+        .contentShape(shape)
     }
 }
 
