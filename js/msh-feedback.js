@@ -28,6 +28,24 @@
     return payload;
   }
 
+  function loadSimpleWorkspace() {
+    if (!root.document || !/\bhello\.html$/.test(root.location && root.location.pathname || '')) return;
+    if (!root.document.querySelector('link[data-msh-simple-conversations]')) {
+      const style = root.document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = 'css/msh-simple-conversations.css';
+      style.dataset.mshSimpleConversations = 'true';
+      root.document.head.appendChild(style);
+    }
+    if (!root.document.querySelector('script[data-msh-simple-conversations]')) {
+      const script = root.document.createElement('script');
+      script.src = 'js/msh-simple-conversations.js';
+      script.defer = true;
+      script.dataset.mshSimpleConversations = 'true';
+      root.document.head.appendChild(script);
+    }
+  }
+
   function bind() {
     if (!root.document || root.document.documentElement.dataset.mshFeedbackBound) return;
     root.document.documentElement.dataset.mshFeedbackBound = 'true';
@@ -42,6 +60,7 @@
     });
   }
 
+  loadSimpleWorkspace();
   if (root.document) root.document.addEventListener('DOMContentLoaded',bind,{ once:true });
   root.MSHFeedback = Object.freeze({ EVENTS, ACCENT_KEY, emit, bind, getAccent, setAccent });
 })(typeof window !== 'undefined' ? window : globalThis);
