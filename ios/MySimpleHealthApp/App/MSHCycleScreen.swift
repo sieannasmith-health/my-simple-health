@@ -43,7 +43,7 @@ struct MSHCycleDayRecord: Codable, Identifiable, Equatable {
         updatedAt: Date = Date()
     ) {
         self.id = id
-        self.date = Calendar.current.startOfDay(for: date)
+        self.date = date
         self.bleeding = bleeding
         self.symptoms = symptoms
         self.note = note
