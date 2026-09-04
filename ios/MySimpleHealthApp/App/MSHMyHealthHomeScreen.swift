@@ -198,6 +198,43 @@ struct MSHMyHealthHomeScreen: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(MSHHomePalette.hairline)
+                    .frame(height: 1)
+                    .padding(.leading, 57)
+
+                NavigationLink {
+                    MSHGroceryComparisonScreen()
+                } label: {
+                    HStack(spacing: 15) {
+                        Image(systemName: "cart")
+                            .font(.title3)
+                            .foregroundStyle(MSHHomePalette.sage)
+                            .frame(width: 42, height: 42)
+                            .background(MSHHomePalette.sage.opacity(0.12))
+                            .clipShape(Circle())
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Compare grocery options")
+                                .font(.system(.headline, design: .serif))
+                                .foregroundStyle(MSHHomePalette.ink)
+                            Text("Try in-store, pickup, and delivery tradeoffs using editable estimates while live retailer connections are being added.")
+                                .font(.caption)
+                                .foregroundStyle(MSHHomePalette.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 6)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(MSHHomePalette.secondary)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("grocery-comparison-doorway")
             }
 
             Text("My Health interprets. Detailed measurements stay one level deeper so your first screen remains about understanding, not monitoring.")
