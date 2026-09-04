@@ -5,7 +5,13 @@ import SwiftUI
 struct MSHNativeFeatureScreen: View {
     let destination: MSHFeatureDestination
 
+    @ViewBuilder
     var body: some View {
-        MSHWebFeatureScreen(destination: destination)
+        switch destination {
+        case .landscape:
+            MSHLandscapeScreen()
+        default:
+            MSHWebFeatureScreen(destination: destination)
+        }
     }
 }
