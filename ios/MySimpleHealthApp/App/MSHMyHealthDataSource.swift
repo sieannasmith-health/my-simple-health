@@ -42,9 +42,10 @@ actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
     }
 
     func loadStatus() async throws -> HealthSyncState {
-        // My Health should refresh already-selected HealthKit areas when the
-        // dashboard loads, not only during onboarding.
-        try? await MSHAppleHealthRuntime.refreshConnectedHealth()
+        // A My Health refresh must complete the Apple Health sync before the
+        // dashboard reads its local snapshot. Do not swallow sync failures and
+        // silently show stale data as though refresh succeeded.
+        try await MSHAppleHealthRuntime.refreshConnectedHealth()
         return try await stateReader.load(provider: .appleHealth)
     }
 
