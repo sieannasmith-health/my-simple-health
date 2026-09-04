@@ -156,7 +156,194 @@ private struct MSHSectionNavigation: View {
 
 private struct MSHNotificationWebRouteScreen: View { let route: MSHWebRoute; var body: some View { ZStack { MSHColor.canvas.ignoresSafeArea(); MSHWebView(route: route) }.toolbarBackground(MSHColor.canvas, for: .navigationBar).toolbarBackground(.visible, for: .navigationBar).accessibilityIdentifier("notification-route-\(route.rawValue)") } }
 private struct MSHSimpleScreen: View { private let route = MSHWebRoute(rawValue: "hello.html")!; var body: some View { ZStack { MSHColor.canvas.ignoresSafeArea(); MSHWebView(route: route) }.accessibilityIdentifier("simple-conversation-screen") } }
-struct MSHWebFeatureScreen: View { let destination: MSHFeatureDestination; var body: some View { MSHImmediateDestination(title: destination.title) { ZStack { MSHColor.canvas.ignoresSafeArea(); MSHWebView(destination: destination) } }.navigationTitle(destination.title).navigationBarTitleDisplayMode(.inline).toolbarBackground(MSHColor.canvas, for: .navigationBar).toolbarBackground(.visible, for: .navigationBar).accessibilityIdentifier("native-feature-\(destination.rawValue)") } }
+
+struct MSHWebFeatureScreen: View {
+    let destination: MSHFeatureDestination
+
+    @ViewBuilder
+    var body: some View {
+        switch destination {
+        case .myHealth:
+            MSHAppleHealthConnectionScreen()
+        default:
+            MSHImmediateDestination(title: destination.title) {
+                ZStack {
+                    MSHColor.canvas.ignoresSafeArea()
+                    MSHWebView(destination: destination)
+                }
+            }
+            .navigationTitle(destination.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .accessibilityIdentifier("native-feature-\(destination.rawValue)")
+        }
+    }
+}
+
+@MainActor
+private struct MSHAppleHealthConnectionScreen: View {
+    @State private var status: MSHAppleHealthStatus?
+    @State private var isWorking = false
+    @State private var errorMessage: String?
+    private let dataSource: any MSHMyHealthDataLoading = MSHMyHealthDataSource.live()
+
+    var body: some View {
+        ZStack {
+            MSHColor.ivory.ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 26) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("APPLE HEALTH")
+                            .font(.caption2.weight(.semibold))
+                            .tracking(2.0)
+                            .foregroundStyle(MSHColor.sage)
+
+                        Text("Your connected health data.")
+                            .font(.system(size: 34, weight: .regular, design: .serif))
+                            .foregroundStyle(MSHColor.charcoal)
+
+                        Text("Apple Health brings movement, sleep, heart activity, and body measurements into My Simple Health as context.")
+                            .font(.body)
+                            .foregroundStyle(MSHColor.charcoal.opacity(0.66))
+                    }
+
+                    if let status {
+                        VStack(alignment: .leading, spacing: 14) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(status.isConnected ? "Connected" : "Not connected")
+                                        .font(.system(.title3, design: .serif, weight: .semibold))
+                                    Text(status.isConnected ? "\(status.selectedAreas.count) health areas selected" : "Connect Apple Health when you’re ready.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(MSHColor.charcoal.opacity(0.62))
+                                }
+                                Spacer()
+                                Image(systemName: status.isConnected ? "checkmark.circle.fill" : "heart.text.square")
+                                    .font(.title2)
+                                    .foregroundStyle(MSHColor.sage)
+                            }
+
+                            if let lastSync = status.lastSuccessfulSyncAt {
+                                Divider()
+                                HStack {
+                                    Text("Last synced")
+                                    Spacer()
+                                    Text(lastSync, format: .relative(presentation: .named))
+                                }
+                                .font(.caption)
+                                .foregroundStyle(MSHColor.charcoal.opacity(0.58))
+                            }
+                        }
+                        .padding(18)
+                        .background(Color.white.opacity(0.54))
+                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .stroke(Color.black.opacity(0.06), lineWidth: 0.8)
+                        }
+
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("CONNECTED AREAS")
+                                .font(.caption2.weight(.semibold))
+                                .tracking(1.5)
+                                .foregroundStyle(MSHColor.charcoal.opacity(0.54))
+                                .padding(.bottom, 10)
+
+                            ForEach(MSHHealthArea.allCases) { area in
+                                HStack(spacing: 14) {
+                                    Image(systemName: area.systemImage)
+                                        .foregroundStyle(MSHColor.sage)
+                                        .frame(width: 28)
+                                    Text(area.title)
+                                        .font(.system(.body, design: .serif))
+                                        .foregroundStyle(MSHColor.charcoal)
+                                    Spacer()
+                                    Image(systemName: status.selectedAreas.contains(area) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(status.selectedAreas.contains(area) ? MSHColor.sage : MSHColor.charcoal.opacity(0.22))
+                                }
+                                .padding(.vertical, 13)
+
+                                if area != MSHHealthArea.allCases.last {
+                                    Divider()
+                                }
+                            }
+                        }
+
+                        Button {
+                            Task { await performPrimaryAction(connected: status.isConnected) }
+                        } label: {
+                            HStack(spacing: 9) {
+                                if isWorking { ProgressView().tint(.white) }
+                                Text(status.isConnected ? "Refresh Apple Health" : "Connect Apple Health")
+                                    .font(.headline)
+                            }
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(MSHColor.charcoal)
+                            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isWorking)
+                    } else {
+                        ProgressView("Loading Apple Health…")
+                            .tint(MSHColor.sage)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 50)
+                    }
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+
+                    Text("Your Apple Health permissions remain controlled by iOS. My Simple Health only reads the areas you have allowed.")
+                        .font(.footnote)
+                        .foregroundStyle(MSHColor.charcoal.opacity(0.54))
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+                .padding(.bottom, 36)
+            }
+        }
+        .navigationTitle("Apple Health")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(MSHColor.ivory, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .task { await loadStatus() }
+        .accessibilityIdentifier("apple-health-native-connection")
+    }
+
+    private func loadStatus() async {
+        do {
+            let syncState = try await dataSource.loadStatus()
+            status = MSHAppleHealthStatus(syncState: syncState)
+            errorMessage = nil
+        } catch {
+            errorMessage = "Apple Health status could not be loaded right now."
+        }
+    }
+
+    private func performPrimaryAction(connected: Bool) async {
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
+
+        do {
+            if connected {
+                try await MSHAppleHealthRuntime.refreshConnectedHealth()
+            } else {
+                _ = try await MSHAppleHealthRuntime.connectForOnboarding()
+            }
+            await loadStatus()
+        } catch {
+            errorMessage = "Apple Health could not be updated right now."
+        }
+    }
+}
 
 private struct MSHProgressScreen: View {
     private let reflection: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [(.healthStory,"See the living story your confirmed health experiences are creating.","book.pages"),(.landscape,"Return to the whole-health picture of where you are now.","map"),(.selfInsight,"Look more closely when one part of your experience needs context.","sparkles.rectangle.stack"),(.journey,"See what has changed over time without turning it into a score.","clock.arrow.circlepath")]
