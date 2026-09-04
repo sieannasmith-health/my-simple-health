@@ -330,7 +330,6 @@ private struct MSHTrackScreen: View {
 
 private struct MSHToolsScreen: View {
     private let care: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.cycle, "Keep cycle context close to the rest of your health.", "circle.dotted.circle"),
         (.medications, "Manage medication supply, refill timing, and follow-through.", "pills")
     ]
 
@@ -429,7 +428,11 @@ private struct MSHDestinationGroup: View {
             ForEach(destinations.indices, id: \.self) { index in
                 let item = destinations[index]
                 NavigationLink {
-                    MSHWebFeatureScreen(destination: item.destination)
+                    if item.destination == .cycle {
+                        MSHCycleScreen()
+                    } else {
+                        MSHWebFeatureScreen(destination: item.destination)
+                    }
                 } label: {
                     MSHEditorialDoorway(
                         title: item.destination.title,
