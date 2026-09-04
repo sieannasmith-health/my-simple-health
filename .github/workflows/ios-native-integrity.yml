@@ -39,6 +39,8 @@ jobs:
           ! grep -q 'Supabase' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'FirebaseAuth' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'FirebaseFirestore' MySimpleHealth.xcodeproj/project.pbxproj
+          grep -q 'FirebaseFunctions' MySimpleHealth.xcodeproj/project.pbxproj
+          grep -q 'LinkKit' MySimpleHealth.xcodeproj/project.pbxproj
           grep -q 'GoogleSignIn' MySimpleHealth.xcodeproj/project.pbxproj
 
       - name: Upload regenerated project
