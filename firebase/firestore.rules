@@ -127,6 +127,29 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.ownerID == request.auth.uid;
     }
 
+    // Plaid access tokens and sync cursors are backend-only. Firebase Admin SDK
+    // bypasses these client rules; no iOS/Web client can directly read or write them.
+    match /mshServerPlaidItems/{itemID} {
+      allow read, write: if false;
+    }
+
+    // Sanitized Plaid views are private to the person who created the connection.
+    // Household sharing must flow through MSH's explicit sharing layer above.
+    match /users/{userID}/plaidConnections/{connectionID} {
+      allow read: if signedIn() && request.auth.uid == userID;
+      allow write: if false;
+    }
+
+    match /users/{userID}/plaidAccounts/{accountID} {
+      allow read: if signedIn() && request.auth.uid == userID;
+      allow write: if false;
+    }
+
+    match /users/{userID}/plaidTransactions/{transactionID} {
+      allow read: if signedIn() && request.auth.uid == userID;
+      allow write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
