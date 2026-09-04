@@ -13,7 +13,7 @@ enum MSHAppleHealthRuntime {
         states: store
     )
 
-    static func connectForOnboarding() async throws -> HealthAuthorizationResult {
+    static func connectForProgressiveSetup() async throws -> HealthAuthorizationResult {
         let areas = Set(HealthDataArea.allCases)
         let result = try await coordinator.connect(areas: areas)
         guard result.outcome == .completed else { return result }
@@ -32,11 +32,17 @@ enum MSHAppleHealthRuntime {
 
         MSHDebugLifecycle.log(
             "healthkit_sync_started",
-            "trigger=onboarding areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
+            "trigger=progressive_setup areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
         )
         let passes = try await coordinator.syncUntilCaughtUp(areas: areas)
-        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=onboarding passes=\(passes)")
+        MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=progressive_setup passes=\(passes)")
         return result
+    }
+
+    // Kept temporarily so older callers on in-flight branches continue to compile.
+    // New product surfaces should use connectForProgressiveSetup().
+    static func connectForOnboarding() async throws -> HealthAuthorizationResult {
+        try await connectForProgressiveSetup()
     }
 
     static func refreshConnectedHealth() async throws {
