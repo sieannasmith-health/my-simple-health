@@ -200,7 +200,7 @@ struct MSHNativeCalendarScreen: View {
                     .foregroundStyle(MSHColor.primaryText)
 
                     LazyVGrid(columns: columns, spacing: 6) {
-                        ForEach(Calendar.current.veryShortStandaloneWeekdaySymbols, id: \.self) { day in
+                        ForEach(Array(Calendar.current.veryShortStandaloneWeekdaySymbols.enumerated()), id: \.offset) { _, day in
                             Text(day.uppercased())
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(MSHColor.secondaryText)
@@ -255,7 +255,7 @@ struct MSHNativeCalendarScreen: View {
     private var dayAgenda: some View {
         let items = store.items(on: selectedDay)
         return VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(selectedDay.formatted(.dateTime.weekday(.wide)))
                         .font(.caption.weight(.semibold)).foregroundStyle(MSHColor.secondaryText)
@@ -263,8 +263,23 @@ struct MSHNativeCalendarScreen: View {
                         .font(.system(.title2, design: .serif, weight: .semibold))
                 }
                 Spacer()
-                Button("Add") { editingItem = nil; showEditor = true }
-                    .buttonStyle(.plain).font(.subheadline.weight(.semibold)).foregroundStyle(MSHColor.accent)
+                HStack(spacing: 14) {
+                    NavigationLink {
+                        MSHNativeMovementLibraryScreen(defaultDate: selectedDay)
+                    } label: {
+                        Label("Movement", systemImage: "figure.walk.motion")
+                            .labelStyle(.iconOnly)
+                            .font(.headline)
+                            .foregroundStyle(MSHColor.accent)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Plan movement")
+
+                    Button("Add") { editingItem = nil; showEditor = true }
+                        .buttonStyle(.plain)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MSHColor.accent)
+                }
             }
 
             if items.isEmpty {
@@ -384,6 +399,473 @@ private struct MSHCalendarEditor: View {
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Native Movement Library + Your Workouts
+
+private struct MSHMovementOption: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let category: String
+
+    static let all: [MSHMovementOption] = [
+        .init(id: "hiit", title: "HIIT", category: "Exercise modalities"),
+        .init(id: "miit", title: "MIIT", category: "Exercise modalities"),
+        .init(id: "barre", title: "Barre", category: "Exercise modalities"),
+        .init(id: "pilates", title: "Pilates", category: "Exercise modalities"),
+        .init(id: "strength_training", title: "Strength training", category: "Exercise modalities"),
+        .init(id: "yoga", title: "Yoga", category: "Exercise modalities"),
+        .init(id: "circuit_training", title: "Circuit training", category: "Exercise modalities"),
+        .init(id: "calisthenics", title: "Calisthenics", category: "Exercise modalities"),
+        .init(id: "walking", title: "Walking", category: "Aerobic and locomotor movement"),
+        .init(id: "running", title: "Running", category: "Aerobic and locomotor movement"),
+        .init(id: "cycling", title: "Cycling", category: "Aerobic and locomotor movement"),
+        .init(id: "swimming", title: "Swimming", category: "Aerobic and locomotor movement"),
+        .init(id: "rowing", title: "Rowing", category: "Aerobic and locomotor movement"),
+        .init(id: "stair_climbing", title: "Stair climbing", category: "Aerobic and locomotor movement"),
+        .init(id: "stretching", title: "Stretching", category: "Mobility and recovery"),
+        .init(id: "mobility", title: "Mobility", category: "Mobility and recovery"),
+        .init(id: "gentle_movement", title: "Gentle movement", category: "Mobility and recovery"),
+        .init(id: "basketball", title: "Basketball", category: "Sports"),
+        .init(id: "tennis", title: "Tennis", category: "Sports"),
+        .init(id: "pickleball", title: "Pickleball", category: "Sports"),
+        .init(id: "soccer", title: "Soccer", category: "Sports"),
+        .init(id: "volleyball", title: "Volleyball", category: "Sports"),
+        .init(id: "golf", title: "Golf", category: "Sports"),
+        .init(id: "softball_baseball", title: "Softball / baseball", category: "Sports"),
+        .init(id: "martial_arts", title: "Martial arts", category: "Sports"),
+        .init(id: "other_sport", title: "Other sport", category: "Sports"),
+        .init(id: "hiking", title: "Hiking", category: "Recreation"),
+        .init(id: "dancing", title: "Dancing", category: "Recreation"),
+        .init(id: "kayaking", title: "Kayaking", category: "Recreation"),
+        .init(id: "skiing_snowboarding", title: "Skiing / snowboarding", category: "Recreation"),
+        .init(id: "skating", title: "Skating", category: "Recreation"),
+        .init(id: "gardening", title: "Gardening", category: "Recreation"),
+        .init(id: "housework", title: "Housework", category: "Activities of daily living"),
+        .init(id: "yard_work", title: "Yard work", category: "Activities of daily living"),
+        .init(id: "carrying_groceries", title: "Carrying groceries", category: "Activities of daily living"),
+        .init(id: "moving_furniture", title: "Moving furniture", category: "Activities of daily living"),
+        .init(id: "stairs", title: "Stairs", category: "Activities of daily living"),
+        .init(id: "active_errands", title: "Active errands", category: "Activities of daily living"),
+        .init(id: "physical_caregiving", title: "Physical caregiving", category: "Activities of daily living"),
+        .init(id: "other_daily_movement", title: "Other daily-life movement", category: "Activities of daily living"),
+        .init(id: "ran_5k", title: "Ran a 5K", category: "Events and meaningful accomplishments"),
+        .init(id: "ran_10k", title: "Ran a 10K", category: "Events and meaningful accomplishments"),
+        .init(id: "ran_half_marathon", title: "Ran a half marathon", category: "Events and meaningful accomplishments"),
+        .init(id: "ran_marathon", title: "Ran a marathon", category: "Events and meaningful accomplishments"),
+        .init(id: "walked_event", title: "Walked a race/event", category: "Events and meaningful accomplishments"),
+        .init(id: "cycling_event", title: "Cycling event", category: "Events and meaningful accomplishments"),
+        .init(id: "hiking_event", title: "Hiking event", category: "Events and meaningful accomplishments"),
+        .init(id: "custom_event", title: "Custom event", category: "Events and meaningful accomplishments")
+    ]
+}
+
+private struct MSHYouTubeWorkout: Identifiable, Codable, Hashable {
+    let videoId: String
+    let title: String
+    let durationMinutes: Int?
+    let focusTags: [String]?
+    let youtubeUrl: String?
+    let thumbnailUrl: String?
+    var id: String { videoId }
+}
+
+private struct MSHYouTubePlaylistResponse: Decodable {
+    let playlistId: String?
+    let videos: [MSHYouTubeWorkout]
+    let source: String?
+    let limited: Bool?
+    let note: String?
+    let error: String?
+}
+
+@MainActor
+private final class MSHMovementLibraryStore: ObservableObject {
+    @Published var workouts: [MSHYouTubeWorkout] = []
+    @Published var playlistURL = ""
+    @Published var isLoading = false
+    @Published var statusMessage = ""
+
+    private let workoutsKey = "msh.nativeMovement.youtubeWorkouts.v1"
+    private let playlistURLKey = "msh.nativeMovement.youtubePlaylistURL.v1"
+
+    init() {
+        playlistURL = UserDefaults.standard.string(forKey: playlistURLKey) ?? ""
+        if let data = UserDefaults.standard.data(forKey: workoutsKey),
+           let decoded = try? JSONDecoder().decode([MSHYouTubeWorkout].self, from: data) {
+            workouts = decoded
+        }
+    }
+
+    func connectPlaylist() async {
+        let trimmed = playlistURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            statusMessage = "Paste a YouTube playlist link first."
+            return
+        }
+        guard var components = URLComponents(string: "https://mysimplehealth.org/api/youtube-playlist") else {
+            statusMessage = "The playlist service is unavailable."
+            return
+        }
+        components.queryItems = [URLQueryItem(name: "url", value: trimmed)]
+        guard let url = components.url else {
+            statusMessage = "That playlist link could not be read."
+            return
+        }
+
+        isLoading = true
+        statusMessage = "Connecting your workouts…"
+        defer { isLoading = false }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let http = response as? HTTPURLResponse else {
+                statusMessage = "YouTube did not return a usable response."
+                return
+            }
+            let decoded = try JSONDecoder().decode(MSHYouTubePlaylistResponse.self, from: data)
+            guard (200..<300).contains(http.statusCode), !decoded.videos.isEmpty else {
+                statusMessage = decoded.error ?? "That playlist could not be loaded."
+                return
+            }
+
+            workouts = decoded.videos
+            UserDefaults.standard.set(trimmed, forKey: playlistURLKey)
+            if let encoded = try? JSONEncoder().encode(workouts) {
+                UserDefaults.standard.set(encoded, forKey: workoutsKey)
+            }
+            statusMessage = decoded.limited == true
+                ? "\(workouts.count) workouts connected. YouTube returned a limited public-feed view."
+                : "\(workouts.count) workouts connected."
+        } catch {
+            statusMessage = "The playlist could not be loaded right now."
+        }
+    }
+
+    func disconnectPlaylist() {
+        workouts = []
+        playlistURL = ""
+        statusMessage = "Playlist disconnected."
+        UserDefaults.standard.removeObject(forKey: workoutsKey)
+        UserDefaults.standard.removeObject(forKey: playlistURLKey)
+    }
+}
+
+private struct MSHMovementPlanChoice: Identifiable {
+    let id = UUID()
+    let title: String
+    let defaultDuration: Int
+    let youtubeURL: String?
+}
+
+struct MSHNativeMovementLibraryScreen: View {
+    @StateObject private var library = MSHMovementLibraryStore()
+    @State private var searchText = ""
+    @State private var planChoice: MSHMovementPlanChoice?
+    let defaultDate: Date
+
+    init(defaultDate: Date = Date()) {
+        self.defaultDate = defaultDate
+    }
+
+    private var filteredMovement: [MSHMovementOption] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !query.isEmpty else { return MSHMovementOption.all }
+        return MSHMovementOption.all.filter {
+            $0.title.lowercased().contains(query) || $0.category.lowercased().contains(query)
+        }
+    }
+
+    private var categories: [String] {
+        var seen = Set<String>()
+        return filteredMovement.compactMap { item in
+            guard seen.insert(item.category).inserted else { return nil }
+            return item.category
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            MSHColor.canvas.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("MOVEMENT LIBRARY")
+                            .font(.caption2.weight(.semibold))
+                            .tracking(2.1)
+                            .foregroundStyle(MSHColor.accent)
+                        Text("Find a way to move.")
+                            .font(.system(size: 34, design: .serif))
+                            .foregroundStyle(MSHColor.primaryText)
+                        Text("Browse movement, keep the workouts you already use, and place either one directly into your Calendar.")
+                            .foregroundStyle(MSHColor.secondaryText)
+                    }
+
+                    yourWorkouts
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("MOVEMENT LIBRARY")
+                            .font(.caption2.weight(.semibold))
+                            .tracking(1.6)
+                            .foregroundStyle(MSHColor.secondaryText)
+
+                        TextField("Search walking, Pilates, gardening…", text: $searchText)
+                            .textInputAutocapitalization(.never)
+                            .padding(.horizontal, 16)
+                            .frame(height: 48)
+                            .background(MSHColor.controlFill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                        ForEach(categories, id: \.self) { category in
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text(category)
+                                    .font(.system(.headline, design: .serif))
+                                    .foregroundStyle(MSHColor.primaryText)
+
+                                FlowLayout(spacing: 8) {
+                                    ForEach(filteredMovement.filter { $0.category == category }) { movement in
+                                        Button {
+                                            planChoice = MSHMovementPlanChoice(title: movement.title, defaultDuration: 30, youtubeURL: nil)
+                                            MSHNativeHaptic.selection.play()
+                                        } label: {
+                                            Text(movement.title)
+                                                .font(.subheadline)
+                                                .foregroundStyle(MSHColor.primaryText)
+                                                .padding(.horizontal, 13)
+                                                .frame(minHeight: 40)
+                                                .background(MSHColor.controlFill.opacity(0.7), in: Capsule())
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                            .padding(18)
+                            .background(MSHColor.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                            .overlay { RoundedRectangle(cornerRadius: 22).stroke(MSHColor.border, lineWidth: 0.7) }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+                .padding(.bottom, 40)
+            }
+        }
+        .navigationTitle("Movement Library")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $planChoice) { choice in
+            MSHMovementPlanner(choice: choice, defaultDate: defaultDate)
+        }
+        .accessibilityIdentifier("native-movement-library")
+    }
+
+    private var yourWorkouts: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("YOUR WORKOUTS")
+                .font(.caption2.weight(.semibold))
+                .tracking(1.6)
+                .foregroundStyle(MSHColor.accent)
+            Text("Keep your workouts here.")
+                .font(.system(.title3, design: .serif, weight: .semibold))
+                .foregroundStyle(MSHColor.primaryText)
+            Text("Connect the YouTube fitness playlist you already use. Saved workouts can be planned directly into your MSH Calendar.")
+                .font(.subheadline)
+                .foregroundStyle(MSHColor.secondaryText)
+
+            HStack(spacing: 10) {
+                TextField("YouTube playlist link", text: $library.playlistURL)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .autocorrectionDisabled()
+                    .padding(.horizontal, 14)
+                    .frame(height: 46)
+                    .background(MSHColor.controlFill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                Button {
+                    Task { await library.connectPlaylist() }
+                } label: {
+                    Group {
+                        if library.isLoading { ProgressView().tint(.white) }
+                        else { Image(systemName: library.workouts.isEmpty ? "link" : "arrow.clockwise").font(.headline) }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                }
+                .background(MSHColor.accent, in: Circle())
+                .buttonStyle(.plain)
+                .disabled(library.isLoading)
+                .accessibilityLabel(library.workouts.isEmpty ? "Connect YouTube playlist" : "Sync YouTube playlist")
+            }
+
+            if !library.statusMessage.isEmpty {
+                Text(library.statusMessage).font(.caption).foregroundStyle(MSHColor.secondaryText)
+            }
+
+            if !library.workouts.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(Array(library.workouts.prefix(100))) { workout in
+                        Button {
+                            planChoice = MSHMovementPlanChoice(
+                                title: workout.title,
+                                defaultDuration: workout.durationMinutes ?? 30,
+                                youtubeURL: workout.youtubeUrl
+                            )
+                            MSHNativeHaptic.selection.play()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "play.rectangle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(MSHColor.clay)
+                                    .frame(width: 34)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(workout.title)
+                                        .font(.system(.body, design: .serif, weight: .medium))
+                                        .foregroundStyle(MSHColor.primaryText)
+                                        .lineLimit(2)
+                                    HStack(spacing: 8) {
+                                        Text("YouTube")
+                                        if let minutes = workout.durationMinutes { Text("• \(minutes) min") }
+                                    }
+                                    .font(.caption)
+                                    .foregroundStyle(MSHColor.secondaryText)
+                                }
+                                Spacer()
+                                Image(systemName: "calendar.badge.plus").foregroundStyle(MSHColor.accent)
+                            }
+                            .padding(.vertical, 13)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        Divider()
+                    }
+                }
+
+                Button("Disconnect playlist", role: .destructive) { library.disconnectPlaylist() }
+                    .font(.caption.weight(.medium))
+            }
+        }
+        .padding(18)
+        .background(MSHColor.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay { RoundedRectangle(cornerRadius: 22).stroke(MSHColor.border, lineWidth: 0.7) }
+    }
+}
+
+private struct MSHMovementPlanner: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var calendarStore = MSHCalendarStore()
+    let choice: MSHMovementPlanChoice
+    @State private var start: Date
+    @State private var duration: Int
+    @State private var notes = ""
+
+    init(choice: MSHMovementPlanChoice, defaultDate: Date) {
+        self.choice = choice
+        let proposedStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: defaultDate) ?? defaultDate
+        _start = State(initialValue: proposedStart)
+        _duration = State(initialValue: max(5, choice.defaultDuration))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Movement") {
+                    Text(choice.title).font(.system(.headline, design: .serif))
+                    if choice.youtubeURL != nil {
+                        Label("From Your Workouts on YouTube", systemImage: "play.rectangle.fill")
+                            .font(.caption).foregroundStyle(MSHColor.secondaryText)
+                    }
+                }
+                Section("Plan") {
+                    DatePicker("Starts", selection: $start)
+                    Stepper("\(duration) minutes", value: $duration, in: 5...240, step: 5)
+                }
+                Section("Context") {
+                    TextField("Notes", text: $notes, axis: .vertical).lineLimit(2...6)
+                }
+                if let rawURL = choice.youtubeURL, let url = URL(string: rawURL) {
+                    Section {
+                        Link(destination: url) { Label("Open workout on YouTube", systemImage: "play.rectangle") }
+                    }
+                }
+            }
+            .navigationTitle("Plan Movement")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add to Calendar") {
+                        var context = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if let youtubeURL = choice.youtubeURL {
+                            context = [context, "Workout: \(youtubeURL)"].filter { !$0.isEmpty }.joined(separator: "\n")
+                        }
+                        calendarStore.save(MSHCalendarItem(
+                            id: UUID(),
+                            title: choice.title,
+                            start: start,
+                            end: start.addingTimeInterval(TimeInterval(duration * 60)),
+                            kind: .movement,
+                            notes: context
+                        ))
+                        MSHNativeHaptic.confirmation.play()
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    struct Cache { var sizes: [CGSize] = [] }
+
+    func makeCache(subviews: Subviews) -> Cache {
+        Cache(sizes: subviews.map { $0.sizeThatFits(.unspecified) })
+    }
+
+    func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        cache.sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
+        let maxWidth = proposal.width ?? 0
+        guard maxWidth > 0 else {
+            return CGSize(width: cache.sizes.reduce(0) { $0 + $1.width + spacing }, height: cache.sizes.map(\.height).max() ?? 0)
+        }
+        var width: CGFloat = 0
+        var rowWidth: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var totalHeight: CGFloat = 0
+        for size in cache.sizes {
+            if rowWidth > 0 && rowWidth + spacing + size.width > maxWidth {
+                width = max(width, rowWidth)
+                totalHeight += rowHeight + spacing
+                rowWidth = size.width
+                rowHeight = size.height
+            } else {
+                rowWidth += (rowWidth > 0 ? spacing : 0) + size.width
+                rowHeight = max(rowHeight, size.height)
+            }
+        }
+        width = max(width, rowWidth)
+        totalHeight += rowHeight
+        return CGSize(width: width, height: totalHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+        for index in subviews.indices {
+            let size = cache.sizes[index]
+            if x > bounds.minX && x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(width: size.width, height: size.height))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
         }
     }
 }
