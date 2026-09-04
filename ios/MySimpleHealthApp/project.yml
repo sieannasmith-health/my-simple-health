@@ -6,6 +6,8 @@ options:
 packages:
   MySimpleHealthHealthKit:
     path: ../MySimpleHealthHealthKit
+  MySimpleHealthFinancialCore:
+    path: ../MySimpleHealthFinancialCore
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
     exactVersion: 12.8.0
@@ -62,6 +64,8 @@ targets:
         product: MSHHealthCore
       - package: MySimpleHealthHealthKit
         product: MSHAppleHealthKit
+      - package: MySimpleHealthFinancialCore
+        product: MSHFinancialCore
       - package: Firebase
         product: FirebaseCore
       - package: Firebase
