@@ -67,8 +67,8 @@ struct MSHMyHealthScreen: View {
     @State private var period: MSHHealthPeriod = .week
     @State private var selectedMetric: MSHMetricKind = .sleep
 
-    init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(viewModel: MSHMyHealthViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? MSHMyHealthViewModel())
     }
 
     private var hasDisplayName: Bool {

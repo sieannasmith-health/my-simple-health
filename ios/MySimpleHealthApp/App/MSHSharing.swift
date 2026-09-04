@@ -8,6 +8,7 @@ enum MSHSharingCategory: String, CaseIterable, Codable, Identifiable {
     case workouts
     case finances
     case health
+    case cycle
 
     var id: Self { self }
 
@@ -17,6 +18,7 @@ enum MSHSharingCategory: String, CaseIterable, Codable, Identifiable {
         case .workouts: "Workouts"
         case .finances: "Finances"
         case .health: "Health & Metrics"
+        case .cycle: "Cycle"
         }
     }
 
@@ -26,6 +28,7 @@ enum MSHSharingCategory: String, CaseIterable, Codable, Identifiable {
         case .workouts: "Share selected workout videos, collections, and planned workouts."
         case .finances: "Share selected household financial information, not your whole financial workspace."
         case .health: "Share approved summaries and trends. Raw Apple Health records stay on this device."
+        case .cycle: "Share approved cycle summaries and timing with this person. Cycle sharing is view-only."
         }
     }
 
@@ -34,6 +37,7 @@ enum MSHSharingCategory: String, CaseIterable, Codable, Identifiable {
         case .calendar, .workouts: ["mode": "selected_items"]
         case .finances: ["mode": "selected_household_items"]
         case .health: ["mode": "approved_metric_summaries"]
+        case .cycle: ["mode": "approved_cycle_summary"]
         }
     }
 }
@@ -265,7 +269,7 @@ final class MSHSharingStore: ObservableObject {
         errorMessage = nil
         do {
             if enabled {
-                let effectivePermission: MSHSharingPermission = category == .health ? .view : permission
+                let effectivePermission: MSHSharingPermission = (category == .health || category == .cycle) ? .view : permission
                 try await document.setData([
                     "relationshipID": relationship.id,
                     "ownerID": uid,
@@ -519,7 +523,7 @@ struct MSHPeopleSharingScreen: View {
                             .padding(.horizontal, MSHSpacing.small)
                     }
 
-                    Text("Raw Apple Health samples never enter this sharing layer. Health sharing is limited to summaries you explicitly approve.")
+                    Text("Raw Apple Health samples never enter this sharing layer. Health and Cycle sharing are limited to summaries you explicitly approve.")
                         .font(.footnote)
                         .foregroundStyle(MSHColor.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)

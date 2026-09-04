@@ -319,7 +319,6 @@ private struct MSHExploreScreen: View {
     ]
 
     private let care: [(destination: MSHFeatureDestination, subtitle: String, image: String)] = [
-        (.cycle, "Keep cycle context close to the rest of your health.", "circle.dotted.circle"),
         (.medications, "Manage medication supply, refill timing, and follow-through.", "pills")
     ]
 
@@ -427,7 +426,11 @@ private struct MSHDestinationGroup: View {
             ForEach(destinations.indices, id: \.self) { index in
                 let item = destinations[index]
                 NavigationLink {
-                    MSHWebFeatureScreen(destination: item.destination)
+                    if item.destination == .cycle {
+                        MSHCycleScreen()
+                    } else {
+                        MSHWebFeatureScreen(destination: item.destination)
+                    }
                 } label: {
                     MSHEditorialDoorway(
                         title: item.destination.title,
@@ -526,6 +529,28 @@ struct MSHProfileSettingsScreen: View {
                             title: "People & Sharing",
                             subtitle: "Choose exactly what you share and with whom.",
                             systemImage: "person.2"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        MSHConnectedHealthSourcesView()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Connections",
+                            subtitle: "Choose when to connect Apple Health, devices, and health apps.",
+                            systemImage: "link"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        MSHFamilyEventsScreen()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Family Events",
+                            subtitle: "Remember birthdays and prepare the messages you choose to send.",
+                            systemImage: "birthday.cake"
                         )
                     }
                     .buttonStyle(.plain)

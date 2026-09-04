@@ -5,9 +5,14 @@ struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
     @EnvironmentObject private var authStore: MSHAuthStore
     @AppStorage("msh.displayName") private var displayName = ""
+    @AppStorage(MSHCycleAudiencePreference.storageKey) private var cycleAudienceRawValue = MSHCycleAudiencePreference.unspecified.rawValue
 
-    init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(viewModel: MSHMyHealthViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? MSHMyHealthViewModel())
+    }
+
+    private var cycleAudience: MSHCycleAudiencePreference {
+        MSHCycleAudiencePreference(rawValue: cycleAudienceRawValue) ?? .unspecified
     }
 
     var body: some View {
@@ -162,11 +167,120 @@ struct MSHMyHealthHomeScreen: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("explore-your-health")
 
+            if cycleAudience == .unspecified {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("PERSONALIZE MY HEALTH")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.6)
+                        .foregroundStyle(MSHHomePalette.gold)
+                    Text("Would you like women’s cycle health to appear in My Health?")
+                        .font(.system(.headline, design: .serif))
+                        .foregroundStyle(MSHHomePalette.ink)
+                    Text("MSH does not infer this from Apple Health, symptoms, or other records. You choose whether this part of My Health applies to you.")
+                        .font(.caption)
+                        .foregroundStyle(MSHHomePalette.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: 12) {
+                        Button("Yes, I’m a woman") {
+                            cycleAudienceRawValue = MSHCycleAudiencePreference.woman.rawValue
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(MSHColor.accent)
+
+                        Button("Not for me") {
+                            cycleAudienceRawValue = MSHCycleAudiencePreference.notForMe.rawValue
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                .mshSurface()
+                .accessibilityIdentifier("cycle-audience-setup")
+            }
+
+            if cycleAudience.showsCycle {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("YOUR HEALTH")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.7)
+                        .foregroundStyle(MSHHomePalette.gold)
+
+                    NavigationLink {
+                        MSHCycleScreen()
+                    } label: {
+                        HStack(spacing: 15) {
+                            Image(systemName: "circle.dotted.circle")
+                                .font(.title3)
+                                .foregroundStyle(MSHHomePalette.wine)
+                                .frame(width: 42, height: 42)
+                                .background(MSHHomePalette.wine.opacity(0.10))
+                                .clipShape(Circle())
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Cycle")
+                                    .font(.system(.headline, design: .serif))
+                                    .foregroundStyle(MSHHomePalette.ink)
+                                Text("Record periods and symptoms, see your timeline, and keep estimates separate from what you recorded.")
+                                    .font(.caption)
+                                    .foregroundStyle(MSHHomePalette.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+
+                            Spacer(minLength: 6)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(MSHHomePalette.secondary)
+                        }
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("my-health-cycle")
+                }
+            }
+
             VStack(alignment: .leading, spacing: 10) {
                 Text("TODAY")
                     .font(.caption2.weight(.semibold))
                     .tracking(1.7)
                     .foregroundStyle(MSHHomePalette.gold)
+
+                NavigationLink {
+                    MSHEmotionCheckInScreen()
+                } label: {
+                    HStack(spacing: 15) {
+                        Image(systemName: "circle.lefthalf.filled")
+                            .font(.title3)
+                            .foregroundStyle(MSHHomePalette.gold)
+                            .frame(width: 42, height: 42)
+                            .background(MSHHomePalette.gold.opacity(0.10))
+                            .clipShape(Circle())
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("How are you feeling?")
+                                .font(.system(.headline, design: .serif))
+                                .foregroundStyle(MSHHomePalette.ink)
+                            Text("Take a moment to notice how things feel right now.")
+                                .font(.caption)
+                                .foregroundStyle(MSHHomePalette.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 6)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(MSHHomePalette.secondary)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("emotion-check-in-doorway")
+
+                Rectangle()
+                    .fill(MSHHomePalette.hairline)
+                    .frame(height: 1)
+                    .padding(.leading, 57)
 
                 NavigationLink {
                     MSHWebFeatureScreen(destination: .calendar)

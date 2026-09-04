@@ -151,7 +151,7 @@ final class MSHNotificationTests: XCTestCase {
         XCTAssertEqual(request.type, .medicationRefillReady)
         XCTAssertEqual(request.eventID, request.identifier)
         XCTAssertEqual(request.route.rawValue, "calendar.html?view=medications")
-        XCTAssertEqual(request.route.appSection, .calendar)
+        XCTAssertEqual(request.route.appSection, .explore)
     }
 
     func testRoutesRejectExternalAndTraversalDestinations() {
