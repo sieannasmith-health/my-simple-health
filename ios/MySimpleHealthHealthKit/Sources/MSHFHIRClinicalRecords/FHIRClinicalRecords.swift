@@ -1,6 +1,48 @@
 import Foundation
 import MSHHealthCore
 
+public enum FHIRClinicalDataArea: String, Codable, CaseIterable, Hashable, Sendable {
+    case conditions
+    case medications
+    case allergies
+    case labsAndResults = "labs_and_results"
+    case careHistory = "care_history"
+}
+
+public struct FHIRAuthorizationResult: Equatable, Sendable {
+    public let outcome: HealthAuthorizationOutcome
+    public let requestedAreas: Set<FHIRClinicalDataArea>
+    public let message: String?
+
+    public init(outcome: HealthAuthorizationOutcome, requestedAreas: Set<FHIRClinicalDataArea>, message: String? = nil) {
+        self.outcome = outcome
+        self.requestedAreas = requestedAreas
+        self.message = message
+    }
+}
+
+public struct FHIRSyncRequest: Sendable {
+    public let areas: Set<FHIRClinicalDataArea>
+    public let lastSuccessfulSyncAt: Date?
+
+    public init(areas: Set<FHIRClinicalDataArea>, lastSuccessfulSyncAt: Date? = nil) {
+        self.areas = areas
+        self.lastSuccessfulSyncAt = lastSuccessfulSyncAt
+    }
+}
+
+public struct FHIRSyncBatch: Sendable {
+    public let records: [HealthRecord]
+    public let completedAt: Date
+    public let partialFailures: [String]
+
+    public init(records: [HealthRecord], completedAt: Date = Date(), partialFailures: [String] = []) {
+        self.records = records
+        self.completedAt = completedAt
+        self.partialFailures = partialFailures
+    }
+}
+
 public struct FHIRConnectionConfiguration: Equatable, Sendable {
     public let connectionID: String
     public let baseURL: URL
@@ -56,9 +98,9 @@ public enum FHIRClinicalRecordsError: LocalizedError, Equatable {
     }
 }
 
-public actor FHIRClinicalRecordsProvider: HealthDataProvider {
-    public nonisolated let provider: HealthProvider = .fhir
-
+/// Read-only FHIR R4 ingestion. SMART authorization is supplied by the app layer
+/// so tokens never become part of the canonical health-record model.
+public actor FHIRClinicalRecordsClient {
     private let configuration: FHIRConnectionConfiguration
     private let authorization: any FHIRAuthorizationSession
     private let transport: any FHIRTransport
@@ -76,31 +118,27 @@ public actor FHIRClinicalRecordsProvider: HealthDataProvider {
         self.timezone = timezone
     }
 
-    public nonisolated func availability() -> HealthProviderAvailability { .available }
-
-    public func requestAuthorization(for areas: Set<HealthDataArea>) async -> HealthAuthorizationResult {
-        let supported = areas.intersection(Self.supportedAreas)
-        guard !supported.isEmpty else {
-            return HealthAuthorizationResult(outcome: .failed, requestedAreas: [], message: "No supported clinical record areas were selected.")
+    public func authorize(areas: Set<FHIRClinicalDataArea>) async -> FHIRAuthorizationResult {
+        guard !areas.isEmpty else {
+            return FHIRAuthorizationResult(outcome: .failed, requestedAreas: [], message: "No clinical record areas were selected.")
         }
         do {
-            try await authorization.authorize(scopes: Self.smartScopes(for: supported))
-            return HealthAuthorizationResult(outcome: .completed, requestedAreas: supported)
+            try await authorization.authorize(scopes: Self.smartScopes(for: areas))
+            return FHIRAuthorizationResult(outcome: .completed, requestedAreas: areas)
         } catch {
-            return HealthAuthorizationResult(outcome: .failed, requestedAreas: supported, message: error.localizedDescription)
+            return FHIRAuthorizationResult(outcome: .failed, requestedAreas: areas, message: error.localizedDescription)
         }
     }
 
-    public func sync(_ request: HealthSyncRequest) async throws -> HealthSyncBatch {
-        let areas = request.areas.intersection(Self.supportedAreas)
-        guard !areas.isEmpty else { return HealthSyncBatch(records: []) }
+    public func sync(_ request: FHIRSyncRequest) async throws -> FHIRSyncBatch {
+        guard !request.areas.isEmpty else { return FHIRSyncBatch(records: []) }
 
         let token = try await authorization.accessToken()
         let importedAt = Date()
         var records: [HealthRecord] = []
         var failures: [String] = []
 
-        for query in Self.queries(for: areas, patientID: configuration.patientID, since: request.lastSuccessfulSyncAt) {
+        for query in Self.queries(for: request.areas, patientID: configuration.patientID, since: request.lastSuccessfulSyncAt) {
             do {
                 let url = try makeURL(resourceType: query.resourceType, queryItems: query.queryItems)
                 let data = try await transport.get(url: url, bearerToken: token)
@@ -115,22 +153,14 @@ public actor FHIRClinicalRecordsProvider: HealthDataProvider {
             }
         }
 
-        return HealthSyncBatch(records: records, completedAt: importedAt, partialFailures: failures)
+        return FHIRSyncBatch(records: records, completedAt: importedAt, partialFailures: failures)
     }
 
     public func disconnect() async {
         await authorization.disconnect()
     }
 
-    public static let supportedAreas: Set<HealthDataArea> = [
-        .conditions,
-        .medications,
-        .allergies,
-        .labsAndResults,
-        .careHistory
-    ]
-
-    public static func smartScopes(for areas: Set<HealthDataArea>) -> Set<String> {
+    public static func smartScopes(for areas: Set<FHIRClinicalDataArea>) -> Set<String> {
         var resources: Set<String> = ["Patient"]
         if areas.contains(.conditions) { resources.insert("Condition") }
         if areas.contains(.medications) { resources.insert("MedicationRequest") }
@@ -151,10 +181,15 @@ public actor FHIRClinicalRecordsProvider: HealthDataProvider {
         let queryItems: [URLQueryItem]
     }
 
-    private static func queries(for areas: Set<HealthDataArea>, patientID: String, since: Date?) -> [Query] {
+    private static func queries(for areas: Set<FHIRClinicalDataArea>, patientID: String, since: Date?) -> [Query] {
         func items(extra: [URLQueryItem] = []) -> [URLQueryItem] {
-            var value = [URLQueryItem(name: "patient", value: patientID), URLQueryItem(name: "_count", value: "100")]
-            if let since { value.append(URLQueryItem(name: "_lastUpdated", value: "gt\(fhirInstant(since))")) }
+            var value = [
+                URLQueryItem(name: "patient", value: patientID),
+                URLQueryItem(name: "_count", value: "100")
+            ]
+            if let since {
+                value.append(URLQueryItem(name: "_lastUpdated", value: "gt\(fhirInstant(since))"))
+            }
             value.append(contentsOf: extra)
             return value
         }
@@ -199,10 +234,10 @@ public enum FHIRResourceMapper {
         importedAt: Date = Date()
     ) throws -> [HealthRecord] {
         guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              object["resourceType"] as? String == "Bundle",
-              let entries = object["entry"] as? [[String: Any]] ?? [] as [[String: Any]]? else {
+              object["resourceType"] as? String == "Bundle" else {
             throw FHIRClinicalRecordsError.malformedBundle
         }
+        let entries = object["entry"] as? [[String: Any]] ?? []
 
         return entries.compactMap { entry in
             guard let resource = entry["resource"] as? [String: Any] else { return nil }
@@ -219,8 +254,9 @@ public enum FHIRResourceMapper {
         guard let resourceType = resource["resourceType"] as? String,
               let resourceID = resource["id"] as? String else { return nil }
 
+        // Namespace source IDs by the MSH connection, because FHIR resource IDs
+        // are unique only within a server/resource namespace.
         let identity = "\(configuration.connectionID):\(resourceType)/\(resourceID)"
-        let sourceSystem = configuration.baseURL.absoluteString
         var metadata: [String: String] = [
             "fhirResourceType": resourceType,
             "fhirResourceID": resourceID,
@@ -243,6 +279,7 @@ public enum FHIRResourceMapper {
             copyCode(resource["code"], prefix: "clinical", into: &metadata)
             copyCodingStatus(resource["clinicalStatus"], key: "clinicalStatus", into: &metadata)
             copyCodingStatus(resource["verificationStatus"], key: "verificationStatus", into: &metadata)
+
         case "MedicationRequest":
             domain = .medications
             recordType = .medicationRequest
@@ -250,6 +287,7 @@ public enum FHIRResourceMapper {
             copyCode(resource["medicationCodeableConcept"], prefix: "medication", into: &metadata)
             copyString(resource["status"], key: "status", into: &metadata)
             copyString(resource["intent"], key: "intent", into: &metadata)
+
         case "AllergyIntolerance":
             domain = .clinical
             recordType = .clinicalAllergy
@@ -257,6 +295,7 @@ public enum FHIRResourceMapper {
             copyCode(resource["code"], prefix: "allergy", into: &metadata)
             copyString(resource["criticality"], key: "criticality", into: &metadata)
             copyCodingStatus(resource["clinicalStatus"], key: "clinicalStatus", into: &metadata)
+
         case "Observation":
             domain = .clinical
             recordType = .clinicalObservation
@@ -264,20 +303,22 @@ public enum FHIRResourceMapper {
             copyCode(resource["code"], prefix: "observation", into: &metadata)
             copyString(resource["status"], key: "status", into: &metadata)
             if let quantity = resource["valueQuantity"] as? [String: Any] {
-                value = quantity["value"] as? Double ?? (quantity["value"] as? NSNumber)?.doubleValue
+                value = (quantity["value"] as? NSNumber)?.doubleValue
                 unit = (quantity["unit"] as? String) ?? (quantity["code"] as? String)
                 copyString(quantity["system"], key: "unitSystem", into: &metadata)
                 copyString(quantity["code"], key: "unitCode", into: &metadata)
             } else if let text = resource["valueString"] as? String {
                 metadata["valueText"] = text
             }
+
         case "DiagnosticReport":
             domain = .clinical
             recordType = .clinicalDiagnosticReport
             start = firstDate(resource["effectiveDateTime"], resource["issued"], metaLastUpdated(resource)) ?? importedAt
             copyCode(resource["code"], prefix: "report", into: &metadata)
             copyString(resource["status"], key: "status", into: &metadata)
-            if let conclusion = resource["conclusion"] as? String { metadata["conclusion"] = conclusion }
+            copyString(resource["conclusion"], key: "conclusion", into: &metadata)
+
         case "Encounter":
             domain = .care
             recordType = .clinicalEncounter
@@ -288,6 +329,7 @@ public enum FHIRResourceMapper {
             if let types = resource["type"] as? [[String: Any]], let first = types.first {
                 copyCode(first, prefix: "encounter", into: &metadata)
             }
+
         case "CarePlan":
             domain = .care
             recordType = .clinicalCarePlan
@@ -298,13 +340,14 @@ public enum FHIRResourceMapper {
             copyString(resource["intent"], key: "intent", into: &metadata)
             copyString(resource["title"], key: "title", into: &metadata)
             copyString(resource["description"], key: "description", into: &metadata)
+
         default:
             return nil
         }
 
         return HealthRecordFactory.imported(
             provider: .fhir,
-            sourceSystem: sourceSystem,
+            sourceSystem: configuration.baseURL.absoluteString,
             sourceRecordID: identity,
             domain: domain,
             recordType: recordType,
@@ -331,6 +374,7 @@ public enum FHIRResourceMapper {
         guard let string = value as? String else { return nil }
         let formatter = ISO8601DateFormatter()
         if let full = formatter.date(from: string) { return full }
+
         let dateOnly = DateFormatter()
         dateOnly.locale = Locale(identifier: "en_US_POSIX")
         dateOnly.dateFormat = "yyyy-MM-dd"
@@ -343,15 +387,14 @@ public enum FHIRResourceMapper {
     }
 
     private static func copyCodingStatus(_ value: Any?, key: String, into metadata: inout [String: String]) {
-        guard let object = value as? [String: Any] else { return }
-        if let coding = (object["coding"] as? [[String: Any]])?.first {
-            copyString(coding["code"], key: key, into: &metadata)
-        }
+        guard let object = value as? [String: Any],
+              let coding = (object["coding"] as? [[String: Any]])?.first else { return }
+        copyString(coding["code"], key: key, into: &metadata)
     }
 
     private static func copyCode(_ value: Any?, prefix: String, into metadata: inout [String: String]) {
         guard let object = value as? [String: Any] else { return }
-        if let text = object["text"] as? String, !text.isEmpty { metadata["\(prefix)Text"] = text }
+        copyString(object["text"], key: "\(prefix)Text", into: &metadata)
         guard let coding = (object["coding"] as? [[String: Any]])?.first else { return }
         copyString(coding["display"], key: "\(prefix)Display", into: &metadata)
         copyString(coding["code"], key: "\(prefix)Code", into: &metadata)
