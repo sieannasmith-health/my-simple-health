@@ -1,5 +1,5 @@
 import FirebaseAuth
-import FirebaseFirestore
+@preconcurrency import FirebaseFirestore
 import Foundation
 import SwiftUI
 
@@ -111,29 +111,26 @@ final class MSHSharingStore: ObservableObject {
         defer { isLoading = false }
 
         do {
-            async let sent = db.collection("sharingRelationships")
+            let sentSnapshot = try await db.collection("sharingRelationships")
                 .whereField("inviterID", isEqualTo: uid)
                 .getDocuments()
 
-            let receivedTask: Task<QuerySnapshot, Error>? = currentEmail.map { email in
-                Task {
-                    try await db.collection("sharingRelationships")
-                        .whereField("inviteeEmail", isEqualTo: email)
-                        .getDocuments()
-                }
+            let receivedSnapshot: QuerySnapshot?
+            if let email = currentEmail {
+                receivedSnapshot = try await db.collection("sharingRelationships")
+                    .whereField("inviteeEmail", isEqualTo: email)
+                    .getDocuments()
+            } else {
+                receivedSnapshot = nil
             }
 
-            async let ownedGrants = db.collection("sharingGrants")
+            let ownerGrantSnapshot = try await db.collection("sharingGrants")
                 .whereField("ownerID", isEqualTo: uid)
                 .getDocuments()
-            async let receivedGrants = db.collection("sharingGrants")
+
+            let recipientGrantSnapshot = try await db.collection("sharingGrants")
                 .whereField("recipientID", isEqualTo: uid)
                 .getDocuments()
-
-            let sentSnapshot = try await sent
-            let receivedSnapshot = try await receivedTask?.value
-            let ownerGrantSnapshot = try await ownedGrants
-            let recipientGrantSnapshot = try await receivedGrants
 
             relationships = dedupe(
                 sentSnapshot.documents.compactMap(Self.relationship) +
