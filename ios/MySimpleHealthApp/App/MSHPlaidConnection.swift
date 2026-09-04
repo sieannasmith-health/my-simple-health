@@ -147,13 +147,14 @@ final class MSHPlaidConnectionController: ObservableObject {
             onLoad: { [weak self] in
                 Task { @MainActor in
                     self?.isLinkReady = true
-                    self?.isPresentingLink = true
                 }
             }
         )
 
         do {
             linkSession = try Plaid.createPlaidLinkSession(configuration: configuration)
+            isLinkReady = true
+            isPresentingLink = true
         } catch {
             errorMessage = error.localizedDescription
         }
