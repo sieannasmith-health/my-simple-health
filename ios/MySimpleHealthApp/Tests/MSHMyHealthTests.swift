@@ -202,16 +202,15 @@ final class MSHMyHealthTests: XCTestCase {
         var green: CGFloat = 0
         var blue: CGFloat = 0
         color.getRed(&red, green: &green, blue: &blue, alpha: nil)
-        return [red, green, blue]
-            .map(Double.init)
-            .map { component in
+        let components = [Double(red), Double(green), Double(blue)]
+        let linearized = components.map { component in
                 component <= 0.03928
                     ? component / 12.92
                     : pow((component + 0.055) / 1.055, 2.4)
-            }
-            .enumerated()
-            .reduce(0) { result, entry in
-                result + entry.element * [0.2126, 0.7152, 0.0722][entry.offset]
-            }
+        }
+        let weights = [0.2126, 0.7152, 0.0722]
+        return zip(linearized, weights).reduce(0) { result, pair in
+            result + pair.0 * pair.1
+        }
     }
 }
