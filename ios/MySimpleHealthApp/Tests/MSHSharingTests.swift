@@ -7,6 +7,8 @@ final class MSHSharingTests: XCTestCase {
         XCTAssertEqual(MSHSharingCategory.workouts.defaultScope["mode"], "selected_items")
         XCTAssertEqual(MSHSharingCategory.finances.defaultScope["mode"], "selected_household_items")
         XCTAssertEqual(MSHSharingCategory.health.defaultScope["mode"], "approved_metric_summaries")
+        XCTAssertEqual(MSHSharingCategory.cycle.defaultScope["mode"], "approved_cycle_summary")
+        XCTAssertEqual(MSHSharingCategory.cycle.title, "Cycle")
     }
 
     func testRelationshipResolvesOtherAccountInBothDirections() {
