@@ -1,4 +1,5 @@
 import Charts
+import MSHHealthCore
 import SwiftUI
 
 @MainActor
@@ -9,9 +10,9 @@ final class MSHMyHealthViewModel: ObservableObject {
         case failed
     }
 
-    // The on-device reader caps this per domain at 20. Keeping the request
-    // aligned with that bound gives the dashboard enough points for useful
-    // charts without turning My Health into an unbounded history decode.
+    // The reader applies a bounded history per record type. This request remains
+    // intentionally small as an API hint; the reader expands it enough for the
+    // Day / Week / Month trend views without decoding unbounded history.
     static let recentActivityLimit = 20
 
     @Published private(set) var loadState: LoadState = .loading
@@ -171,13 +172,9 @@ struct MSHMyHealthScreen: View {
             }
 
             MSHQuietDivider(title: "What’s connected")
-
             MSHConnectedHealthSummary(status: snapshot.appleHealth)
-
             MSHQuietDivider(title: "Continue your health")
-
             MSHHealthDoorways()
-
             MSHCalendarDoorway()
         }
         .animation(.easeInOut(duration: 0.24), value: selectedMetric)
@@ -304,9 +301,36 @@ private enum MSHHealthPeriod: String, CaseIterable, Identifiable {
         case .day:
             return calendar.date(byAdding: .hour, value: -24, to: Date()) ?? Date.distantPast
         case .week:
-            return calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date.distantPast
+            return calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: Date())) ?? Date.distantPast
         case .month:
-            return calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date.distantPast
+            return calendar.date(byAdding: .day, value: -29, to: calendar.startOfDay(for: Date())) ?? Date.distantPast
+        }
+    }
+
+    var chartDomain: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let end: Date
+        switch self {
+        case .day:
+            end = Date()
+        case .week, .month:
+            end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: Date())) ?? Date()
+        }
+        return cutoff...end
+    }
+
+    var axisDates: [Date] {
+        let calendar = Calendar.current
+        switch self {
+        case .day:
+            return (0...4).compactMap { index in
+                let seconds = chartDomain.upperBound.timeIntervalSince(chartDomain.lowerBound)
+                return chartDomain.lowerBound.addingTimeInterval(seconds * Double(index) / 4.0)
+            }
+        case .week:
+            return (0...6).compactMap { calendar.date(byAdding: .day, value: $0, to: cutoff) }
+        case .month:
+            return [0, 7, 14, 21, 29].compactMap { calendar.date(byAdding: .day, value: $0, to: cutoff) }
         }
     }
 
@@ -488,18 +512,29 @@ private enum MSHMetricSeriesBuilder {
     }
 
     private static func preferredHeartItems(_ items: [MSHRecentHealthActivity]) -> [MSHRecentHealthActivity] {
-        let resting = items.filter { $0.title.localizedCaseInsensitiveContains("Resting") && $0.numericValue != nil }
+        let resting = items.filter { $0.recordType == .restingHeartRate && $0.numericValue != nil }
         if !resting.isEmpty { return resting }
-        return items.filter { $0.title.localizedCaseInsensitiveContains("Heart rate") && $0.numericValue != nil }
+        return items.filter { $0.recordType == .heartRate && $0.numericValue != nil }
     }
 
     private static func preferredMovementItems(_ items: [MSHRecentHealthActivity]) -> [MSHRecentHealthActivity] {
-        let priorityTerms = ["Steps", "Active energy", "Exercise time", "Walking + running distance", "Cycling distance", "Swimming distance"]
-        for term in priorityTerms {
-            let matches = items.filter { $0.title == term && $0.numericValue != nil }
+        // AppleHealthKitProvider already creates one stepDailySummary per day.
+        // Prefer that source of truth over high-frequency raw step samples.
+        let dailySteps = items.filter { $0.recordType == .stepDailySummary && $0.numericValue != nil }
+        if !dailySteps.isEmpty { return dailySteps }
+
+        let priorityTypes: [HealthRecordType] = [
+            .activeEnergy,
+            .exerciseTime,
+            .distanceWalkingRunning,
+            .distanceCycling,
+            .distanceSwimming
+        ]
+        for type in priorityTypes {
+            let matches = items.filter { $0.recordType == type && $0.numericValue != nil }
             if !matches.isEmpty { return matches }
         }
-        return items.filter { $0.numericValue != nil }
+        return items.filter { $0.recordType == .stepSample && $0.numericValue != nil }
     }
 
     private static func numericSeries(
@@ -539,10 +574,10 @@ private enum MSHMetricSeriesBuilder {
             return MSHChartPoint(date: date, value: value)
         }
 
+        let latestPoint = points.last
         let latest = items.max(by: { $0.occurredAt < $1.occurredAt })
         let unit = latest?.unit ?? ""
-        let latestValue = latest?.numericValue
-        let headline = latestValue.map { format($0, unit: unit) } ?? "—"
+        let headline = latestPoint.map { format($0.value, unit: unit) } ?? "—"
         let metricName = latest?.title ?? fallbackDescriptor
 
         return MSHMetricSeries(
@@ -576,11 +611,16 @@ private enum MSHMetricSeriesBuilder {
             )
         }
 
+        // Assign early-morning sleep intervals to the night that began the day
+        // before. This keeps a single night from splitting across midnight.
+        let calendar = Calendar.current
         var buckets: [Date: Double] = [:]
         for item in asleep {
             guard let minutes = item.durationMinutes else { continue }
-            let day = Calendar.current.startOfDay(for: item.occurredAt)
-            buckets[day, default: 0] += minutes / 60
+            let shifted = calendar.date(byAdding: .hour, value: -12, to: item.occurredAt) ?? item.occurredAt
+            let night = calendar.startOfDay(for: shifted)
+            guard night >= calendar.startOfDay(for: period.cutoff) else { continue }
+            buckets[night, default: 0] += minutes / 60
         }
 
         let points = buckets.keys.sorted().map {
@@ -592,7 +632,7 @@ private enum MSHMetricSeriesBuilder {
         return MSHMetricSeries(
             kind: .sleep,
             headline: headline,
-            descriptor: "Most recent sleep represented in this view",
+            descriptor: "Most recent night in this view",
             unit: "h",
             points: points,
             latestDate: asleep.map(\.occurredAt).max()
@@ -807,7 +847,7 @@ private struct MSHMetricDetailCard: View {
                     .contentTransition(.numericText())
 
                 if let point = selectedPoint {
-                    Text(point.date, format: .dateTime.month(.abbreviated).day().hour().minute())
+                    Text(point.date, format: .dateTime.month(.abbreviated).day())
                         .font(.caption)
                         .foregroundStyle(MSHLuxuryPalette.secondaryInk)
                 } else if let date = metric.latestDate {
@@ -865,8 +905,9 @@ private struct MSHMetricDetailCard: View {
                     }
                 }
                 .frame(height: 210)
+                .chartXScale(domain: period.chartDomain)
                 .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: period == .month ? 4 : 5)) { value in
+                    AxisMarks(values: period.axisDates) { value in
                         AxisGridLine().foregroundStyle(MSHLuxuryPalette.hairline.opacity(0.55))
                         AxisTick().foregroundStyle(MSHLuxuryPalette.hairline)
                         AxisValueLabel {
@@ -894,7 +935,7 @@ private struct MSHMetricDetailCard: View {
                 .sensoryFeedback(.selection, trigger: selectedPoint?.id)
 
                 HStack {
-                    Text("Slide across the chart to explore")
+                    Text(metric.points.count > 1 ? "Slide across the chart to explore" : "One recent point in this view")
                         .font(.caption)
                         .foregroundStyle(MSHLuxuryPalette.secondaryInk)
                     Spacer()

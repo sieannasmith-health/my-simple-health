@@ -15,47 +15,69 @@ struct MSHOnboardingOpeningStoryboard {
         var body: some View {
             GeometryReader { proxy in
                 ZStack {
-                    MSHOpeningEnvironment(desaturated: true, warmth: 0.08)
+                    MSHOpeningThresholdEnvironment()
 
                     LinearGradient(
                         colors: [
-                            Color.black.opacity(0.22),
-                            Color.black.opacity(0.05),
-                            Color.black.opacity(0.30)
+                            Color.black.opacity(0.04),
+                            Color.clear,
+                            Color.black.opacity(0.10)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                     .ignoresSafeArea()
 
-                    VStack(spacing: 14) {
-                        Spacer()
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 110)
 
-                        Text("MY SIMPLE HEALTH")
-                            .font(.system(size: 14, weight: .semibold))
-                            .tracking(3.2)
-                            .foregroundStyle(.white.opacity(0.84))
-                            .opacity(eyebrowVisible ? 1 : 0)
-                            .offset(y: eyebrowVisible ? 0 : 7)
+                        VStack(spacing: 26) {
+                            Text("MY SIMPLE HEALTH")
+                                .font(.system(size: 13, weight: .semibold))
+                                .tracking(3.4)
+                                .foregroundStyle(.white.opacity(0.92))
+                                .padding(.horizontal, 22)
+                                .frame(height: 42)
+                                .mshNativeGlass(
+                                    in: Capsule(),
+                                    tint: MSHOpeningPalette.ivory,
+                                    edgeStrength: 0.90,
+                                    shadowStrength: 0.72,
+                                    glowStrength: 0.26
+                                )
+                                .opacity(eyebrowVisible ? 1 : 0)
+                                .offset(y: eyebrowVisible ? 0 : 7)
 
-                        Text("Your health. Your space.")
-                            .font(.system(size: 38, weight: .regular, design: .serif))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 30)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .opacity(titleVisible ? 1 : 0)
-                            .offset(y: titleVisible ? 0 : 9)
+                            Text("Your health.\nYour space.")
+                                .font(.system(size: 44, weight: .regular, design: .serif))
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 18)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .opacity(titleVisible ? 1 : 0)
+                                .offset(y: titleVisible ? 0 : 9)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 38)
+                        .frame(maxWidth: 354)
+                        .mshNativeGlass(
+                            in: RoundedRectangle(cornerRadius: 34, style: .continuous),
+                            tint: MSHOpeningPalette.ivory,
+                            edgeStrength: 1.16,
+                            shadowStrength: 1.12,
+                            glowStrength: 0.38
+                        )
 
                         Spacer()
 
                         MSHOpeningContinueButton(title: "Continue", action: onContinue)
                             .opacity(showContinue ? 1 : 0)
-                            .offset(y: showContinue ? 0 : 8)
+                            .offset(y: showContinue ? 0 : 10)
                             .allowsHitTesting(showContinue)
-                            .padding(.bottom, 56)
+                            .padding(.bottom, 54)
                     }
-                    .padding(.horizontal, 22)
+                    .padding(.horizontal, 18)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
             }
@@ -83,7 +105,7 @@ struct MSHOnboardingOpeningStoryboard {
                     titleVisible = true
                 }
                 try? await Task.sleep(for: .milliseconds(760))
-                withAnimation(.easeOut(duration: 0.62)) {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.80)) {
                     showContinue = true
                 }
             }
@@ -391,12 +413,12 @@ private struct MSHCoherenceInsightCard: View {
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .background(MSHOpeningPalette.ivory.opacity(0.28), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(MSHOpeningPalette.stone.opacity(0.72), lineWidth: 0.8)
-        }
+        .mshNativeGlass(
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous),
+            tint: insight.tint.color,
+            edgeStrength: 0.88,
+            shadowStrength: 0.55
+        )
     }
 }
 
@@ -451,14 +473,124 @@ private struct MSHOnboardingFragmentView: View {
         }
         .padding(.horizontal, 12)
         .frame(height: 38)
-        .background(.ultraThinMaterial, in: Capsule())
-        .background(fragment.tint.color.opacity(0.14), in: Capsule())
-        .overlay {
-            Capsule()
-                .stroke(fragment.tint.color.opacity(0.34), lineWidth: 0.8)
-        }
-        .shadow(color: MSHOpeningPalette.espresso.opacity(0.07), radius: 9, y: 4)
+        .mshNativeGlass(
+            in: Capsule(),
+            tint: fragment.tint.color,
+            edgeStrength: 0.94,
+            shadowStrength: 0.72
+        )
         .accessibilityLabel(fragment.title)
+    }
+}
+
+/// A neutral architectural threshold for first launch. It deliberately does not use
+/// any of the rooms a person can later choose as My Space.
+private struct MSHOpeningThresholdEnvironment: View {
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.91, green: 0.87, blue: 0.80),
+                        Color(red: 0.78, green: 0.70, blue: 0.61),
+                        Color(red: 0.47, green: 0.39, blue: 0.32)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                // Warm plaster wall with a distinct architectural alcove.
+                RoundedRectangle(cornerRadius: 58, style: .continuous)
+                    .fill(Color(red: 0.83, green: 0.76, blue: 0.66).opacity(0.92))
+                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.72)
+                    .offset(x: proxy.size.width * 0.08, y: -proxy.size.height * 0.02)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 58, style: .continuous)
+                            .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                    }
+                    .shadow(color: .black.opacity(0.12), radius: 28, x: 0, y: 18)
+
+                // Stone floor plane gives the threshold a real architectural horizon.
+                LinearGradient(
+                    colors: [
+                        Color.clear,
+                        Color(red: 0.54, green: 0.45, blue: 0.37).opacity(0.22),
+                        Color(red: 0.31, green: 0.25, blue: 0.21).opacity(0.48)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: proxy.size.height * 0.40)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+
+                // Dark wood reveals on both sides keep the scene architectural without
+                // resembling any selectable My Space room.
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.22, green: 0.16, blue: 0.12),
+                                Color(red: 0.34, green: 0.25, blue: 0.19)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: proxy.size.width * 0.10)
+                    .frame(maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.29, green: 0.21, blue: 0.16),
+                                Color(red: 0.18, green: 0.13, blue: 0.10)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: proxy.size.width * 0.08)
+                    .frame(maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+
+                // Directional daylight reads like a real opening rather than a soft blob.
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.34),
+                        Color.white.opacity(0.08),
+                        Color.clear
+                    ],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
+                )
+                .blendMode(.screen)
+
+                // Thin horizontal seams imply large-format stone/plaster panels.
+                VStack(spacing: proxy.size.height * 0.12) {
+                    ForEach(0..<6, id: \.self) { _ in
+                        Rectangle()
+                            .fill(Color.white.opacity(0.035))
+                            .frame(height: 0.7)
+                    }
+                }
+                .padding(.horizontal, proxy.size.width * 0.12)
+                .offset(y: proxy.size.height * 0.04)
+
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.08),
+                        Color.clear,
+                        Color.black.opacity(0.18)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .ignoresSafeArea()
     }
 }
 
@@ -498,34 +630,22 @@ private struct MSHOpeningContinueButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
+        MSHNativeGlassButton(
+            shape: Capsule(),
+            tint: MSHOpeningPalette.ivory,
+            foreground: MSHOpeningPalette.charcoal,
+            haptic: .softImpact,
+            action: action
+        ) {
+            HStack(spacing: 10) {
                 Text(title)
                 Image(systemName: "arrow.right")
-                    .font(.footnote.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
             }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(MSHOpeningPalette.ivory)
-            .padding(.horizontal, 22)
-            .frame(height: 48)
-            .background(MSHOpeningPalette.charcoal, in: Capsule())
-            .overlay {
-                Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.8)
-            }
+            .font(.headline.weight(.semibold))
+            .padding(.horizontal, 30)
+            .frame(height: 58)
         }
-        .buttonStyle(.plain)
         .accessibilityLabel(title)
     }
-}
-
-private enum MSHOpeningPalette {
-    static let ivory = Color(red: 248 / 255, green: 247 / 255, blue: 243 / 255)
-    static let stone = Color(red: 224 / 255, green: 223 / 255, blue: 220 / 255)
-    static let charcoal = Color(red: 31 / 255, green: 30 / 255, blue: 29 / 255)
-    static let espresso = Color(red: 33 / 255, green: 30 / 255, blue: 30 / 255)
-    static let sage = Color(red: 149 / 255, green: 153 / 255, blue: 129 / 255)
-    static let powder = Color(red: 197 / 255, green: 207 / 255, blue: 218 / 255)
-    static let clay = Color(red: 97 / 255, green: 66 / 255, blue: 47 / 255)
-    static let mushroom = Color(red: 210 / 255, green: 192 / 255, blue: 175 / 255)
-    static let secondaryText = Color(red: 105 / 255, green: 101 / 255, blue: 96 / 255)
 }

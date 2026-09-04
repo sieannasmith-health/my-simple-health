@@ -18,6 +18,8 @@ protocol MSHMyHealthDataLoading: Sendable {
 }
 
 actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
+    private static let dashboardHistoryPerRecordType = 90
+
     private let stateReader: any MSHHealthStateReading
     private let recentReader: any MSHRecentHealthReading
 
@@ -49,7 +51,8 @@ actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
     }
 
     func loadRecentActivity(limit: Int) async throws -> [HealthRecord] {
-        try await recentReader.recentRecords(provider: .appleHealth, limit: limit)
+        let dashboardLimit = max(limit, Self.dashboardHistoryPerRecordType)
+        return try await recentReader.recentRecords(provider: .appleHealth, limit: dashboardLimit)
     }
 }
 
@@ -64,9 +67,9 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
         }
     }
 
-    // This is a per-domain cap. Keeping the limit bounded prevents high-frequency
-    // metrics such as heart rate and steps from crowding Sleep off the dashboard.
-    static let maximumLimit = 20
+    // The cap is applied per record type, not per broad health domain. This keeps
+    // daily summaries and trend history available without allowing unbounded reads.
+    static let maximumLimit = 120
 
     private let databaseURL: URL
 
@@ -95,11 +98,11 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
 
         let sql = """
             WITH ranked AS (
-                SELECT payload, domain, event_start,
+                SELECT payload, record_type, event_start,
                        ROW_NUMBER() OVER (
-                           PARTITION BY domain
+                           PARTITION BY record_type
                            ORDER BY event_start DESC
-                       ) AS domain_rank
+                       ) AS type_rank
                 FROM health_records
                 WHERE provider = ?
                   AND lifecycle_status = ?
@@ -107,7 +110,7 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
             )
             SELECT payload
             FROM ranked
-            WHERE domain_rank <= ?
+            WHERE type_rank <= ?
             ORDER BY event_start DESC
             """
         var statement: OpaquePointer?
@@ -126,7 +129,7 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
         }
 
         var records: [HealthRecord] = []
-        records.reserveCapacity(boundedLimit * 4)
+        records.reserveCapacity(boundedLimit * 8)
         while true {
             let result = sqlite3_step(statement)
             if result == SQLITE_DONE { return records }
