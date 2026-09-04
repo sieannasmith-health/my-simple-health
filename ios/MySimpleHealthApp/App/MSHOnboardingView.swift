@@ -3,7 +3,6 @@ import SwiftUI
 private enum MSHOnboardingStep: Int, CaseIterable {
     case launch
     case welcome
-    case appleHealth
     case notifications
     case startingPoint
     case completion
@@ -42,8 +41,6 @@ private struct MSHOnboardingFlow: View {
                     MSHLaunchExperience()
                 case .welcome:
                     welcome
-                case .appleHealth:
-                    appleHealth
                 case .notifications:
                     notifications
                 case .startingPoint:
@@ -86,7 +83,7 @@ private struct MSHOnboardingFlow: View {
             message: "Your health, together.\nIn the context of you."
         ) {
             VStack(spacing: 14) {
-                MSHPrimaryButton(title: "Continue") { advance(to: .appleHealth) }
+                MSHPrimaryButton(title: "Continue") { advance(to: .notifications) }
 
                 Link("Already have an account? Log in", destination: URL(string: "https://mysimplehealth.org/login")!)
                     .font(.callout.weight(.semibold))
@@ -100,24 +97,6 @@ private struct MSHOnboardingFlow: View {
                 .font(.footnote)
                 .foregroundStyle(MSHOnboardingPalette.charcoal.opacity(0.72))
                 .padding(.top, 6)
-            }
-        }
-    }
-
-    private var appleHealth: some View {
-        MSHOnboardingPage(
-            eyebrow: "APPLE HEALTH",
-            title: "Bring your health with you",
-            message: "Connect Apple Health to bring supported health information into My Health. You choose what to share, and you can change access later."
-        ) {
-            VStack(spacing: 12) {
-                MSHPrimaryButton(title: "Connect Apple Health", isWorking: isWorking) {
-                    requestAppleHealth()
-                }
-                MSHSecondaryButton(title: "Not now", disabled: isWorking) {
-                    store.setAppleHealthChoice(.notNow)
-                    advance(to: .notifications)
-                }
             }
         }
     }
@@ -182,22 +161,6 @@ private struct MSHOnboardingFlow: View {
             message: "Your starting point is only a doorway. My Health remains the place where your broader picture comes together."
         ) {
             MSHPrimaryButton(title: "Go to My Health") { store.complete() }
-        }
-    }
-
-    private func requestAppleHealth() {
-        guard !isWorking else { return }
-        isWorking = true
-        Task { @MainActor in
-            do {
-                let result = try await MSHAppleHealthRuntime.connectForOnboarding()
-                store.setAppleHealthChoice(result.outcome == .completed ? .requested : .declined)
-                isWorking = false
-                advance(to: .notifications)
-            } catch {
-                isWorking = false
-                errorMessage = error.localizedDescription
-            }
         }
     }
 
