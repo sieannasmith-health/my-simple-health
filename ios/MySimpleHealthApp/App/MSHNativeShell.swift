@@ -205,15 +205,22 @@ private struct MSHSimpleScreen: View {
 
 struct MSHWebFeatureScreen: View {
     let destination: MSHFeatureDestination
+
+    @ViewBuilder
     var body: some View {
-        MSHImmediateDestination(title: destination.title) {
-            ZStack { MSHColor.canvas.ignoresSafeArea(); MSHWebView(destination: destination) }
+        switch destination {
+        case .landscape:
+            MSHLandscapeScreen()
+        default:
+            MSHImmediateDestination(title: destination.title) {
+                ZStack { MSHColor.canvas.ignoresSafeArea(); MSHWebView(destination: destination) }
+            }
+            .navigationTitle(destination.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(MSHColor.canvas, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .accessibilityIdentifier("native-feature-\(destination.rawValue)")
         }
-        .navigationTitle(destination.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(MSHColor.canvas, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .accessibilityIdentifier("native-feature-\(destination.rawValue)")
     }
 }
 
