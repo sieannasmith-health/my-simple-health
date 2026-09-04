@@ -224,14 +224,6 @@ struct MSHNativeCalendarScreen: View {
         }
         .navigationTitle("Calendar")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    editingItem = nil
-                    showEditor = true
-                } label: { Image(systemName: "plus") }
-            }
-        }
         .sheet(isPresented: $showEditor) {
             MSHCalendarEditor(item: editingItem, defaultDate: selectedDay) { item in
                 store.save(item)
