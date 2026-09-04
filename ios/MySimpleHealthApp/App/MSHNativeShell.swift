@@ -532,6 +532,17 @@ struct MSHProfileSettingsScreen: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink {
+                        MSHConnectedHealthSourcesView()
+                    } label: {
+                        MSHFeatureDoorway(
+                            title: "Connections",
+                            subtitle: "Choose when to connect Apple Health, devices, and health apps.",
+                            systemImage: "link"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     VStack(alignment: .leading, spacing: MSHSpacing.medium) {
                         Text("What should we call you?")
                             .font(MSHTypography.cardTitle)
