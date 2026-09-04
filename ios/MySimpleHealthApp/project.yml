@@ -29,7 +29,7 @@ targets:
         DEVELOPMENT_TEAM: 736NRP69T9
         CODE_SIGN_ENTITLEMENTS: App/MySimpleHealth.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        SWIFT_VERSION: 5.0
+        SWIFT_VERSION: 6.0
         OTHER_LDFLAGS: $(inherited) -ObjC
         TARGETED_DEVICE_FAMILY: "1,2"
       configs:
