@@ -18,6 +18,8 @@ protocol MSHMyHealthDataLoading: Sendable {
 }
 
 actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
+    private static let dashboardHistoryPerRecordType = 90
+
     private let stateReader: any MSHHealthStateReading
     private let recentReader: any MSHRecentHealthReading
 
@@ -49,7 +51,8 @@ actor MSHMyHealthDataSource: MSHMyHealthDataLoading {
     }
 
     func loadRecentActivity(limit: Int) async throws -> [HealthRecord] {
-        try await recentReader.recentRecords(provider: .appleHealth, limit: limit)
+        let dashboardLimit = max(limit, Self.dashboardHistoryPerRecordType)
+        return try await recentReader.recentRecords(provider: .appleHealth, limit: dashboardLimit)
     }
 }
 
@@ -64,15 +67,9 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
         }
     }
 
-    // My Health contains Day / Week / Month views. A small cap per broad domain
-    // loses useful daily summaries because high-frequency samples (especially
-    // steps and heart rate) can consume the entire allowance in a few hours.
-    // Keep a bounded history per record type instead, with enough samples for
-    // daily/weekly/monthly aggregation while still avoiding an unbounded decode.
-    static let minimumHistoryPerRecordType = 90
-    static let maximumHistoryPerRecordType = 120
-    // Compatibility alias for existing tests/callers that referenced the former cap.
-    static let maximumLimit = maximumHistoryPerRecordType
+    // The cap is applied per record type, not per broad health domain. This keeps
+    // daily summaries and trend history available without allowing unbounded reads.
+    static let maximumLimit = 120
 
     private let databaseURL: URL
 
@@ -81,12 +78,8 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
     }
 
     func recentRecords(provider: HealthProvider, limit: Int) throws -> [HealthRecord] {
-        let requested = max(0, limit)
-        guard requested > 0, FileManager.default.fileExists(atPath: databaseURL.path) else { return [] }
-        let boundedLimit = min(
-            max(requested, Self.minimumHistoryPerRecordType),
-            Self.maximumHistoryPerRecordType
-        )
+        let boundedLimit = min(max(0, limit), Self.maximumLimit)
+        guard boundedLimit > 0, FileManager.default.fileExists(atPath: databaseURL.path) else { return [] }
 
         var database: OpaquePointer?
         let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
