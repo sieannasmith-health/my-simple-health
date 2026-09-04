@@ -18,7 +18,7 @@ final class MSHMyHealthViewModel: ObservableObject {
     private let dataSource: any MSHMyHealthDataLoading
     private var hasLoaded = false
 
-    init(dataSource: any MSHMyHealthDataLoading = MSHMyHealthDataSource.live()) {
+    nonisolated init(dataSource: any MSHMyHealthDataLoading = MSHMyHealthDataSource.live()) {
         self.dataSource = dataSource
     }
 
