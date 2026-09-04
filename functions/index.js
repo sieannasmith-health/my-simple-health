@@ -16,7 +16,6 @@ const PLAID_ENVIRONMENTS = {
   production: "https://production.plaid.com",
 };
 
-// Non-secret integration configuration. These must also be registered with Plaid.
 const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || "https://mysimplehealth.org/plaid/";
 const PLAID_WEBHOOK_URL = process.env.PLAID_WEBHOOK_URL ||
   "https://us-central1-my-simple-health-2fd8b.cloudfunctions.net/plaidWebhook";
@@ -133,7 +132,7 @@ function transactionData(uid, itemId, transaction) {
   };
 }
 
-async function syncPlaidItem(itemRef) {
+async function syncPlaidItemInternal(itemRef) {
   const snapshot = await itemRef.get();
   if (!snapshot.exists) throw new HttpsError("not-found", "Plaid Item not found.");
 
@@ -321,7 +320,7 @@ export const exchangePlaidPublicToken = onCall(
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
 
-    const sync = await syncPlaidItem(privateRef);
+    const sync = await syncPlaidItemInternal(privateRef);
     return { itemId, connected: true, sync };
   },
 );
@@ -332,7 +331,7 @@ export const syncPlaidItem = onCall(
     const uid = requireUser(request);
     const itemId = typeof request.data?.itemId === "string" ? request.data.itemId.trim() : "";
     const { ref } = await requireOwnedItem(uid, itemId);
-    return { itemId, sync: await syncPlaidItem(ref) };
+    return { itemId, sync: await syncPlaidItemInternal(ref) };
   },
 );
 
@@ -376,7 +375,7 @@ export const plaidWebhook = onRequest(
 
     if (webhookType === "TRANSACTIONS" && webhookCode === "SYNC_UPDATES_AVAILABLE" && typeof itemId === "string") {
       const snapshot = await db.collection("mshServerPlaidItems").where("itemId", "==", itemId).limit(1).get();
-      if (!snapshot.empty) await syncPlaidItem(snapshot.docs[0].ref);
+      if (!snapshot.empty) await syncPlaidItemInternal(snapshot.docs[0].ref);
     }
 
     res.status(200).json({ received: true });
