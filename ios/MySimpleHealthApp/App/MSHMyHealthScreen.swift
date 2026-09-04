@@ -1,4 +1,5 @@
 import Charts
+import MSHHealthCore
 import SwiftUI
 
 @MainActor
@@ -573,21 +574,11 @@ private enum MSHMetricSeriesBuilder {
             return MSHChartPoint(date: date, value: value)
         }
 
-        let latest = items.max(by: { $0.occurredAt < $1.occurredAt })
         let latestPoint = points.last
+        let latest = items.max(by: { $0.occurredAt < $1.occurredAt })
         let unit = latest?.unit ?? ""
-        let headline: String
-        if let latestPoint {
-            headline = format(latestPoint.value, unit: unit)
-        } else {
-            headline = "—"
-        }
-        let metricName: String = {
-            guard let latest else { return fallbackDescriptor }
-            if latest.recordType == .stepDailySummary { return "Daily steps" }
-            if latest.recordType == .restingHeartRate { return "Resting heart rate" }
-            return latest.title
-        }()
+        let headline = latestPoint.map { format($0.value, unit: unit) } ?? "—"
+        let metricName = latest?.title ?? fallbackDescriptor
 
         return MSHMetricSeries(
             kind: kind,
@@ -604,9 +595,7 @@ private enum MSHMetricSeriesBuilder {
         period: MSHHealthPeriod
     ) -> MSHMetricSeries {
         let asleep = items.filter { item in
-            guard item.recordType == .sleepInterval,
-                  let minutes = item.durationMinutes,
-                  minutes > 0 else { return false }
+            guard let minutes = item.durationMinutes, minutes > 0 else { return false }
             let stage = (item.sleepStage ?? "").lowercased()
             return !stage.contains("awake") && !stage.contains("inbed") && !stage.contains("in_bed")
         }
@@ -622,10 +611,15 @@ private enum MSHMetricSeriesBuilder {
             )
         }
 
+        // Assign early-morning sleep intervals to the night that began the day
+        // before. This keeps a single night from splitting across midnight.
+        let calendar = Calendar.current
         var buckets: [Date: Double] = [:]
         for item in asleep {
             guard let minutes = item.durationMinutes else { continue }
-            let night = sleepNightAnchor(for: item.occurredAt)
+            let shifted = calendar.date(byAdding: .hour, value: -12, to: item.occurredAt) ?? item.occurredAt
+            let night = calendar.startOfDay(for: shifted)
+            guard night >= calendar.startOfDay(for: period.cutoff) else { continue }
             buckets[night, default: 0] += minutes / 60
         }
 
@@ -638,20 +632,11 @@ private enum MSHMetricSeriesBuilder {
         return MSHMetricSeries(
             kind: .sleep,
             headline: headline,
-            descriptor: "Most recent night",
+            descriptor: "Most recent night in this view",
             unit: "h",
             points: points,
             latestDate: asleep.map(\.occurredAt).max()
         )
-    }
-
-    private static func sleepNightAnchor(for date: Date) -> Date {
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: date)
-        let shifted = hour < 12
-            ? (calendar.date(byAdding: .day, value: -1, to: date) ?? date)
-            : date
-        return calendar.startOfDay(for: shifted)
     }
 
     static func format(_ value: Double, unit: String) -> String {
@@ -950,7 +935,7 @@ private struct MSHMetricDetailCard: View {
                 .sensoryFeedback(.selection, trigger: selectedPoint?.id)
 
                 HStack {
-                    Text(metric.points.count > 1 ? "Slide across the chart to explore" : "One recent point is available in this view")
+                    Text(metric.points.count > 1 ? "Slide across the chart to explore" : "One recent point in this view")
                         .font(.caption)
                         .foregroundStyle(MSHLuxuryPalette.secondaryInk)
                     Spacer()
