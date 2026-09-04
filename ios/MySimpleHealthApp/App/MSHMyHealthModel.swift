@@ -77,6 +77,7 @@ struct MSHHealthAreaCardModel: Identifiable, Equatable, Sendable {
 struct MSHRecentHealthActivity: Identifiable, Equatable, Sendable {
     let id: String
     let area: MSHHealthArea
+    let recordType: HealthRecordType
     let title: String
     let detail: String?
     let systemImage: String
@@ -92,6 +93,7 @@ struct MSHRecentHealthActivity: Identifiable, Equatable, Sendable {
     init(
         id: String,
         area: MSHHealthArea,
+        recordType: HealthRecordType,
         title: String,
         detail: String?,
         systemImage: String,
@@ -103,6 +105,7 @@ struct MSHRecentHealthActivity: Identifiable, Equatable, Sendable {
     ) {
         self.id = id
         self.area = area
+        self.recordType = recordType
         self.title = title
         self.detail = detail
         self.systemImage = systemImage
@@ -127,14 +130,11 @@ enum MSHMyHealthMapper {
         recentLimit: Int
     ) -> MSHMyHealthSnapshot {
         let status = MSHAppleHealthStatus(syncState: syncState)
-        let perAreaLimit = max(0, recentLimit)
-        let balancedRecords = MSHHealthArea.allCases
-            .flatMap { area in
-                recentRecords
-                    .filter { area.includes($0.domain) }
-                    .prefix(perAreaLimit)
-            }
-            .sorted { $0.eventStart > $1.eventStart }
+
+        // The reader already applies a bounded history per record type. Do not
+        // cap again by broad area here: doing so lets high-frequency step or
+        // heart-rate samples push daily summaries and older trend points out.
+        let balancedRecords = recentRecords.sorted { $0.eventStart > $1.eventStart }
 
         let cards = MSHHealthArea.allCases.map { area in
             MSHHealthAreaCardModel(
@@ -157,16 +157,23 @@ enum MSHMyHealthMapper {
                   let end = record.eventEnd else { return nil }
             return max(0, end.timeIntervalSince(record.eventStart) / 60)
         }()
+        let displayUnit: String? = {
+            switch record.recordType {
+            case .stepDailySummary: "steps"
+            default: record.unit
+            }
+        }()
 
         return MSHRecentHealthActivity(
             id: record.id,
             area: presentation.area,
+            recordType: record.recordType,
             title: presentation.title,
             detail: presentation.detail,
             systemImage: presentation.systemImage,
             occurredAt: record.eventStart,
             numericValue: record.value,
-            unit: record.unit,
+            unit: displayUnit,
             durationMinutes: durationMinutes,
             sleepStage: record.metadata["sleepStage"]
         )
@@ -175,14 +182,17 @@ enum MSHMyHealthMapper {
     private static func recordPresentation(_ record: HealthRecord) -> (area: MSHHealthArea, title: String, detail: String?, systemImage: String) {
         let numericDetail = record.value.flatMap { value -> String? in
             guard let unit = record.unit else { return nil }
-            return "\(value.formatted(.number.precision(.fractionLength(0...1)))) \(unit)"
+            let displayUnit = record.recordType == .stepDailySummary ? "steps" : unit
+            return "\(value.formatted(.number.precision(.fractionLength(0...1)))) \(displayUnit)"
         }
 
         switch record.recordType {
         case .workout:
             return (.movement, record.metadata["activityName"] ?? "Workout", nil, "figure.run")
-        case .stepSample, .stepDailySummary:
+        case .stepDailySummary:
             return (.movement, "Steps", numericDetail, "shoeprints.fill")
+        case .stepSample:
+            return (.movement, "Step sample", numericDetail, "shoeprints.fill")
         case .activeEnergy:
             return (.movement, "Active energy", numericDetail, "flame")
         case .exerciseTime:
