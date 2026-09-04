@@ -94,33 +94,11 @@ struct MSHMyHealthHomeScreen: View {
 
         VStack(alignment: .leading, spacing: 28) {
             VStack(alignment: .leading, spacing: 0) {
-                MSHHomeSummaryRow(
-                    title: "Sleep",
-                    value: sleep.value,
-                    context: sleep.context,
-                    icon: "moon.stars.fill",
-                    accent: MSHHomePalette.plum
-                )
-
+                MSHHomeSummaryRow(title: "Sleep", value: sleep.value, context: sleep.context, icon: "moon.stars.fill", accent: MSHHomePalette.plum)
                 divider
-
-                MSHHomeSummaryRow(
-                    title: "Movement",
-                    value: movement.value,
-                    context: movement.context,
-                    icon: "figure.walk.motion",
-                    accent: MSHHomePalette.sage
-                )
-
+                MSHHomeSummaryRow(title: "Movement", value: movement.value, context: movement.context, icon: "figure.walk.motion", accent: MSHHomePalette.sage)
                 divider
-
-                MSHHomeSummaryRow(
-                    title: "Heart",
-                    value: heart.value,
-                    context: heart.context,
-                    icon: "heart.fill",
-                    accent: MSHHomePalette.wine
-                )
+                MSHHomeSummaryRow(title: "Heart", value: heart.value, context: heart.context, icon: "heart.fill", accent: MSHHomePalette.wine)
             }
 
             NavigationLink {
@@ -142,25 +120,19 @@ struct MSHMyHealthHomeScreen: View {
                             .foregroundStyle(MSHHomePalette.ivory.opacity(0.78))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-
                     Spacer(minLength: 10)
-
                     Image(systemName: "chart.xyaxis.line")
                         .font(.title2)
                         .foregroundStyle(MSHHomePalette.gold)
                 }
                 .padding(20)
-                .background(
-                    LinearGradient(
-                        colors: [MSHHomePalette.forest, MSHHomePalette.forestDeep],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .background(LinearGradient(colors: [MSHHomePalette.forest, MSHHomePalette.forestDeep], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("explore-your-health")
+
+            healthDimensions
 
             VStack(alignment: .leading, spacing: 10) {
                 Text("TODAY")
@@ -178,7 +150,6 @@ struct MSHMyHealthHomeScreen: View {
                             .frame(width: 42, height: 42)
                             .background(MSHColor.accent.opacity(0.10))
                             .clipShape(Circle())
-
                         VStack(alignment: .leading, spacing: 3) {
                             Text("What’s coming up")
                                 .font(.system(.headline, design: .serif))
@@ -188,7 +159,6 @@ struct MSHMyHealthHomeScreen: View {
                                 .foregroundStyle(MSHHomePalette.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-
                         Spacer(minLength: 6)
                         Image(systemName: "chevron.right")
                             .font(.caption.weight(.semibold))
@@ -207,11 +177,68 @@ struct MSHMyHealthHomeScreen: View {
         }
     }
 
+    private var healthDimensions: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("YOUR HEALTH")
+                .font(.caption2.weight(.semibold))
+                .tracking(1.7)
+                .foregroundStyle(MSHHomePalette.gold)
+
+            Text("Eight parts of your health. One place to understand them together.")
+                .font(.system(.title3, design: .serif, weight: .semibold))
+                .foregroundStyle(MSHHomePalette.ink)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                dimensionLink(title: "Physical", subtitle: "Movement, sleep & body", icon: "figure.walk", destination: .movementPlan)
+                dimensionLink(title: "Food & Nutrition", subtitle: "Food, meals & nutrition", icon: "fork.knife", destination: .food)
+                dimensionLink(title: "Emotional", subtitle: "Stress, reflection & insight", icon: "brain.head.profile", destination: .selfInsight)
+                dimensionLink(title: "Financial", subtitle: "Money, accounts & options", icon: "building.columns", destination: .financialHealth)
+                dimensionLink(title: "Social", subtitle: "Relationships & connection", icon: "person.2", destination: .landscape)
+                dimensionLink(title: "Environment", subtitle: "Home & surroundings", icon: "house.and.flag", destination: .landscape)
+                dimensionLink(title: "Healthcare", subtitle: "Care, medications & prevention", icon: "cross.case", destination: .medications)
+                dimensionLink(title: "Purpose", subtitle: "Vision, goals & direction", icon: "sparkles", destination: .horizon)
+            }
+        }
+        .accessibilityIdentifier("whole-health-dimensions")
+    }
+
+    private func dimensionLink(title: String, subtitle: String, icon: String, destination: MSHFeatureDestination) -> some View {
+        NavigationLink {
+            MSHWebFeatureScreen(destination: destination)
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(MSHColor.accent)
+                    .frame(width: 34, height: 34)
+                    .background(MSHColor.accent.opacity(0.10))
+                    .clipShape(Circle())
+                Text(title)
+                    .font(.system(.headline, design: .serif))
+                    .foregroundStyle(MSHHomePalette.ink)
+                    .multilineTextAlignment(.leading)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(MSHHomePalette.secondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 126, alignment: .topLeading)
+            .padding(14)
+            .background(MSHColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(MSHColor.border.opacity(0.8), lineWidth: 0.5)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title). \(subtitle)")
+    }
+
     private var divider: some View {
-        Rectangle()
-            .fill(MSHHomePalette.hairline)
-            .frame(height: 1)
-            .padding(.leading, 50)
+        Rectangle().fill(MSHHomePalette.hairline).frame(height: 1).padding(.leading, 50)
     }
 
     private var loading: some View {
@@ -237,18 +264,9 @@ struct MSHMyHealthHomeScreen: View {
         .padding(.vertical, 14)
     }
 
-    private func summary(
-        for area: MSHHealthArea,
-        in activity: [MSHRecentHealthActivity]
-    ) -> (value: String, context: String) {
-        let items = activity
-            .filter { $0.area == area }
-            .sorted { $0.occurredAt > $1.occurredAt }
-
-        guard let latest = items.first else {
-            return ("No recent data", "Ready when Apple Health has something recent to share.")
-        }
-
+    private func summary(for area: MSHHealthArea, in activity: [MSHRecentHealthActivity]) -> (value: String, context: String) {
+        let items = activity.filter { $0.area == area }.sorted { $0.occurredAt > $1.occurredAt }
+        guard let latest = items.first else { return ("No recent data", "Ready when Apple Health has something recent to share.") }
         switch area {
         case .sleep:
             let asleep = items.filter {
@@ -257,27 +275,12 @@ struct MSHMyHealthHomeScreen: View {
                 return !stage.contains("awake") && !stage.contains("inbed") && !stage.contains("in_bed")
             }
             let latestNight = sleepNightAnchor(for: latest.occurredAt)
-            let minutes = asleep
-                .filter { sleepNightAnchor(for: $0.occurredAt) == latestNight }
-                .compactMap(\.durationMinutes)
-                .reduce(0, +)
-            return (
-                duration(minutes: minutes),
-                "Your recent sleep is here as context. Open the deeper view when you want the stages and trend."
-            )
-
+            let minutes = asleep.filter { sleepNightAnchor(for: $0.occurredAt) == latestNight }.compactMap(\.durationMinutes).reduce(0, +)
+            return (duration(minutes: minutes), "Your recent sleep is here as context. Open the deeper view when you want the stages and trend.")
         case .movement:
-            return (
-                displayValue(latest),
-                "Your latest movement measurement is available without turning the home screen into a performance score."
-            )
-
+            return (displayValue(latest), "Your latest movement measurement is available without turning the home screen into a performance score.")
         case .heartActivity:
-            return (
-                displayValue(latest),
-                "This is your latest heart context. The full range and trend live in Explore Your Health."
-            )
-
+            return (displayValue(latest), "This is your latest heart context. The full range and trend live in Explore Your Health.")
         case .bodyMeasurements:
             return (displayValue(latest), "Recent body context is available in the deeper data view.")
         }
@@ -286,9 +289,7 @@ struct MSHMyHealthHomeScreen: View {
     private func sleepNightAnchor(for date: Date) -> Date {
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: date)
-        let shifted = hour < 12
-            ? (calendar.date(byAdding: .day, value: -1, to: date) ?? date)
-            : date
+        let shifted = hour < 12 ? (calendar.date(byAdding: .day, value: -1, to: date) ?? date) : date
         return calendar.startOfDay(for: shifted)
     }
 
@@ -324,23 +325,13 @@ private struct MSHHomeSummaryRow: View {
                 .frame(width: 36, height: 36)
                 .background(accent.opacity(0.13))
                 .clipShape(Circle())
-
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(title)
-                        .font(.system(.headline, design: .serif))
-                        .foregroundStyle(MSHHomePalette.ink)
+                    Text(title).font(.system(.headline, design: .serif)).foregroundStyle(MSHHomePalette.ink)
                     Spacer()
-                    Text(value)
-                        .font(.system(.subheadline, design: .serif, weight: .semibold))
-                        .foregroundStyle(MSHHomePalette.ink)
-                        .multilineTextAlignment(.trailing)
+                    Text(value).font(.system(.subheadline, design: .serif, weight: .semibold)).foregroundStyle(MSHHomePalette.ink).multilineTextAlignment(.trailing)
                 }
-
-                Text(context)
-                    .font(.caption)
-                    .foregroundStyle(MSHHomePalette.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(context).font(.caption).foregroundStyle(MSHHomePalette.secondary).fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.vertical, 15)
