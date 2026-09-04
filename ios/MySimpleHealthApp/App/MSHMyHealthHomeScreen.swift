@@ -167,6 +167,37 @@ struct MSHMyHealthHomeScreen: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("explore-your-health")
 
+            if cycleAudience == .unspecified {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("PERSONALIZE MY HEALTH")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.6)
+                        .foregroundStyle(MSHHomePalette.gold)
+                    Text("Would you like women’s cycle health to appear in My Health?")
+                        .font(.system(.headline, design: .serif))
+                        .foregroundStyle(MSHHomePalette.ink)
+                    Text("MSH does not infer this from Apple Health, symptoms, or other records. You choose whether this part of My Health applies to you.")
+                        .font(.caption)
+                        .foregroundStyle(MSHHomePalette.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: 12) {
+                        Button("Yes, I’m a woman") {
+                            cycleAudienceRawValue = MSHCycleAudiencePreference.woman.rawValue
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(MSHColor.accent)
+
+                        Button("Not for me") {
+                            cycleAudienceRawValue = MSHCycleAudiencePreference.notForMe.rawValue
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                .mshSurface()
+                .accessibilityIdentifier("cycle-audience-setup")
+            }
+
             if cycleAudience.showsCycle {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("YOUR HEALTH")
