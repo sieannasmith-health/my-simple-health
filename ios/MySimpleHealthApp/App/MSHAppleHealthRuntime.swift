@@ -46,37 +46,27 @@ enum MSHAppleHealthRuntime {
     }
 
     static func refreshConnectedHealth() async throws {
-        guard UIApplication.shared.applicationState == .active else { return }
-
-        var state = try await store.load(provider: .appleHealth)
-        var areas = state.selectedAreas
-
-        // Recover installations that still have HealthKit authorization but lost the
-        // local selected-area state during the auth/backend migration. HealthKit does
-        // not re-prompt for permissions the user has already answered.
-        if areas.isEmpty {
-            let requestedAreas = Set(HealthDataArea.allCases)
+        guard UIApplication.shared.applicationState == .active else {
             MSHDebugLifecycle.log(
-                "healthkit_connection_repair_started",
-                "trigger=my_health_refresh"
+                "healthkit_sync_skipped",
+                "trigger=my_health_refresh reason=application_not_active"
             )
-            let authorization = try await coordinator.connect(areas: requestedAreas)
-            guard authorization.outcome == .completed else {
-                MSHDebugLifecycle.log(
-                    "healthkit_connection_repair_skipped",
-                    "reason=authorization_not_completed"
-                )
-                return
-            }
-            state = try await store.load(provider: .appleHealth)
-            areas = state.selectedAreas
-            MSHDebugLifecycle.log(
-                "healthkit_connection_repair_finished",
-                "areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
-            )
+            return
         }
 
-        guard !areas.isEmpty else { return }
+        var state = try await store.load(provider: .appleHealth)
+        let areas = state.selectedAreas
+
+        // Refresh is read/sync behavior only. If the person has not connected
+        // Apple Health yet, do nothing. Permission requests belong exclusively to
+        // explicit progressive setup, never to a pull-to-refresh gesture.
+        guard !areas.isEmpty else {
+            MSHDebugLifecycle.log(
+                "healthkit_sync_skipped",
+                "trigger=my_health_refresh reason=no_selected_areas"
+            )
+            return
+        }
 
         // A checkpoint can survive while the local SQLite cache is empty. In that
         // state an anchored HealthKit query correctly returns only changes after the
