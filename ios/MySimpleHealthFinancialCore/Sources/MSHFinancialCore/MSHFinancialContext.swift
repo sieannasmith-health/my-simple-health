@@ -158,7 +158,7 @@ public struct MSHFinancialHorizon: Codable, Equatable, Sendable {
     public let requiresAttention: Bool
 
     public var nothingRequiresAction: Bool {
-        !requiresAttention
+        affordability == .room
     }
 }
 
@@ -204,9 +204,9 @@ public extension MSHFinancialCore {
             label: cost.label,
             amount: cost.amount,
             dueAt: cost.expectedAt ?? fallbackDate,
-            kind: cost.kind == .medication ? .medication : .healthcare,
+            kind: commitmentKind(for: cost.kind),
             priority: .essential,
-            source: cost.kind == .medication ? .prescription : .appointment,
+            source: commitmentSource(for: cost.kind),
             sourceRecordID: cost.healthRecordID,
             healthCostID: cost.id,
             provenance: cost.provenance
@@ -338,6 +338,23 @@ public extension MSHFinancialCore {
         case .pets: return .petCare
         case .savings, .investments: return .savings
         default: return .other
+        }
+    }
+
+    private static func commitmentKind(for healthKind: MSHHealthCostKind) -> MSHFinancialCommitmentKind {
+        switch healthKind {
+        case .insurancePremium: return .insurance
+        case .medication: return .medication
+        default: return .healthcare
+        }
+    }
+
+    private static func commitmentSource(for healthKind: MSHHealthCostKind) -> MSHFinancialCommitmentSource {
+        switch healthKind {
+        case .insurancePremium: return .insurance
+        case .medication: return .prescription
+        case .appointment: return .appointment
+        default: return .manual
         }
     }
 
