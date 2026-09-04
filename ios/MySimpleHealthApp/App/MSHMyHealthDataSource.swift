@@ -71,6 +71,8 @@ actor SQLiteRecentHealthRecordReader: MSHRecentHealthReading {
     // daily/weekly/monthly aggregation while still avoiding an unbounded decode.
     static let minimumHistoryPerRecordType = 90
     static let maximumHistoryPerRecordType = 120
+    // Compatibility alias for existing tests/callers that referenced the former cap.
+    static let maximumLimit = maximumHistoryPerRecordType
 
     private let databaseURL: URL
 
