@@ -20,11 +20,6 @@ public enum HealthDataArea: String, Codable, CaseIterable, Hashable, Sendable {
     case sleep
     case heartActivity = "heart_activity"
     case bodyMeasurements = "body_measurements"
-    case conditions
-    case medications
-    case allergies
-    case labsAndResults = "labs_and_results"
-    case careHistory = "care_history"
 }
 
 public enum HealthRecordType: String, Codable, Sendable {
