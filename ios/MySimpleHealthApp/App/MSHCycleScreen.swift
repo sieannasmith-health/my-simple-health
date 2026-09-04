@@ -271,8 +271,8 @@ struct MSHCycleScreen: View {
     @State private var displayedMonth = Calendar.current.startOfMonth(containing: Date())
     @State private var showingEditor = false
 
-    init(store: MSHCycleStore = MSHCycleStore()) {
-        _store = StateObject(wrappedValue: store)
+    init(store: MSHCycleStore? = nil) {
+        _store = StateObject(wrappedValue: store ?? MSHCycleStore())
     }
 
     var body: some View {
