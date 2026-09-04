@@ -9,7 +9,8 @@ let package = Package(
     ],
     products: [
         .library(name: "MSHHealthCore", targets: ["MSHHealthCore"]),
-        .library(name: "MSHAppleHealthKit", targets: ["MSHAppleHealthKit"])
+        .library(name: "MSHAppleHealthKit", targets: ["MSHAppleHealthKit"]),
+        .library(name: "MSHFHIRClinicalRecords", targets: ["MSHFHIRClinicalRecords"])
     ],
     targets: [
         .target(
@@ -26,7 +27,12 @@ let package = Package(
             dependencies: ["MSHHealthCore"],
             linkerSettings: [.linkedFramework("HealthKit", .when(platforms: [.iOS]))]
         ),
-        .testTarget(name: "MSHHealthCoreTests", dependencies: ["MSHHealthCore"])
+        .target(
+            name: "MSHFHIRClinicalRecords",
+            dependencies: ["MSHHealthCore"]
+        ),
+        .testTarget(name: "MSHHealthCoreTests", dependencies: ["MSHHealthCore"]),
+        .testTarget(name: "MSHFHIRClinicalRecordsTests", dependencies: ["MSHFHIRClinicalRecords", "MSHHealthCore"])
     ],
     cxxLanguageStandard: .cxx17
 )
