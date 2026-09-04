@@ -5,9 +5,14 @@ struct MSHMyHealthHomeScreen: View {
     @StateObject private var viewModel: MSHMyHealthViewModel
     @EnvironmentObject private var authStore: MSHAuthStore
     @AppStorage("msh.displayName") private var displayName = ""
+    @AppStorage(MSHCycleAudiencePreference.storageKey) private var cycleAudienceRawValue = MSHCycleAudiencePreference.unspecified.rawValue
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    private var cycleAudience: MSHCycleAudiencePreference {
+        MSHCycleAudiencePreference(rawValue: cycleAudienceRawValue) ?? .unspecified
     }
 
     var body: some View {
@@ -162,43 +167,45 @@ struct MSHMyHealthHomeScreen: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("explore-your-health")
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("YOUR HEALTH")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.7)
-                    .foregroundStyle(MSHHomePalette.gold)
+            if cycleAudience.showsCycle {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("YOUR HEALTH")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.7)
+                        .foregroundStyle(MSHHomePalette.gold)
 
-                NavigationLink {
-                    MSHCycleScreen()
-                } label: {
-                    HStack(spacing: 15) {
-                        Image(systemName: "circle.dotted.circle")
-                            .font(.title3)
-                            .foregroundStyle(MSHHomePalette.wine)
-                            .frame(width: 42, height: 42)
-                            .background(MSHHomePalette.wine.opacity(0.10))
-                            .clipShape(Circle())
+                    NavigationLink {
+                        MSHCycleScreen()
+                    } label: {
+                        HStack(spacing: 15) {
+                            Image(systemName: "circle.dotted.circle")
+                                .font(.title3)
+                                .foregroundStyle(MSHHomePalette.wine)
+                                .frame(width: 42, height: 42)
+                                .background(MSHHomePalette.wine.opacity(0.10))
+                                .clipShape(Circle())
 
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Cycle")
-                                .font(.system(.headline, design: .serif))
-                                .foregroundStyle(MSHHomePalette.ink)
-                            Text("Record periods and symptoms, see your timeline, and keep estimates separate from what you recorded.")
-                                .font(.caption)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Cycle")
+                                    .font(.system(.headline, design: .serif))
+                                    .foregroundStyle(MSHHomePalette.ink)
+                                Text("Record periods and symptoms, see your timeline, and keep estimates separate from what you recorded.")
+                                    .font(.caption)
+                                    .foregroundStyle(MSHHomePalette.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+
+                            Spacer(minLength: 6)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
                                 .foregroundStyle(MSHHomePalette.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
                         }
-
-                        Spacer(minLength: 6)
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(MSHHomePalette.secondary)
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
                     }
-                    .padding(.vertical, 8)
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("my-health-cycle")
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("my-health-cycle")
             }
 
             VStack(alignment: .leading, spacing: 10) {
