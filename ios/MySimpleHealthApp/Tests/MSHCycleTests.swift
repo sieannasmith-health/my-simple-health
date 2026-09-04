@@ -5,23 +5,21 @@ import XCTest
 final class MSHCycleTests: XCTestCase {
     private var defaults: UserDefaults!
     private var calendar: Calendar!
+    private var suiteName = ""
 
     override func setUp() {
         super.setUp()
-        defaults = UserDefaults(suiteName: "MSHCycleTests.\(UUID().uuidString)")!
+        suiteName = "MSHCycleTests.\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suiteName)!
         calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
     }
 
     override func tearDown() {
-        defaults.removePersistentDomain(forName: defaultsSuiteName)
+        defaults.removePersistentDomain(forName: suiteName)
         defaults = nil
         calendar = nil
         super.tearDown()
-    }
-
-    private var defaultsSuiteName: String {
-        defaults.volatileDomainNames.first(where: { $0.hasPrefix("MSHCycleTests.") }) ?? "MSHCycleTests"
     }
 
     private func date(_ value: String) -> Date {
