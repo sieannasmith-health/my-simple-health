@@ -341,11 +341,19 @@ actor MSHHealthRecordCorrectionStore {
         }
     }
 
-    private func bindBlob(_ value: Data, index: Int32, statement: OpaquePointer, database: OpaquePointer) throws {
+    private nonisolated func bindBlob(
+        _ value: Data,
+        index: Int32,
+        statement: OpaquePointer,
+        database: OpaquePointer
+    ) throws {
+        let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
         let result = value.withUnsafeBytes { bytes in
-            sqlite3_bind_blob(statement, index, bytes.baseAddress, Int32(value.count), sqliteTransient)
+            sqlite3_bind_blob(statement, index, bytes.baseAddress, Int32(value.count), transient)
         }
-        guard result == SQLITE_OK else { throw sqliteError(database) }
+        guard result == SQLITE_OK else {
+            throw CorrectionError.sqlite(String(cString: sqlite3_errmsg(database)))
+        }
     }
 
     private var sqliteTransient: sqlite3_destructor_type {
