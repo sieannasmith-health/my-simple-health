@@ -63,7 +63,7 @@ final class AppleHealthBridge: NSObject, WKScriptMessageHandler {
 #endif
                     MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=explicit_sync passes=\(passes)")
                 case "disconnect": try await coordinator.disconnect()
-                case "removeImportedData": try await coordinator.removeImportedRecords()
+                case "removeImportedData": try await MSHAppleHealthRuntime.removeImportedData()
                 case "manage":
                     if let url = URL(string: UIApplication.openSettingsURLString) { await UIApplication.shared.open(url) }
                 case "calendarRange":

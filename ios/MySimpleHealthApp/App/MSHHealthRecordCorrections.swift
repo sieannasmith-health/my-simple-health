@@ -90,11 +90,13 @@ actor MSHHealthRecordCorrectionStore {
 
         let original = try loadRecord(deduplicationKey: proposed.deduplicationKey, database: database)
         guard original.id == proposed.id,
+              original.ownerID == proposed.ownerID,
               original.domain == proposed.domain,
               original.recordType == proposed.recordType,
               original.source == proposed.source,
               original.importedAt == proposed.importedAt,
-              original.provenance == proposed.provenance else {
+              original.provenance == proposed.provenance,
+              original.informationClass == proposed.informationClass else {
             throw CorrectionError.identityMismatch
         }
 
@@ -104,7 +106,7 @@ actor MSHHealthRecordCorrectionStore {
 
         let corrected = HealthRecord(
             id: original.id,
-            ownerID: proposed.ownerID,
+            ownerID: original.ownerID,
             domain: original.domain,
             recordType: original.recordType,
             value: proposed.value,
@@ -114,7 +116,7 @@ actor MSHHealthRecordCorrectionStore {
             timezoneIdentifier: proposed.timezoneIdentifier,
             source: original.source,
             provenance: original.provenance,
-            informationClass: proposed.informationClass,
+            informationClass: original.informationClass,
             importedAt: original.importedAt,
             updatedAt: correctedAt,
             lifecycleStatus: .active,
@@ -178,6 +180,39 @@ actor MSHHealthRecordCorrectionStore {
             throw sqliteError(database)
         }
         return kind
+    }
+
+    /// Removes imported canonical rows and their MSH corrections together.
+    /// Dropping the correction rows first, inside the same write transaction,
+    /// allows the protection triggers to permit the requested provider purge.
+    func removeImportedRecords(provider: HealthProvider) throws {
+        let database = try openDatabase()
+        defer { sqlite3_close(database) }
+        try execute(Self.schema, on: database)
+
+        try execute("BEGIN IMMEDIATE TRANSACTION", on: database)
+        do {
+            let removeCorrections = try prepare(
+                "DELETE FROM msh_health_record_corrections WHERE provider = ?",
+                on: database
+            )
+            defer { sqlite3_finalize(removeCorrections) }
+            try bindText(provider.rawValue, index: 1, statement: removeCorrections, database: database)
+            guard sqlite3_step(removeCorrections) == SQLITE_DONE else { throw sqliteError(database) }
+
+            let removeRecords = try prepare(
+                "DELETE FROM health_records WHERE provider = ?",
+                on: database
+            )
+            defer { sqlite3_finalize(removeRecords) }
+            try bindText(provider.rawValue, index: 1, statement: removeRecords, database: database)
+            guard sqlite3_step(removeRecords) == SQLITE_DONE else { throw sqliteError(database) }
+
+            try execute("COMMIT", on: database)
+        } catch {
+            try? execute("ROLLBACK", on: database)
+            throw error
+        }
     }
 
     private func replaceCanonicalRecord(

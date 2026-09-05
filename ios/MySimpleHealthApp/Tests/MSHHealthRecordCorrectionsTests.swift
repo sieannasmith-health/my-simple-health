@@ -130,6 +130,73 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
         XCTAssertEqual(records.first?.source.sourceRecordID, "duplicate-b")
     }
 
+    func testCorrectionRejectsOwnerAndInformationClassChanges() async throws {
+        let directory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = FileHealthStore(directoryURL: directory)
+        let original = makeRecord(id: "identity", value: 42)
+        try await store.apply(records: [original], deletedSourceRecordIDs: [], provider: .appleHealth)
+
+        let corrections = MSHHealthRecordCorrectionStore(
+            databaseURL: directory.appendingPathComponent("health-records-v3.sqlite")
+        )
+        try await corrections.install()
+        let changedIdentity = HealthRecord(
+            id: original.id,
+            ownerID: "different-owner",
+            domain: original.domain,
+            recordType: original.recordType,
+            value: 43,
+            unit: original.unit,
+            eventStart: original.eventStart,
+            eventEnd: original.eventEnd,
+            timezoneIdentifier: original.timezoneIdentifier,
+            source: original.source,
+            provenance: original.provenance,
+            informationClass: "INFERRED",
+            importedAt: original.importedAt,
+            updatedAt: original.updatedAt,
+            lifecycleStatus: .active,
+            metadata: original.metadata
+        )
+
+        do {
+            try await corrections.correct(changedIdentity)
+            XCTFail("Expected identity-changing correction to be rejected")
+        } catch let error as MSHHealthRecordCorrectionStore.CorrectionError {
+            guard case .identityMismatch = error else {
+                return XCTFail("Expected identityMismatch, got \(error)")
+            }
+        }
+    }
+
+    func testRemoveImportedDataPurgesProtectedCorrectionsAndTombstones() async throws {
+        let directory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = FileHealthStore(directoryURL: directory)
+        let corrected = makeRecord(id: "corrected", value: 10)
+        let deleted = makeRecord(id: "deleted", value: 20)
+        try await store.apply(records: [corrected, deleted], deletedSourceRecordIDs: [], provider: .appleHealth)
+
+        let corrections = MSHHealthRecordCorrectionStore(
+            databaseURL: directory.appendingPathComponent("health-records-v3.sqlite")
+        )
+        try await corrections.install()
+        try await corrections.correct(makeRecord(id: "corrected", value: 11))
+        try await corrections.delete(deleted)
+
+        try await corrections.removeImportedRecords(provider: .appleHealth)
+
+        let remainingRecords = try await store.records(provider: .appleHealth)
+        let correctedKind = try await corrections.kind(for: corrected)
+        let deletedKind = try await corrections.kind(for: deleted)
+        XCTAssertTrue(remainingRecords.isEmpty)
+        XCTAssertNil(correctedKind)
+        XCTAssertNil(deletedKind)
+    }
+
     private func makeTemporaryDirectory() throws -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("MSHHealthRecordCorrectionsTests-\(UUID().uuidString)", isDirectory: true)

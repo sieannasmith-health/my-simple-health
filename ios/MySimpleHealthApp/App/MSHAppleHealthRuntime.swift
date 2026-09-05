@@ -114,6 +114,11 @@ enum MSHAppleHealthRuntime {
         try await corrections.delete(record)
     }
 
+    static func removeImportedData() async throws {
+        try await prepareCanonicalCorrections()
+        try await corrections.removeImportedRecords(provider: .appleHealth)
+    }
+
     private static func prepareCanonicalCorrections() async throws {
         // Opening the FileHealthStore first guarantees the health_records table exists
         // before the correction store creates protection triggers against it.
