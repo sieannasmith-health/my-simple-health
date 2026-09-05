@@ -22,11 +22,7 @@ final class MSHPlaidConnectionController: ObservableObject {
 
     private let functions = Functions.functions(region: "us-central1")
     private let db = Firestore.firestore()
-    nonisolated(unsafe) private var listener: ListenerRegistration?
-
-    deinit {
-        listener?.remove()
-    }
+    private var listener: ListenerRegistration?
 
     func start() {
         guard listener == nil, let uid = Auth.auth().currentUser?.uid else { return }
