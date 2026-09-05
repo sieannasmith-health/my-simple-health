@@ -95,7 +95,8 @@ final class MSHSharedContentStore: ObservableObject {
         let endsValue: Any = endsAt ?? NSNull()
 
         do {
-            try await db.collection("sharedItems").document(itemID).setData([
+            let document = db.collection("sharedItems").document(itemID)
+            let documentData: [String: Any] = [
                 "grantID": grant.id,
                 "ownerID": uid,
                 "recipientID": grant.recipientID,
@@ -107,7 +108,16 @@ final class MSHSharedContentStore: ObservableObject {
                 "endsAt": endsValue,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp()
-            ], merge: true)
+            ]
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                document.setData(documentData, merge: true) { error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            }
             errorMessage = nil
             return true
         } catch {
