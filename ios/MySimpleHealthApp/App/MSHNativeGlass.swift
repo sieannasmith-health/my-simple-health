@@ -42,95 +42,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     func body(content: Content) -> some View {
         let editorialGlass = shadowStrength <= 0.60 && glowStrength <= 0.22
 
-        let filled = content
-            .background {
-                if reduceTransparency {
-                    shape.fill(Color.white.opacity(0.94))
-                } else {
-                    shape
-                        .fill(.ultraThinMaterial)
-                        .opacity(editorialGlass ? 0.30 : 1.0)
-                        .overlay {
-                            shape.fill(
-                                Color.black.opacity(
-                                    editorialGlass
-                                        ? 0.018 + (0.010 * glowStrength)
-                                        : 0.0
-                                )
-                            )
-                        }
-                        .overlay {
-                            shape.fill(
-                                Color.white.opacity(
-                                    editorialGlass
-                                        ? 0.075
-                                        : 0.045 + (0.055 * glowStrength)
-                                )
-                            )
-                        }
-                        .overlay {
-                            shape.fill(
-                                tint.opacity(
-                                    editorialGlass
-                                        ? 0.004 + (0.006 * glowStrength)
-                                        : 0.070 + (0.045 * glowStrength)
-                                )
-                            )
-                        }
-                        .overlay {
-                            shape.fill(
-                                RadialGradient(
-                                    colors: [
-                                        Color(red: 0.46, green: 0.82, blue: 1.0)
-                                            .opacity(
-                                                editorialGlass
-                                                    ? 0.007 + (0.012 * glowStrength)
-                                                    : 0.18 + (0.12 * glowStrength)
-                                            ),
-                                        Color.white.opacity(editorialGlass ? 0.010 : 0.05),
-                                        Color.clear
-                                    ],
-                                    center: .topLeading,
-                                    startRadius: 4,
-                                    endRadius: 170
-                                )
-                            )
-                        }
-                        .overlay {
-                            shape.fill(
-                                RadialGradient(
-                                    colors: [
-                                        Color(red: 0.86, green: 0.50, blue: 1.0)
-                                            .opacity(
-                                                editorialGlass
-                                                    ? 0.005 + (0.010 * glowStrength)
-                                                    : 0.16 + (0.14 * glowStrength)
-                                            ),
-                                        tint.opacity(editorialGlass ? 0.004 : 0.08 + (0.06 * glowStrength)),
-                                        Color.clear
-                                    ],
-                                    center: .bottomTrailing,
-                                    startRadius: 2,
-                                    endRadius: 185
-                                )
-                            )
-                        }
-                        .overlay {
-                            shape.fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(editorialGlass ? 0.085 : 0.15 + (0.08 * glowStrength)),
-                                        Color.clear,
-                                        Color(red: 1.0, green: 0.82, blue: 0.67)
-                                            .opacity(editorialGlass ? 0.006 : 0.07 + (0.05 * glowStrength))
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                        }
-                }
-            }
+        let filled = content.background { glassBackground(editorial: editorialGlass) }
         let edged = filled.overlay {
                 shape.strokeBorder(
                     LinearGradient(
@@ -191,7 +103,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 )
                 .blur(radius: editorialGlass ? 0.65 : 1.55)
             }
-        let highlighted = glowing.overlay(alignment: .top) {
+        let highlighted = glowing.overlay(alignment: Alignment.top) {
                 shape
                     .strokeBorder(
                         Color.white.opacity((editorialGlass ? 0.34 : 0.92) * edgeStrength),
@@ -221,6 +133,64 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 radius: editorialGlass ? 6 : 14,
                 y: editorialGlass ? 3 : 6
             )
+    }
+
+    @ViewBuilder
+    private func glassBackground(editorial: Bool) -> some View {
+        if reduceTransparency {
+            shape.fill(Color.white.opacity(0.94))
+        } else {
+            let material = shape
+                .fill(.ultraThinMaterial)
+                .opacity(editorial ? 0.30 : 1.0)
+            let darkened = material.overlay {
+                shape.fill(Color.black.opacity(editorial ? 0.018 + (0.010 * glowStrength) : 0.0))
+            }
+            let lightened = darkened.overlay {
+                shape.fill(Color.white.opacity(editorial ? 0.075 : 0.045 + (0.055 * glowStrength)))
+            }
+            let tinted = lightened.overlay {
+                shape.fill(tint.opacity(editorial ? 0.004 + (0.006 * glowStrength) : 0.070 + (0.045 * glowStrength)))
+            }
+            let coolGlow = tinted.overlay {
+                shape.fill(RadialGradient(
+                    colors: [
+                        Color(red: 0.46, green: 0.82, blue: 1.0)
+                            .opacity(editorial ? 0.007 + (0.012 * glowStrength) : 0.18 + (0.12 * glowStrength)),
+                        Color.white.opacity(editorial ? 0.010 : 0.05),
+                        Color.clear
+                    ],
+                    center: .topLeading,
+                    startRadius: 4,
+                    endRadius: 170
+                ))
+            }
+            let violetGlow = coolGlow.overlay {
+                shape.fill(RadialGradient(
+                    colors: [
+                        Color(red: 0.86, green: 0.50, blue: 1.0)
+                            .opacity(editorial ? 0.005 + (0.010 * glowStrength) : 0.16 + (0.14 * glowStrength)),
+                        tint.opacity(editorial ? 0.004 : 0.08 + (0.06 * glowStrength)),
+                        Color.clear
+                    ],
+                    center: .bottomTrailing,
+                    startRadius: 2,
+                    endRadius: 185
+                ))
+            }
+            violetGlow.overlay {
+                shape.fill(LinearGradient(
+                    colors: [
+                        Color.white.opacity(editorial ? 0.085 : 0.15 + (0.08 * glowStrength)),
+                        Color.clear,
+                        Color(red: 1.0, green: 0.82, blue: 0.67)
+                            .opacity(editorial ? 0.006 : 0.07 + (0.05 * glowStrength))
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottomTrailing
+                ))
+            }
+        }
     }
 }
 

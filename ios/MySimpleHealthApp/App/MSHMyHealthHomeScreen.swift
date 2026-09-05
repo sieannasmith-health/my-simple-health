@@ -582,6 +582,7 @@ struct MSHMyHealthHomeScreen: View {
     }
 }
 
+@MainActor
 private struct MSHDigitalEnvironmentSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPhotoItem: PhotosPickerItem?
@@ -712,7 +713,7 @@ private struct MSHDigitalEnvironmentSheet: View {
                             .font(.caption)
                             .foregroundStyle(MSHColor.charcoal.opacity(0.58))
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                 }
