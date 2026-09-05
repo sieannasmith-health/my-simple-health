@@ -1,6 +1,6 @@
 import Combine
 import FirebaseAuth
-import FirebaseFirestore
+@preconcurrency import FirebaseFirestore
 import Foundation
 
 enum MSHSharedResourceType: String, Codable, CaseIterable {
