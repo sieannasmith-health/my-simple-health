@@ -15,10 +15,10 @@ enum MSHColor {
     static let cream = ivory
     static let warmWhite = Color(red: 0.992, green: 0.989, blue: 0.980)
 
-    private static let accentLight = UIColor(red: 0.584, green: 0.600, blue: 0.506, alpha: 1)
-    private static let accentDark = UIColor(red: 0.690, green: 0.704, blue: 0.620, alpha: 1)
-    private static let canvasLight = UIColor(red: 0.973, green: 0.969, blue: 0.953, alpha: 1)
-    private static let canvasDark = UIColor(red: 0.082, green: 0.075, blue: 0.075, alpha: 1)
+    static let accentLight = UIColor(red: 0.420, green: 0.440, blue: 0.360, alpha: 1)
+    static let accentDark = UIColor(red: 0.690, green: 0.704, blue: 0.620, alpha: 1)
+    static let canvasLight = UIColor(red: 0.973, green: 0.969, blue: 0.953, alpha: 1)
+    static let canvasDark = UIColor(red: 0.082, green: 0.075, blue: 0.075, alpha: 1)
 
     static let accent = adaptive(light: accentLight, dark: accentDark)
     static let canvas = adaptive(light: canvasLight, dark: canvasDark)
