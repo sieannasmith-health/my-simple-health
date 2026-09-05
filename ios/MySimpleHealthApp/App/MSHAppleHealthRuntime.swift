@@ -19,16 +19,9 @@ enum MSHAppleHealthRuntime {
         let result = try await coordinator.connect(areas: areas)
         guard result.outcome == .completed else { return result }
 
-        if UIApplication.shared.applicationState != .active {
-            let notifications = NotificationCenter.default.notifications(
-                named: UIApplication.didBecomeActiveNotification
-            )
-            if UIApplication.shared.applicationState != .active {
-                for await _ in notifications {
-                    try Task.checkCancellation()
-                    if UIApplication.shared.applicationState == .active { break }
-                }
-            }
+        while UIApplication.shared.applicationState != .active {
+            try Task.checkCancellation()
+            try await Task.sleep(nanoseconds: 100_000_000)
         }
 
         try await prepareCanonicalCorrections()
