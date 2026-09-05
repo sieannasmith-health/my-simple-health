@@ -42,6 +42,7 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
 
         let records = try await store.records(provider: .appleHealth)
         let saved = try XCTUnwrap(records.first)
+        let correctionKind = try await corrections.kind(for: saved)
         XCTAssertEqual(records.count, 1)
         XCTAssertEqual(saved.id, original.id)
         XCTAssertEqual(saved.value, 465)
@@ -51,7 +52,7 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
         XCTAssertEqual(saved.importedAt, original.importedAt)
         XCTAssertEqual(saved.metadata["note"], "Adjusted in MSH")
         XCTAssertEqual(saved.metadata["msh.correction"], "corrected")
-        XCTAssertEqual(try await corrections.kind(for: saved), .corrected)
+        XCTAssertEqual(correctionKind, .corrected)
     }
 
     func testMSHDeleteDoesNotReappearAfterProviderRefresh() async throws {
@@ -68,12 +69,15 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
         try await corrections.install()
         try await corrections.delete(original, at: Date(timeIntervalSince1970: 1_800_000_100))
 
-        XCTAssertTrue(try await store.records(provider: .appleHealth).isEmpty)
+        let recordsAfterDelete = try await store.records(provider: .appleHealth)
+        XCTAssertTrue(recordsAfterDelete.isEmpty)
 
         // A later source upsert must not resurrect the MSH tombstone.
         try await store.apply(records: [original], deletedSourceRecordIDs: [], provider: .appleHealth)
-        XCTAssertTrue(try await store.records(provider: .appleHealth).isEmpty)
-        XCTAssertEqual(try await corrections.kind(for: original), .deleted)
+        let recordsAfterRefresh = try await store.records(provider: .appleHealth)
+        let correctionKind = try await corrections.kind(for: original)
+        XCTAssertTrue(recordsAfterRefresh.isEmpty)
+        XCTAssertEqual(correctionKind, .deleted)
     }
 
     func testProviderDeletionCannotEraseMSHCorrectionTombstone() async throws {
@@ -97,10 +101,12 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
             deletedSourceRecordIDs: [original.source.sourceRecordID],
             provider: .appleHealth
         )
-        XCTAssertEqual(try await corrections.kind(for: original), .deleted)
+        let correctionKind = try await corrections.kind(for: original)
+        XCTAssertEqual(correctionKind, .deleted)
 
         try await store.apply(records: [original], deletedSourceRecordIDs: [], provider: .appleHealth)
-        XCTAssertTrue(try await store.records(provider: .appleHealth).isEmpty)
+        let recordsAfterRefresh = try await store.records(provider: .appleHealth)
+        XCTAssertTrue(recordsAfterRefresh.isEmpty)
     }
 
     func testDuplicateLookingRecordsAreCorrectedByStableIdentityOnly() async throws {
@@ -147,7 +153,6 @@ final class MSHHealthRecordCorrectionsTests: XCTestCase {
             start: date,
             end: date.addingTimeInterval(60),
             timezone: TimeZone(identifier: "America/Indiana/Indianapolis")!,
-            sourceName: "Apple Health fixture",
             metadata: ["fixture": "true"],
             importedAt: date
         )
