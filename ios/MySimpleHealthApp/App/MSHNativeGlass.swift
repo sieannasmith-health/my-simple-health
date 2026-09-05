@@ -42,7 +42,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     func body(content: Content) -> some View {
         let editorialGlass = shadowStrength <= 0.60 && glowStrength <= 0.22
 
-        content
+        let filled = content
             .background {
                 if reduceTransparency {
                     shape.fill(Color.white.opacity(0.94))
@@ -131,7 +131,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                         }
                 }
             }
-            .overlay {
+        let edged = filled.overlay {
                 shape.strokeBorder(
                     LinearGradient(
                         colors: [
@@ -146,7 +146,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                     lineWidth: editorialGlass ? 0.70 : 1.10
                 )
             }
-            .overlay {
+        let refracted = edged.overlay {
                 shape.strokeBorder(
                     AngularGradient(
                         colors: [
@@ -171,7 +171,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 )
                 .blur(radius: 0.08)
             }
-            .overlay {
+        let glowing = refracted.overlay {
                 shape.strokeBorder(
                     AngularGradient(
                         colors: [
@@ -191,7 +191,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                 )
                 .blur(radius: editorialGlass ? 0.65 : 1.55)
             }
-            .overlay(alignment: .top) {
+        let highlighted = glowing.overlay(alignment: .top) {
                 shape
                     .strokeBorder(
                         Color.white.opacity((editorialGlass ? 0.34 : 0.92) * edgeStrength),
@@ -199,7 +199,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                     )
                     .blur(radius: 0.06)
             }
-            .shadow(
+        return highlighted.shadow(
                 color: tint.opacity((editorialGlass ? 0.004 : 0.11) + ((editorialGlass ? 0.008 : 0.10) * glowStrength)),
                 radius: editorialGlass ? 3 : 10 + (9 * glowStrength),
                 y: 1

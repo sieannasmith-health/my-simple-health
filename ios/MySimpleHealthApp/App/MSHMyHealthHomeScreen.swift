@@ -601,6 +601,7 @@ private struct MSHDigitalEnvironmentSheet: View {
         GridItem(.flexible(), spacing: 10)
     ]
 
+    @MainActor
     var body: some View {
         NavigationStack {
             ZStack {
