@@ -20,8 +20,8 @@ final class MSHPlaidConnectionController: ObservableObject {
 
     private(set) var linkSession: PlaidLinkSession?
 
-    private let functions = Functions.functions(region: "us-central1")
-    private let db = Firestore.firestore()
+    private lazy var functions = Functions.functions(region: "us-central1")
+    private lazy var db = Firestore.firestore()
     private var listener: ListenerRegistration?
 
     func start() {
