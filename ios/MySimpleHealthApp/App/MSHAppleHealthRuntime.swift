@@ -7,6 +7,7 @@ import UIKit
 enum MSHAppleHealthRuntime {
     static let provider = AppleHealthKitProvider()
     static let store = FileHealthStore()
+    static let corrections = MSHHealthRecordCorrectionStore()
     static let coordinator = HealthSyncCoordinator(
         provider: provider,
         records: store,
@@ -18,18 +19,12 @@ enum MSHAppleHealthRuntime {
         let result = try await coordinator.connect(areas: areas)
         guard result.outcome == .completed else { return result }
 
-        if UIApplication.shared.applicationState != .active {
-            let notifications = NotificationCenter.default.notifications(
-                named: UIApplication.didBecomeActiveNotification
-            )
-            if UIApplication.shared.applicationState != .active {
-                for await _ in notifications {
-                    try Task.checkCancellation()
-                    if UIApplication.shared.applicationState == .active { break }
-                }
-            }
+        while UIApplication.shared.applicationState != .active {
+            try Task.checkCancellation()
+            try await Task.sleep(nanoseconds: 100_000_000)
         }
 
+        try await prepareCanonicalCorrections()
         MSHDebugLifecycle.log(
             "healthkit_sync_started",
             "trigger=onboarding areas=\(areas.map(\.rawValue).sorted().joined(separator: ","))"
@@ -89,6 +84,7 @@ enum MSHAppleHealthRuntime {
             )
         }
 
+        try await prepareCanonicalCorrections()
         MSHDebugLifecycle.log(
             "healthkit_sync_started",
             "trigger=my_health_refresh areas=\(areas.map(\.rawValue).sorted().joined(separator: ",")) localRecordCount=\(localRecordCount)"
@@ -99,5 +95,27 @@ enum MSHAppleHealthRuntime {
             "healthkit_sync_finished",
             "trigger=my_health_refresh passes=\(passes) partialFailures=\(finalState.partialFailures.count)"
         )
+    }
+
+    static func correctInMSH(_ record: HealthRecord) async throws {
+        try await prepareCanonicalCorrections()
+        try await corrections.correct(record)
+    }
+
+    static func removeFromMSH(_ record: HealthRecord) async throws {
+        try await prepareCanonicalCorrections()
+        try await corrections.delete(record)
+    }
+
+    static func removeImportedData() async throws {
+        try await prepareCanonicalCorrections()
+        try await corrections.removeImportedRecords(provider: .appleHealth)
+    }
+
+    private static func prepareCanonicalCorrections() async throws {
+        // Opening the FileHealthStore first guarantees the health_records table exists
+        // before the correction store creates protection triggers against it.
+        _ = try await store.diagnosticRecordCount()
+        try await corrections.install()
     }
 }

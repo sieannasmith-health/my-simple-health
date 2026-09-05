@@ -63,7 +63,7 @@ final class AppleHealthBridge: NSObject, WKScriptMessageHandler {
 #endif
                     MSHDebugLifecycle.log("healthkit_sync_finished", "trigger=explicit_sync passes=\(passes)")
                 case "disconnect": try await coordinator.disconnect()
-                case "removeImportedData": try await coordinator.removeImportedRecords()
+                case "removeImportedData": try await MSHAppleHealthRuntime.removeImportedData()
                 case "manage":
                     if let url = URL(string: UIApplication.openSettingsURLString) { await UIApplication.shared.open(url) }
                 case "calendarRange":
@@ -106,30 +106,11 @@ final class AppleHealthBridge: NSObject, WKScriptMessageHandler {
             "healthkit_first_sync_waiting_for_application_active",
             "applicationState=\(String(describing: initialState))"
         )
-        let notifications = NotificationCenter.default.notifications(
-            named: UIApplication.didBecomeActiveNotification
-        )
-
-        // Close the small gap between the initial state read and observer setup.
-        if UIApplication.shared.applicationState == .active {
-            MSHDebugLifecycle.log("healthkit_first_sync_application_active", "source=observer_setup_recheck")
-            return
-        }
-
-        for await _ in notifications {
+        while UIApplication.shared.applicationState != .active {
             try Task.checkCancellation()
-            let state = UIApplication.shared.applicationState
-            MSHDebugLifecycle.log(
-                "healthkit_first_sync_did_become_active_notification",
-                "applicationState=\(String(describing: state))"
-            )
-            if state == .active {
-                MSHDebugLifecycle.log("healthkit_first_sync_application_active", "source=notification")
-                return
-            }
+            try await Task.sleep(nanoseconds: 100_000_000)
         }
-
-        try Task.checkCancellation()
+        MSHDebugLifecycle.log("healthkit_first_sync_application_active", "source=state_wait")
     }
 
     private func respond(

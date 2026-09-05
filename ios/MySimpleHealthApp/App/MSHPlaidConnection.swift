@@ -24,10 +24,6 @@ final class MSHPlaidConnectionController: ObservableObject {
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
 
-    deinit {
-        listener?.remove()
-    }
-
     func start() {
         guard listener == nil, let uid = Auth.auth().currentUser?.uid else { return }
         listener = db.collection("users")
