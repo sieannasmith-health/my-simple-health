@@ -4,7 +4,7 @@ import FirebaseFunctions
 import LinkKit
 import SwiftUI
 
-struct MSHPlaidConnectionSummary: Identifiable, Equatable {
+struct MSHPlaidConnectionSummary: Identifiable, Equatable, Sendable {
     let id: String
     let status: String
     let lastSuccessfulSyncAt: Date?
@@ -25,27 +25,30 @@ final class MSHPlaidConnectionController: ObservableObject {
     private var listener: ListenerRegistration?
 
     func start() {
-        guard listener == nil, let uid = Auth.auth().currentUser?.uid else { return }
+        stop()
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         listener = db.collection("users")
             .document(uid)
             .collection("plaidConnections")
             .addSnapshotListener { [weak self] snapshot, error in
-                Task { @MainActor in
+                let errorMessage = error?.localizedDescription
+                let connections = snapshot?.documents.compactMap { document -> MSHPlaidConnectionSummary? in
+                    let data = document.data()
+                    return MSHPlaidConnectionSummary(
+                        id: document.documentID,
+                        status: data["status"] as? String ?? "connected",
+                        lastSuccessfulSyncAt: (data["lastSuccessfulSyncAt"] as? Timestamp)?.dateValue()
+                    )
+                }
+                .sorted { $0.id < $1.id } ?? []
+
+                Task { @MainActor [weak self] in
                     guard let self else { return }
-                    if let error {
-                        self.errorMessage = error.localizedDescription
+                    if let errorMessage {
+                        self.errorMessage = errorMessage
                         return
                     }
-
-                    self.connections = snapshot?.documents.compactMap { document in
-                        let data = document.data()
-                        return MSHPlaidConnectionSummary(
-                            id: document.documentID,
-                            status: data["status"] as? String ?? "connected",
-                            lastSuccessfulSyncAt: (data["lastSuccessfulSyncAt"] as? Timestamp)?.dateValue()
-                        )
-                    }
-                    .sorted { $0.id < $1.id } ?? []
+                    self.connections = connections
                 }
             }
     }
