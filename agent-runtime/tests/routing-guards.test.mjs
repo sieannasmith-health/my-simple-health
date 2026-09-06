@@ -20,8 +20,9 @@ assert.match(reconciler, /assignedAgent = 'tessa'/);
 assert.match(reconciler, /State atomically consumed/);
 assert.match(runV3, /post-turn-reconciler\.mjs/);
 
-assert.match(runtimeWorkflow, /workflow_dispatch:/);
-assert.doesNotMatch(runtimeWorkflow, /^\s*issues:/m);
-assert.doesNotMatch(runtimeWorkflow, /^\s*issue_comment:/m);
+assert.match(runtimeWorkflow, /on:\n  workflow_dispatch:/);
+assert.doesNotMatch(runtimeWorkflow, /on:\n[\s\S]*?\n  issues:\n\s+types:\s*\[labeled\]/);
+assert.doesNotMatch(runtimeWorkflow, /issue_comment:\n\s+types:\s*\[created\]/);
+assert.doesNotMatch(runtimeWorkflow, /github\.event_name\s*==\s*['"]issues['"]/);
 
 console.log('routing guard regressions passed');
