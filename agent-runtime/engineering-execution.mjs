@@ -32,7 +32,15 @@ function validateImplementationFiles(files) {
 }
 
 export function executionApproved(issue, agentKey, labelNames) {
-  return agentKey === 'selah' && labelNames(issue).includes('execution:approved');
+  const approved = labelNames(issue).includes('execution:approved');
+
+  // Product coordination must be able to observe existing execution authority
+  // without being granted permission to implement code itself. The runner keeps
+  // the implementation boundary on Selah, but Nomy must not interpret an
+  // already-approved objective as lacking authorization and escalate to Siea.
+  if (agentKey === 'nomy') return approved;
+
+  return agentKey === 'selah' && approved;
 }
 
 export async function applyImplementation({ issue, result, github, labelNames }) {
