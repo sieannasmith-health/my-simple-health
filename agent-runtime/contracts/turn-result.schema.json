@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mysimplehealth.org/schemas/agent-turn-result-v1.json",
+  "title": "MSH Agent Turn Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "execution_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agent_name": { "type": "string", "minLength": 1 },
+        "stage_completed": { "type": "string", "minLength": 1 }
+      },
+      "required": ["agent_name", "stage_completed"]
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "success": { "type": "boolean" },
+        "summary": { "type": "string", "minLength": 1 },
+        "error_details": { "type": ["string", "null"] }
+      },
+      "required": ["success", "summary", "error_details"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": { "type": "string", "enum": ["COMMENT", "PULL_REQUEST", "COMMIT", "WORKFLOW_RUN", "NONE"] },
+        "reference_id": { "type": ["string", "null"] },
+        "pr_number": { "type": ["integer", "null"], "minimum": 1 },
+        "head_sha": { "type": ["string", "null"] },
+        "workflow_run_ids": { "type": "array", "items": { "type": "integer" } }
+      },
+      "required": ["artifact_type", "reference_id", "pr_number", "head_sha", "workflow_run_ids"]
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "next_step": { "type": "string", "enum": ["CONTINUE", "PRODUCT_REVIEW", "HALT_FOR_HUMAN"] },
+        "next_agent": { "type": ["string", "null"] },
+        "next_stage": { "type": ["string", "null"] }
+      },
+      "required": ["next_step", "next_agent", "next_stage"]
+    },
+    "human_gate": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "enum": ["PRODUCT_DECISION", "DEVICE_CHECK", "CREDENTIAL_OR_ACCESS", "EXPLICIT_APPROVAL"] },
+            "request": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string", "minLength": 1 },
+            "resume_stage": { "type": "string", "minLength": 1 }
+          },
+          "required": ["type", "request", "reason", "resume_stage"]
+        }
+      ]
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "retryable": { "type": "boolean" },
+        "reason": { "type": ["string", "null"] }
+      },
+      "required": ["retryable", "reason"]
+    }
+  },
+  "required": ["contract_version", "execution_metadata", "outcome", "evidence", "routing", "human_gate", "retry"]
+}
