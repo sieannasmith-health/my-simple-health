@@ -104,6 +104,59 @@ function leaseExpired(state) {
   if (state.status !== 'EXECUTING' || !state.execution?.lease_expires_at) return false;
   return Date.parse(state.execution.lease_expires_at) <= Date.now();
 }
+function hasHistoryEvent(state, event) {
+  return Array.isArray(state.history) && state.history.some(entry => entry?.event === event);
+}
+function executionGateSatisfied(issue, state) {
+  if (state.status !== 'HUMAN_APPROVAL_REQUIRED') return false;
+  if (state.human_gate?.reason_code !== 'EXECUTION_APPROVAL_REQUIRED') return false;
+  return labels(issue).includes('execution:approved');
+}
+function legacyHumanGateNeedsReevaluation(issue, state) {
+  if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return false;
+  if (state.current_stage !== 'IMPLEMENTATION' || state.assigned_agent !== 'human') return false;
+  if (!labels(issue).includes('execution:approved')) return false;
+  if (hasHistoryEvent(state, 'LEGACY_HUMAN_GATE_REEVALUATION')) return false;
+  const history = Array.isArray(state.history) ? state.history : [];
+  const last = history.at(-1);
+  return last?.agent === 'selah' && last?.result_status === 'blocked';
+}
+function recoverHumanGate(issue, state) {
+  if (executionGateSatisfied(issue, state)) {
+    return {
+      ...state,
+      status: 'PENDING',
+      assigned_agent: state.human_gate?.resume_agent || 'selah',
+      current_stage: state.human_gate?.resume_stage || 'IMPLEMENTATION',
+      execution: null,
+      human_gate: null,
+      history: [...(Array.isArray(state.history) ? state.history : []), {
+        at: new Date().toISOString(),
+        event: 'HUMAN_GATE_SATISFIED',
+        reason_code: 'EXECUTION_APPROVAL_REQUIRED',
+        satisfied_by: 'execution:approved'
+      }].slice(-20)
+    };
+  }
+
+  if (legacyHumanGateNeedsReevaluation(issue, state)) {
+    return {
+      ...state,
+      status: 'PENDING',
+      assigned_agent: 'selah',
+      current_stage: 'IMPLEMENTATION',
+      execution: null,
+      history: [...(Array.isArray(state.history) ? state.history : []), {
+        at: new Date().toISOString(),
+        event: 'LEGACY_HUMAN_GATE_REEVALUATION',
+        reason_code: 'UNTYPED_LEGACY_GATE',
+        satisfied_by: 'bounded_revalidation_after_runtime_upgrade'
+      }].slice(-20)
+    };
+  }
+
+  return state;
+}
 async function dispatch(state) {
   await request(`/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`, {
     method: 'POST',
@@ -120,6 +173,14 @@ if (!isEventEligibleForStateWrite(eventContext)) {
 const issue = await request(`/issues/${issueNumber}`);
 let state = parseState(issue.body || '') || defaultState(issue);
 if (['COMPLETED', 'ORCHESTRATION_BLOCKED'].includes(state.status)) process.exit(0);
+
+if (state.status === 'HUMAN_APPROVAL_REQUIRED') {
+  const recovered = recoverHumanGate(issue, state);
+  if (recovered !== state) {
+    console.log(`[AUTONOMY] Reconciled satisfied or legacy human gate on issue #${issueNumber}; resuming ${recovered.assigned_agent}.`);
+    state = recovered;
+  }
+}
 
 if (leaseExpired(state)) {
   state.retry_count += 1;
