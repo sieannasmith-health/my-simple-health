@@ -30,8 +30,13 @@ export function repositoryRoot(env = process.env, cwd = process.cwd()) {
 }
 
 export function listTrackedWorkspaceFiles(root) {
-  const output = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8' });
-  return output.split('\0').filter(Boolean).filter(safeTrackedPath).sort();
+  try {
+    const output = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return { files: output.split('\0').filter(Boolean).filter(safeTrackedPath).sort(), error: null };
+  } catch (error) {
+    const message = error?.stderr?.toString?.().trim() || error?.message || 'git ls-files failed';
+    return { files: [], error: message.slice(0, 500) };
+  }
 }
 
 function objectiveTerms(objectiveText) {
@@ -53,14 +58,20 @@ function scorePath(filePath, terms) {
 }
 
 export function selectWorkspacePaths({ root, explicitPaths = [], objectiveText = '', maxFiles = 8 }) {
-  const tracked = listTrackedWorkspaceFiles(root);
+  const discovery = listTrackedWorkspaceFiles(root);
+  const tracked = discovery.files;
   const trackedSet = new Set(tracked);
   const explicit = explicitPaths
     .map(candidate => normalizeRelative(root, candidate))
     .filter(candidate => candidate && trackedSet.has(candidate) && safeTrackedPath(candidate));
 
   if (explicit.length > 0) {
-    return { mode: 'EXPLICIT_PATHS', manifest: tracked, selected: [...new Set(explicit)].slice(0, maxFiles) };
+    return {
+      mode: 'EXPLICIT_PATHS',
+      manifest: tracked,
+      selected: [...new Set(explicit)].slice(0, maxFiles),
+      discoveryError: discovery.error
+    };
   }
 
   const terms = objectiveTerms(objectiveText);
@@ -71,9 +82,10 @@ export function selectWorkspacePaths({ root, explicitPaths = [], objectiveText =
   const positive = ranked.filter(item => item.score > 0).map(item => item.filePath);
   const fallback = ranked.map(item => item.filePath);
   return {
-    mode: 'WORKSPACE_FALLBACK',
+    mode: discovery.error ? 'WORKSPACE_DISCOVERY_UNAVAILABLE' : 'WORKSPACE_FALLBACK',
     manifest: tracked,
-    selected: (positive.length > 0 ? positive : fallback).slice(0, maxFiles)
+    selected: (positive.length > 0 ? positive : fallback).slice(0, maxFiles),
+    discoveryError: discovery.error
   };
 }
 
@@ -87,9 +99,12 @@ export async function hydrateWorkspaceContext({ root, explicitPaths = [], object
       const content = await fs.readFile(absolute, 'utf8');
       excerpts.push(`FILE: ${filePath}\n${content.slice(0, maxBytesPerFile)}`);
     } catch {
-      // A tracked file can disappear between checkout and hydration only if the workspace mutates.
-      // Skip it and preserve the rest of the deterministic context rather than escalating to a human.
+      // Preserve the rest of the deterministic context rather than failing the bounded turn.
     }
+  }
+
+  if (excerpts.length === 0 && selection.discoveryError) {
+    excerpts.push(`WORKSPACE DISCOVERY DIAGNOSTIC: tracked repository files could not be enumerated automatically. ${selection.discoveryError}`);
   }
 
   return {
@@ -97,6 +112,7 @@ export async function hydrateWorkspaceContext({ root, explicitPaths = [], object
     mode: selection.mode,
     manifest: selection.manifest,
     selected: selection.selected,
-    excerpts
+    excerpts,
+    discoveryError: selection.discoveryError
   };
 }
