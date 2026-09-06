@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { authorizeMaintenanceFromEvent } from './maintenance-authorization.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -173,6 +174,22 @@ if (!isEventEligibleForStateWrite(eventContext)) {
 const issue = await request(`/issues/${issueNumber}`);
 let state = parseState(issue.body || '') || defaultState(issue);
 if (['COMPLETED', 'ORCHESTRATION_BLOCKED'].includes(state.status)) process.exit(0);
+
+const maintenanceAuthorization = authorizeMaintenanceFromEvent({
+  eventName: eventContext.eventName,
+  payload: eventContext.payload,
+  repositoryOwner: owner,
+  issueNumber,
+  state
+});
+if (maintenanceAuthorization.matchedCommand && !maintenanceAuthorization.authorized) {
+  console.log(`[SECURITY] Rejected runtime-maintenance command on issue #${issueNumber}: sender is not the repository owner or command scope is invalid.`);
+  process.exit(0);
+}
+if (maintenanceAuthorization.authorized) {
+  state = maintenanceAuthorization.state;
+  console.log(`[SECURITY] Accepted owner-authenticated runtime-maintenance grant ${maintenanceAuthorization.grant.grant_id} for issue #${issueNumber}.`);
+}
 
 if (state.status === 'HUMAN_APPROVAL_REQUIRED') {
   const recovered = recoverHumanGate(issue, state);
