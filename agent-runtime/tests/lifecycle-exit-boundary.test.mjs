@@ -77,4 +77,18 @@ const reconcileIndex = orchestratorSource.indexOf("post-turn-reconciler.mjs");
 assert.ok(workerIndex >= 0 && normalizeIndex > workerIndex && reconcileIndex > normalizeIndex,
   'Runtime must execute worker, await normalization, then execute reconciliation');
 
+const reconcilerSource = await fs.readFile(new URL('../post-turn-reconciler.mjs', import.meta.url), 'utf8');
+const statePersistIndex = reconcilerSource.indexOf('persistWithOptimisticGuard');
+const labelReconcileIndex = reconcilerSource.lastIndexOf('await reconcileLabels(transition)');
+const pendingGuardIndex = reconcilerSource.indexOf("nextState.status === 'PENDING'");
+const evaluatorDispatchIndex = reconcilerSource.lastIndexOf('await dispatchEvaluator()');
+assert.ok(statePersistIndex >= 0 && labelReconcileIndex > statePersistIndex,
+  'Post-turn reconciliation must persist authoritative state before visible labels');
+assert.ok(pendingGuardIndex > labelReconcileIndex && evaluatorDispatchIndex > pendingGuardIndex,
+  'A reconciled PENDING state must explicitly dispatch the state evaluator after label reconciliation');
+assert.ok(reconcilerSource.includes("'msh-agent-state-evaluator.yml'"),
+  'Explicit ignition must target the deployed MSH State Evaluator workflow');
+assert.ok(reconcilerSource.includes("inputs: { issue_number: String(issueNumber) }"),
+  'Explicit ignition must preserve the evaluator workflow single-input contract');
+
 console.log('lifecycle exit-boundary regression tests passed');
