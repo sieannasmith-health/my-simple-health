@@ -41,5 +41,7 @@ jobs:
         run: node agent-runtime/tests/routing-guards.test.mjs
       - name: Verify orchestration authority policy
         run: node agent-runtime/tests/orchestration-policy.test.mjs
+      - name: Verify lifecycle exit boundary
+        run: node agent-runtime/tests/lifecycle-exit-boundary.test.mjs
       - name: Verify blind watchdog E2E contract
         run: node agent-runtime/tests/orphan-e2e-contract.test.mjs
