@@ -17,6 +17,7 @@ const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
 const MAX_CONTEXT_EXCERPTS = 8;
 const MAX_EXCERPT_CHARS = 7000;
+const MAX_MAINTENANCE_CONTEXT_BYTES = 200_000;
 const SAFE_TEXT_EXTENSIONS = new Set([
   '.md', '.mjs', '.js', '.cjs', '.ts', '.tsx', '.jsx', '.json', '.yml', '.yaml', '.sh', '.py',
   '.swift', '.kt', '.kts', '.java', '.rb', '.go', '.rs', '.sql', '.html', '.css', '.scss', '.txt'
@@ -197,20 +198,33 @@ async function discoverWorkspaceContextPaths(issue, comments) {
   }
 }
 
-async function readWorkspaceExcerpt(filePath) {
+async function readWorkspaceFile(filePath) {
   try {
     const absolutePath = path.resolve(repositoryRoot, filePath);
     const relativePath = path.relative(repositoryRoot, absolutePath);
     if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) return '';
     const content = await fs.readFile(absolutePath, 'utf8');
     if (content.includes('\0')) return '';
-    return content.slice(0, MAX_EXCERPT_CHARS);
+    return content;
   } catch {
     return '';
   }
 }
 
-async function collectDeterministicContext(issue, comments, resolution) {
+async function readWorkspaceExcerpt(filePath) {
+  return (await readWorkspaceFile(filePath)).slice(0, MAX_EXCERPT_CHARS);
+}
+
+function activeMaintenancePaths(state) {
+  const grant = state?.maintenance_grant;
+  if (!grant || grant.reason_code !== 'RUNTIME_MAINTENANCE_APPROVED' || grant.consumed_at) return [];
+  return [...new Set((grant.allowed_paths || []).map(filePath => String(filePath || '').replaceAll('\\', '/')))]
+    .filter(Boolean)
+    .filter(isSafeContextPath)
+    .slice(0, MAX_CONTEXT_EXCERPTS);
+}
+
+async function collectDeterministicContext(issue, comments, resolution, state) {
   const workingAgreement = (await readRepoFile('AGENTS.md')).slice(0, 14000);
   let filePaths = explicitRepoPaths(issue, comments);
   let contextSource = 'explicit references';
@@ -221,17 +235,35 @@ async function collectDeterministicContext(issue, comments, resolution) {
     contextSource = 'ranked checked-out workspace fallback';
   }
 
+  const maintenancePaths = activeMaintenancePaths(state);
+  const maintenanceSet = new Set(maintenancePaths);
+  filePaths = [...maintenancePaths, ...filePaths.filter(filePath => !maintenanceSet.has(filePath))].slice(0, MAX_CONTEXT_EXCERPTS);
+
   const excerpts = [];
-  for (const filePath of filePaths.slice(0, MAX_CONTEXT_EXCERPTS)) {
-    const content = contextSource === 'explicit references' ? await readRepoFile(filePath) : await readWorkspaceExcerpt(filePath);
-    if (content) excerpts.push(`FILE: ${filePath}\n${content.slice(0, MAX_EXCERPT_CHARS)}`);
+  let maintenanceBytes = 0;
+  for (const filePath of filePaths) {
+    let content = '';
+    if (maintenanceSet.has(filePath)) {
+      content = await readWorkspaceFile(filePath);
+      if (!content) continue;
+      const bytes = Buffer.byteLength(content, 'utf8');
+      maintenanceBytes += bytes;
+      if (maintenanceBytes > MAX_MAINTENANCE_CONTEXT_BYTES) {
+        throw new Error(`Maintenance context exceeds ${MAX_MAINTENANCE_CONTEXT_BYTES} byte aggregate safety limit.`);
+      }
+      console.log(`[CONTEXT_ELEVATION] Full maintenance context for ${filePath} (${bytes} bytes).`);
+    } else {
+      content = contextSource === 'explicit references' ? await readRepoFile(filePath) : await readWorkspaceExcerpt(filePath);
+      content = content.slice(0, MAX_EXCERPT_CHARS);
+    }
+    if (content) excerpts.push(`FILE: ${filePath}\n${content}`);
   }
 
   const repositoryFiles = excerpts.length > 0 ? excerpts.join('\n\n---\n\n') : '(No repository source files available in current workspace)';
   const prContext = resolution?.pr
     ? `DETERMINISTIC PR EVIDENCE (${resolution.resolved_via}):\n${JSON.stringify(resolution.pr, null, 2)}`
     : `DETERMINISTIC PR EVIDENCE:\n${resolution?.required ? '(required but unresolved)' : '(not required for this stage)'}`;
-  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nREPOSITORY FILE CONTEXT (${contextSource}; max ${MAX_CONTEXT_EXCERPTS} excerpts):\n${repositoryFiles}`;
+  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nREPOSITORY FILE CONTEXT (${contextSource}; max ${MAX_CONTEXT_EXCERPTS} files; maintenance targets full-text under ${MAX_MAINTENANCE_CONTEXT_BYTES} aggregate bytes):\n${repositoryFiles}`;
 }
 
 function extractOutputText(payload) {
@@ -271,11 +303,9 @@ if (evidenceResolution.routeToCoordinator) {
 }
 
 await persistEvidence(state, evidenceResolution);
-const repositoryContext = await collectDeterministicContext(issue, comments, evidenceResolution);
+const repositoryContext = await collectDeterministicContext(issue, comments, evidenceResolution, state);
 const canExecute = executionApproved(issue, agentKey, labelNames);
-const maintenancePaths = Array.isArray(state.maintenance_grant?.allowed_paths) && !state.maintenance_grant?.consumed_at
-  ? state.maintenance_grant.allowed_paths
-  : [];
+const maintenancePaths = activeMaintenancePaths(state);
 
 const operationsRules = `
 MSH agent-operations rules:
