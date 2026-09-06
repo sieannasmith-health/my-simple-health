@@ -1,4 +1,5 @@
 name: MSH Agent Runtime
+run-name: MSH Agent Runtime • #${{ inputs.issue_number }} • ${{ inputs.agent }}
 
 on:
   workflow_dispatch:
