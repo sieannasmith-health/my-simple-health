@@ -9,7 +9,8 @@ assert.match(evaluator, /repository_dispatch:\s*\n\s*types:\s*\[msh-watchdog-swe
 assert.match(evaluator, /github\.event_name == 'schedule' \|\| github\.event_name == 'repository_dispatch'/);
 assert.match(evaluator, /Responsible:/);
 
-assert.match(e2e, /labels:\s*\[\]/, 'synthetic issue contract should begin without orchestration labels');
+assert.match(e2e, /gh issue create/);
+assert.doesNotMatch(e2e, /gh issue create[^\n]*--label/, 'synthetic issue must begin without orchestration labels');
 assert.match(e2e, /msh-watchdog-sweep/);
 assert.doesNotMatch(e2e, /issue_number.*dispatch/i, 'blind watchdog trigger must not receive issue-specific context');
 assert.match(e2e, /needs:siea/);
