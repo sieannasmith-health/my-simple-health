@@ -9,6 +9,7 @@ on:
       - 'ios/**'
       - 'firebase/firestore.rules'
       - 'tests/core-authority-rules.test.mjs'
+      - 'tests/core-authority-firestore.test.mjs'
       - '.github/workflows/ios-native-integrity.yml'
 
 permissions:
@@ -24,6 +25,11 @@ jobs:
 
       - name: Verify Core authority rules contract
         run: node --test tests/core-authority-rules.test.mjs
+
+      - name: Verify Core member isolation in Firestore emulator
+        run: |
+          npm install --no-save @firebase/rules-unit-testing firebase firebase-tools
+          npx firebase-tools emulators:exec --only firestore "node --test tests/core-authority-firestore.test.mjs"
 
       - name: Verify local HealthKit package
         working-directory: ios/MySimpleHealthHealthKit
