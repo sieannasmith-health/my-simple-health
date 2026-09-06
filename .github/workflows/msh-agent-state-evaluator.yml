@@ -1,4 +1,8 @@
 name: MSH Agent State Evaluator
+run-name: >-
+  ${{ github.event_name == 'repository_dispatch'
+      && format('MSH Watchdog Sweep • {0}', github.event.client_payload.correlation_id)
+      || format('MSH Agent State Evaluator • {0}', github.event.issue.number || inputs.issue_number || github.run_id) }}
 
 on:
   workflow_dispatch:
@@ -22,7 +26,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: msh-agent-state-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+  group: msh-agent-state-${{ github.event.issue.number || inputs.issue_number || github.event.client_payload.correlation_id || github.run_id }}
   cancel-in-progress: false
 
 jobs:
