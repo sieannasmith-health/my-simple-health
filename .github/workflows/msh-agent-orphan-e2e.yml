@@ -48,22 +48,61 @@ jobs:
           echo "$issue" | jq -e '.body | contains("<!-- MSH_STATE_LOCK -->") | not' >/dev/null
 
       - name: Trigger blind repository-wide watchdog sweep
+        id: trigger
         shell: bash
         run: |
-          gh api --method POST "repos/$REPO/dispatches" -f event_type='msh-watchdog-sweep'
+          correlation="e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "correlation=$correlation" >> "$GITHUB_OUTPUT"
+          gh api --method POST "repos/$REPO/dispatches" \
+            -f event_type='msh-watchdog-sweep' \
+            -F "client_payload[correlation_id]=$correlation"
+          echo "Triggered blind watchdog sweep: $correlation"
 
-      - name: Wait only for watchdog-produced evidence
+      - name: Wait for the exact watchdog sweep to complete
+        shell: bash
+        env:
+          CORRELATION: ${{ steps.trigger.outputs.correlation }}
+        run: |
+          expected="MSH Watchdog Sweep • $CORRELATION"
+          deadline=$((SECONDS + 180))
+
+          while [ $SECONDS -lt $deadline ]; do
+            run=$(gh run list --repo "$REPO" --workflow msh-agent-state-evaluator.yml --event repository_dispatch --limit 50 \
+              --json databaseId,displayTitle,status,conclusion,createdAt \
+              --jq ".[] | select(.displayTitle == \"$expected\") | @json" | head -n 1)
+
+            if [ -n "$run" ]; then
+              status=$(echo "$run" | jq -r '.status')
+              conclusion=$(echo "$run" | jq -r '.conclusion // ""')
+              echo "Correlated watchdog: $run"
+
+              if [ "$status" = "completed" ]; then
+                test "$conclusion" = "success"
+                exit 0
+              fi
+            fi
+
+            sleep 5
+          done
+
+          echo "Timed out waiting for correlated watchdog sweep: $expected" >&2
+          gh run list --repo "$REPO" --workflow msh-agent-state-evaluator.yml --event repository_dispatch --limit 20 \
+            --json databaseId,displayTitle,status,conclusion,createdAt >&2
+          exit 1
+
+      - name: Assert watchdog-produced discovery and bounded-turn dispatch
         shell: bash
         env:
           ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
         run: |
-          deadline=$((SECONDS + 180))
+          deadline=$((SECONDS + 120))
           while [ $SECONDS -lt $deadline ]; do
             issue=$(gh api "repos/$REPO/issues/$ISSUE_NUMBER")
             body=$(echo "$issue" | jq -r '.body // ""')
             labels=$(echo "$issue" | jq -r '[.labels[].name] | join(" ")')
 
-            run=$(gh run list --repo "$REPO" --workflow msh-agent-runtime.yml --limit 50 --json databaseId,displayTitle,status,conclusion,createdAt \
+            run=$(gh run list --repo "$REPO" --workflow msh-agent-runtime.yml --limit 50 \
+              --json databaseId,displayTitle,status,conclusion,createdAt \
               --jq ".[] | select(.displayTitle == \"MSH Agent Runtime • #$ISSUE_NUMBER • selah\") | @json" | head -n 1)
 
             if [[ "$body" == *'<!-- MSH_STATE_LOCK -->'* ]] && [[ "$labels" == *'agent:selah'* ]] && [ -n "$run" ]; then
@@ -75,9 +114,10 @@ jobs:
             sleep 5
           done
 
-          echo "Timed out waiting for unattended watchdog discovery evidence." >&2
+          echo "Timed out waiting for unattended discovery evidence." >&2
           gh api "repos/$REPO/issues/$ISSUE_NUMBER" | jq '{labels: [.labels[].name], body: .body}' >&2
-          gh run list --repo "$REPO" --workflow msh-agent-runtime.yml --limit 20 --json databaseId,displayTitle,status,conclusion,createdAt >&2
+          gh run list --repo "$REPO" --workflow msh-agent-runtime.yml --limit 20 \
+            --json databaseId,displayTitle,status,conclusion,createdAt >&2
           exit 1
 
       - name: Assert no false Siea escalation
