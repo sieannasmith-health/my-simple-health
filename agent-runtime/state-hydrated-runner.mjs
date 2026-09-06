@@ -1,4 +1,7 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { applyImplementation, executionApproved } from './engineering-execution.mjs';
 import { resolveRequiredEvidence } from './evidence-resolver.mjs';
 
@@ -10,6 +13,21 @@ const requestedAgent = (process.env.AGENT_NAME || '').trim().toLowerCase();
 const model = process.env.AGENT_MODEL || 'gpt-5.6-luna';
 const STATE_START = '<!-- MSH_STATE_LOCK -->';
 const STATE_END = '<!-- MSH_STATE_LOCK_END -->';
+const execFileAsync = promisify(execFile);
+const repositoryRoot = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
+const MAX_CONTEXT_EXCERPTS = 8;
+const MAX_EXCERPT_CHARS = 7000;
+const SAFE_TEXT_EXTENSIONS = new Set([
+  '.md', '.mjs', '.js', '.cjs', '.ts', '.tsx', '.jsx', '.json', '.yml', '.yaml', '.sh', '.py',
+  '.swift', '.kt', '.kts', '.java', '.rb', '.go', '.rs', '.sql', '.html', '.css', '.scss', '.txt'
+]);
+const EXCLUDED_CONTEXT_PATHS = [
+  /(^|\/)\.env(?:\.|$)/i,
+  /(^|\/)(?:secrets?|credentials?)(?:\/|\.|$)/i,
+  /\.(?:pem|p12|pfx|key|der|cer|crt)$/i,
+  /(^|\/)(?:package-lock\.json|pnpm-lock\.yaml|yarn\.lock|Podfile\.lock)$/i,
+  /(^|\/)(?:vendor|Pods|DerivedData|node_modules|build|dist)(\/|$)/i
+];
 
 if (!githubToken || !openaiKey || !repository || !issueNumber) {
   throw new Error('Missing required runtime environment.');
@@ -130,20 +148,90 @@ function explicitRepoPaths(issue, comments) {
   const text = [issue.body || '', ...comments.slice(-12).map(comment => comment.body || '')].join('\n');
   const pattern = /(?:^|[`\s(])((?:\.github\/|agent-runtime\/|ios\/|src\/|app\/|scripts\/|tests\/)[A-Za-z0-9_./-]+\.[A-Za-z0-9]+)(?=$|[`\s),:])/gm;
   const matches = text.match(pattern) || [];
-  return [...new Set(matches.map(value => value.trim().replace(/^`|`$/g, '')))].slice(0, 8);
+  return [...new Set(matches.map(value => value.trim().replace(/^`|`$/g, '')))].filter(Boolean).slice(0, MAX_CONTEXT_EXCERPTS);
+}
+
+function objectiveTerms(issue, comments) {
+  const text = [issue.title || '', issue.body || '', ...comments.slice(-6).map(comment => comment.body || '')].join(' ').toLowerCase();
+  const stopWords = new Set(['about', 'after', 'agent', 'again', 'also', 'been', 'being', 'from', 'have', 'into', 'issue', 'only', 'should', 'that', 'their', 'there', 'these', 'they', 'this', 'through', 'when', 'where', 'which', 'with', 'would']);
+  return [...new Set((text.match(/[a-z0-9][a-z0-9_-]{2,}/g) || []).filter(term => !stopWords.has(term)))].slice(0, 80);
+}
+
+function isSafeContextPath(filePath) {
+  const normalized = filePath.replaceAll('\\', '/');
+  if (EXCLUDED_CONTEXT_PATHS.some(pattern => pattern.test(normalized))) return false;
+  const extension = path.posix.extname(normalized).toLowerCase();
+  return SAFE_TEXT_EXTENSIONS.has(extension) || ['AGENTS.md', 'README.md', 'Dockerfile', 'Makefile'].includes(path.posix.basename(normalized));
+}
+
+function rankContextPath(filePath, terms) {
+  const normalized = filePath.toLowerCase();
+  const basename = path.posix.basename(normalized);
+  let score = 0;
+  if (normalized.startsWith('agent-runtime/')) score += 5;
+  if (normalized.startsWith('.github/workflows/')) score += 4;
+  if (/(^|\/)(tests?|specs?)(\/|\.|$)/.test(normalized)) score += 2;
+  for (const term of terms) {
+    if (basename.includes(term)) score += 5;
+    else if (normalized.includes(term)) score += 2;
+  }
+  return score;
+}
+
+async function discoverWorkspaceContextPaths(issue, comments) {
+  try {
+    const { stdout } = await execFileAsync('git', ['ls-files', '-z'], { cwd: repositoryRoot, maxBuffer: 4 * 1024 * 1024 });
+    const terms = objectiveTerms(issue, comments);
+    return stdout
+      .split('\0')
+      .map(value => value.trim())
+      .filter(Boolean)
+      .filter(isSafeContextPath)
+      .map(filePath => ({ filePath, score: rankContextPath(filePath, terms) }))
+      .sort((a, b) => b.score - a.score || a.filePath.localeCompare(b.filePath))
+      .slice(0, MAX_CONTEXT_EXCERPTS)
+      .map(item => item.filePath);
+  } catch (error) {
+    console.warn(`[CONTEXT] git ls-files fallback unavailable: ${error?.message || String(error)}`);
+    return [];
+  }
+}
+
+async function readWorkspaceExcerpt(filePath) {
+  try {
+    const absolutePath = path.resolve(repositoryRoot, filePath);
+    const relativePath = path.relative(repositoryRoot, absolutePath);
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) return '';
+    const content = await fs.readFile(absolutePath, 'utf8');
+    if (content.includes('\0')) return '';
+    return content.slice(0, MAX_EXCERPT_CHARS);
+  } catch {
+    return '';
+  }
 }
 
 async function collectDeterministicContext(issue, comments, resolution) {
   const workingAgreement = (await readRepoFile('AGENTS.md')).slice(0, 14000);
-  const excerpts = [];
-  for (const filePath of explicitRepoPaths(issue, comments)) {
-    const content = await readRepoFile(filePath);
-    if (content) excerpts.push(`FILE: ${filePath}\n${content.slice(0, 7000)}`);
+  let filePaths = explicitRepoPaths(issue, comments);
+  let contextSource = 'explicit references';
+
+  if (!filePaths || filePaths.length === 0 || (filePaths.length === 1 && filePaths[0].trim() === '(none)')) {
+    console.log('[CONTEXT] No explicit references found. Invoking git ls-files tree fallback...');
+    filePaths = await discoverWorkspaceContextPaths(issue, comments);
+    contextSource = 'ranked checked-out workspace fallback';
   }
+
+  const excerpts = [];
+  for (const filePath of filePaths.slice(0, MAX_CONTEXT_EXCERPTS)) {
+    const content = contextSource === 'explicit references' ? await readRepoFile(filePath) : await readWorkspaceExcerpt(filePath);
+    if (content) excerpts.push(`FILE: ${filePath}\n${content.slice(0, MAX_EXCERPT_CHARS)}`);
+  }
+
+  const repositoryFiles = excerpts.length > 0 ? excerpts.join('\n\n---\n\n') : '(No repository source files available in current workspace)';
   const prContext = resolution?.pr
     ? `DETERMINISTIC PR EVIDENCE (${resolution.resolved_via}):\n${JSON.stringify(resolution.pr, null, 2)}`
     : `DETERMINISTIC PR EVIDENCE:\n${resolution?.required ? '(required but unresolved)' : '(not required for this stage)'}`;
-  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nEXPLICITLY REFERENCED REPOSITORY FILES:\n${excerpts.join('\n\n---\n\n') || '(none)'}`;
+  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nREPOSITORY FILE CONTEXT (${contextSource}; max ${MAX_CONTEXT_EXCERPTS} excerpts):\n${repositoryFiles}`;
 }
 
 function extractOutputText(payload) {
