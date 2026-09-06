@@ -11,10 +11,16 @@ final class MSHOnboardingTests: XCTestCase {
         suiteName = "MSHOnboardingTests.\(UUID().uuidString)"
         defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
+#if DEBUG
+        UserDefaults.standard.removePersistentDomain(forName: MSHOnboardingStoreFactory.freshOnboardingTestSuiteName)
+#endif
     }
 
     override func tearDown() {
         defaults.removePersistentDomain(forName: suiteName)
+#if DEBUG
+        UserDefaults.standard.removePersistentDomain(forName: MSHOnboardingStoreFactory.freshOnboardingTestSuiteName)
+#endif
         defaults = nil
         suiteName = nil
         super.tearDown()
@@ -76,4 +82,37 @@ final class MSHOnboardingTests: XCTestCase {
         XCTAssertEqual(store.state.schemaVersion, MSHOnboardingState.currentSchemaVersion)
         XCTAssertEqual(store.state.startingPoint, .movement)
     }
+
+#if DEBUG
+    func testFreshOnboardingHarnessUsesIsolatedStateAndCanPersistAcrossTestRelaunch() {
+        let productionState = MSHOnboardingState(started: true, completed: true)
+        UserDefaults.standard.set(
+            try? JSONEncoder().encode(productionState),
+            forKey: MSHOnboardingStore.storageKey
+        )
+
+        let first = MSHOnboardingStoreFactory.make(arguments: [
+            MSHOnboardingStoreFactory.freshOnboardingTestArgument,
+            MSHOnboardingStoreFactory.resetFreshOnboardingTestArgument
+        ])
+
+        XCTAssertTrue(first.shouldPresentOnboarding)
+        XCTAssertFalse(first.state.completed)
+        first.setAppleHealthChoice(.notNow)
+        first.setNotificationChoice(.notNow)
+        first.complete()
+
+        let relaunched = MSHOnboardingStoreFactory.make(arguments: [
+            MSHOnboardingStoreFactory.freshOnboardingTestArgument
+        ])
+        XCTAssertFalse(relaunched.shouldPresentOnboarding)
+        XCTAssertTrue(relaunched.state.completed)
+
+        let productionData = UserDefaults.standard.data(forKey: MSHOnboardingStore.storageKey)
+        let preservedProductionState = productionData.flatMap { try? JSONDecoder().decode(MSHOnboardingState.self, from: $0) }
+        XCTAssertEqual(preservedProductionState, productionState)
+
+        UserDefaults.standard.removeObject(forKey: MSHOnboardingStore.storageKey)
+    }
+#endif
 }
