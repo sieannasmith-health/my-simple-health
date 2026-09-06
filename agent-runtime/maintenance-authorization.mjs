@@ -53,6 +53,50 @@ export function createMaintenanceGrant({ issueNumber, approvedBy, allowedPaths, 
   };
 }
 
+export function authorizeMaintenanceFromEvent({ eventName, payload, repositoryOwner, issueNumber, state, now = new Date().toISOString() }) {
+  if (eventName !== 'issue_comment') return { state, authorized: false, matchedCommand: false };
+
+  const commentBody = String(payload?.comment?.body || '');
+  const allowedPaths = parseMaintenanceApprovalCommand(commentBody);
+  if (!allowedPaths) return { state, authorized: false, matchedCommand: false };
+
+  const senderLogin = String(payload?.sender?.login || '').toLowerCase();
+  const ownerLogin = String(repositoryOwner || '').toLowerCase();
+  if (!senderLogin || !ownerLogin || senderLogin !== ownerLogin) {
+    return { state, authorized: false, matchedCommand: true };
+  }
+
+  const commentId = Number(payload?.comment?.id || 0);
+  if (!commentId) return { state, authorized: false, matchedCommand: true };
+
+  const grant = createMaintenanceGrant({
+    issueNumber,
+    approvedBy: payload.sender.login,
+    allowedPaths,
+    approvedAt: payload?.comment?.created_at || now,
+    sourceCommentId: commentId
+  });
+
+  const nextState = {
+    ...state,
+    status: 'PENDING',
+    current_stage: 'IMPLEMENTATION',
+    assigned_agent: 'selah',
+    execution: null,
+    human_gate: null,
+    maintenance_grant: grant,
+    history: [...(Array.isArray(state?.history) ? state.history : []), {
+      at: now,
+      event: 'RUNTIME_MAINTENANCE_GRANTED',
+      grant_id: grant.grant_id,
+      approved_by: grant.approved_by,
+      allowed_paths: grant.allowed_paths
+    }].slice(-20)
+  };
+
+  return { state: nextState, authorized: true, matchedCommand: true, grant };
+}
+
 export function maintenanceGrantAllowsPath({ state, issueNumber, filePath }) {
   const normalized = normalizeMaintenancePath(filePath);
   if (!isProtectedRuntimePath(normalized)) return true;
@@ -62,4 +106,19 @@ export function maintenanceGrantAllowsPath({ state, issueNumber, filePath }) {
   if (Number(grant.issue_number) !== Number(issueNumber)) return false;
   if (!Array.isArray(grant.allowed_paths)) return false;
   return grant.allowed_paths.includes(normalized);
+}
+
+export function drainMaintenanceGrant(state, { at = new Date().toISOString(), outcome = 'turn_closed' } = {}) {
+  const grant = state?.maintenance_grant;
+  if (!grant) return state;
+  return {
+    ...state,
+    maintenance_grant: null,
+    history: [...(Array.isArray(state.history) ? state.history : []), {
+      at,
+      event: 'RUNTIME_MAINTENANCE_GRANT_DRAINED',
+      grant_id: grant.grant_id,
+      outcome
+    }].slice(-20)
+  };
 }
