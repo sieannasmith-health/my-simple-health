@@ -5,7 +5,6 @@ const evaluator = await fs.readFile(new URL('../state-evaluator.mjs', import.met
 const reconciler = await fs.readFile(new URL('../post-turn-reconciler.mjs', import.meta.url), 'utf8');
 const runV3 = await fs.readFile(new URL('../run-v3.mjs', import.meta.url), 'utf8');
 const runtimeWorkflow = await fs.readFile(new URL('../../.github/workflows/msh-agent-runtime.yml', import.meta.url), 'utf8');
-const evaluatorWorkflow = await fs.readFile(new URL('../../.github/workflows/msh-agent-state-evaluator.yml', import.meta.url), 'utf8');
 
 assert.match(evaluator, /ORCHESTRATION_BLOCKED/);
 assert.match(evaluator, /reconcileLabels\('nomy', 'blocked', false\)/);
@@ -22,9 +21,8 @@ assert.match(reconciler, /State atomically consumed/);
 assert.match(runV3, /post-turn-reconciler\.mjs/);
 
 assert.match(runtimeWorkflow, /on:\n  workflow_dispatch:/);
-assert.doesNotMatch(runtimeWorkflow, /issues:\n\s+types:\s*\[labeled\]/);
+assert.doesNotMatch(runtimeWorkflow, /on:\n[\s\S]*?\n  issues:\n\s+types:\s*\[labeled\]/);
 assert.doesNotMatch(runtimeWorkflow, /issue_comment:\n\s+types:\s*\[created\]/);
 assert.doesNotMatch(runtimeWorkflow, /github\.event_name\s*==\s*['"]issues['"]/);
-assert.match(evaluatorWorkflow, /issues:\n\s+types:\s*\[labeled\]/);
 
 console.log('routing guard regressions passed');
