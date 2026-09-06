@@ -1,0 +1,70 @@
+name: MSH Agent CI Router
+
+on:
+  workflow_run:
+    workflows: ["iOS Native Integrity"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  route-agent-pr:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route CI result back to MSH agent task
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const prs = run.pull_requests || [];
+            if (!prs.length) {
+              core.info('No pull request attached to this workflow run.');
+              return;
+            }
+
+            for (const prRef of prs) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prRef.number
+              });
+
+              const match = pr.head.ref.match(/^agent\/issue-(\d+)-selah-/);
+              if (!match) {
+                core.info(`PR #${pr.number} is not an MSH agent execution branch.`);
+                continue;
+              }
+
+              const issueNumber = Number(match[1]);
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+
+              const current = issue.labels.map(label => typeof label === 'string' ? label : label.name).filter(Boolean);
+              const preserved = current.filter(label => !label.startsWith('agent:') && !label.startsWith('status:') && label !== 'needs:siea');
+              const passed = run.conclusion === 'success';
+              const nextAgent = passed ? 'tessa' : 'selah';
+              const nextStatus = passed ? 'review_requested' : 'changes_requested';
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: passed
+                  ? `**CI GATE PASSED**\n\nPR #${pr.number} passed iOS Native Integrity run ${run.id}. Routing implementation evidence to Tessa for QA review.`
+                  : `**CI GATE FAILED**\n\nPR #${pr.number} failed iOS Native Integrity run ${run.id} with conclusion \`${run.conclusion}\`. Routing back to Selah for diagnosis and correction. No Product scope expansion is authorized.`
+              });
+
+              await github.rest.issues.setLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: [...preserved, `status:${nextStatus}`, `agent:${nextAgent}`]
+              });
+            }
