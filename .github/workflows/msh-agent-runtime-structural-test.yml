@@ -22,6 +22,7 @@ jobs:
         run: |
           node --check agent-runtime/run-v2.mjs
           node --check agent-runtime/run-v3.mjs
+          node --check agent-runtime/state-hydrated-runner.mjs
           node --check agent-runtime/evidence-resolver.mjs
           node --check agent-runtime/engineering-execution.mjs
       - name: Verify null PR recovery
