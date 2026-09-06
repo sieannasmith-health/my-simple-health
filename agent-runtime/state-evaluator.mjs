@@ -70,7 +70,7 @@ async function dispatch(state) {
 
 const issue = await request(`/issues/${issueNumber}`);
 let state = parseState(issue.body || '') || defaultState(issue);
-if (['COMPLETED', 'HUMAN_APPROVAL_REQUIRED'].includes(state.status)) process.exit(0);
+if (['COMPLETED', 'ORCHESTRATION_BLOCKED'].includes(state.status)) process.exit(0);
 
 if (leaseExpired(state)) {
   state.retry_count += 1;
@@ -79,10 +79,19 @@ if (leaseExpired(state)) {
   await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: `**WATCHDOG RECOVERY**\n\nExpired execution lease recovered. Retry ${state.retry_count}/${state.max_retries}.` }) });
 }
 if (state.retry_count >= state.max_retries) {
-  state.status = 'HUMAN_APPROVAL_REQUIRED';
+  state.status = 'ORCHESTRATION_BLOCKED';
+  state.current_stage = 'PRODUCT_COORDINATION';
+  state.assigned_agent = 'nomy';
+  state.execution = null;
+  state.history = [...(state.history || []), {
+    at: new Date().toISOString(),
+    event: 'CIRCUIT_BREAKER_TO_COORDINATOR',
+    retry_count: state.retry_count
+  }].slice(-20);
   await persist(state);
-  await reconcileLabels(state.assigned_agent, 'blocked', true);
-  await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: '**ORCHESTRATION CIRCUIT BREAKER**\n\nMaximum bounded-turn retries reached. Human review is required before execution resumes.' }) });
+  await reconcileLabels('nomy', 'blocked', false);
+  await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: '**ORCHESTRATION CIRCUIT BREAKER**\n\nMaximum bounded-turn retries reached. Routing this operational failure to Nomy for coordinator diagnosis. This is not a Siea gate.' }) });
+  await dispatch({ ...state, assigned_agent: 'nomy' });
   process.exit(0);
 }
 if (state.status !== 'PENDING') { await persist(state); process.exit(0); }
