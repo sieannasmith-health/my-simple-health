@@ -67,6 +67,30 @@ function makeFetch({ labels, latestComment }) {
   assert.equal(mutationCalls.length, 2, 'Normalization must update labels and post its audit comment');
 }
 
+{
+  const { fetchImpl, calls } = makeFetch({
+    labels: ['agent:nomy', 'status:blocked'],
+    latestComment: 'Execution is not approved for this run. Apply the objective-level `execution:approved` authorization, then route the bounded canary to Selah.'
+  });
+
+  const signal = await normalizeHumanGate({
+    token: 'test-token',
+    repository: 'owner/repo',
+    issueNumber: 189,
+    fetchImpl
+  });
+
+  assert.equal(signal, HumanGateSignal.NORMALIZED,
+    'Nomy missing-execution-approval wording is a Product coordination gate even before needs:siea is present');
+  const labelUpdate = calls.find(call => call.url.endsWith('/issues/189/labels') && call.options.method === 'PUT');
+  assert.ok(labelUpdate, 'Nomy execution-gate normalization must reconcile labels');
+  const payload = JSON.parse(labelUpdate.options.body);
+  assert.ok(payload.labels.includes('agent:nomy'));
+  assert.ok(payload.labels.includes('status:blocked'));
+  assert.equal(payload.labels.includes('needs:siea'), false,
+    'Nomy execution-gate normalization must not preserve false needs:siea escalation');
+}
+
 const helperSource = await fs.readFile(new URL('../human-gate-normalizer.mjs', import.meta.url), 'utf8');
 assert.equal(helperSource.includes('process.exit('), false, 'Nested normalizer must never terminate the runtime process');
 

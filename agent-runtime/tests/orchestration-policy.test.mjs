@@ -33,8 +33,17 @@ assert.equal(
     ['status:blocked'],
     'Execution is not approved for this run.'
   ),
-  false,
-  'normalization only applies after a false needs:siea escalation was actually produced'
+  true,
+  'missing execution approval must be intercepted before a false needs:siea escalation is persisted'
+);
+
+assert.equal(
+  isExecutionApprovalCoordinationGate(
+    ['status:blocked'],
+    'Execution is not approved for this run, so the lifecycle canary cannot be executed. Apply the objective-level execution:approved authorization, then route the bounded canary to Selah.'
+  ),
+  true,
+  'Nomy canary blocker wording must remain a Product coordination gate'
 );
 
 console.log('orchestration policy tests passed');
