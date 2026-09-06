@@ -1,3 +1,5 @@
+import { drainMaintenanceGrant } from './maintenance-authorization.mjs';
+
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
 const issueNumber = Number(process.env.ISSUE_NUMBER || 0);
@@ -172,7 +174,7 @@ const historyEntry = {
   }
 };
 
-const nextState = {
+let nextState = {
   ...state,
   status: transition.runtimeStatus,
   current_stage: transition.nextStage,
@@ -182,6 +184,7 @@ const nextState = {
   history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
   updated_at: completedAt
 };
+nextState = drainMaintenanceGrant(nextState, { at: completedAt, outcome: `reconciled:${transition.publicStatus}` });
 
 const persisted = await persistWithOptimisticGuard(freshIssue, nextState);
 if (!persisted) process.exit(0);
