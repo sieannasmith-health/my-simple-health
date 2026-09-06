@@ -24,7 +24,8 @@ function labels(issue) { return (issue.labels || []).map(x => typeof x === 'stri
 function parseState(body = '') {
   const escapedStart = START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const escapedEnd = END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = body.match(new RegExp(`${escapedStart}\\s*\\`\\`\\`json\\s*([\\s\\S]*?)\\s*\\`\\`\\`\\s*${escapedEnd}`));
+  const fence = '```';
+  const match = body.match(new RegExp(`${escapedStart}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapedEnd}`));
   return match ? JSON.parse(match[1]) : null;
 }
 function defaultState(issue) {
