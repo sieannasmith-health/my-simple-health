@@ -80,7 +80,15 @@ jobs:
       - name: Recover stale actionable agent issues
         shell: bash
         run: |
-          gh issue list --state open --limit 100 --json number,labels --jq '.[] | select(any(.labels[]?; .name | startswith("agent:"))) | .number' > /tmp/issues
+          gh issue list --state open --limit 100 --json number,labels,body --jq '
+            .[]
+            | select(
+                any(.labels[]?; .name | startswith("agent:"))
+                or ((.body // "") | contains("<!-- MSH_STATE_LOCK -->"))
+                or (((.body // "") | test("(?m)^## Owner\\s*$")) and ((.body // "") | test("(?m)^- Responsible:\\s*[A-Za-z][A-Za-z0-9_-]*\\s*/")))
+              )
+            | .number
+          ' > /tmp/issues
           while read -r issue; do
             [ -z "$issue" ] && continue
             echo "Evaluating issue #$issue"
