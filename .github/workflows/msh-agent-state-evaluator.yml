@@ -1,4 +1,8 @@
 name: MSH Agent State Evaluator
+run-name: >-
+  ${{ github.event_name == 'repository_dispatch'
+      && format('MSH Watchdog Sweep • {0}', github.event.client_payload.correlation_id)
+      || format('MSH Agent State Evaluator • {0}', github.event.issue.number || inputs.issue_number || github.run_id) }}
 
 on:
   workflow_dispatch:
@@ -7,6 +11,8 @@ on:
         description: GitHub issue number to evaluate
         required: true
         type: string
+  repository_dispatch:
+    types: [msh-watchdog-sweep]
   issues:
     types: [labeled]
   issue_comment:
@@ -20,12 +26,12 @@ permissions:
   actions: write
 
 concurrency:
-  group: msh-agent-state-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+  group: msh-agent-state-${{ github.event.issue.number || inputs.issue_number || github.event.client_payload.correlation_id || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   evaluate-one:
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'repository_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -60,7 +66,7 @@ jobs:
         run: node agent-runtime/state-evaluator.mjs
 
   watchdog:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'repository_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
