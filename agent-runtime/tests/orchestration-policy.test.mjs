@@ -46,4 +46,13 @@ assert.equal(
   'Nomy canary blocker wording must remain a Product coordination gate'
 );
 
+assert.equal(
+  isExecutionApprovalCoordinationGate(
+    ['status:blocked'],
+    'Lifecycle canary remains blocked because the objective-level `execution:approved` authorization is absent.'
+  ),
+  true,
+  'authorization-is-absent wording must remain a Product coordination gate'
+);
+
 console.log('orchestration policy tests passed');
