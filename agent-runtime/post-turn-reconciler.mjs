@@ -3,6 +3,8 @@ const repository = process.env.GITHUB_REPOSITORY;
 const issueNumber = Number(process.env.ISSUE_NUMBER || 0);
 const runId = process.env.GITHUB_RUN_ID || null;
 const runStartedAt = Number(process.env.MSH_RUN_STARTED_AT || 0);
+const evaluatorWorkflow = process.env.AGENT_EVALUATOR_WORKFLOW || 'msh-agent-state-evaluator.yml';
+const evaluatorRef = process.env.AGENT_EVALUATOR_REF || 'main';
 const START = '<!-- MSH_STATE_LOCK -->';
 const END = '<!-- MSH_STATE_LOCK_END -->';
 
@@ -133,6 +135,16 @@ async function reconcileLabels(transition) {
   });
 }
 
+async function dispatchEvaluator() {
+  await request(`/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ref: evaluatorRef,
+      inputs: { issue_number: String(issueNumber) }
+    })
+  });
+}
+
 const freshIssue = await request(`/issues/${issueNumber}`);
 const state = parseState(freshIssue.body || '');
 if (!state) {
@@ -176,3 +188,9 @@ if (!persisted) process.exit(0);
 
 await reconcileLabels(transition);
 console.log(`[MSH Runtime] State atomically consumed. Transitioned to ${nextState.current_stage} / ${nextState.assigned_agent || 'none'} / ${nextState.status}.`);
+
+if (nextState.status === 'PENDING' && nextState.assigned_agent) {
+  console.log(`[MSH Runtime] Explicitly igniting evaluator for next owner ${nextState.assigned_agent} on issue #${issueNumber}.`);
+  await dispatchEvaluator();
+  console.log(`[MSH Runtime] Explicit evaluator dispatch accepted for issue #${issueNumber}.`);
+}
