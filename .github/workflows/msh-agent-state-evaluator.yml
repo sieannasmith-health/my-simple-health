@@ -7,6 +7,8 @@ on:
         description: GitHub issue number to evaluate
         required: true
         type: string
+  repository_dispatch:
+    types: [msh-watchdog-sweep]
   issues:
     types: [labeled]
   issue_comment:
@@ -25,7 +27,7 @@ concurrency:
 
 jobs:
   evaluate-one:
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'repository_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -60,7 +62,7 @@ jobs:
         run: node agent-runtime/state-evaluator.mjs
 
   watchdog:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'repository_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
