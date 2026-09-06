@@ -29,5 +29,8 @@ jobs:
           node --check agent-runtime/evidence-resolver.mjs
           node --check agent-runtime/engineering-execution.mjs
           node --check agent-runtime/state-evaluator.mjs
+          node --check agent-runtime/post-turn-reconciler.mjs
       - name: Verify null PR recovery
         run: node agent-runtime/tests/evidence-resolver.test.mjs
+      - name: Verify routing guard regressions
+        run: node agent-runtime/tests/routing-guards.test.mjs
