@@ -3,7 +3,9 @@ export function isExecutionApprovalCoordinationGate(labels, latestComment = '') 
   const comment = String(latestComment || '');
   const missingExecutionApproval = !names.includes('execution:approved');
   const blocked = names.includes('status:blocked');
-  const executionApprovalLanguage = /(execution is not approved|approve an execution run|execution:approved authority|apply the objective-level `?execution:approved`? authorization|approve execution)/i.test(comment);
+  const mentionsExecutionApproval = /execution:approved/i.test(comment);
+  const executionApprovalLanguage = /(execution is not approved|approve an execution run|not authorized|authorization is absent|authorization.*absent|approval.*absent|approve execution)/i.test(comment)
+    || (mentionsExecutionApproval && /(absent|missing|not approved|not authorized|approve|authorization|authorized)/i.test(comment));
 
   return missingExecutionApproval
     && blocked
