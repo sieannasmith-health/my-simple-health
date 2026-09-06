@@ -20,11 +20,15 @@ const headers = {
   'Content-Type': 'application/json'
 };
 
-async function gh(path, options = {}) {
-  const response = await fetch(`${apiBase}${path}`, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+async function request(url, options = {}) {
+  const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
   if (!response.ok) throw new Error(`GitHub ${response.status}: ${await response.text()}`);
   if (response.status === 204) return null;
   return response.json();
+}
+
+async function gh(path, options = {}) {
+  return request(`${apiBase}${path}`, options);
 }
 
 async function ensureLabel(name, color) {
@@ -55,12 +59,53 @@ function parseAgentFromIssue(issue, explicit) {
   return '';
 }
 
+async function readRepoFile(path) {
+  try {
+    const file = await gh(`/contents/${encodeURIComponent(path).replaceAll('%2F', '/')}?ref=main`);
+    if (!file?.content || file.encoding !== 'base64') return '';
+    return Buffer.from(file.content, 'base64').toString('utf8');
+  } catch {
+    return '';
+  }
+}
+
+async function collectRepositoryContext(issue) {
+  const workingAgreement = (await readRepoFile('AGENTS.md')).slice(0, 14000);
+  const sourceText = `${issue.title}\n${issue.body || ''}`;
+  const preferred = ['plaid', 'financial', 'firestore', 'firebase', 'swift', 'onboarding', 'landscape', 'economize', 'simple', 'healthkit'];
+  const terms = preferred.filter(term => sourceText.toLowerCase().includes(term)).slice(0, 4);
+  const paths = new Set();
+
+  for (const term of terms) {
+    try {
+      const q = encodeURIComponent(`${term} repo:${repository}`);
+      const result = await request(`https://api.github.com/search/code?q=${q}&per_page=5`);
+      for (const item of result.items || []) {
+        if (item.path && !item.path.startsWith('agent-runtime/')) paths.add(item.path);
+        if (paths.size >= 8) break;
+      }
+    } catch (error) {
+      console.warn(`Code search failed for ${term}: ${error.message}`);
+    }
+    if (paths.size >= 8) break;
+  }
+
+  const excerpts = [];
+  for (const path of [...paths].slice(0, 8)) {
+    const content = await readRepoFile(path);
+    if (content) excerpts.push(`FILE: ${path}\n${content.slice(0, 7000)}`);
+  }
+
+  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\nRELEVANT REPOSITORY EXCERPTS:\n${excerpts.join('\n\n---\n\n') || '(no scoped excerpts found)'}`;
+}
+
 const agents = JSON.parse(await fs.readFile(new URL('./agents.json', import.meta.url), 'utf8'));
 const issue = await gh(`/issues/${issueNumber}`);
 const comments = await gh(`/issues/${issueNumber}/comments?per_page=100`);
 const agentKey = parseAgentFromIssue(issue, requestedAgent);
 const agent = agents[agentKey];
 if (!agent) throw new Error(`Unknown or missing agent: ${agentKey || '(none)'}`);
+const repositoryContext = await collectRepositoryContext(issue);
 
 const operationsRules = `
 MSH agent-operations rules:
@@ -69,7 +114,8 @@ MSH agent-operations rules:
 - Do not place member health, financial, credential, or secret data into issue comments.
 - Treat GitHub Issues as coordination records, PRs as implementation proposals, and CI as verification evidence.
 - Return concrete work/status, not role-play filler.
-- If implementation or external action cannot be completed from the information/tools represented in the issue, identify the exact blocker.
+- Ground repository claims in the supplied repository excerpts. If the excerpts are insufficient, say exactly what must be inspected next.
+- Never claim code was changed, tests ran, CI passed, or an external action occurred unless the task context actually demonstrates it.
 - Choose next_agent only when a real handoff is ready. Valid agents: ${Object.keys(agents).join(', ')}.
 - Use requires_human only when Siea must make a decision, supply a secret/credential, perform a physical-device check, or grant access that automation cannot provide.
 `;
@@ -88,7 +134,9 @@ ${issue.body || ''}
 Recent task conversation:
 ${transcript || '(none)'}
 
-Return a concise operational result. Do the task to the extent possible from the supplied repository/task context. If this is an audit/review task, give the findings and next action. If it requires code changes that are not available in this execution context, specify the implementation request rather than pretending code was changed.
+${repositoryContext}
+
+Return a concise operational result. Do the task to the extent supported by the supplied task and repository context. For audits/reviews, return findings, evidence, exact gap, and next action. For implementation work, describe the concrete implementation request unless the task conversation contains actual implementation evidence.
 `;
 
 const schema = {
@@ -123,7 +171,7 @@ const text = extractOutputText(payload);
 if (!text) throw new Error('OpenAI response contained no output text.');
 const result = JSON.parse(text);
 
-const prefix = result.status === 'blocked' ? 'BLOCKER' : result.status === 'review_requested' ? 'REVIEW REQUEST' : result.status === 'changes_requested' ? 'REVIEW RESULT' : result.status === 'ready_for_product' ? 'HANDOFF' : result.status === 'completed' ? 'STATUS' : 'STATUS';
+const prefix = result.status === 'blocked' ? 'BLOCKER' : result.status === 'review_requested' ? 'REVIEW REQUEST' : result.status === 'changes_requested' ? 'REVIEW RESULT' : result.status === 'ready_for_product' ? 'HANDOFF' : 'STATUS';
 const comment = `**${prefix}: ${agent.name}**\n\n${result.message}${result.requires_human && result.human_request ? `\n\n**SIEA CHECK:** ${result.human_request}` : ''}${result.next_agent ? `\n\n**Next handoff:** ${agents[result.next_agent].name}` : ''}`;
 await gh(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: comment }) });
 
