@@ -66,12 +66,17 @@ function parseState(body = '') {
   const match = body.match(new RegExp(`${escapedStart}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapedEnd}`));
   return match ? JSON.parse(match[1]) : null;
 }
-function defaultState(issue) {
+function assignedAgentFromIssue(issue) {
   const agentLabel = labels(issue).find(x => x.startsWith('agent:'));
+  if (agentLabel) return agentLabel.slice(6).toLowerCase();
+  const ownerMatch = String(issue.body || '').match(/^## Owner\s*$[\s\S]*?^- Responsible:\s*([A-Za-z][A-Za-z0-9_-]*)\s*\//mi);
+  return ownerMatch ? ownerMatch[1].toLowerCase() : 'nomy';
+}
+function defaultState(issue) {
   return {
     version: 1,
     current_stage: 'COORDINATION',
-    assigned_agent: agentLabel ? agentLabel.slice(6) : 'nomy',
+    assigned_agent: assignedAgentFromIssue(issue),
     status: 'PENDING',
     retry_count: 0,
     max_retries: maxRetriesDefault,
