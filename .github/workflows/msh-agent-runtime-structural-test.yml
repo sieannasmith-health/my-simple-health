@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - 'agent-runtime/**'
+      - '.github/workflows/msh-agent-runtime.yml'
+      - '.github/workflows/msh-agent-state-evaluator.yml'
+      - '.github/workflows/msh-agent-orphan-e2e.yml'
       - '.github/workflows/msh-agent-runtime-structural-test.yml'
 
 permissions:
@@ -29,8 +32,12 @@ jobs:
           node --check agent-runtime/evidence-resolver.mjs
           node --check agent-runtime/engineering-execution.mjs
           node --check agent-runtime/state-evaluator.mjs
+          node --check agent-runtime/human-gate-normalizer.mjs
+          node --check agent-runtime/orchestration-policy.mjs
           node --check agent-runtime/post-turn-reconciler.mjs
       - name: Verify null PR recovery
         run: node agent-runtime/tests/evidence-resolver.test.mjs
       - name: Verify routing guard regressions
         run: node agent-runtime/tests/routing-guards.test.mjs
+      - name: Verify orchestration authority policy
+        run: node agent-runtime/tests/orchestration-policy.test.mjs
