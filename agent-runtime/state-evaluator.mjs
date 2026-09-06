@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises';
+
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
 const issueNumber = Number(process.env.ISSUE_NUMBER || 0);
@@ -21,6 +23,42 @@ async function request(path, options = {}) {
 }
 
 function labels(issue) { return (issue.labels || []).map(x => typeof x === 'string' ? x : x.name).filter(Boolean); }
+
+async function readEventContext() {
+  const eventName = process.env.GITHUB_EVENT_NAME || '';
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  if (!eventPath) return { eventName, payload: {} };
+  try {
+    return { eventName, payload: JSON.parse(await fs.readFile(eventPath, 'utf8')) };
+  } catch (error) {
+    console.warn(`[MSH Evaluator] Could not read event payload: ${error.message}`);
+    return { eventName, payload: {} };
+  }
+}
+
+function isEventEligibleForStateWrite({ eventName, payload }) {
+  if (!eventName || eventName === 'workflow_dispatch' || eventName === 'issues' || eventName === 'schedule') return true;
+  if (eventName !== 'issue_comment') return false;
+
+  const senderType = String(payload?.sender?.type || '');
+  const senderLogin = String(payload?.sender?.login || '').toLowerCase();
+  const commentBody = String(payload?.comment?.body || '');
+
+  if (senderType === 'Bot' || senderLogin.includes('vercel') || senderLogin.includes('github-actions')) {
+    console.log(`[MSH Evaluator] Ignored non-authoritative bot trigger from: ${senderLogin || '(unknown bot)'}`);
+    return false;
+  }
+
+  const trimmed = commentBody.trimStart();
+  const isOrchestrationCommand = trimmed.startsWith('/') || commentBody.includes(START);
+  if (!isOrchestrationCommand) {
+    console.log('[MSH Evaluator] Ignored organic comment thread event (not a structured command).');
+    return false;
+  }
+
+  return true;
+}
+
 function parseState(body = '') {
   const escapedStart = START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const escapedEnd = END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -66,6 +104,12 @@ async function dispatch(state) {
     method: 'POST',
     body: JSON.stringify({ ref, inputs: { issue_number: String(issueNumber), agent: state.assigned_agent } })
   });
+}
+
+const eventContext = await readEventContext();
+if (!isEventEligibleForStateWrite(eventContext)) {
+  console.log(`[MSH Evaluator] No-op success for ineligible ${eventContext.eventName || 'unknown'} event on issue #${issueNumber}.`);
+  process.exit(0);
 }
 
 const issue = await request(`/issues/${issueNumber}`);
