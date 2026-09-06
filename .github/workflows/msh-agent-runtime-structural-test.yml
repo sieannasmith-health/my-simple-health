@@ -1,0 +1,28 @@
+name: MSH Agent Runtime Structural Test
+
+on:
+  pull_request:
+    paths:
+      - 'agent-runtime/**'
+      - '.github/workflows/msh-agent-runtime-structural-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  null-pr-evidence-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check runtime syntax
+        run: |
+          node --check agent-runtime/run-v2.mjs
+          node --check agent-runtime/run-v3.mjs
+          node --check agent-runtime/evidence-resolver.mjs
+          node --check agent-runtime/engineering-execution.mjs
+      - name: Verify null PR recovery
+        run: node agent-runtime/tests/evidence-resolver.test.mjs
