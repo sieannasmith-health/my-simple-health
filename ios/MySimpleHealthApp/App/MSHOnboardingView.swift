@@ -5,7 +5,6 @@ private enum MSHOnboardingStep: Int, CaseIterable {
     case welcome
     case appleHealth
     case notifications
-    case startingPoint
     case completion
 }
 
@@ -18,6 +17,9 @@ struct MSHRootExperience: View {
                 MSHOnboardingFlow(store: onboardingStore)
             } else {
                 MSHAppShell()
+                    .safeAreaInset(edge: .top, spacing: 0) {
+                        MSHAccountSessionBar()
+                    }
             }
         }
         .environmentObject(onboardingStore)
@@ -46,8 +48,6 @@ private struct MSHOnboardingFlow: View {
                     appleHealth
                 case .notifications:
                     notifications
-                case .startingPoint:
-                    startingPoint
                 case .completion:
                     completion
                 }
@@ -134,42 +134,7 @@ private struct MSHOnboardingFlow: View {
                 }
                 MSHSecondaryButton(title: "Not now", disabled: isWorking) {
                     store.setNotificationChoice(.notNow)
-                    advance(to: .startingPoint)
-                }
-            }
-        }
-    }
-
-    private var startingPoint: some View {
-        MSHOnboardingPage(
-            eyebrow: "STARTING POINT",
-            title: "Where would you like to start?",
-            message: "This only helps shape your first view. You can explore every part of My Simple Health at any time."
-        ) {
-            VStack(spacing: 10) {
-                ForEach(MSHOnboardingStartingPoint.allCases) { startingPoint in
-                    Button {
-                        store.setStartingPoint(startingPoint)
-                        advance(to: .completion)
-                    } label: {
-                        HStack {
-                            Text(startingPoint.title)
-                            Spacer()
-                            Image(systemName: "arrow.right")
-                                .font(.footnote.weight(.semibold))
-                        }
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(MSHOnboardingPalette.forest)
-                        .padding(.horizontal, 18)
-                        .frame(maxWidth: .infinity, minHeight: 54)
-                        .background(MSHOnboardingPalette.warmWhite.opacity(0.82))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(MSHOnboardingPalette.forest.opacity(0.16), lineWidth: 1)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    }
-                    .buttonStyle(MSHQuietButtonStyle())
+                    advance(to: .completion)
                 }
             }
         }
@@ -179,7 +144,7 @@ private struct MSHOnboardingFlow: View {
         MSHOnboardingPage(
             eyebrow: "MY SIMPLE HEALTH",
             title: "Your health starts here.",
-            message: "Your starting point is only a doorway. My Health remains the place where your broader picture comes together."
+            message: "My Health is where your broader picture comes together."
         ) {
             MSHPrimaryButton(title: "Go to My Health") { store.complete() }
         }
@@ -209,7 +174,7 @@ private struct MSHOnboardingFlow: View {
                 let status = try await MSHNotificationService.shared.requestAuthorization()
                 store.setNotificationChoice(status.canSchedule ? .allowed : .declined)
                 isWorking = false
-                advance(to: .startingPoint)
+                advance(to: .completion)
             } catch {
                 isWorking = false
                 errorMessage = error.localizedDescription

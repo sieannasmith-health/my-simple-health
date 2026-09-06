@@ -150,10 +150,7 @@ struct MSHAuthenticatedRootExperience: View {
                     ProgressView().tint(MSHColor.forest)
                 }
             } else if authStore.isAuthenticated {
-                MSHAppShell()
-                    .safeAreaInset(edge: .top, spacing: 0) {
-                        MSHAccountSessionBar()
-                    }
+                MSHRootExperience()
             } else {
                 MSHAuthGateView(store: authStore)
             }
