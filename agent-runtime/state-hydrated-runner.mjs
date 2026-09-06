@@ -273,6 +273,9 @@ if (evidenceResolution.routeToCoordinator) {
 await persistEvidence(state, evidenceResolution);
 const repositoryContext = await collectDeterministicContext(issue, comments, evidenceResolution);
 const canExecute = executionApproved(issue, agentKey, labelNames);
+const maintenancePaths = Array.isArray(state.maintenance_grant?.allowed_paths) && !state.maintenance_grant?.consumed_at
+  ? state.maintenance_grant.allowed_paths
+  : [];
 
 const operationsRules = `
 MSH agent-operations rules:
@@ -290,7 +293,10 @@ MSH agent-operations rules:
 const executionInstructions = canExecute ? `
 EXECUTION MODE IS APPROVED FOR THIS SELAH RUN.
 Return implementation only when the supplied deterministic context is sufficient for a scoped change.
-Implementation files must be complete UTF-8 replacements. Protected runtime paths remain unavailable to ordinary autonomous engineering.
+Implementation files must be complete UTF-8 replacements.
+${maintenancePaths.length > 0
+  ? `A single-use runtime-maintenance grant is active. Protected writes are allowed ONLY to these exact paths:\n${maintenancePaths.map(filePath => `- ${filePath}`).join('\n')}`
+  : 'Protected runtime paths remain unavailable to ordinary autonomous engineering.'}
 ` : `
 EXECUTION MODE IS NOT APPROVED FOR THIS RUN.
 Return implementation=null. Do not claim code was changed.
@@ -361,7 +367,7 @@ const result = JSON.parse(text);
 let implementationEvidence = null;
 if (result.implementation) {
   if (agentKey !== 'selah') throw new Error('Only Selah may return implementation payloads.');
-  implementationEvidence = await applyImplementation({ issue, result, github: gh, labelNames });
+  implementationEvidence = await applyImplementation({ issue, state, result, github: gh, labelNames });
   result.status = 'review_requested';
   result.next_agent = null;
   result.requires_human = false;
