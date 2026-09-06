@@ -8,6 +8,14 @@ on:
       - '.github/workflows/msh-agent-state-evaluator.yml'
       - '.github/workflows/msh-agent-orphan-e2e.yml'
       - '.github/workflows/msh-agent-runtime-structural-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'agent-runtime/**'
+      - '.github/workflows/msh-agent-runtime.yml'
+      - '.github/workflows/msh-agent-state-evaluator.yml'
+      - '.github/workflows/msh-agent-orphan-e2e.yml'
+      - '.github/workflows/msh-agent-runtime-structural-test.yml'
 
 permissions:
   contents: read
