@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { applyImplementation, executionApproved } from './engineering-execution.mjs';
 import { resolveRequiredEvidence } from './evidence-resolver.mjs';
+import { hydrateWorkspaceContext, repositoryRoot } from './workspace-context.mjs';
 
 const githubToken = process.env.GITHUB_TOKEN;
 const openaiKey = process.env.OPENAI_API_KEY;
@@ -129,21 +130,25 @@ async function readRepoFile(filePath) {
 function explicitRepoPaths(issue, comments) {
   const text = [issue.body || '', ...comments.slice(-12).map(comment => comment.body || '')].join('\n');
   const pattern = /(?:^|[`\s(])((?:\.github\/|agent-runtime\/|ios\/|src\/|app\/|scripts\/|tests\/)[A-Za-z0-9_./-]+\.[A-Za-z0-9]+)(?=$|[`\s),:])/gm;
-  const matches = text.match(pattern) || [];
-  return [...new Set(matches.map(value => value.trim().replace(/^`|`$/g, '')))].slice(0, 8);
+  const matches = [...text.matchAll(pattern)];
+  return [...new Set(matches.map(match => match[1]))].slice(0, 8);
 }
 
 async function collectDeterministicContext(issue, comments, resolution) {
   const workingAgreement = (await readRepoFile('AGENTS.md')).slice(0, 14000);
-  const excerpts = [];
-  for (const filePath of explicitRepoPaths(issue, comments)) {
-    const content = await readRepoFile(filePath);
-    if (content) excerpts.push(`FILE: ${filePath}\n${content.slice(0, 7000)}`);
-  }
+  const objectiveText = [issue.title || '', issue.body || '', ...comments.slice(-12).map(comment => comment.body || '')].join('\n');
+  const workspace = await hydrateWorkspaceContext({
+    root: repositoryRoot(),
+    explicitPaths: explicitRepoPaths(issue, comments),
+    objectiveText,
+    maxFiles: 8,
+    maxBytesPerFile: 7000
+  });
   const prContext = resolution?.pr
     ? `DETERMINISTIC PR EVIDENCE (${resolution.resolved_via}):\n${JSON.stringify(resolution.pr, null, 2)}`
     : `DETERMINISTIC PR EVIDENCE:\n${resolution?.required ? '(required but unresolved)' : '(not required for this stage)'}`;
-  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nEXPLICITLY REFERENCED REPOSITORY FILES:\n${excerpts.join('\n\n---\n\n') || '(none)'}`;
+  const manifest = workspace.manifest.slice(0, 200).join('\n');
+  return `REPOSITORY WORKING AGREEMENT:\n${workingAgreement || '(not available)'}\n\n${prContext}\n\nDETERMINISTIC WORKSPACE CONTEXT:\nroot=${workspace.root}\nmode=${workspace.mode}\nselected=${workspace.selected.join(', ') || '(none)'}\n\nTRACKED FILE MANIFEST (first 200):\n${manifest || '(none)'}\n\nHYDRATED REPOSITORY FILES:\n${workspace.excerpts.join('\n\n---\n\n') || '(none)'}`;
 }
 
 function extractOutputText(payload) {
@@ -201,6 +206,7 @@ MSH agent-operations rules:
 
 const executionInstructions = canExecute ? `
 EXECUTION MODE IS APPROVED FOR THIS SELAH RUN.
+The checked-out repository has already been deterministically inspected by the runtime and relevant tracked files are supplied below. Do not request repository access merely because the issue omitted explicit file paths.
 Return implementation only when the supplied deterministic context is sufficient for a scoped change.
 Implementation files must be complete UTF-8 replacements. Protected runtime paths remain unavailable to ordinary autonomous engineering.
 ` : `
