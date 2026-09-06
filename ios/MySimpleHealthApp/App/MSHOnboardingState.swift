@@ -121,6 +121,31 @@ final class MSHOnboardingStore: ObservableObject {
     }
 }
 
+@MainActor
+enum MSHOnboardingStoreFactory {
+#if DEBUG
+    static let freshOnboardingTestArgument = "-MSHFreshOnboardingTest"
+    static let resetFreshOnboardingTestArgument = "-MSHResetFreshOnboardingTest"
+    static let freshOnboardingTestSuiteName = "org.mysimplehealth.onboarding.fresh-test"
+#endif
+
+    static func make(arguments: [String] = ProcessInfo.processInfo.arguments) -> MSHOnboardingStore {
+#if DEBUG
+        if arguments.contains(freshOnboardingTestArgument),
+           let defaults = UserDefaults(suiteName: freshOnboardingTestSuiteName) {
+            if arguments.contains(resetFreshOnboardingTestArgument) {
+                defaults.removePersistentDomain(forName: freshOnboardingTestSuiteName)
+            }
+            return MSHOnboardingStore(
+                defaults: defaults,
+                existingUserDetector: { false }
+            )
+        }
+#endif
+        return MSHOnboardingStore()
+    }
+}
+
 enum MSHExistingUserDetector {
     static func hasExistingNativeHealthState() -> Bool {
         guard let applicationSupport = FileManager.default.urls(
