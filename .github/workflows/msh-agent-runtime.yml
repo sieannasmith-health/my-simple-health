@@ -40,17 +40,32 @@ jobs:
       - name: Resolve issue and agent
         id: route
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_ISSUE: ${{ inputs.issue_number }}
+          DISPATCH_AGENT: ${{ inputs.agent }}
+          EVENT_ISSUE: ${{ github.event.issue.number }}
+          EVENT_LABEL: ${{ github.event.label.name }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "issue=${{ inputs.issue_number }}" >> "$GITHUB_OUTPUT"
-            echo "agent=${{ inputs.agent }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "issues" ]; then
-            echo "issue=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-            echo "agent=${{ github.event.label.name }}" | sed 's/agent://' | sed 's/^/agent=/' >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            issue="$DISPATCH_ISSUE"
+            agent="$DISPATCH_AGENT"
+          elif [ "$EVENT_NAME" = "issues" ]; then
+            issue="$EVENT_ISSUE"
+            agent="${EVENT_LABEL#agent:}"
           else
-            echo "issue=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-            echo "${{ github.event.comment.body }}" | sed -n '1s/^RUN AGENT:[[:space:]]*//p' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z].*$//' | sed 's/^/agent=/' >> "$GITHUB_OUTPUT"
+            issue="$EVENT_ISSUE"
+            agent="$(printf '%s' "$COMMENT_BODY" | sed -n '1s/^RUN AGENT:[[:space:]]*//p' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z].*$//')"
           fi
+
+          if [ -z "$issue" ] || [ -z "$agent" ]; then
+            echo "Unable to resolve issue/agent from event." >&2
+            exit 1
+          fi
+
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"
+          echo "agent=$agent" >> "$GITHUB_OUTPUT"
 
       - name: Run MSH specialist agent
         env:
