@@ -36,7 +36,6 @@ final class MSHOnboardingTests: XCTestCase {
         first.markStarted()
         first.setAppleHealthChoice(.notNow)
         first.setNotificationChoice(.declined)
-        first.setStartingPoint(.movement)
         first.complete()
 
         let relaunched = MSHOnboardingStore(defaults: defaults, existingUserDetector: { false })
@@ -45,7 +44,7 @@ final class MSHOnboardingTests: XCTestCase {
         XCTAssertTrue(relaunched.state.completed)
         XCTAssertEqual(relaunched.state.appleHealthChoice, .notNow)
         XCTAssertEqual(relaunched.state.notificationChoice, .declined)
-        XCTAssertEqual(relaunched.state.startingPoint, .movement)
+        XCTAssertNil(relaunched.state.startingPoint)
     }
 
     func testExistingNativeHealthUserIsMigratedPastOnboardingWithoutChangingChoices() {
@@ -58,14 +57,23 @@ final class MSHOnboardingTests: XCTestCase {
         XCTAssertEqual(store.state.notificationChoice, .notAsked)
     }
 
-    func testEveryStartingPointIsNonemptyAndPersistable() {
-        XCTAssertEqual(MSHOnboardingStartingPoint.allCases.count, 5)
-        XCTAssertTrue(MSHOnboardingStartingPoint.allCases.allSatisfy { !$0.title.isEmpty })
+    func testLegacyMigratedExistingUserRemainsPastOnboarding() throws {
+        var legacyState = MSHOnboardingState(
+            schemaVersion: 1,
+            started: true,
+            completed: true,
+            migratedExistingUser: true
+        )
+        legacyState.startingPoint = .movement
+        defaults.set(try JSONEncoder().encode(legacyState), forKey: MSHOnboardingStore.storageKey)
 
         let store = MSHOnboardingStore(defaults: defaults, existingUserDetector: { false })
-        for startingPoint in MSHOnboardingStartingPoint.allCases {
-            store.setStartingPoint(startingPoint)
-            XCTAssertEqual(store.state.startingPoint, startingPoint)
-        }
+
+        XCTAssertFalse(store.shouldPresentOnboarding)
+        XCTAssertTrue(store.state.started)
+        XCTAssertTrue(store.state.completed)
+        XCTAssertTrue(store.state.migratedExistingUser)
+        XCTAssertEqual(store.state.schemaVersion, MSHOnboardingState.currentSchemaVersion)
+        XCTAssertEqual(store.state.startingPoint, .movement)
     }
 }

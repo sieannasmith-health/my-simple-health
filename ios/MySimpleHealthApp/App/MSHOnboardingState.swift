@@ -59,13 +59,9 @@ final class MSHOnboardingStore: ObservableObject {
         if let data = defaults.data(forKey: Self.storageKey),
            var decoded = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) {
             if decoded.schemaVersion < MSHOnboardingState.currentSchemaVersion {
-                // v1 treated existing HealthKit state as completed onboarding.
-                // v2 introduces an explicit account-first gate, so those
-                // migrated development users must see onboarding once.
-                if decoded.migratedExistingUser {
-                    decoded.completed = false
-                    decoded.started = false
-                }
+                // Preserve the established-member decision recorded by older
+                // schemas. Reconnecting the first-run gate must not replay
+                // onboarding for a member already migrated past it.
                 decoded.schemaVersion = MSHOnboardingState.currentSchemaVersion
             }
             state = decoded
