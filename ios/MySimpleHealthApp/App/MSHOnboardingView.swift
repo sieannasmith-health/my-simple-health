@@ -9,7 +9,11 @@ private enum MSHOnboardingStep: Int, CaseIterable {
 }
 
 struct MSHRootExperience: View {
-    @StateObject private var onboardingStore = MSHOnboardingStore()
+    @StateObject private var onboardingStore: MSHOnboardingStore
+
+    init() {
+        _onboardingStore = StateObject(wrappedValue: MSHOnboardingStoreFactory.make())
+    }
 
     var body: some View {
         Group {
