@@ -1,0 +1,80 @@
+name: MSH Agent State Evaluator
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: GitHub issue number to evaluate
+        required: true
+        type: string
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: msh-agent-state-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  evaluate-one:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ github.token }}
+      AGENT_TURN_WORKFLOW: msh-agent-runtime.yml
+      AGENT_TURN_REF: main
+      AGENT_LEASE_MINUTES: '20'
+      AGENT_MAX_RETRIES: '3'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Resolve issue
+        id: issue
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_ISSUE: ${{ inputs.issue_number }}
+          EVENT_ISSUE: ${{ github.event.issue.number }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then issue="$DISPATCH_ISSUE"; else issue="$EVENT_ISSUE"; fi
+          test -n "$issue"
+          echo "number=$issue" >> "$GITHUB_OUTPUT"
+      - name: Evaluate durable task state
+        env:
+          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
+        run: node agent-runtime/state-evaluator.mjs
+
+  watchdog:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ github.token }}
+      AGENT_TURN_WORKFLOW: msh-agent-runtime.yml
+      AGENT_TURN_REF: main
+      AGENT_LEASE_MINUTES: '20'
+      AGENT_MAX_RETRIES: '3'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover stale actionable agent issues
+        shell: bash
+        run: |
+          gh issue list --state open --limit 100 --json number,labels --jq '.[] | select(any(.labels[]?; .name | startswith("agent:"))) | .number' > /tmp/issues
+          while read -r issue; do
+            [ -z "$issue" ] && continue
+            echo "Evaluating issue #$issue"
+            ISSUE_NUMBER="$issue" node agent-runtime/state-evaluator.mjs
+          done < /tmp/issues
