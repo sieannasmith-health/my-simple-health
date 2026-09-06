@@ -7,6 +7,8 @@ on:
   pull_request:
     paths:
       - 'ios/**'
+      - 'firebase/firestore.rules'
+      - 'tests/core-authority-rules.test.mjs'
       - '.github/workflows/ios-native-integrity.yml'
 
 permissions:
@@ -19,6 +21,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify Core authority rules contract
+        run: node --test tests/core-authority-rules.test.mjs
 
       - name: Verify local HealthKit package
         working-directory: ios/MySimpleHealthHealthKit
