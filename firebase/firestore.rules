@@ -36,6 +36,62 @@ service cloud.firestore {
         );
     }
 
+    function ownsCoreMemberNamespace(userID) {
+      return signedIn() && request.auth.uid == userID;
+    }
+
+    function validCoreProvenance(value) {
+      return value in ["USER_STATED", "USER_CONFIRMED", "SYSTEM_OBSERVED", "MODEL_INFERRED"];
+    }
+
+    function validCoreAuthority(value) {
+      return value in ["member", "external_source", "system_derived", "model_inference"];
+    }
+
+    function validCoreLifecycle(value) {
+      return value in ["ACTIVE", "AMENDED", "SUPERSEDED", "DELETED"];
+    }
+
+    function validCoreDomain(value) {
+      return value in [
+        "onboarding", "landscape", "focus", "vision", "project",
+        "practice", "reflection", "learning", "progress", "return_point"
+      ];
+    }
+
+    function validCoreRecord(data, userID, recordID) {
+      return data.keys().hasAll([
+          "recordID", "ownerID", "domain", "recordType", "schemaVersion",
+          "provenance", "authority", "lifecycleStatus", "sourceRecordIDs",
+          "createdAt", "updatedAt"
+        ])
+        && data.recordID == recordID
+        && data.ownerID == userID
+        && data.recordID is string
+        && data.recordType is string
+        && data.schemaVersion == "1.0.0"
+        && validCoreDomain(data.domain)
+        && validCoreProvenance(data.provenance)
+        && validCoreAuthority(data.authority)
+        && validCoreLifecycle(data.lifecycleStatus)
+        && data.sourceRecordIDs is list
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && (!data.keys().hasAny(["deletedAt"]) || data.deletedAt == null || data.deletedAt is timestamp);
+    }
+
+    function immutableCoreIdentityPreserved() {
+      return request.resource.data.recordID == resource.data.recordID
+        && request.resource.data.ownerID == resource.data.ownerID
+        && request.resource.data.domain == resource.data.domain
+        && request.resource.data.recordType == resource.data.recordType
+        && request.resource.data.schemaVersion == resource.data.schemaVersion
+        && request.resource.data.provenance == resource.data.provenance
+        && request.resource.data.authority == resource.data.authority
+        && request.resource.data.sourceRecordIDs == resource.data.sourceRecordIDs
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
     match /sharingRelationships/{relationshipID} {
       allow create: if signedIn()
         && request.resource.data.inviterID == request.auth.uid
@@ -125,6 +181,22 @@ service cloud.firestore {
         && (resource.data.ownerID == request.auth.uid || resource.data.recipientID == request.auth.uid);
 
       allow delete: if signedIn() && resource.data.ownerID == request.auth.uid;
+    }
+
+    // Core-v1 account-backed authority foundation. No journey domain is migrated in B.1.
+    // Every record lives under its Firebase Auth UID and carries a stable authority envelope.
+    match /users/{userID}/coreRecords/{recordID} {
+      allow read: if ownsCoreMemberNamespace(userID);
+
+      allow create: if ownsCoreMemberNamespace(userID)
+        && validCoreRecord(request.resource.data, userID, recordID);
+
+      allow update: if ownsCoreMemberNamespace(userID)
+        && validCoreRecord(request.resource.data, userID, recordID)
+        && immutableCoreIdentityPreserved();
+
+      // Domain deletion is represented through lifecycle/tombstone semantics so lineage survives.
+      allow delete: if false;
     }
 
     // Plaid access tokens and sync cursors are backend-only. Firebase Admin SDK
