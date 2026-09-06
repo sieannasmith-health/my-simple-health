@@ -9,7 +9,7 @@ import {
   normalizeMaintenancePath
 } from './maintenance-authorization.mjs';
 
-function validateImplementationFiles(files, issueNumber, state) {
+export function validateImplementationFiles(files, issueNumber, state) {
   if (!Array.isArray(files) || files.length < 1 || files.length > 8) {
     throw new Error('Implementation must contain 1-8 file replacements.');
   }
