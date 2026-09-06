@@ -31,6 +31,8 @@ jobs:
           node --check agent-runtime/state-hydrated-runner.mjs
           node --check agent-runtime/evidence-resolver.mjs
           node --check agent-runtime/engineering-execution.mjs
+          node --check agent-runtime/maintenance-authorization.mjs
+          node --check agent-runtime/maintenance-cleanup.mjs
           node --check agent-runtime/state-evaluator.mjs
           node --check agent-runtime/human-gate-normalizer.mjs
           node --check agent-runtime/orchestration-policy.mjs
@@ -45,3 +47,5 @@ jobs:
         run: node agent-runtime/tests/lifecycle-exit-boundary.test.mjs
       - name: Verify blind watchdog E2E contract
         run: node agent-runtime/tests/orphan-e2e-contract.test.mjs
+      - name: Verify runtime maintenance authorization security
+        run: node agent-runtime/tests/maintenance-authorization.test.mjs
