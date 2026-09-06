@@ -2,6 +2,15 @@ name: MSH Mac Xcode Worker
 
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: Controlled worker operation
+        required: true
+        default: native-test
+        type: choice
+        options:
+          - verify
+          - native-test
 
 permissions:
   contents: read
@@ -11,10 +20,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verify-mac-xcode-worker:
-    name: Verify MSH Mac → XcodeBuildMCP → Xcode
+  mac-xcode-worker:
+    name: MSH Mac → XcodeBuildMCP → Xcode
     runs-on: [self-hosted, macOS, ARM64, msh-xcode]
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       MSH_WORKSPACE: /Users/sieannasmith/Documents/my-simple-health
       PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -72,16 +81,119 @@ jobs:
           xcodebuildmcp xcode-ide bridge-status
           xcodebuildmcp xcode-ide list-tools
 
-      - name: Worker verification summary
+      - name: Verify local HealthKit package
+        if: ${{ inputs.operation == 'native-test' }}
+        working-directory: ios/MySimpleHealthHealthKit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f Package.swift
+          swift package describe
+
+      - name: Ensure XcodeGen is available
+        if: ${{ inputs.operation == 'native-test' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Regenerate Xcode project from canonical config
+        if: ${{ inputs.operation == 'native-test' }}
+        working-directory: ios/MySimpleHealthApp
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodegen generate
+
+      - name: Select available iPhone simulator
+        if: ${{ inputs.operation == 'native-test' }}
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          SIMULATOR_UDID="$(python3 - <<'PY'
+          import json
+          import subprocess
+
+          payload = json.loads(subprocess.check_output([
+              'xcrun', 'simctl', 'list', 'devices', 'available', '-j'
+          ]))
+          preferred_names = (
+              'iPhone 17 Pro', 'iPhone 17',
+              'iPhone 16 Pro', 'iPhone 16',
+              'iPhone 15 Pro', 'iPhone 15'
+          )
+          preferred = []
+          fallback = []
+          for runtime, devices in payload.get('devices', {}).items():
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if not device.get('isAvailable'):
+                      continue
+                  name = device.get('name', '')
+                  udid = device.get('udid')
+                  if not udid or not name.startswith('iPhone'):
+                      continue
+                  fallback.append((name, udid))
+                  if name in preferred_names:
+                      preferred.append((preferred_names.index(name), name, udid))
+          if preferred:
+              preferred.sort()
+              print(preferred[0][2])
+          elif fallback:
+              fallback.sort()
+              print(fallback[0][1])
+          else:
+              raise SystemExit('No available iPhone simulator found on runner')
+          PY
+          )"
+          echo "udid=$SIMULATOR_UDID" >> "$GITHUB_OUTPUT"
+          echo "Using simulator $SIMULATOR_UDID"
+
+      - name: Run MySimpleHealth native unit tests
+        if: ${{ inputs.operation == 'native-test' }}
+        working-directory: ios/MySimpleHealthApp
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/MSHNativeTests.xcresult"
+          xcodebuild \
+            -project MySimpleHealth.xcodeproj \
+            -scheme MySimpleHealth \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -configuration Debug \
+            -resultBundlePath "$RUNNER_TEMP/MSHNativeTests.xcresult" \
+            test CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload native test result bundle
+        if: ${{ always() && inputs.operation == 'native-test' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: msh-native-test-xcresult
+          path: ${{ runner.temp }}/MSHNativeTests.xcresult
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Worker summary
+        if: ${{ always() }}
         shell: bash
         run: |
           {
-            echo "## MSH Mac Xcode worker verification"
+            echo "## MSH Mac Xcode worker"
             echo ""
+            echo "- Operation: ${{ inputs.operation }}"
             echo "- Runner: $RUNNER_NAME"
             echo "- OS: $RUNNER_OS"
             echo "- Architecture: $RUNNER_ARCH"
+            echo "- Commit: $GITHUB_SHA"
             echo "- Xcode: available"
             echo "- XcodeBuildMCP: available"
             echo "- IDE bridge query: completed"
+            if [[ "${{ inputs.operation }}" == "native-test" ]]; then
+              echo "- Native test execution: requested"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
