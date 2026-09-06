@@ -36,9 +36,15 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
 
       - name: Resolve issue and agent
         id: route
@@ -69,6 +75,9 @@ jobs:
 
           echo "issue=$issue" >> "$GITHUB_OUTPUT"
           echo "agent=$agent" >> "$GITHUB_OUTPUT"
+
+      - name: Confirm Node runtime
+        run: node --version
 
       - name: Run MSH specialist agent
         env:
