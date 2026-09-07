@@ -19,7 +19,7 @@ function spawnWorker(address, mode) {
 }
 
 test('Temporal workflow survives hard worker process loss', { timeout: 30_000 }, async (t) => {
-  const env = await TestWorkflowEnvironment.createTimeSkipping();
+  const env = await TestWorkflowEnvironment.createLocal();
   t.after(async () => env.teardown());
 
   const address = env.address;
