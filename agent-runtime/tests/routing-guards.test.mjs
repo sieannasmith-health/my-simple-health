@@ -23,13 +23,22 @@ assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);
 assert.match(reconciler, /deriveTransitionFromResult\(structuredWorkerResult, state\)/);
 assert.match(reconciler, /State atomically consumed/);
+assert.match(reconciler, /reason_code/);
 
 assert.match(transitionPolicy, /runtimeStatus: 'PENDING'/);
 assert.match(transitionPolicy, /result\.status === 'review_requested'/);
 assert.match(transitionPolicy, /assignedAgent = 'tessa'/);
 
 assert.match(runV3, /post-turn-reconciler\.mjs/);
+assert.match(runV3, /enrichReasonCode\(await runBoundedWorker\(\)\)/);
+assert.match(runV3, /EXECUTION_APPROVAL_REQUIRED/);
+assert.match(runV3, /HUMAN_APPROVAL_REQUIRED/);
+assert.match(runV3, /normalizeHumanGate\(\{ structuredResult: structuredWorkerResult \}\)/);
 assert.match(runV3, /await reconcileTurn\(structuredWorkerResult\)/);
+assert.ok(
+  runV3.indexOf('normalizeHumanGate({ structuredResult: structuredWorkerResult })') < runV3.indexOf('await reconcileTurn(structuredWorkerResult)'),
+  'Structured reason code must reach normalization before reconciliation'
+);
 
 assert.match(runtimeWorkflow, /on:\n  workflow_dispatch:/);
 assert.doesNotMatch(runtimeWorkflow, /on:\n[\s\S]*?\n  issues:\n\s+types:\s*\[labeled\]/);

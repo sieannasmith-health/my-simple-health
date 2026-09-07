@@ -114,7 +114,10 @@ export async function reconcileTurn(structuredWorkerResult) {
   }
 
   const transition = deriveTransitionFromResult(structuredWorkerResult, state);
-  console.log(`[RECONCILER] Structured result authority: status=${structuredWorkerResult.status}, next_agent=${structuredWorkerResult.next_agent || 'none'}, requires_human=${Boolean(structuredWorkerResult.requires_human)}.`);
+  const reasonCode = typeof structuredWorkerResult?.reason_code === 'string'
+    ? structuredWorkerResult.reason_code
+    : null;
+  console.log(`[RECONCILER] Structured result authority: status=${structuredWorkerResult.status}, reason_code=${reasonCode || 'none'}, next_agent=${structuredWorkerResult.next_agent || 'none'}, requires_human=${Boolean(structuredWorkerResult.requires_human)}.`);
 
   const completedAt = new Date().toISOString();
   const historyEntry = {
@@ -122,6 +125,7 @@ export async function reconcileTurn(structuredWorkerResult) {
     agent: state.assigned_agent,
     status: 'COMPLETED',
     result_status: transition.publicStatus,
+    reason_code: reasonCode,
     evidence: state.evidence || null,
     telemetry: {
       run_id: runId,

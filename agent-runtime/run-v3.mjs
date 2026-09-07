@@ -39,11 +39,30 @@ function runBoundedWorker() {
   });
 }
 
+function enrichReasonCode(result) {
+  if (!result || typeof result !== 'object') return result;
+  if (typeof result.reason_code === 'string' && result.reason_code) return result;
+
+  let reasonCode = null;
+  if (result.requires_human === true) {
+    reasonCode = 'HUMAN_APPROVAL_REQUIRED';
+  } else if (
+    result.agent === 'selah'
+    && result.status === 'blocked'
+    && result.execution_approved === false
+  ) {
+    reasonCode = 'EXECUTION_APPROVAL_REQUIRED';
+  }
+
+  return { ...result, reason_code: reasonCode };
+}
+
 let runtimeError = null;
 try {
-  const structuredWorkerResult = await runBoundedWorker();
+  const structuredWorkerResult = enrichReasonCode(await runBoundedWorker());
+  console.log(`[MSH Runtime] Structured reason_code=${structuredWorkerResult.reason_code || 'none'}.`);
   const { normalizeHumanGate } = await import('./human-gate-normalizer.mjs');
-  await normalizeHumanGate();
+  await normalizeHumanGate({ structuredResult: structuredWorkerResult });
   const { reconcileTurn } = await import('./post-turn-reconciler.mjs');
   await reconcileTurn(structuredWorkerResult);
 } catch (error) {
