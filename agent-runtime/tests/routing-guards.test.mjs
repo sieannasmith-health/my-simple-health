@@ -20,12 +20,16 @@ assert.ok(maintenanceIndex >= 0 && blockedTerminalIndex > maintenanceIndex,
 assert.match(evaluator, /Orchestration-blocked issue .* remains terminal without a fresh owner-authenticated maintenance grant/);
 
 assert.match(evaluator, /legacyHumanGateRecoveryTarget/);
-assert.match(evaluator, /state\.current_stage === 'IMPLEMENTATION' && last\?\.agent === 'selah'/);
-assert.match(evaluator, /state\.current_stage === 'PRODUCT_COORDINATION' && last\?\.agent === 'nomy'/);
-assert.match(evaluator, /last\?\.result_status === 'blocked'/);
+assert.match(evaluator, /lastWorkerTurn/);
+assert.match(evaluator, /\[\.\.\.history\]\.reverse\(\)\.find\(entry => entry\?\.agent && entry\?\.result_status\)/);
+assert.match(evaluator, /state\.current_stage === 'IMPLEMENTATION' && lastWorkerTurn\?\.agent === 'selah'/);
+assert.match(evaluator, /state\.current_stage === 'PRODUCT_COORDINATION' && lastWorkerTurn\?\.agent === 'nomy'/);
+assert.match(evaluator, /lastWorkerTurn\?\.result_status === 'blocked'/);
+assert.doesNotMatch(evaluator, /hasHistoryEvent\(state, 'LEGACY_HUMAN_GATE_REEVALUATION'\)/);
 assert.match(evaluator, /assigned_agent: legacyTarget\.assigned_agent/);
 assert.match(evaluator, /current_stage: legacyTarget\.current_stage/);
 assert.match(evaluator, /human_gate: null/);
+assert.match(evaluator, /repeatable_revalidation_after_runtime_upgrade/);
 
 assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);

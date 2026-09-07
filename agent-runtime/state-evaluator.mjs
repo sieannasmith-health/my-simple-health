@@ -144,10 +144,6 @@ function leaseExpired(state) {
   return Date.parse(state.execution.lease_expires_at) <= Date.now();
 }
 
-function hasHistoryEvent(state, event) {
-  return Array.isArray(state.history) && state.history.some(entry => entry?.event === event);
-}
-
 function executionGateSatisfied(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED') return false;
   if (state.human_gate?.reason_code !== 'EXECUTION_APPROVAL_REQUIRED') return false;
@@ -158,14 +154,13 @@ function legacyHumanGateRecoveryTarget(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return null;
   if (state.assigned_agent !== 'human') return null;
   if (!labels(issue).includes('execution:approved')) return null;
-  if (hasHistoryEvent(state, 'LEGACY_HUMAN_GATE_REEVALUATION')) return null;
 
   const history = Array.isArray(state.history) ? state.history : [];
-  const last = history.at(-1);
-  if (state.current_stage === 'IMPLEMENTATION' && last?.agent === 'selah' && last?.result_status === 'blocked') {
+  const lastWorkerTurn = [...history].reverse().find(entry => entry?.agent && entry?.result_status);
+  if (state.current_stage === 'IMPLEMENTATION' && lastWorkerTurn?.agent === 'selah' && lastWorkerTurn?.result_status === 'blocked') {
     return { assigned_agent: 'selah', current_stage: 'IMPLEMENTATION' };
   }
-  if (state.current_stage === 'PRODUCT_COORDINATION' && last?.agent === 'nomy' && last?.result_status === 'blocked') {
+  if (state.current_stage === 'PRODUCT_COORDINATION' && lastWorkerTurn?.agent === 'nomy' && lastWorkerTurn?.result_status === 'blocked') {
     return { assigned_agent: 'nomy', current_stage: 'PRODUCT_COORDINATION' };
   }
   return null;
@@ -202,7 +197,7 @@ function recoverLegacyHumanGate(issue, state) {
         at: new Date().toISOString(),
         event: 'LEGACY_HUMAN_GATE_REEVALUATION',
         reason_code: 'UNTYPED_LEGACY_GATE',
-        satisfied_by: 'bounded_revalidation_after_runtime_upgrade',
+        satisfied_by: 'repeatable_revalidation_after_runtime_upgrade',
         resume_agent: legacyTarget.assigned_agent,
         resume_stage: legacyTarget.current_stage
       }].slice(-20)
