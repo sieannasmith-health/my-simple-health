@@ -1,12 +1,15 @@
-const completed = new Set<string>();
+export async function recordStage(
+  objectiveId: string,
+  stage: string,
+  idempotencyKey: string,
+): Promise<string> {
+  if (!idempotencyKey) {
+    throw new Error('IDEMPOTENCY_KEY_REQUIRED');
+  }
 
-export async function recordStage(objectiveId: string, stage: string): Promise<string> {
-  const key = `${objectiveId}:${stage}`;
-
-  // Pilot idempotency boundary. Production persistence will replace this
-  // in-memory store after the Temporal execution proof is accepted.
-  if (completed.has(key)) return stage;
-
-  completed.add(key);
+  // Temporal may retry Activities. Durable external side effects must use this
+  // stable key against a durable store or an external API's idempotency support.
+  // The pilot Activity itself is intentionally side-effect free.
+  void objectiveId;
   return stage;
 }
