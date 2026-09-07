@@ -45,7 +45,6 @@ enum MSHCoreLifecycleStatus: String, Codable, CaseIterable, Sendable {
     case deleted = "DELETED"
 }
 
-/// Versioned account-backed envelope. B.1 defines the contract only; no Core domain is migrated yet.
 struct MSHCoreRecordEnvelope: Codable, Equatable, Sendable {
     static let schemaVersion = "1.0.0"
 
@@ -62,20 +61,11 @@ struct MSHCoreRecordEnvelope: Codable, Equatable, Sendable {
     let updatedAt: Date
     let deletedAt: Date?
 
-    init(
-        recordID: String,
-        ownerID: MSHMemberID,
-        domain: MSHCoreDomain,
-        recordType: String,
-        provenance: MSHCoreProvenance,
-        authority: MSHCoreAuthority,
-        lifecycleStatus: MSHCoreLifecycleStatus = .active,
-        sourceRecordIDs: [String] = [],
-        createdAt: Date,
-        updatedAt: Date,
-        deletedAt: Date? = nil,
-        schemaVersion: String = Self.schemaVersion
-    ) {
+    init(recordID: String, ownerID: MSHMemberID, domain: MSHCoreDomain, recordType: String,
+         provenance: MSHCoreProvenance, authority: MSHCoreAuthority,
+         lifecycleStatus: MSHCoreLifecycleStatus = .active, sourceRecordIDs: [String] = [],
+         createdAt: Date, updatedAt: Date, deletedAt: Date? = nil,
+         schemaVersion: String = Self.schemaVersion) {
         self.recordID = recordID
         self.ownerID = ownerID
         self.domain = domain
@@ -91,43 +81,55 @@ struct MSHCoreRecordEnvelope: Codable, Equatable, Sendable {
     }
 }
 
-/// Canonical Firestore namespace for synchronized Core records.
-/// Member journey domains will migrate here in later gated slices.
 enum MSHCoreMemberNamespace {
-    static func memberPath(_ memberID: MSHMemberID) -> String {
-        "users/\(memberID.rawValue)"
-    }
-
-    static func recordsPath(_ memberID: MSHMemberID) -> String {
-        "\(memberPath(memberID))/coreRecords"
-    }
-
-    static func recordPath(_ recordID: String, memberID: MSHMemberID) -> String {
-        "\(recordsPath(memberID))/\(recordID)"
-    }
+    static func memberPath(_ memberID: MSHMemberID) -> String { "users/\(memberID.rawValue)" }
+    static func recordsPath(_ memberID: MSHMemberID) -> String { "\(memberPath(memberID))/coreRecords" }
+    static func recordPath(_ recordID: String, memberID: MSHMemberID) -> String { "\(recordsPath(memberID))/\(recordID)" }
 }
 
-/// Read boundary for account-backed Core records. Implementations must scope every operation to memberID.
 protocol MSHCoreRecordReading: Sendable {
     func records(for memberID: MSHMemberID, domain: MSHCoreDomain?) async throws -> [MSHCoreRecordEnvelope]
 }
 
-/// Write boundary for account-backed Core records. Stable record IDs are supplied by the domain layer.
 protocol MSHCoreRecordWriting: Sendable {
     func create(_ record: MSHCoreRecordEnvelope, for memberID: MSHMemberID) async throws
-    func updateLifecycle(
-        recordID: String,
-        for memberID: MSHMemberID,
-        to lifecycleStatus: MSHCoreLifecycleStatus,
-        updatedAt: Date,
-        deletedAt: Date?
-    ) async throws
+    func updateLifecycle(recordID: String, for memberID: MSHMemberID, to lifecycleStatus: MSHCoreLifecycleStatus,
+                         updatedAt: Date, deletedAt: Date?) async throws
 }
 
 typealias MSHCoreRecordRepository = MSHCoreRecordReading & MSHCoreRecordWriting
 
-/// Domain operations sit above persistence so SwiftUI and WebKit surfaces do not become authorities.
 protocol MSHCoreDomainService: Sendable {
     associatedtype Snapshot: Sendable
     func currentSnapshot(for memberID: MSHMemberID) async throws -> Snapshot
+}
+
+/// Deterministic repository implementation used by the onboarding domain and by tests.
+/// A production Firestore adapter can implement the same B.1 protocol without changing domain logic.
+actor MSHInMemoryCoreRecordRepository: MSHCoreRecordRepository {
+    enum Error: Swift.Error { case unauthorized, duplicate, notFound }
+    private var recordsByPath: [String: MSHCoreRecordEnvelope] = [:]
+
+    func records(for memberID: MSHMemberID, domain: MSHCoreDomain?) async throws -> [MSHCoreRecordEnvelope] {
+        recordsByPath.values.filter { $0.ownerID == memberID && (domain == nil || $0.domain == domain) }
+    }
+
+    func create(_ record: MSHCoreRecordEnvelope, for memberID: MSHMemberID) async throws {
+        guard record.ownerID == memberID else { throw Error.unauthorized }
+        let path = MSHCoreMemberNamespace.recordPath(record.recordID, memberID: memberID)
+        guard recordsByPath[path] == nil else { throw Error.duplicate }
+        recordsByPath[path] = record
+    }
+
+    func updateLifecycle(recordID: String, for memberID: MSHMemberID, to lifecycleStatus: MSHCoreLifecycleStatus,
+                         updatedAt: Date, deletedAt: Date?) async throws {
+        let path = MSHCoreMemberNamespace.recordPath(recordID, memberID: memberID)
+        guard var record = recordsByPath[path], record.ownerID == memberID else { throw Error.notFound }
+        record = MSHCoreRecordEnvelope(recordID: record.recordID, ownerID: record.ownerID, domain: record.domain,
+                                       recordType: record.recordType, provenance: record.provenance,
+                                       authority: record.authority, lifecycleStatus: lifecycleStatus,
+                                       sourceRecordIDs: record.sourceRecordIDs, createdAt: record.createdAt,
+                                       updatedAt: updatedAt, deletedAt: deletedAt)
+        recordsByPath[path] = record
+    }
 }
