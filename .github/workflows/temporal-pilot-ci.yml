@@ -23,9 +23,17 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install locked pilot dependencies
+      - name: Refresh pilot lockfile for MCP dependency transition
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Install generated locked pilot dependencies
         run: npm ci --ignore-scripts
       - name: TypeScript contract build
         run: npm run build
       - name: Pilot contract tests
         run: npm test
+      - name: Preserve generated pilot lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: temporal-pilot-package-lock
+          path: temporal-pilot/package-lock.json
+          if-no-files-found: error
