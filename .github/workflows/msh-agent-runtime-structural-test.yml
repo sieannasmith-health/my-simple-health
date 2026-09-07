@@ -49,3 +49,5 @@ jobs:
         run: node agent-runtime/tests/orphan-e2e-contract.test.mjs
       - name: Verify runtime maintenance authorization security
         run: node agent-runtime/tests/maintenance-authorization.test.mjs
+      - name: Verify runtime failure safety
+        run: node agent-runtime/tests/runtime-failure-safety.test.mjs
