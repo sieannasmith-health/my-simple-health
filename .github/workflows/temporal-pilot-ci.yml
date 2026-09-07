@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'temporal-pilot/**'
+      - '.msh-canary/**'
       - '.github/workflows/temporal-pilot-ci.yml'
   workflow_dispatch:
 
