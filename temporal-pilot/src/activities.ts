@@ -108,7 +108,15 @@ export async function runAgentStage(
           if (`pr:${prArtifact.number}` !== selah.artifactRef || prArtifact.created !== false) {
             throw new Error('MCP_QA_PR_VERIFICATION_FAILED');
           }
-          return { stage, artifactType: 'QA_RESULT', artifactRef: `verified:${selah.artifactRef}`, status: 'PASS' };
+
+          const checksResult = await connection.client.callTool({
+            name: 'github_read_checks',
+            arguments: { ref: branch },
+          });
+          const checks = jsonText(checksResult);
+          if (checks.conclusion !== 'success') throw new Error(`MCP_QA_CI_NOT_SUCCESS:${String(checks.conclusion)}`);
+
+          return { stage, artifactType: 'QA_RESULT', artifactRef: `verified-ci:${selah.artifactRef}`, status: 'PASS' };
         }
         case 'NOMY_ACCEPTANCE': {
           const result = await connection.client.callTool({ name: 'github_read_issue', arguments: { issueNumber } });
