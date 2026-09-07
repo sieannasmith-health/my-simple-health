@@ -3,6 +3,7 @@ import type * as activities from './activities.js';
 
 export interface FoundationPilotInput {
   objectiveId: string;
+  activityTimeout?: string;
 }
 
 export interface FoundationPilotResult {
@@ -11,18 +12,21 @@ export interface FoundationPilotResult {
   terminalStatus: 'COMPLETED';
 }
 
-const { recordStage } = proxyActivities<typeof activities>({
-  startToCloseTimeout: '30 seconds',
-  retry: {
-    initialInterval: '1 second',
-    maximumAttempts: 3,
-  },
-});
+function stageActivities(activityTimeout = '30 seconds') {
+  return proxyActivities<typeof activities>({
+    startToCloseTimeout: activityTimeout,
+    retry: {
+      initialInterval: '1 second',
+      maximumAttempts: 3,
+    },
+  });
+}
 
 export async function foundationPilot(
   input: FoundationPilotInput,
 ): Promise<FoundationPilotResult> {
   const stages: string[] = [];
+  const { recordStage } = stageActivities(input.activityTimeout);
 
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
     const recorded = await recordStage(input.objectiveId, stage);
