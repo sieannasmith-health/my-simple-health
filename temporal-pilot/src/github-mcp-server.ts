@@ -39,6 +39,7 @@ export function createMshGitHubMcpServer(options: GitHubMcpServerOptions = {}): 
   const token = options.token ?? process.env.GITHUB_TOKEN;
   const fetchImpl = options.fetchImpl ?? fetch;
   const testMode = options.testMode ?? process.env.MSH_MCP_TEST_MODE === '1';
+  const testBranches = new Set<string>();
 
   const server = new McpServer({ name: 'msh-github-boundary', version: '1.0.0' });
 
@@ -83,8 +84,10 @@ export function createMshGitHubMcpServer(options: GitHubMcpServerOptions = {}): 
     },
     async ({ branch, fromRef, idempotencyKey }) => {
       if (testMode) {
+        const created = !testBranches.has(branch);
+        testBranches.add(branch);
         return {
-          content: [{ type: 'text', text: JSON.stringify({ branch, created: true, idempotencyKey }) }],
+          content: [{ type: 'text', text: JSON.stringify({ branch, created, idempotencyKey }) }],
         };
       }
 
