@@ -1,10 +1,15 @@
 import { ApplicationFailure } from '@temporalio/common';
-import { proxyActivities } from '@temporalio/workflow';
+import { proxyActivities, sleep } from '@temporalio/workflow';
 import type * as activities from './activities.js';
+
+const FOUNDATION_STAGES = ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE'] as const;
+type FoundationStage = (typeof FOUNDATION_STAGES)[number];
 
 export interface FoundationPilotInput {
   objectiveId: string;
   activityTimeout?: string;
+  startDelay?: string;
+  resumeFromStage?: FoundationStage;
 }
 
 export interface FoundationPilotResult {
@@ -26,10 +31,21 @@ function stageActivities(activityTimeout = '30 seconds') {
 export async function foundationPilot(
   input: FoundationPilotInput,
 ): Promise<FoundationPilotResult> {
+  if (input.startDelay) {
+    await sleep(input.startDelay);
+  }
+
   const stages: string[] = [];
   const { recordStage } = stageActivities(input.activityTimeout);
+  const startIndex = input.resumeFromStage
+    ? FOUNDATION_STAGES.indexOf(input.resumeFromStage)
+    : 0;
 
-  for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
+  if (startIndex < 0) {
+    throw ApplicationFailure.nonRetryable('INVALID_RESUME_STAGE');
+  }
+
+  for (const stage of FOUNDATION_STAGES.slice(startIndex)) {
     const idempotencyKey = `${input.objectiveId}:${stage}:record-stage`;
     const recorded = await recordStage(input.objectiveId, stage, idempotencyKey);
     if (recorded !== stage) {
