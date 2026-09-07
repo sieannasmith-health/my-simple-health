@@ -52,19 +52,30 @@ function parseState(body = '') {
   try { return JSON.parse(match[1]); } catch { return null; }
 }
 
+function sequenceOf(state) {
+  return Number.isInteger(state?.sequence_version) ? state.sequence_version : 0;
+}
+
 function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
 async function persistWithOptimisticGuard(snapshot, nextState) {
   const verify = await request(`/issues/${issueNumber}`);
-  if (verify.updated_at !== snapshot.updated_at) {
-    console.log(`[MSH Runtime] Concurrency Guard: issue signature changed from ${snapshot.updated_at} to ${verify.updated_at}. Aborting state consumption to prevent overwrite.`);
+  const verifiedState = parseState(verify.body || '');
+  const expectedSequence = sequenceOf(parseState(snapshot.body || ''));
+  const actualSequence = sequenceOf(verifiedState);
+  if (verify.updated_at !== snapshot.updated_at || actualSequence !== expectedSequence) {
+    console.log(`[MSH Runtime] Concurrency Guard: stale state on issue #${issueNumber} (expected sequence=${expectedSequence}, actual=${actualSequence}). No-op success.`);
     return false;
   }
 
+  const versionedState = {
+    ...nextState,
+    sequence_version: expectedSequence + 1
+  };
   const pattern = new RegExp(`${escapeRegExp(START)}[\\s\\S]*?${escapeRegExp(END)}`);
-  const block = stateBlock(nextState);
+  const block = stateBlock(versionedState);
   const body = pattern.test(snapshot.body || '')
     ? (snapshot.body || '').replace(pattern, block)
     : `${snapshot.body || ''}\n\n${block}`.trim();
@@ -82,7 +93,7 @@ async function reconcileLabels(transition) {
     name => !name.startsWith('agent:') && !name.startsWith('status:') && name !== 'needs:siea'
   );
   const next = [...preserved, `status:${transition.publicStatus}`];
-  if (transition.assignedAgent && transition.assignedAgent !== 'human') next.push(`agent:${transition.assignedAgent}`);
+  if (transition.assignedAgent) next.push(`agent:${transition.assignedAgent}`);
   if (transition.needsHuman) next.push('needs:siea');
   await request(`/issues/${issueNumber}/labels`, {
     method: 'PUT',
@@ -139,6 +150,7 @@ export async function reconcileTurn(structuredWorkerResult) {
     status: transition.runtimeStatus,
     current_stage: transition.nextStage,
     assigned_agent: transition.assignedAgent,
+    human_gate: transition.humanGate,
     execution: null,
     retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
     history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
