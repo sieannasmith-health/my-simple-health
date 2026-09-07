@@ -30,7 +30,8 @@ export async function foundationPilot(
   const { recordStage } = stageActivities(input.activityTimeout);
 
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
-    const recorded = await recordStage(input.objectiveId, stage);
+    const idempotencyKey = `${input.objectiveId}:${stage}:record-stage`;
+    const recorded = await recordStage(input.objectiveId, stage, idempotencyKey);
     if (recorded !== stage) {
       throw ApplicationFailure.nonRetryable(`MALFORMED_AGENT_RESULT:${stage}`);
     }
