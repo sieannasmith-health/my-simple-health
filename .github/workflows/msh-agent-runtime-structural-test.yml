@@ -37,6 +37,9 @@ jobs:
           node --check agent-runtime/human-gate-normalizer.mjs
           node --check agent-runtime/orchestration-policy.mjs
           node --check agent-runtime/post-turn-reconciler.mjs
+          node --check agent-runtime/runtime-preflight-guard.mjs
+          node --check agent-runtime/livelock-policy.mjs
+          node --check agent-runtime/turn-transition.mjs
       - name: Verify null PR recovery
         run: node agent-runtime/tests/evidence-resolver.test.mjs
       - name: Verify routing guard regressions
@@ -51,3 +54,5 @@ jobs:
         run: node agent-runtime/tests/maintenance-authorization.test.mjs
       - name: Verify runtime failure safety
         run: node agent-runtime/tests/runtime-failure-safety.test.mjs
+      - name: Verify reconciliation authority and livelock boundary
+        run: node agent-runtime/tests/reconciliation-authority-livelock-boundary.test.mjs
