@@ -1,0 +1,31 @@
+name: MSH Temporal Pilot CI
+
+on:
+  pull_request:
+    paths:
+      - 'temporal-pilot/**'
+      - '.github/workflows/temporal-pilot-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  temporal-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: temporal-pilot
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pilot dependencies
+        run: npm install --ignore-scripts
+      - name: TypeScript contract build
+        run: npm run build
+      - name: Pilot contract tests
+        run: npm test
