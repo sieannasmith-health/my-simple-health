@@ -29,9 +29,13 @@ test('malformed agent result fails explicitly without becoming a Siea gate', asy
       await assert.rejects(
         handle.result(),
         (error) => {
-          const text = String(error);
-          assert.match(text, /MALFORMED_AGENT_RESULT:NOMY/);
-          assert.doesNotMatch(text, /SIEA|HUMAN_APPROVAL_REQUIRED|PAUSED_FOR_SIEA/);
+          assert.ok(error instanceof Error);
+          assert.equal(error.name, 'WorkflowFailedError');
+          assert.ok(error.cause instanceof Error);
+
+          const failureText = `${error.cause.name}: ${error.cause.message}`;
+          assert.match(failureText, /MALFORMED_AGENT_RESULT:NOMY/);
+          assert.doesNotMatch(failureText, /SIEA|HUMAN_APPROVAL_REQUIRED|PAUSED_FOR_SIEA/);
           return true;
         },
       );
