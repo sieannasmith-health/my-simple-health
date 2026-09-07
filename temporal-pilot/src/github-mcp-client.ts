@@ -6,6 +6,13 @@ export interface MshGitHubMcpClient {
   close(): Promise<void>;
 }
 
+function stringEnv(env: NodeJS.ProcessEnv, overrides?: Record<string, string>): Record<string, string> {
+  const base = Object.fromEntries(
+    Object.entries(env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+  );
+  return { ...base, ...overrides };
+}
+
 export async function connectMshGitHubMcpClient(options: {
   command?: string;
   args?: string[];
@@ -19,7 +26,7 @@ export async function connectMshGitHubMcpClient(options: {
   const transport = new StdioClientTransport({
     command: options.command ?? process.execPath,
     args: options.args ?? ['src/github-mcp-server-stdio.ts'],
-    env: { ...process.env, ...options.env },
+    env: stringEnv(process.env, options.env),
   });
 
   await client.connect(transport);
