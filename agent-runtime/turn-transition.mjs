@@ -2,8 +2,7 @@ const SIEA_REASON_CODES = new Set([
   'PHYSICAL_DEVICE_ACTION',
   'ACCOUNT_OWNER_ACTION',
   'EXTERNAL_CREDENTIAL_ACTION',
-  'IRREVERSIBLE_OWNER_APPROVAL',
-  'HUMAN_APPROVAL_REQUIRED'
+  'IRREVERSIBLE_OWNER_APPROVAL'
 ]);
 
 function stageForAgent(agent, fallback) {
@@ -18,9 +17,9 @@ export function deriveTransitionFromResult(result, state) {
     throw new Error('Missing trusted structured worker result for reconciliation.');
   }
 
-  // Authority routing is based exclusively on the machine-readable reason
-  // code. Human-readable messages and the generic requires_human flag are not
-  // authority signals.
+  // Authority routing is based exclusively on machine-readable reason codes.
+  // Human-readable messages and a generic requires_human flag are never
+  // sufficient to create a Siea-only pause.
   const reasonCode = typeof result.reason_code === 'string' ? result.reason_code : null;
 
   if (reasonCode === 'EXECUTION_APPROVAL_REQUIRED') {
