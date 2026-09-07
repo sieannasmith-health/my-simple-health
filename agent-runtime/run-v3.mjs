@@ -46,7 +46,11 @@ function enrichReasonCode(result) {
   let reasonCode = null;
   if (result.requires_human === true) {
     reasonCode = 'HUMAN_APPROVAL_REQUIRED';
-  } else if (result.status === 'blocked' && result.execution_approved === false) {
+  } else if (
+    result.agent === 'selah'
+    && result.status === 'blocked'
+    && result.execution_approved === false
+  ) {
     reasonCode = 'EXECUTION_APPROVAL_REQUIRED';
   }
 
