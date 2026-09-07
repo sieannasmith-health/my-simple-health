@@ -11,6 +11,8 @@ on:
         options:
           - verify
           - native-test
+  issues:
+    types: [labeled]
 
 permissions:
   contents: read
@@ -21,6 +23,7 @@ concurrency:
 
 jobs:
   mac-xcode-worker:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'issues' && github.event.issue.number == 181 && github.event.label.name == 'execution:approved') }}
     name: MSH Mac → XcodeBuildMCP → Xcode
     runs-on: [self-hosted, macOS, ARM64, msh-xcode]
     timeout-minutes: 30
@@ -82,7 +85,7 @@ jobs:
           xcodebuildmcp xcode-ide list-tools
 
       - name: Verify local HealthKit package
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ github.event_name == 'issues' || inputs.operation == 'native-test' }}
         working-directory: ios/MySimpleHealthHealthKit
         shell: bash
         run: |
@@ -91,7 +94,7 @@ jobs:
           swift package describe
 
       - name: Ensure XcodeGen is available
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ github.event_name == 'issues' || inputs.operation == 'native-test' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -101,7 +104,7 @@ jobs:
           xcodegen --version
 
       - name: Regenerate Xcode project from canonical config
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ github.event_name == 'issues' || inputs.operation == 'native-test' }}
         working-directory: ios/MySimpleHealthApp
         shell: bash
         run: |
@@ -109,7 +112,7 @@ jobs:
           xcodegen generate
 
       - name: Select available iPhone simulator
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ github.event_name == 'issues' || inputs.operation == 'native-test' }}
         id: simulator
         shell: bash
         run: |
@@ -155,7 +158,7 @@ jobs:
           echo "Using simulator $SIMULATOR_UDID"
 
       - name: Run MySimpleHealth native unit tests
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ github.event_name == 'issues' || inputs.operation == 'native-test' }}
         working-directory: ios/MySimpleHealthApp
         shell: bash
         run: |
@@ -170,7 +173,7 @@ jobs:
             test CODE_SIGNING_ALLOWED=NO
 
       - name: Upload native test result bundle
-        if: ${{ always() && inputs.operation == 'native-test' }}
+        if: ${{ always() && (github.event_name == 'issues' || inputs.operation == 'native-test') }}
         uses: actions/upload-artifact@v4
         with:
           name: msh-native-test-xcresult
@@ -185,7 +188,11 @@ jobs:
           {
             echo "## MSH Mac Xcode worker"
             echo ""
-            echo "- Operation: ${{ inputs.operation }}"
+            if [[ "${{ github.event_name }}" == "issues" ]]; then
+              echo "- Operation: native-test (approved via issue #181)"
+            else
+              echo "- Operation: ${{ inputs.operation }}"
+            fi
             echo "- Runner: $RUNNER_NAME"
             echo "- OS: $RUNNER_OS"
             echo "- Architecture: $RUNNER_ARCH"
@@ -193,7 +200,7 @@ jobs:
             echo "- Xcode: available"
             echo "- XcodeBuildMCP: available"
             echo "- IDE bridge query: completed"
-            if [[ "${{ inputs.operation }}" == "native-test" ]]; then
+            if [[ "${{ github.event_name }}" == "issues" || "${{ inputs.operation }}" == "native-test" ]]; then
               echo "- Native test execution: requested"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
