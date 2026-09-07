@@ -12,7 +12,8 @@ test('pilot preserves the required agent sequence', () => {
 });
 
 test('Temporal owns bounded activity retry behavior', () => {
-  assert.match(workflow, /startToCloseTimeout:\s*['"]30 seconds['"]/);
+  assert.match(workflow, /activityTimeout\s*=\s*['"]30 seconds['"]/);
+  assert.match(workflow, /startToCloseTimeout:\s*activityTimeout/);
   assert.match(workflow, /maximumAttempts:\s*3/);
 });
 
