@@ -1,4 +1,5 @@
 import { drainMaintenanceGrant } from './maintenance-authorization.mjs';
+import { deriveTransitionFromResult } from './turn-transition.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -55,54 +56,6 @@ function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
-function stageForAgent(agent, fallback) {
-  if (agent === 'tessa') return 'QA';
-  if (agent === 'selah') return 'IMPLEMENTATION';
-  if (agent === 'nomy') return 'PRODUCT_COORDINATION';
-  return fallback || 'INITIAL_TRIAGE';
-}
-
-function deriveTransition(issue, state) {
-  const labels = labelNames(issue);
-  const statusLabel = labels.find(name => name.startsWith('status:'))?.slice(7) || 'in_progress';
-  const agentLabel = labels.find(name => name.startsWith('agent:'))?.slice(6) || null;
-  const needsHuman = labels.includes('needs:siea');
-
-  if (needsHuman) {
-    return {
-      runtimeStatus: 'HUMAN_APPROVAL_REQUIRED',
-      assignedAgent: 'human',
-      nextStage: state.current_stage,
-      publicStatus: statusLabel === 'completed' ? 'blocked' : statusLabel,
-      needsHuman: true
-    };
-  }
-
-  if (statusLabel === 'completed') {
-    return {
-      runtimeStatus: 'COMPLETED',
-      assignedAgent: null,
-      nextStage: state.current_stage,
-      publicStatus: 'completed',
-      needsHuman: false
-    };
-  }
-
-  let assignedAgent = agentLabel;
-  if (!assignedAgent && statusLabel === 'review_requested') assignedAgent = 'tessa';
-  if (!assignedAgent && statusLabel === 'ready_for_product') assignedAgent = 'nomy';
-  if (!assignedAgent && statusLabel === 'blocked') assignedAgent = 'nomy';
-  if (!assignedAgent) assignedAgent = state.assigned_agent;
-
-  return {
-    runtimeStatus: 'PENDING',
-    assignedAgent,
-    nextStage: stageForAgent(assignedAgent, state.current_stage),
-    publicStatus: statusLabel,
-    needsHuman: false
-  };
-}
-
 async function persistWithOptimisticGuard(snapshot, nextState) {
   const verify = await request(`/issues/${issueNumber}`);
   if (verify.updated_at !== snapshot.updated_at) {
@@ -147,53 +100,57 @@ async function dispatchEvaluator() {
   });
 }
 
-const freshIssue = await request(`/issues/${issueNumber}`);
-const state = parseState(freshIssue.body || '');
-if (!state) {
-  console.log(`[MSH Runtime] No durable state block on issue #${issueNumber}; nothing to consume.`);
-  process.exit(0);
-}
-
-if (state.status !== 'EXECUTING') {
-  console.log(`[MSH Runtime] Concurrency Guard: State is no longer EXECUTING (Current: ${state.status}). Aborting consumption to prevent data overwrite.`);
-  process.exit(0);
-}
-
-const transition = deriveTransition(freshIssue, state);
-const completedAt = new Date().toISOString();
-const historyEntry = {
-  stage: state.current_stage,
-  agent: state.assigned_agent,
-  status: 'COMPLETED',
-  result_status: transition.publicStatus,
-  evidence: state.evidence || null,
-  telemetry: {
-    run_id: runId,
-    duration_ms: runStartedAt > 0 ? Math.max(0, Date.now() - runStartedAt) : null,
-    timestamp: completedAt
+export async function reconcileTurn(structuredWorkerResult) {
+  const freshIssue = await request(`/issues/${issueNumber}`);
+  const state = parseState(freshIssue.body || '');
+  if (!state) {
+    console.log(`[MSH Runtime] No durable state block on issue #${issueNumber}; nothing to consume.`);
+    return;
   }
-};
 
-let nextState = {
-  ...state,
-  status: transition.runtimeStatus,
-  current_stage: transition.nextStage,
-  assigned_agent: transition.assignedAgent,
-  execution: null,
-  retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
-  history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
-  updated_at: completedAt
-};
-nextState = drainMaintenanceGrant(nextState, { at: completedAt, outcome: `reconciled:${transition.publicStatus}` });
+  if (state.status !== 'EXECUTING') {
+    console.log(`[MSH Runtime] Concurrency Guard: State is no longer EXECUTING (Current: ${state.status}). Aborting consumption to prevent data overwrite.`);
+    return;
+  }
 
-const persisted = await persistWithOptimisticGuard(freshIssue, nextState);
-if (!persisted) process.exit(0);
+  const transition = deriveTransitionFromResult(structuredWorkerResult, state);
+  console.log(`[RECONCILER] Structured result authority: status=${structuredWorkerResult.status}, next_agent=${structuredWorkerResult.next_agent || 'none'}, requires_human=${Boolean(structuredWorkerResult.requires_human)}.`);
 
-await reconcileLabels(transition);
-console.log(`[MSH Runtime] State atomically consumed. Transitioned to ${nextState.current_stage} / ${nextState.assigned_agent || 'none'} / ${nextState.status}.`);
+  const completedAt = new Date().toISOString();
+  const historyEntry = {
+    stage: state.current_stage,
+    agent: state.assigned_agent,
+    status: 'COMPLETED',
+    result_status: transition.publicStatus,
+    evidence: state.evidence || null,
+    telemetry: {
+      run_id: runId,
+      duration_ms: runStartedAt > 0 ? Math.max(0, Date.now() - runStartedAt) : null,
+      timestamp: completedAt
+    }
+  };
 
-if (nextState.status === 'PENDING' && nextState.assigned_agent) {
-  console.log(`[MSH Runtime] Explicitly igniting evaluator for next owner ${nextState.assigned_agent} on issue #${issueNumber}.`);
-  await dispatchEvaluator();
-  console.log(`[MSH Runtime] Explicit evaluator dispatch accepted for issue #${issueNumber}.`);
+  let nextState = {
+    ...state,
+    status: transition.runtimeStatus,
+    current_stage: transition.nextStage,
+    assigned_agent: transition.assignedAgent,
+    execution: null,
+    retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
+    history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
+    updated_at: completedAt
+  };
+  nextState = drainMaintenanceGrant(nextState, { at: completedAt, outcome: `reconciled:${transition.publicStatus}` });
+
+  const persisted = await persistWithOptimisticGuard(freshIssue, nextState);
+  if (!persisted) return;
+
+  await reconcileLabels(transition);
+  console.log(`[MSH Runtime] State atomically consumed from structured result. Transitioned to ${nextState.current_stage} / ${nextState.assigned_agent || 'none'} / ${nextState.status}.`);
+
+  if (nextState.status === 'PENDING' && nextState.assigned_agent) {
+    console.log(`[MSH Runtime] Explicitly igniting evaluator for next owner ${nextState.assigned_agent} on issue #${issueNumber}.`);
+    await dispatchEvaluator();
+    console.log(`[MSH Runtime] Explicit evaluator dispatch accepted for issue #${issueNumber}.`);
+  }
 }
