@@ -27,5 +27,7 @@ test('activity idempotency boundaries are restart-safe by construction', () => {
   assert.match(workflow, /idempotencyKey\s*=\s*`\$\{input\.objectiveId\}:\$\{stage\}:record-stage`/);
   assert.match(workflow, /idempotencyKey\s*=\s*`\$\{input\.objectiveId\}:\$\{stage\}:artifact-stage`/);
   assert.match(activities, /IDEMPOTENCY_KEY_REQUIRED/);
-  assert.match(activities, /durable store or an external API's idempotency support/);
+  assert.match(activities, /idempotencyKey:\s*`\$\{idempotencyKey\}:branch`/);
+  assert.match(activities, /idempotencyKey:\s*`\$\{idempotencyKey\}:file`/);
+  assert.match(activities, /idempotencyKey:\s*`\$\{idempotencyKey\}:pr`/);
 });
