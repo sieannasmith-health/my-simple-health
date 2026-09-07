@@ -19,6 +19,14 @@ assert.ok(maintenanceIndex >= 0 && blockedTerminalIndex > maintenanceIndex,
   'Owner-authenticated maintenance recovery must be evaluated before ORCHESTRATION_BLOCKED becomes terminal');
 assert.match(evaluator, /Orchestration-blocked issue .* remains terminal without a fresh owner-authenticated maintenance grant/);
 
+assert.match(evaluator, /legacyHumanGateRecoveryTarget/);
+assert.match(evaluator, /state\.current_stage === 'IMPLEMENTATION' && last\?\.agent === 'selah'/);
+assert.match(evaluator, /state\.current_stage === 'PRODUCT_COORDINATION' && last\?\.agent === 'nomy'/);
+assert.match(evaluator, /last\?\.result_status === 'blocked'/);
+assert.match(evaluator, /assigned_agent: legacyTarget\.assigned_agent/);
+assert.match(evaluator, /current_stage: legacyTarget\.current_stage/);
+assert.match(evaluator, /human_gate: null/);
+
 assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);
 assert.match(reconciler, /deriveTransitionFromResult\(structuredWorkerResult, state\)/);
