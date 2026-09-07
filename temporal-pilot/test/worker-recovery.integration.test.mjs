@@ -5,28 +5,23 @@ import { Worker } from '@temporalio/worker';
 
 const taskQueue = 'msh-worker-recovery-test';
 
-test('workflow survives worker shutdown and completes on replacement worker', async (t) => {
+test('workflow recovers after first worker stops polling', { timeout: 20_000 }, async (t) => {
   const env = await TestWorkflowEnvironment.createTimeSkipping();
   t.after(async () => env.teardown());
 
-  let markFirstActivityStarted;
-  const firstActivityStarted = new Promise((resolve) => {
-    markFirstActivityStarted = resolve;
+  let markFirstAttempt;
+  const firstAttempt = new Promise((resolve) => {
+    markFirstAttempt = resolve;
   });
-  let firstCall = true;
 
   const worker1 = await Worker.create({
     connection: env.nativeConnection,
     taskQueue,
     workflowsPath: new URL('../src/workflows.ts', import.meta.url).pathname,
     activities: {
-      async recordStage(_objectiveId, stage) {
-        if (firstCall) {
-          firstCall = false;
-          markFirstActivityStarted();
-          throw new Error('simulated worker loss');
-        }
-        return stage;
+      async recordStage() {
+        markFirstAttempt();
+        throw new Error('simulated worker loss');
       },
     },
   });
@@ -38,9 +33,12 @@ test('workflow survives worker shutdown and completes on replacement worker', as
     args: [{ objectiveId: '203-recovery' }],
   });
 
-  await firstActivityStarted;
+  await firstAttempt;
+
+  // Stop worker1 without awaiting its drain. This models loss of the original
+  // poller while leaving Temporal's durable workflow execution alive.
   worker1.shutdown();
-  await worker1Run;
+  void worker1Run.catch(() => {});
 
   const worker2 = await Worker.create({
     connection: env.nativeConnection,
