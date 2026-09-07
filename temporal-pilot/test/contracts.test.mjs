@@ -7,7 +7,7 @@ const activities = fs.readFileSync(new URL('../src/activities.ts', import.meta.u
 
 test('pilot preserves the required agent sequence', () => {
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
-    assert.match(workflow, new RegExp(`['\"]${stage}['\"]`));
+    assert.match(workflow, new RegExp(`['\\"]${stage}['\\"]`));
   }
 });
 
@@ -22,9 +22,10 @@ test('pilot does not import the quarantined legacy runtime', () => {
   assert.doesNotMatch(activities, /agent-runtime/);
 });
 
-test('activity idempotency boundary is restart-safe by construction', () => {
+test('activity idempotency boundaries are restart-safe by construction', () => {
   assert.doesNotMatch(activities, /new Set<string>/);
   assert.match(workflow, /idempotencyKey\s*=\s*`\$\{input\.objectiveId\}:\$\{stage\}:record-stage`/);
+  assert.match(workflow, /idempotencyKey\s*=\s*`\$\{input\.objectiveId\}:\$\{stage\}:artifact-stage`/);
   assert.match(activities, /IDEMPOTENCY_KEY_REQUIRED/);
   assert.match(activities, /durable store or an external API's idempotency support/);
 });
