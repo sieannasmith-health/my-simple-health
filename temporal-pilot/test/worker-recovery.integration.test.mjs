@@ -22,7 +22,7 @@ test('Temporal workflow survives hard worker process loss', { timeout: 30_000 },
   const env = await TestWorkflowEnvironment.createTimeSkipping();
   t.after(async () => env.teardown());
 
-  const address = env.nativeConnection.options.address;
+  const address = env.address;
   const firstWorker = spawnWorker(address, 'crash');
   t.after(() => firstWorker.kill('SIGKILL'));
 
