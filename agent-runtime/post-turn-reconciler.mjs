@@ -43,8 +43,9 @@ function escapeRegExp(value) {
 }
 
 function parseState(body = '') {
+  const fence = '```';
   const pattern = new RegExp(
-    `${escapeRegExp(START)}\\s*\\`\\`\\`json\\s*([\\s\\S]*?)\\s*\\`\\`\\`\\s*${escapeRegExp(END)}`
+    `${escapeRegExp(START)}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapeRegExp(END)}`
   );
   const match = body.match(pattern);
   if (!match) return null;
@@ -52,7 +53,7 @@ function parseState(body = '') {
 }
 
 function stateBlock(state) {
-  return `${START}\n\\`\\`\\`json\n${JSON.stringify(state, null, 2)}\n\\`\\`\\`\n${END}`;
+  return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
 async function persistWithOptimisticGuard(snapshot, nextState) {
@@ -68,7 +69,10 @@ async function persistWithOptimisticGuard(snapshot, nextState) {
     ? (snapshot.body || '').replace(pattern, block)
     : `${snapshot.body || ''}\n\n${block}`.trim();
 
-  await request(`/issues/${issueNumber}`, { method: 'PATCH', body: JSON.stringify({ body }) });
+  await request(`/issues/${issueNumber}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ body })
+  });
   return true;
 }
 
@@ -89,7 +93,10 @@ async function reconcileLabels(transition) {
 async function dispatchEvaluator() {
   await request(`/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, {
     method: 'POST',
-    body: JSON.stringify({ ref: evaluatorRef, inputs: { issue_number: String(issueNumber) } })
+    body: JSON.stringify({
+      ref: evaluatorRef,
+      inputs: { issue_number: String(issueNumber) }
+    })
   });
 }
 
