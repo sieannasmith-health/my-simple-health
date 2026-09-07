@@ -60,6 +60,13 @@ function isEventEligibleForStateWrite({ eventName, payload }) {
   return true;
 }
 
+function isSieaApprovalEvent({ eventName, payload }) {
+  if (eventName !== 'issue_comment') return false;
+  const senderLogin = String(payload?.sender?.login || '').toLowerCase();
+  const commentBody = String(payload?.comment?.body || '').trim().toLowerCase();
+  return senderLogin === owner.toLowerCase() && commentBody.startsWith('/siea approve');
+}
+
 function parseState(body = '') {
   const escapedStart = START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const escapedEnd = END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -67,15 +74,22 @@ function parseState(body = '') {
   const match = body.match(new RegExp(`${escapedStart}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapedEnd}`));
   return match ? JSON.parse(match[1]) : null;
 }
+
+function sequenceOf(state) {
+  return Number.isInteger(state?.sequence_version) ? state.sequence_version : 0;
+}
+
 function assignedAgentFromIssue(issue) {
   const agentLabel = labels(issue).find(x => x.startsWith('agent:'));
   if (agentLabel) return agentLabel.slice(6).toLowerCase();
   const ownerMatch = String(issue.body || '').match(/^## Owner\s*$[\s\S]*?^- Responsible:\s*([A-Za-z][A-Za-z0-9_-]*)\s*\//mi);
   return ownerMatch ? ownerMatch[1].toLowerCase() : 'nomy';
 }
+
 function defaultState(issue) {
   return {
     version: 1,
+    sequence_version: 0,
     current_stage: 'COORDINATION',
     assigned_agent: assignedAgentFromIssue(issue),
     status: 'PENDING',
@@ -83,36 +97,63 @@ function defaultState(issue) {
     max_retries: maxRetriesDefault,
     history: [],
     execution: null,
+    human_gate: null,
     updated_at: new Date().toISOString()
   };
 }
+
 function stateBlock(state) { return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`; }
-async function persist(state) {
+
+async function persist(expectedState, nextState) {
   const fresh = await request(`/issues/${issueNumber}`);
+  const current = parseState(fresh.body || '');
+  const expectedSequence = sequenceOf(expectedState);
+  const currentSequence = sequenceOf(current);
+  if (current && currentSequence !== expectedSequence) {
+    console.log(`[MSH Evaluator] Stale writer no-op on issue #${issueNumber}: expected sequence=${expectedSequence}, current=${currentSequence}.`);
+    return false;
+  }
+  if (!current && expectedSequence !== 0) {
+    console.log(`[MSH Evaluator] Missing expected durable state on issue #${issueNumber}; no-op success.`);
+    return false;
+  }
+
+  const versioned = {
+    ...nextState,
+    sequence_version: expectedSequence + 1,
+    updated_at: new Date().toISOString()
+  };
   const pattern = new RegExp(`${START}[\\s\\S]*?${END}`);
-  const block = stateBlock({ ...state, updated_at: new Date().toISOString() });
+  const block = stateBlock(versioned);
   const body = pattern.test(fresh.body || '') ? (fresh.body || '').replace(pattern, block) : `${fresh.body || ''}\n\n${block}`.trim();
   await request(`/issues/${issueNumber}`, { method: 'PATCH', body: JSON.stringify({ body }) });
+  return true;
 }
+
 async function reconcileLabels(agent, status, needsHuman = false) {
   const fresh = await request(`/issues/${issueNumber}`);
   const preserved = labels(fresh).filter(x => !x.startsWith('agent:') && !x.startsWith('status:') && x !== 'needs:siea');
-  const next = [...preserved, `agent:${agent}`, `status:${status}`];
+  const next = [...preserved, `status:${status}`];
+  if (agent) next.push(`agent:${agent}`);
   if (needsHuman) next.push('needs:siea');
   await request(`/issues/${issueNumber}/labels`, { method: 'PUT', body: JSON.stringify({ labels: [...new Set(next)] }) });
 }
+
 function leaseExpired(state) {
   if (state.status !== 'EXECUTING' || !state.execution?.lease_expires_at) return false;
   return Date.parse(state.execution.lease_expires_at) <= Date.now();
 }
+
 function hasHistoryEvent(state, event) {
   return Array.isArray(state.history) && state.history.some(entry => entry?.event === event);
 }
+
 function executionGateSatisfied(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED') return false;
   if (state.human_gate?.reason_code !== 'EXECUTION_APPROVAL_REQUIRED') return false;
   return labels(issue).includes('execution:approved');
 }
+
 function legacyHumanGateRecoveryTarget(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return null;
   if (state.assigned_agent !== 'human') return null;
@@ -129,7 +170,8 @@ function legacyHumanGateRecoveryTarget(issue, state) {
   }
   return null;
 }
-function recoverHumanGate(issue, state) {
+
+function recoverLegacyHumanGate(issue, state) {
   if (executionGateSatisfied(issue, state)) {
     return {
       ...state,
@@ -169,6 +211,27 @@ function recoverHumanGate(issue, state) {
 
   return state;
 }
+
+function resumeSieaGate(state) {
+  const gate = state.human_gate;
+  if (state.status !== 'PAUSED_FOR_SIEA' || gate?.assignee !== 'siea' || !gate?.resume_agent) return null;
+  return {
+    ...state,
+    status: 'PENDING',
+    assigned_agent: gate.resume_agent,
+    current_stage: gate.resume_stage || state.current_stage,
+    execution: null,
+    human_gate: null,
+    history: [...(Array.isArray(state.history) ? state.history : []), {
+      at: new Date().toISOString(),
+      event: 'SIEA_GATE_APPROVED',
+      satisfied_by: '/siea approve',
+      resume_agent: gate.resume_agent,
+      resume_stage: gate.resume_stage || state.current_stage
+    }].slice(-20)
+  };
+}
+
 async function dispatch(state) {
   await request(`/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`, {
     method: 'POST',
@@ -184,7 +247,22 @@ if (!isEventEligibleForStateWrite(eventContext)) {
 
 const issue = await request(`/issues/${issueNumber}`);
 let state = parseState(issue.body || '') || defaultState(issue);
+const expectedState = structuredClone(state);
 if (state.status === 'COMPLETED') process.exit(0);
+
+if (state.status === 'PAUSED_FOR_SIEA') {
+  if (!isSieaApprovalEvent(eventContext)) {
+    console.log(`[MSH Evaluator] Issue #${issueNumber} is PAUSED_FOR_SIEA; unrelated event is a no-op success.`);
+    process.exit(0);
+  }
+  const resumed = resumeSieaGate(state);
+  if (!resumed) {
+    console.log(`[MSH Evaluator] Issue #${issueNumber} has malformed Siea gate state; leaving paused for review.`);
+    process.exit(0);
+  }
+  state = resumed;
+  console.log(`[MSH Evaluator] Owner-authenticated Siea approval accepted; resuming ${state.assigned_agent}.`);
+}
 
 const maintenanceAuthorization = authorizeMaintenanceFromEvent({
   eventName: eventContext.eventName,
@@ -206,7 +284,7 @@ if (maintenanceAuthorization.authorized) {
 }
 
 if (state.status === 'HUMAN_APPROVAL_REQUIRED') {
-  const recovered = recoverHumanGate(issue, state);
+  const recovered = recoverLegacyHumanGate(issue, state);
   if (recovered !== state) {
     console.log(`[AUTONOMY] Reconciled satisfied or legacy human gate on issue #${issueNumber}; resuming ${recovered.assigned_agent}.`);
     state = recovered;
@@ -219,23 +297,30 @@ if (leaseExpired(state)) {
   state.execution = null;
   await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: `**WATCHDOG RECOVERY**\n\nExpired execution lease recovered. Retry ${state.retry_count}/${state.max_retries}.` }) });
 }
+
 if (state.retry_count >= state.max_retries) {
   state.status = 'ORCHESTRATION_BLOCKED';
   state.current_stage = 'PRODUCT_COORDINATION';
   state.assigned_agent = 'nomy';
   state.execution = null;
+  state.human_gate = null;
   state.history = [...(state.history || []), {
     at: new Date().toISOString(),
     event: 'CIRCUIT_BREAKER_TO_COORDINATOR',
     retry_count: state.retry_count
   }].slice(-20);
-  await persist(state);
+  const persisted = await persist(expectedState, state);
+  if (!persisted) process.exit(0);
   await reconcileLabels('nomy', 'blocked', false);
   await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: '**ORCHESTRATION CIRCUIT BREAKER**\n\nMaximum bounded-turn retries reached. Routing this operational failure to Nomy for coordinator diagnosis. This is not a Siea gate.' }) });
   await dispatch({ ...state, assigned_agent: 'nomy' });
   process.exit(0);
 }
-if (state.status !== 'PENDING') { await persist(state); process.exit(0); }
+
+if (state.status !== 'PENDING') {
+  if (JSON.stringify(state) !== JSON.stringify(expectedState)) await persist(expectedState, state);
+  process.exit(0);
+}
 
 const now = new Date();
 state.status = 'EXECUTING';
@@ -244,7 +329,8 @@ state.execution = {
   lease_expires_at: new Date(now.getTime() + leaseMinutes * 60_000).toISOString(),
   attempt: state.retry_count + 1
 };
-await persist(state);
+const persisted = await persist(expectedState, state);
+if (!persisted) process.exit(0);
 await reconcileLabels(state.assigned_agent, 'in_progress');
 await dispatch(state);
 console.log(`Dispatched bounded turn for ${state.assigned_agent} on issue #${issueNumber}.`);
