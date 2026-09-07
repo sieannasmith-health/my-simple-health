@@ -89,6 +89,23 @@ async function associatedPRNumbers(issue, github) {
     .map(pr => pr.number);
 }
 
+async function activeCandidateEvidence(issue, comments, github, excludedNumber = null) {
+  const explicit = explicitPRNumbers(issue, comments);
+  const associated = await associatedPRNumbers(issue, github);
+  const candidates = [...new Set([...explicit, ...associated])]
+    .filter(number => number !== excludedNumber);
+
+  const evidence = [];
+  for (const number of candidates) {
+    try {
+      const candidate = await fetchPREvidence(number, github);
+      if (candidate.state === 'open') evidence.push(candidate);
+    } catch {}
+  }
+
+  return { candidates, evidence };
+}
+
 export async function resolveRequiredEvidence({ state, issue, comments, eventPayload, github }) {
   const stage = String(state.current_stage || '').toUpperCase();
   if (!stageRequiresPR(stage)) {
@@ -101,19 +118,39 @@ export async function resolveRequiredEvidence({ state, issue, comments, eventPay
   }
 
   const historicalNumber = historicalPRNumber(state);
+  let historicalEvidence = null;
   if (historicalNumber) {
-    return { required: true, pr: await fetchPREvidence(historicalNumber, github), resolved_via: 'STATE_HISTORY' };
+    historicalEvidence = await fetchPREvidence(historicalNumber, github);
+    if (historicalEvidence.state === 'open') {
+      return { required: true, pr: historicalEvidence, resolved_via: 'STATE_HISTORY' };
+    }
   }
 
-  const explicit = explicitPRNumbers(issue, comments);
-  if (explicit.length === 1) {
-    return { required: true, pr: await fetchPREvidence(explicit[0], github), resolved_via: 'EXPLICIT_REFERENCE' };
+  const { candidates, evidence: activeEvidence } = await activeCandidateEvidence(
+    issue,
+    comments,
+    github,
+    historicalNumber
+  );
+  if (activeEvidence.length === 1) {
+    return {
+      required: true,
+      pr: activeEvidence[0],
+      resolved_via: historicalEvidence ? 'ACTIVE_ISSUE_ASSOCIATION' : 'ISSUE_ASSOCIATION'
+    };
   }
 
-  const associated = await associatedPRNumbers(issue, github);
-  const candidates = [...new Set([...explicit, ...associated])];
-  if (candidates.length === 1) {
-    return { required: true, pr: await fetchPREvidence(candidates[0], github), resolved_via: 'ISSUE_ASSOCIATION' };
+  if (activeEvidence.length > 1) {
+    return {
+      required: true,
+      pr: null,
+      routeToCoordinator: true,
+      reason: `Multiple active deterministic PR candidates found for stage ${stage}: ${activeEvidence.map(pr => pr.pr_number).join(', ')}`
+    };
+  }
+
+  if (historicalEvidence) {
+    return { required: true, pr: historicalEvidence, resolved_via: 'STATE_HISTORY_FALLBACK' };
   }
 
   return {
