@@ -11,15 +11,20 @@ export function deriveTransitionFromResult(result, state) {
   }
 
   if (result.requires_human) {
+    const resumeAgent = result.next_agent || state.assigned_agent || 'nomy';
     return {
-      runtimeStatus: 'HUMAN_APPROVAL_REQUIRED',
-      assignedAgent: 'siea',
+      runtimeStatus: 'PAUSED_FOR_SIEA',
+      assignedAgent: null,
       nextStage: state.current_stage,
       publicStatus: result.status === 'completed' ? 'blocked' : result.status,
       needsHuman: true,
       humanGate: {
+        assignee: 'siea',
         type: 'EXPLICIT_SIEA_REQUEST',
-        action: result.human_request || result.message || 'Siea review required by structured worker result.'
+        action: result.human_request || result.message || 'Siea review required by structured worker result.',
+        requested_at: new Date().toISOString(),
+        resume_agent: resumeAgent,
+        resume_stage: stageForAgent(resumeAgent, state.current_stage)
       }
     };
   }
