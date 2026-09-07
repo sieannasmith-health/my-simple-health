@@ -1,4 +1,8 @@
-import { isExecutionApprovalCoordinationGate } from './orchestration-policy.mjs';
+import {
+  isExecutionApprovalCoordinationGate,
+  parseStructuredResult,
+  RuntimeReasonCode
+} from './orchestration-policy.mjs';
 
 export const HumanGateSignal = Object.freeze({
   NO_OP: 'NO_OP',
@@ -34,38 +38,45 @@ export async function normalizeHumanGate({
     return response.json();
   }
 
-  function labelNames(issue) {
-    return (issue.labels || [])
-      .map(label => typeof label === 'string' ? label : label.name)
-      .filter(Boolean);
-  }
+  const labelNames = issue => (issue.labels || [])
+    .map(label => typeof label === 'string' ? label : label.name)
+    .filter(Boolean);
 
   const issue = await request(`/issues/${issueNumber}`);
   const comments = await request(`/issues/${issueNumber}/comments?per_page=100`);
-  const latestComment = comments.at(-1)?.body || '';
   const labels = labelNames(issue);
+  const structuredResult = [...comments].reverse()
+    .map(comment => parseStructuredResult(comment.body || ''))
+    .find(Boolean);
+  const reasonCode = structuredResult?.reason_code || null;
 
-  if (!isExecutionApprovalCoordinationGate(labels, latestComment)) {
+  if (!isExecutionApprovalCoordinationGate(labels, reasonCode)) {
     console.log(`[MSH Runtime] Human-gate normalization NO_OP on issue #${issueNumber}.`);
     return HumanGateSignal.NO_OP;
   }
 
-  const preserved = labels.filter(
-    name => !name.startsWith('agent:') && !name.startsWith('status:') && name !== 'needs:siea'
+  const preserved = labels.filter(name =>
+    !name.startsWith('agent:') &&
+    !name.startsWith('status:') &&
+    name !== 'needs:siea'
   );
 
   await request(`/issues/${issueNumber}/labels`, {
     method: 'PUT',
-    body: JSON.stringify({ labels: [...new Set([...preserved, 'agent:nomy', 'status:blocked'])] })
+    body: JSON.stringify({
+      labels: [...new Set([...preserved, 'agent:nomy', 'status:blocked'])]
+    })
   });
 
   await request(`/issues/${issueNumber}/comments`, {
     method: 'POST',
     body: JSON.stringify({
-      body: '**RUNTIME AUTHORITY NORMALIZATION**\n\nMissing `execution:approved` is a Product coordination gate, not a Siea-only action. Routing to Nomy without `needs:siea`. The execution safety gate remains enforced.'
+      body: `<!-- MSH_RESULT ${JSON.stringify({
+        reason_code: RuntimeReasonCode.EXECUTION_APPROVAL_REQUIRED
+      })} -->\n\n**RUNTIME AUTHORITY NORMALIZATION**\n\nMissing execution authority is a Product coordination gate. Routing to Nomy without \\`needs:siea\\`. The execution safety gate remains enforced.`
     })
   });
 
-  console.log(`[MSH Runtime] Normalized missing execution approval to Nomy on issue #${issueNumber}.`);
+  console.log(`[MSH Runtime] Normalized structured execution gate to Nomy on issue #${issueNumber}.`);
   return HumanGateSignal.NORMALIZED;
 }

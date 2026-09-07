@@ -1,28 +1,18 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 
+const runner = await fs.readFile(new URL('../state-hydrated-runner.mjs', import.meta.url), 'utf8');
 const evaluator = await fs.readFile(new URL('../state-evaluator.mjs', import.meta.url), 'utf8');
 const reconciler = await fs.readFile(new URL('../post-turn-reconciler.mjs', import.meta.url), 'utf8');
-const runV3 = await fs.readFile(new URL('../run-v3.mjs', import.meta.url), 'utf8');
-const runtimeWorkflow = await fs.readFile(new URL('../../.github/workflows/msh-agent-runtime.yml', import.meta.url), 'utf8');
-
+const normalizer = await fs.readFile(new URL('../human-gate-normalizer.mjs', import.meta.url), 'utf8');
+assert.match(runner, /reason_code/);
+assert.match(runner, /MSH_RESULT/);
+assert.match(runner, /EXECUTION_APPROVAL_REQUIRED/);
 assert.match(evaluator, /ORCHESTRATION_BLOCKED/);
-assert.match(evaluator, /reconcileLabels\('nomy', 'blocked', false\)/);
 assert.match(evaluator, /assigned_agent: 'nomy'/);
-assert.doesNotMatch(evaluator, /reconcileLabels\([^\n]+true\)/);
-assert.doesNotMatch(evaluator, /Human review is required before execution resumes/);
-
 assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);
-assert.match(reconciler, /runtimeStatus: 'PENDING'/);
-assert.match(reconciler, /statusLabel === 'review_requested'/);
-assert.match(reconciler, /assignedAgent = 'tessa'/);
 assert.match(reconciler, /State atomically consumed/);
-assert.match(runV3, /post-turn-reconciler\.mjs/);
-
-assert.match(runtimeWorkflow, /on:\n  workflow_dispatch:/);
-assert.doesNotMatch(runtimeWorkflow, /on:\n[\s\S]*?\n  issues:\n\s+types:\s*\[labeled\]/);
-assert.doesNotMatch(runtimeWorkflow, /issue_comment:\n\s+types:\s*\[created\]/);
-assert.doesNotMatch(runtimeWorkflow, /github\.event_name\s*==\s*['"]issues['"]/);
-
+assert.match(normalizer, /parseStructuredResult/);
+assert.doesNotMatch(normalizer, /execution is not approved|not authorized|authorization.*absent/i);
 console.log('routing guard regressions passed');

@@ -1,58 +1,31 @@
 import assert from 'node:assert/strict';
-import { isExecutionApprovalCoordinationGate } from '../orchestration-policy.mjs';
+import { isExecutionApprovalCoordinationGate, parseStructuredResult, RuntimeReasonCode } from '../orchestration-policy.mjs';
+
+for (const wording of [
+  'Execution authority is unavailable.',
+  'The worker cannot continue yet.',
+  'Please coordinate authorization with Product.',
+  'This run is waiting on its safety gate.'
+]) {
+  assert.equal(
+    isExecutionApprovalCoordinationGate(['status:blocked'], RuntimeReasonCode.EXECUTION_APPROVAL_REQUIRED),
+    true,
+    wording
+  );
+}
 
 assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked', 'needs:siea'],
-    'Execution is not approved for this run. SIEA CHECK: Approve an execution run.'
-  ),
-  true,
-  'missing execution approval must route to Product coordination, not Siea'
+  isExecutionApprovalCoordinationGate(['status:blocked', 'execution:approved'], RuntimeReasonCode.EXECUTION_APPROVAL_REQUIRED),
+  false
 );
-
 assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked', 'needs:siea', 'execution:approved'],
-    'Execution is not approved for this run.'
-  ),
+  isExecutionApprovalCoordinationGate(['status:blocked'], RuntimeReasonCode.HUMAN_APPROVAL_REQUIRED),
   false,
-  'an explicit execution approval must never be normalized away'
+  'human-only gates must not be converted into Product execution coordination'
 );
-
 assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked', 'needs:siea'],
-    'A physical-device permission must be granted on the iPhone.'
-  ),
-  false,
-  'real human-only gates must remain Siea escalations'
+  parseStructuredResult('arbitrary prose <!-- MSH_RESULT {"reason_code":"EXECUTION_APPROVAL_REQUIRED"} -->')?.reason_code,
+  RuntimeReasonCode.EXECUTION_APPROVAL_REQUIRED
 );
-
-assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked'],
-    'Execution is not approved for this run.'
-  ),
-  true,
-  'missing execution approval must be intercepted before a false needs:siea escalation is persisted'
-);
-
-assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked'],
-    'Execution is not approved for this run, so the lifecycle canary cannot be executed. Apply the objective-level execution:approved authorization, then route the bounded canary to Selah.'
-  ),
-  true,
-  'Nomy canary blocker wording must remain a Product coordination gate'
-);
-
-assert.equal(
-  isExecutionApprovalCoordinationGate(
-    ['status:blocked'],
-    'Lifecycle canary remains blocked because the objective-level `execution:approved` authorization is absent.'
-  ),
-  true,
-  'authorization-is-absent wording must remain a Product coordination gate'
-);
-
+assert.equal(parseStructuredResult('Execution is not approved.'), null);
 console.log('orchestration policy tests passed');
