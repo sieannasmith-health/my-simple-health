@@ -135,9 +135,10 @@ for (const outcome of ['success', 'blocked', 'failed']) {
   assert.ok(stateMatch);
   const persisted = JSON.parse(stateMatch[1]);
   assert.equal(persisted.maintenance_grant, null);
-  assert.deepEqual(persisted.execution, activeExecution);
-  assert.equal(persisted.status, 'EXECUTING');
+  assert.equal(persisted.execution, null);
+  assert.equal(persisted.status, 'PENDING');
   assert.equal(persisted.assigned_agent, 'selah');
+  assert.equal(persisted.history.at(-2).event, 'RUNTIME_FAILURE_EXECUTION_RECOVERED');
   assert.equal(persisted.history.at(-1).event, 'RUNTIME_MAINTENANCE_GRANT_DRAINED');
   assert.equal(persisted.history.at(-1).outcome, 'runtime_failure');
 }

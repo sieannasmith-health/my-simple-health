@@ -19,6 +19,26 @@ function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
+export function recoverRuntimeFailureState(state, { outcome = 'runtime_failure', at = new Date().toISOString() } = {}) {
+  if (outcome !== 'runtime_failure' || !state?.execution) return state;
+  return {
+    ...state,
+    status: 'PENDING',
+    assigned_agent: state.assigned_agent === 'human' ? 'selah' : state.assigned_agent,
+    execution: null,
+    human_gate: null,
+    history: [
+      ...(Array.isArray(state.history) ? state.history : []),
+      {
+        at,
+        event: 'RUNTIME_FAILURE_EXECUTION_RECOVERED',
+        reason_code: 'RUNTIME_FAILURE',
+        recovered_agent: state.assigned_agent === 'human' ? 'selah' : state.assigned_agent
+      }
+    ]
+  };
+}
+
 export async function clearMaintenanceGrant({
   token = process.env.GITHUB_TOKEN,
   repository = process.env.GITHUB_REPOSITORY,
@@ -48,8 +68,10 @@ export async function clearMaintenanceGrant({
   const state = parseState(fresh.body || '');
   if (!state?.maintenance_grant) return false;
 
-  const drained = drainMaintenanceGrant(state, { outcome });
-  const nextState = { ...drained, updated_at: new Date().toISOString() };
+  const now = new Date().toISOString();
+  const recovered = recoverRuntimeFailureState(state, { outcome, at: now });
+  const drained = drainMaintenanceGrant(recovered, { outcome });
+  const nextState = { ...drained, updated_at: now };
   const pattern = new RegExp(`${escapeRegExp(START)}[\\s\\S]*?${escapeRegExp(END)}`);
   const body = pattern.test(fresh.body || '')
     ? (fresh.body || '').replace(pattern, stateBlock(nextState))
@@ -57,5 +79,8 @@ export async function clearMaintenanceGrant({
 
   await request(`/issues/${issueNumber}`, { method: 'PATCH', body: JSON.stringify({ body }) });
   console.log(`[MAINTENANCE_ELEVATION] Cleared single-use maintenance grant on issue #${issueNumber} (${outcome}).`);
+  if (outcome === 'runtime_failure' && state.execution) {
+    console.log(`[MSH Runtime] Recovered execution lease on issue #${issueNumber}; state returned to PENDING.`);
+  }
   return true;
 }
