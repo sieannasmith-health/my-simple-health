@@ -173,7 +173,7 @@ if (!isEventEligibleForStateWrite(eventContext)) {
 
 const issue = await request(`/issues/${issueNumber}`);
 let state = parseState(issue.body || '') || defaultState(issue);
-if (['COMPLETED', 'ORCHESTRATION_BLOCKED'].includes(state.status)) process.exit(0);
+if (state.status === 'COMPLETED') process.exit(0);
 
 const maintenanceAuthorization = authorizeMaintenanceFromEvent({
   eventName: eventContext.eventName,
@@ -189,6 +189,9 @@ if (maintenanceAuthorization.matchedCommand && !maintenanceAuthorization.authori
 if (maintenanceAuthorization.authorized) {
   state = maintenanceAuthorization.state;
   console.log(`[SECURITY] Accepted owner-authenticated runtime-maintenance grant ${maintenanceAuthorization.grant.grant_id} for issue #${issueNumber}.`);
+} else if (state.status === 'ORCHESTRATION_BLOCKED') {
+  console.log(`[MSH Evaluator] Orchestration-blocked issue #${issueNumber} remains terminal without a fresh owner-authenticated maintenance grant.`);
+  process.exit(0);
 }
 
 if (state.status === 'HUMAN_APPROVAL_REQUIRED') {

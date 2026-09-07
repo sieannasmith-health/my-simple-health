@@ -13,6 +13,12 @@ assert.match(evaluator, /assigned_agent: 'nomy'/);
 assert.doesNotMatch(evaluator, /reconcileLabels\([^\n]+true\)/);
 assert.doesNotMatch(evaluator, /Human review is required before execution resumes/);
 
+const maintenanceIndex = evaluator.indexOf('authorizeMaintenanceFromEvent({');
+const blockedTerminalIndex = evaluator.indexOf("else if (state.status === 'ORCHESTRATION_BLOCKED')");
+assert.ok(maintenanceIndex >= 0 && blockedTerminalIndex > maintenanceIndex,
+  'Owner-authenticated maintenance recovery must be evaluated before ORCHESTRATION_BLOCKED becomes terminal');
+assert.match(evaluator, /Orchestration-blocked issue .* remains terminal without a fresh owner-authenticated maintenance grant/);
+
 assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);
 assert.match(reconciler, /deriveTransitionFromResult\(structuredWorkerResult, state\)/);
