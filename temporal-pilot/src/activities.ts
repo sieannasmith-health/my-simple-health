@@ -24,6 +24,10 @@ function priorArtifact(priorEvidence: StageEvidence[], stage: StageEvidence['sta
   return priorEvidence.find((evidence) => evidence.stage === stage);
 }
 
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function recordStage(objectiveId: string, stage: string, idempotencyKey: string): Promise<string> {
   if (!idempotencyKey) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
   void objectiveId;
@@ -43,6 +47,7 @@ export async function runAgentStage(
     try {
       const issueNumber = objectiveIssueNumber(objectiveId);
       const branch = `msh-autonomy-canary-${objectiveId}`;
+      const baseRef = process.env.MSH_CANARY_BASE_REF ?? 'selah/temporal-foundation-pilot';
       const canaryPath = `.msh-canary/objective-${objectiveId}.json`;
 
       switch (stage) {
@@ -55,7 +60,7 @@ export async function runAgentStage(
         case 'SELAH': {
           const branchResult = await connection.client.callTool({
             name: 'github_create_branch',
-            arguments: { branch, fromRef: 'main', idempotencyKey: `${idempotencyKey}:branch` },
+            arguments: { branch, fromRef: baseRef, idempotencyKey: `${idempotencyKey}:branch` },
           });
           const branchArtifact = jsonText(branchResult);
           if (branchArtifact.branch !== branch) throw new Error('MCP_BRANCH_MISMATCH');
@@ -65,7 +70,7 @@ export async function runAgentStage(
             arguments: {
               branch,
               path: canaryPath,
-              content: JSON.stringify({ objectiveId, issueNumber, producedBy: 'SELAH', idempotencyKey }, null, 2) + '\n',
+              content: JSON.stringify({ objectiveId, issueNumber, producedBy: 'SELAH', baseRef, idempotencyKey }, null, 2) + '\n',
               message: `MSH autonomy canary for #${objectiveId}`,
               idempotencyKey: `${idempotencyKey}:file`,
             },
@@ -77,14 +82,14 @@ export async function runAgentStage(
             name: 'github_open_pull_request',
             arguments: {
               head: branch,
-              base: 'main',
+              base: baseRef,
               title: `MSH autonomy canary #${objectiveId}`,
               body: `Automated bounded canary artifact for Product objective #${objectiveId}. Do not merge.`,
               idempotencyKey: `${idempotencyKey}:pr`,
             },
           });
           const prArtifact = jsonText(prResult);
-          if (typeof prArtifact.number !== 'number' || prArtifact.head !== branch || prArtifact.base !== 'main') {
+          if (typeof prArtifact.number !== 'number' || prArtifact.head !== branch || prArtifact.base !== baseRef) {
             throw new Error('MCP_PR_ARTIFACT_MISMATCH');
           }
           return { stage, artifactType: 'PULL_REQUEST', artifactRef: `pr:${prArtifact.number}`, status: 'READY' };
@@ -98,7 +103,7 @@ export async function runAgentStage(
             name: 'github_open_pull_request',
             arguments: {
               head: branch,
-              base: 'main',
+              base: baseRef,
               title: `MSH autonomy canary #${objectiveId}`,
               body: `Automated bounded canary artifact for Product objective #${objectiveId}. Do not merge.`,
               idempotencyKey: `${idempotencyKey}:verify-pr`,
@@ -109,14 +114,21 @@ export async function runAgentStage(
             throw new Error('MCP_QA_PR_VERIFICATION_FAILED');
           }
 
-          const checksResult = await connection.client.callTool({
-            name: 'github_read_checks',
-            arguments: { ref: branch },
-          });
-          const checks = jsonText(checksResult);
-          if (checks.conclusion !== 'success') throw new Error(`MCP_QA_CI_NOT_SUCCESS:${String(checks.conclusion)}`);
-
-          return { stage, artifactType: 'QA_RESULT', artifactRef: `verified-ci:${selah.artifactRef}`, status: 'PASS' };
+          let lastConclusion = 'pending';
+          for (let attempt = 0; attempt < 12; attempt += 1) {
+            const checksResult = await connection.client.callTool({
+              name: 'github_read_checks',
+              arguments: { ref: branch },
+            });
+            const checks = jsonText(checksResult);
+            lastConclusion = String(checks.conclusion);
+            if (lastConclusion === 'success') {
+              return { stage, artifactType: 'QA_RESULT', artifactRef: `verified-ci:${selah.artifactRef}`, status: 'PASS' };
+            }
+            if (lastConclusion === 'failure') throw new Error('MCP_QA_CI_FAILED');
+            await sleepMs(10_000);
+          }
+          throw new Error(`MCP_QA_CI_NOT_SUCCESS:${lastConclusion}`);
         }
         case 'NOMY_ACCEPTANCE': {
           const result = await connection.client.callTool({ name: 'github_read_issue', arguments: { issueNumber } });
