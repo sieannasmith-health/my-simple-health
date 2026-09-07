@@ -38,7 +38,7 @@ test('Temporal workflow survives hard worker process loss', { timeout: 30_000 },
   const handle = await env.client.workflow.start('foundationPilot', {
     taskQueue,
     workflowId: `msh-hard-recovery-${Date.now()}`,
-    args: [{ objectiveId: '203-hard-recovery' }],
+    args: [{ objectiveId: '203-hard-recovery', activityTimeout: '3 seconds' }],
   });
 
   await activityStarted;
