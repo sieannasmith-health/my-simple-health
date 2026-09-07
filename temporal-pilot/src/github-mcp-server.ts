@@ -40,6 +40,8 @@ export function createMshGitHubMcpServer(options: GitHubMcpServerOptions = {}): 
   const fetchImpl = options.fetchImpl ?? fetch;
   const testMode = options.testMode ?? process.env.MSH_MCP_TEST_MODE === '1';
   const testBranches = new Set<string>();
+  const testFiles = new Map<string, { content: string; sha: string }>();
+  const testPullRequests = new Map<string, { number: number; head: string; base: string }>();
 
   const server = new McpServer({ name: 'msh-github-boundary', version: '1.0.0' });
 
@@ -131,6 +133,142 @@ export function createMshGitHubMcpServer(options: GitHubMcpServerOptions = {}): 
 
       return {
         content: [{ type: 'text', text: JSON.stringify({ branch, created: true, idempotencyKey }) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    'github_write_repository_file',
+    {
+      description: 'Create or replace one UTF-8 repository file on an approved branch using a stable idempotency key.',
+      inputSchema: z.object({
+        branch: z.string().min(1),
+        path: z.string().min(1),
+        content: z.string(),
+        message: z.string().min(1),
+        idempotencyKey: z.string().min(1),
+      }),
+    },
+    async ({ branch, path, content, message, idempotencyKey }) => {
+      if (testMode) {
+        const key = `${branch}:${path}`;
+        const existing = testFiles.get(key);
+        const sha = existing?.sha ?? `test-sha-${testFiles.size + 1}`;
+        const changed = existing?.content !== content;
+        testFiles.set(key, { content, sha });
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ branch, path, sha, changed, idempotencyKey }) }],
+        };
+      }
+
+      const repo = requireRepository(repository);
+      const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+      const existing = await githubJson(
+        fetchImpl,
+        `https://api.github.com/repos/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`,
+        { method: 'GET', headers: headers(token) },
+      );
+      if (existing.status !== 200 && existing.status !== 404) {
+        return { isError: true, content: [{ type: 'text', text: `GITHUB_FILE_LOOKUP_FAILED:${existing.status}` }] };
+      }
+
+      const existingBody = existing.status === 200 ? existing.body as { sha: string } : null;
+      const written = await githubJson(
+        fetchImpl,
+        `https://api.github.com/repos/${repo}/contents/${encodedPath}`,
+        {
+          method: 'PUT',
+          headers: { ...headers(token), 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            content: Buffer.from(content, 'utf8').toString('base64'),
+            branch,
+            ...(existingBody ? { sha: existingBody.sha } : {}),
+          }),
+        },
+      );
+      if (written.status !== 200 && written.status !== 201) {
+        return { isError: true, content: [{ type: 'text', text: `GITHUB_WRITE_FILE_FAILED:${written.status}` }] };
+      }
+      const writtenBody = written.body as { content?: { sha?: string } };
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            branch,
+            path,
+            sha: writtenBody.content?.sha ?? null,
+            changed: true,
+            idempotencyKey,
+          }),
+        }],
+      };
+    },
+  );
+
+  server.registerTool(
+    'github_open_pull_request',
+    {
+      description: 'Open one pull request for an approved branch. Repeated calls reuse an existing open pull request for the same head/base.',
+      inputSchema: z.object({
+        head: z.string().min(1),
+        base: z.string().min(1),
+        title: z.string().min(1),
+        body: z.string(),
+        idempotencyKey: z.string().min(1),
+      }),
+    },
+    async ({ head, base, title, body, idempotencyKey }) => {
+      const key = `${head}:${base}`;
+      if (testMode) {
+        const existing = testPullRequests.get(key);
+        if (existing) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ ...existing, created: false, idempotencyKey }) }],
+          };
+        }
+        const created = { number: testPullRequests.size + 900, head, base };
+        testPullRequests.set(key, created);
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ ...created, created: true, idempotencyKey }) }],
+        };
+      }
+
+      const repo = requireRepository(repository);
+      const [owner] = repo.split('/');
+      const existing = await githubJson(
+        fetchImpl,
+        `https://api.github.com/repos/${repo}/pulls?state=open&head=${encodeURIComponent(`${owner}:${head}`)}&base=${encodeURIComponent(base)}`,
+        { method: 'GET', headers: headers(token) },
+      );
+      if (existing.status !== 200) {
+        return { isError: true, content: [{ type: 'text', text: `GITHUB_PR_LOOKUP_FAILED:${existing.status}` }] };
+      }
+      const existingPulls = existing.body as Array<{ number: number; head: { ref: string }; base: { ref: string } }>;
+      if (existingPulls.length > 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({ number: existingPulls[0].number, head, base, created: false, idempotencyKey }),
+          }],
+        };
+      }
+
+      const created = await githubJson(
+        fetchImpl,
+        `https://api.github.com/repos/${repo}/pulls`,
+        {
+          method: 'POST',
+          headers: { ...headers(token), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, body, head, base }),
+        },
+      );
+      if (created.status !== 201) {
+        return { isError: true, content: [{ type: 'text', text: `GITHUB_OPEN_PR_FAILED:${created.status}` }] };
+      }
+      const createdBody = created.body as { number: number };
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ number: createdBody.number, head, base, created: true, idempotencyKey }) }],
       };
     },
   );
