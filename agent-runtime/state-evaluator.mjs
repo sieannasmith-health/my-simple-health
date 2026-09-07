@@ -113,14 +113,21 @@ function executionGateSatisfied(issue, state) {
   if (state.human_gate?.reason_code !== 'EXECUTION_APPROVAL_REQUIRED') return false;
   return labels(issue).includes('execution:approved');
 }
-function legacyHumanGateNeedsReevaluation(issue, state) {
-  if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return false;
-  if (state.current_stage !== 'IMPLEMENTATION' || state.assigned_agent !== 'human') return false;
-  if (!labels(issue).includes('execution:approved')) return false;
-  if (hasHistoryEvent(state, 'LEGACY_HUMAN_GATE_REEVALUATION')) return false;
+function legacyHumanGateRecoveryTarget(issue, state) {
+  if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return null;
+  if (state.assigned_agent !== 'human') return null;
+  if (!labels(issue).includes('execution:approved')) return null;
+  if (hasHistoryEvent(state, 'LEGACY_HUMAN_GATE_REEVALUATION')) return null;
+
   const history = Array.isArray(state.history) ? state.history : [];
   const last = history.at(-1);
-  return last?.agent === 'selah' && last?.result_status === 'blocked';
+  if (state.current_stage === 'IMPLEMENTATION' && last?.agent === 'selah' && last?.result_status === 'blocked') {
+    return { assigned_agent: 'selah', current_stage: 'IMPLEMENTATION' };
+  }
+  if (state.current_stage === 'PRODUCT_COORDINATION' && last?.agent === 'nomy' && last?.result_status === 'blocked') {
+    return { assigned_agent: 'nomy', current_stage: 'PRODUCT_COORDINATION' };
+  }
+  return null;
 }
 function recoverHumanGate(issue, state) {
   if (executionGateSatisfied(issue, state)) {
@@ -140,18 +147,22 @@ function recoverHumanGate(issue, state) {
     };
   }
 
-  if (legacyHumanGateNeedsReevaluation(issue, state)) {
+  const legacyTarget = legacyHumanGateRecoveryTarget(issue, state);
+  if (legacyTarget) {
     return {
       ...state,
       status: 'PENDING',
-      assigned_agent: 'selah',
-      current_stage: 'IMPLEMENTATION',
+      assigned_agent: legacyTarget.assigned_agent,
+      current_stage: legacyTarget.current_stage,
       execution: null,
+      human_gate: null,
       history: [...(Array.isArray(state.history) ? state.history : []), {
         at: new Date().toISOString(),
         event: 'LEGACY_HUMAN_GATE_REEVALUATION',
         reason_code: 'UNTYPED_LEGACY_GATE',
-        satisfied_by: 'bounded_revalidation_after_runtime_upgrade'
+        satisfied_by: 'bounded_revalidation_after_runtime_upgrade',
+        resume_agent: legacyTarget.assigned_agent,
+        resume_stage: legacyTarget.current_stage
       }].slice(-20)
     };
   }
