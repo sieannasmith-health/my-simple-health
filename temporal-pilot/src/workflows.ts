@@ -30,6 +30,9 @@ export async function foundationPilot(
 
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
     const recorded = await recordStage(input.objectiveId, stage);
+    if (recorded !== stage) {
+      throw new Error(`MALFORMED_AGENT_RESULT:${stage}`);
+    }
     stages.push(recorded);
   }
 
