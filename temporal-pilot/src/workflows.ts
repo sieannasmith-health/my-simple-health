@@ -1,15 +1,24 @@
 import { ApplicationFailure } from '@temporalio/common';
-import { proxyActivities, sleep } from '@temporalio/workflow';
+import {
+  condition,
+  defineSignal,
+  proxyActivities,
+  setHandler,
+  sleep,
+} from '@temporalio/workflow';
 import type * as activities from './activities.js';
 
 const FOUNDATION_STAGES = ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE'] as const;
 type FoundationStage = (typeof FOUNDATION_STAGES)[number];
+
+export const sieaApproveSignal = defineSignal('sieaApprove');
 
 export interface FoundationPilotInput {
   objectiveId: string;
   activityTimeout?: string;
   startDelay?: string;
   resumeFromStage?: FoundationStage;
+  requireSieaApproval?: boolean;
 }
 
 export interface FoundationPilotResult {
@@ -35,6 +44,11 @@ export async function foundationPilot(
     await sleep(input.startDelay);
   }
 
+  let sieaApproved = !input.requireSieaApproval;
+  setHandler(sieaApproveSignal, () => {
+    sieaApproved = true;
+  });
+
   const stages: string[] = [];
   const { recordStage } = stageActivities(input.activityTimeout);
   const startIndex = input.resumeFromStage
@@ -46,6 +60,10 @@ export async function foundationPilot(
   }
 
   for (const stage of FOUNDATION_STAGES.slice(startIndex)) {
+    if (input.requireSieaApproval && stage === 'TESSA') {
+      await condition(() => sieaApproved);
+    }
+
     const idempotencyKey = `${input.objectiveId}:${stage}:record-stage`;
     const recorded = await recordStage(input.objectiveId, stage, idempotencyKey);
     if (recorded !== stage) {
