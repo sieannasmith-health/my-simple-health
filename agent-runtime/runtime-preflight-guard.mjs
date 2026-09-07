@@ -1,3 +1,5 @@
+import { hasLivelock } from './livelock-policy.mjs';
+
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
 const issueNumber = Number(process.env.ISSUE_NUMBER || 0);
@@ -48,19 +50,6 @@ function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
-function isBlockedWithoutNewEvidence(entry) {
-  if (!entry || entry.event) return false;
-  if (entry.status !== 'COMPLETED' || entry.result_status !== 'blocked') return false;
-  return !entry.evidence;
-}
-
-function hasLivelock(state) {
-  if (state?.maintenance_grant && !state.maintenance_grant.consumed_at) return false;
-  const turns = (Array.isArray(state?.history) ? state.history : []).filter(entry => !entry?.event);
-  if (turns.length < BLOCKED_TURN_LIMIT) return false;
-  return turns.slice(-BLOCKED_TURN_LIMIT).every(isBlockedWithoutNewEvidence);
-}
-
 async function stopLivelock(issue, state) {
   const now = new Date().toISOString();
   const history = Array.isArray(state.history) ? state.history : [];
@@ -109,7 +98,7 @@ async function stopLivelock(issue, state) {
 const issue = await request(`/issues/${issueNumber}`);
 const state = parseState(issue.body || '');
 
-if (state && hasLivelock(state)) {
+if (state && hasLivelock(state, BLOCKED_TURN_LIMIT)) {
   await stopLivelock(issue, state);
   console.log(`[AUTONOMY] Livelock circuit breaker stopped issue #${issueNumber} before another worker turn.`);
   process.exit(0);
