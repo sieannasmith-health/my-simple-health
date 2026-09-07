@@ -1,3 +1,4 @@
+import { ApplicationFailure } from '@temporalio/common';
 import { proxyActivities } from '@temporalio/workflow';
 import type * as activities from './activities.js';
 
@@ -31,7 +32,7 @@ export async function foundationPilot(
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
     const recorded = await recordStage(input.objectiveId, stage);
     if (recorded !== stage) {
-      throw new Error(`MALFORMED_AGENT_RESULT:${stage}`);
+      throw ApplicationFailure.nonRetryable(`MALFORMED_AGENT_RESULT:${stage}`);
     }
     stages.push(recorded);
   }
