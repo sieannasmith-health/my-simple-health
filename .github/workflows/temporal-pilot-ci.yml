@@ -8,30 +8,37 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   temporal-pilot:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: temporal-pilot
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: selah/temporal-foundation-pilot
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install pilot dependencies
+      - name: Generate exact pilot dependency lock
+        working-directory: temporal-pilot
         run: npm install --ignore-scripts
-      - name: Capture generated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: temporal-pilot-package-lock
-          path: temporal-pilot/package-lock.json
-          if-no-files-found: error
+      - name: Commit generated lockfile once
+        run: |
+          if git diff --quiet -- temporal-pilot/package-lock.json && git ls-files --error-unmatch temporal-pilot/package-lock.json >/dev/null 2>&1; then
+            echo 'Lockfile already committed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add temporal-pilot/package-lock.json
+          git commit -m 'Lock Temporal pilot dependencies'
+          git push origin HEAD:selah/temporal-foundation-pilot
       - name: TypeScript contract build
+        working-directory: temporal-pilot
         run: npm run build
       - name: Pilot contract tests
+        working-directory: temporal-pilot
         run: npm test
