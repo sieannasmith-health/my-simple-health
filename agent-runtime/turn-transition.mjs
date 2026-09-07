@@ -13,10 +13,14 @@ export function deriveTransitionFromResult(result, state) {
   if (result.requires_human) {
     return {
       runtimeStatus: 'HUMAN_APPROVAL_REQUIRED',
-      assignedAgent: 'human',
+      assignedAgent: 'siea',
       nextStage: state.current_stage,
       publicStatus: result.status === 'completed' ? 'blocked' : result.status,
-      needsHuman: true
+      needsHuman: true,
+      humanGate: {
+        type: 'EXPLICIT_SIEA_REQUEST',
+        action: result.human_request || result.message || 'Siea review required by structured worker result.'
+      }
     };
   }
 
@@ -26,7 +30,8 @@ export function deriveTransitionFromResult(result, state) {
       assignedAgent: null,
       nextStage: state.current_stage,
       publicStatus: 'completed',
-      needsHuman: false
+      needsHuman: false,
+      humanGate: null
     };
   }
 
@@ -41,6 +46,7 @@ export function deriveTransitionFromResult(result, state) {
     assignedAgent,
     nextStage: stageForAgent(assignedAgent, state.current_stage),
     publicStatus: result.status,
-    needsHuman: false
+    needsHuman: false,
+    humanGate: null
   };
 }
