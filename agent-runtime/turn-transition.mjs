@@ -1,3 +1,11 @@
+const SIEA_REASON_CODES = new Set([
+  'PHYSICAL_DEVICE_ACTION',
+  'ACCOUNT_OWNER_ACTION',
+  'EXTERNAL_CREDENTIAL_ACTION',
+  'IRREVERSIBLE_OWNER_APPROVAL',
+  'HUMAN_APPROVAL_REQUIRED'
+]);
+
 function stageForAgent(agent, fallback) {
   if (agent === 'tessa') return 'QA';
   if (agent === 'selah') return 'IMPLEMENTATION';
@@ -10,7 +18,23 @@ export function deriveTransitionFromResult(result, state) {
     throw new Error('Missing trusted structured worker result for reconciliation.');
   }
 
-  if (result.requires_human) {
+  // Authority routing is based exclusively on the machine-readable reason
+  // code. Human-readable messages and the generic requires_human flag are not
+  // authority signals.
+  const reasonCode = typeof result.reason_code === 'string' ? result.reason_code : null;
+
+  if (reasonCode === 'EXECUTION_APPROVAL_REQUIRED') {
+    return {
+      runtimeStatus: 'PENDING',
+      assignedAgent: 'nomy',
+      nextStage: 'PRODUCT_COORDINATION',
+      publicStatus: 'blocked',
+      needsHuman: false,
+      humanGate: null
+    };
+  }
+
+  if (SIEA_REASON_CODES.has(reasonCode)) {
     const resumeAgent = result.next_agent || state.assigned_agent || 'nomy';
     return {
       runtimeStatus: 'PAUSED_FOR_SIEA',
@@ -21,7 +45,8 @@ export function deriveTransitionFromResult(result, state) {
       humanGate: {
         assignee: 'siea',
         type: 'EXPLICIT_SIEA_REQUEST',
-        action: result.human_request || result.message || 'Siea review required by structured worker result.',
+        reason_code: reasonCode,
+        action: result.human_request || result.message || 'Siea action required by structured worker result.',
         requested_at: new Date().toISOString(),
         resume_agent: resumeAgent,
         resume_stage: stageForAgent(resumeAgent, state.current_stage)
