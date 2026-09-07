@@ -7,6 +7,7 @@ import {
   sleep,
 } from '@temporalio/workflow';
 import type * as activities from './activities.js';
+import type { StageEvidence } from './activities.js';
 
 const FOUNDATION_STAGES = ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE'] as const;
 type FoundationStage = (typeof FOUNDATION_STAGES)[number];
@@ -24,6 +25,12 @@ export interface FoundationPilotInput {
 export interface FoundationPilotResult {
   objectiveId: string;
   stages: string[];
+  terminalStatus: 'COMPLETED';
+}
+
+export interface FoundationArtifactPilotResult {
+  objectiveId: string;
+  evidence: StageEvidence[];
   terminalStatus: 'COMPLETED';
 }
 
@@ -75,6 +82,38 @@ export async function foundationPilot(
   return {
     objectiveId: input.objectiveId,
     stages,
+    terminalStatus: 'COMPLETED',
+  };
+}
+
+export async function foundationArtifactPilot(
+  input: FoundationPilotInput,
+): Promise<FoundationArtifactPilotResult> {
+  const evidence: StageEvidence[] = [];
+  const { runAgentStage } = stageActivities(input.activityTimeout);
+
+  for (const stage of FOUNDATION_STAGES) {
+    const idempotencyKey = `${input.objectiveId}:${stage}:artifact-stage`;
+    const artifact = await runAgentStage(input.objectiveId, stage, evidence, idempotencyKey);
+
+    if (artifact.stage !== stage || !artifact.artifactRef) {
+      throw ApplicationFailure.nonRetryable(`INVALID_STAGE_EVIDENCE:${stage}`);
+    }
+
+    if (stage === 'TESSA' && artifact.status !== 'PASS') {
+      throw ApplicationFailure.nonRetryable('QA_NOT_PASSED');
+    }
+
+    if (stage === 'NOMY_ACCEPTANCE' && artifact.status !== 'ACCEPTED') {
+      throw ApplicationFailure.nonRetryable('PRODUCT_NOT_ACCEPTED');
+    }
+
+    evidence.push(artifact);
+  }
+
+  return {
+    objectiveId: input.objectiveId,
+    evidence,
     terminalStatus: 'COMPLETED',
   };
 }
