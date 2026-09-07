@@ -169,3 +169,9 @@ A change is done when:
 - the branch is reviewable as a focused PR,
 - the implementation still feels like one coherent My Simple Health system,
 - and the change increases the person's ability to understand or steward their health and life without unnecessarily increasing dependence on MSH.
+
+## Agent runtime implementation contract
+
+When the MSH agent runtime says execution is approved, the structured `implementation` result is the implementation mechanism itself. For each entry in `implementation.files`, `path` identifies the repository file and `content` must contain the complete UTF-8 replacement for that file. The runtime writes that full content to the checked-out branch, commits it, pushes the branch, and opens a pull request. An agent must not request a separate patch tool, editor, shell, or “complete replacement mechanism” when the required target is already covered by execution authority and, for protected runtime paths, by the active exact-path maintenance grant.
+
+For an authorized protected runtime-maintenance turn, full source text for each granted path may be supplied in deterministic repository context. If that context is sufficient to make the scoped change, return the complete replacements in `implementation.files` rather than escalating to a human merely because the file is being replaced in full. A human escalation remains appropriate only for a genuinely missing decision, credential, access grant, approval, or physical-device action that the runtime cannot perform.
