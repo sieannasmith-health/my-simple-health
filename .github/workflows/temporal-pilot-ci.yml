@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   temporal-pilot:
@@ -19,28 +19,11 @@ jobs:
         working-directory: temporal-pilot
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Refresh pilot lockfile for MCP dependency transition
-        run: npm install --package-lock-only --ignore-scripts
-      - name: Commit refreshed pilot lockfile when needed
-        working-directory: .
-        shell: bash
-        run: |
-          if git diff --quiet -- temporal-pilot/package-lock.json; then
-            echo "Pilot lockfile already current"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add temporal-pilot/package-lock.json
-          git commit -m "Lock MCP v2 pilot dependencies"
-          git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
-      - name: Install generated locked pilot dependencies
+      - name: Install locked pilot dependencies
         run: npm ci --ignore-scripts
       - name: TypeScript contract build
         run: npm run build
