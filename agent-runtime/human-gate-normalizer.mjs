@@ -1,4 +1,7 @@
-import { isExecutionApprovalCoordinationGate } from './orchestration-policy.mjs';
+import {
+  isExecutionApprovalCoordinationGate,
+  reasonCodeOf
+} from './orchestration-policy.mjs';
 
 export const HumanGateSignal = Object.freeze({
   NO_OP: 'NO_OP',
@@ -9,6 +12,7 @@ export async function normalizeHumanGate({
   token = process.env.GITHUB_TOKEN,
   repository = process.env.GITHUB_REPOSITORY,
   issueNumber = Number(process.env.ISSUE_NUMBER || 0),
+  structuredResult = null,
   fetchImpl = fetch
 } = {}) {
   if (!token || !repository || !issueNumber) {
@@ -42,11 +46,11 @@ export async function normalizeHumanGate({
 
   const issue = await request(`/issues/${issueNumber}`);
   const comments = await request(`/issues/${issueNumber}/comments?per_page=100`);
-  const latestComment = comments.at(-1)?.body || '';
   const labels = labelNames(issue);
+  const reasonCode = reasonCodeOf(structuredResult);
 
-  if (!isExecutionApprovalCoordinationGate(labels, latestComment)) {
-    console.log(`[MSH Runtime] Human-gate normalization NO_OP on issue #${issueNumber}.`);
+  if (!isExecutionApprovalCoordinationGate(labels, structuredResult)) {
+    console.log(`[MSH Runtime] Human-gate normalization NO_OP on issue #${issueNumber} (reason_code=${reasonCode || 'none'}).`);
     return HumanGateSignal.NO_OP;
   }
 
@@ -62,10 +66,10 @@ export async function normalizeHumanGate({
   await request(`/issues/${issueNumber}/comments`, {
     method: 'POST',
     body: JSON.stringify({
-      body: '**RUNTIME AUTHORITY NORMALIZATION**\n\nMissing `execution:approved` is a Product coordination gate, not a Siea-only action. Routing to Nomy without `needs:siea`. The execution safety gate remains enforced.'
+      body: '**RUNTIME AUTHORITY NORMALIZATION**\n\nStructured reason code `EXECUTION_APPROVAL_REQUIRED` identifies missing execution authority. This is a Product coordination gate, not a Siea-only action. The execution safety gate remains enforced.'
     })
   });
 
-  console.log(`[MSH Runtime] Normalized missing execution approval to Nomy on issue #${issueNumber}.`);
+  console.log(`[MSH Runtime] Normalized ${reasonCode} to Nomy on issue #${issueNumber}.`);
   return HumanGateSignal.NORMALIZED;
 }

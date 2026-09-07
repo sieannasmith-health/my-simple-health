@@ -1,13 +1,34 @@
-export function isExecutionApprovalCoordinationGate(labels, latestComment = '') {
-  const names = Array.isArray(labels) ? labels.filter(Boolean) : [];
-  const comment = String(latestComment || '');
-  const missingExecutionApproval = !names.includes('execution:approved');
-  const blocked = names.includes('status:blocked');
-  const mentionsExecutionApproval = /execution:approved/i.test(comment);
-  const executionApprovalLanguage = /(execution is not approved|approve an execution run|not authorized|authorization is absent|authorization.*absent|approval.*absent|approve execution)/i.test(comment)
-    || (mentionsExecutionApproval && /(absent|missing|not approved|not authorized|approve|authorization|authorized)/i.test(comment));
+const EXECUTION_APPROVAL_REQUIRED = 'EXECUTION_APPROVAL_REQUIRED';
+const HUMAN_APPROVAL_REQUIRED = 'HUMAN_APPROVAL_REQUIRED';
 
-  return missingExecutionApproval
-    && blocked
-    && executionApprovalLanguage;
+export const RuntimeReasonCode = Object.freeze({
+  EXECUTION_APPROVAL_REQUIRED,
+  HUMAN_APPROVAL_REQUIRED
+});
+
+function reasonCodeFromResult(result) {
+  if (typeof result === 'string') return result;
+  return result && typeof result.reason_code === 'string' ? result.reason_code : null;
+}
+
+/**
+ * Missing execution authority is a Product coordination gate. This decision
+ * intentionally consumes only the structured worker result; comment wording
+ * is presentation and must never influence routing.
+ */
+export function isExecutionApprovalCoordinationGate(labels, structuredResult = null) {
+  const names = Array.isArray(labels) ? labels.filter(Boolean) : [];
+  const reasonCode = reasonCodeFromResult(structuredResult);
+
+  return !names.includes('execution:approved')
+    && names.includes('status:blocked')
+    && reasonCode === EXECUTION_APPROVAL_REQUIRED;
+}
+
+export function isHumanApprovalRequired(structuredResult = null) {
+  return reasonCodeFromResult(structuredResult) === HUMAN_APPROVAL_REQUIRED;
+}
+
+export function reasonCodeOf(structuredResult = null) {
+  return reasonCodeFromResult(structuredResult);
 }
