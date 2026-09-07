@@ -73,11 +73,13 @@ jobs:
           fi
           pgrep -x Xcode >/dev/null
 
-      - name: Query XcodeBuildMCP IDE bridge
+      - name: Initialize and query XcodeBuildMCP IDE bridge
         working-directory: /Users/sieannasmith/Documents/my-simple-health
         shell: bash
         run: |
           set -euo pipefail
+          xcodebuildmcp xcode-ide bridge-status
+          xcodebuildmcp xcode-ide bridge-sync
           xcodebuildmcp xcode-ide bridge-status
           xcodebuildmcp xcode-ide list-tools
 
@@ -192,7 +194,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Xcode: available"
             echo "- XcodeBuildMCP: available"
-            echo "- IDE bridge query: completed"
+            echo "- IDE bridge initialization/query: completed"
             if [[ "${{ inputs.operation }}" == "native-test" ]]; then
               echo "- Native test execution: requested"
             fi
