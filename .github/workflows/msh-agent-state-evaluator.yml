@@ -72,18 +72,9 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
-      GITHUB_TOKEN: ${{ github.token }}
-      AGENT_TURN_WORKFLOW: msh-agent-runtime.yml
-      AGENT_TURN_REF: main
-      AGENT_LEASE_MINUTES: '20'
-      AGENT_MAX_RETRIES: '3'
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '24'
-          package-manager-cache: false
-      - name: Recover stale actionable agent issues
+      - name: Discover stale actionable issues and dispatch serialized evaluations
         shell: bash
         run: |
           gh issue list --state open --limit 100 --json number,labels,body --jq '
@@ -97,6 +88,6 @@ jobs:
           ' > /tmp/issues
           while read -r issue; do
             [ -z "$issue" ] && continue
-            echo "Evaluating issue #$issue"
-            ISSUE_NUMBER="$issue" node agent-runtime/state-evaluator.mjs
+            echo "Dispatching serialized evaluator for issue #$issue"
+            gh workflow run msh-agent-state-evaluator.yml --ref main -f issue_number="$issue"
           done < /tmp/issues
