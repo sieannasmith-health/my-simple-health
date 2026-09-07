@@ -9,19 +9,21 @@ const state = {
 
 const genuineGate = deriveTransitionFromResult({
   status: 'blocked',
-  next_agent: null,
+  next_agent: 'tessa',
   requires_human: true,
   human_request: 'Approve the manual native-test run on MSH-Mac.',
   message: 'Native execution is ready for Siea approval.'
 }, state);
 
-assert.equal(genuineGate.runtimeStatus, 'HUMAN_APPROVAL_REQUIRED');
-assert.equal(genuineGate.assignedAgent, 'siea');
+assert.equal(genuineGate.runtimeStatus, 'PAUSED_FOR_SIEA');
+assert.equal(genuineGate.assignedAgent, null);
 assert.equal(genuineGate.needsHuman, true);
-assert.deepEqual(genuineGate.humanGate, {
-  type: 'EXPLICIT_SIEA_REQUEST',
-  action: 'Approve the manual native-test run on MSH-Mac.'
-});
+assert.equal(genuineGate.humanGate.assignee, 'siea');
+assert.equal(genuineGate.humanGate.type, 'EXPLICIT_SIEA_REQUEST');
+assert.equal(genuineGate.humanGate.action, 'Approve the manual native-test run on MSH-Mac.');
+assert.equal(genuineGate.humanGate.resume_agent, 'tessa');
+assert.equal(genuineGate.humanGate.resume_stage, 'QA');
+assert.ok(genuineGate.humanGate.requested_at);
 
 const ordinaryBlocked = deriveTransitionFromResult({
   status: 'blocked',
@@ -36,4 +38,4 @@ assert.equal(ordinaryBlocked.assignedAgent, 'nomy');
 assert.equal(ordinaryBlocked.needsHuman, false);
 assert.equal(ordinaryBlocked.humanGate, null);
 
-console.log('explicit Siea human gate regression tests passed');
+console.log('paused Siea human gate regression tests passed');
