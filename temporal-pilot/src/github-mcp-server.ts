@@ -75,6 +75,45 @@ export function createMshGitHubMcpServer(options: GitHubMcpServerOptions = {}): 
   );
 
   server.registerTool(
+    'github_read_checks',
+    {
+      description: 'Read GitHub check runs for one approved commit ref and return a strict aggregate conclusion for QA.',
+      inputSchema: z.object({ ref: z.string().min(1) }),
+    },
+    async ({ ref }) => {
+      if (testMode) {
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ ref, conclusion: 'success', checks: [{ name: 'temporal-pilot', status: 'completed', conclusion: 'success' }] }) }],
+        };
+      }
+
+      const repo = requireRepository(repository);
+      const result = await githubJson(
+        fetchImpl,
+        `https://api.github.com/repos/${repo}/commits/${encodeURIComponent(ref)}/check-runs`,
+        { method: 'GET', headers: headers(token) },
+      );
+      if (result.status !== 200) {
+        return { isError: true, content: [{ type: 'text', text: `GITHUB_READ_CHECKS_FAILED:${result.status}` }] };
+      }
+
+      const body = result.body as {
+        check_runs?: Array<{ name: string; status: string; conclusion: string | null }>;
+      };
+      const checks = body.check_runs ?? [];
+      const conclusion = checks.length === 0 || checks.some((check) => check.status !== 'completed' || check.conclusion === null)
+        ? 'pending'
+        : checks.every((check) => check.conclusion === 'success')
+          ? 'success'
+          : 'failure';
+
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ ref, conclusion, checks }) }],
+      };
+    },
+  );
+
+  server.registerTool(
     'github_create_branch',
     {
       description: 'Create one branch from an existing ref. Repeated calls are idempotent by branch name.',
