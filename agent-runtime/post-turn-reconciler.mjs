@@ -82,7 +82,7 @@ async function reconcileLabels(transition) {
     name => !name.startsWith('agent:') && !name.startsWith('status:') && name !== 'needs:siea'
   );
   const next = [...preserved, `status:${transition.publicStatus}`];
-  if (transition.assignedAgent && transition.assignedAgent !== 'human') next.push(`agent:${transition.assignedAgent}`);
+  if (transition.assignedAgent) next.push(`agent:${transition.assignedAgent}`);
   if (transition.needsHuman) next.push('needs:siea');
   await request(`/issues/${issueNumber}/labels`, {
     method: 'PUT',
@@ -139,6 +139,7 @@ export async function reconcileTurn(structuredWorkerResult) {
     status: transition.runtimeStatus,
     current_stage: transition.nextStage,
     assigned_agent: transition.assignedAgent,
+    human_gate: transition.humanGate,
     execution: null,
     retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
     history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
