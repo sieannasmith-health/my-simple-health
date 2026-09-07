@@ -25,6 +25,7 @@ test('official MCP v2 stdio path exposes bounded GitHub tools with idempotent si
       [
         'github_create_branch',
         'github_open_pull_request',
+        'github_read_checks',
         'github_read_issue',
         'github_write_repository_file',
       ],
@@ -40,6 +41,14 @@ test('official MCP v2 stdio path exposes bounded GitHub tools with idempotent si
       title: 'test issue',
       body: 'test body',
     });
+
+    const checksResult = await connection.client.callTool({
+      name: 'github_read_checks',
+      arguments: { ref: 'test-commit-sha' },
+    });
+    assert.notEqual(checksResult.isError, true);
+    assert.equal(jsonText(checksResult).conclusion, 'success');
+    assert.equal(jsonText(checksResult).checks[0].name, 'temporal-pilot');
 
     const first = await connection.client.callTool({
       name: 'github_create_branch',
