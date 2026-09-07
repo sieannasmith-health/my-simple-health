@@ -9,9 +9,9 @@ test('workflow survives worker shutdown and completes on replacement worker', as
   const env = await TestWorkflowEnvironment.createTimeSkipping();
   t.after(async () => env.teardown());
 
-  let releaseFirstActivity;
+  let markFirstActivityStarted;
   const firstActivityStarted = new Promise((resolve) => {
-    releaseFirstActivity = resolve;
+    markFirstActivityStarted = resolve;
   });
   let firstCall = true;
 
@@ -23,8 +23,8 @@ test('workflow survives worker shutdown and completes on replacement worker', as
       async recordStage(_objectiveId, stage) {
         if (firstCall) {
           firstCall = false;
-          releaseFirstActivity();
-          await new Promise(() => {});
+          markFirstActivityStarted();
+          throw new Error('simulated worker loss');
         }
         return stage;
       },
