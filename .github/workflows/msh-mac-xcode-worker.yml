@@ -63,25 +63,13 @@ jobs:
           test -f "$MSH_WORKSPACE/.xcodebuildmcp/config.yaml"
           echo "workspace=$MSH_WORKSPACE"
 
-      - name: Ensure Xcode is available to IDE bridge
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! pgrep -x Xcode >/dev/null 2>&1; then
-            open -a Xcode
-            sleep 10
-          fi
-          pgrep -x Xcode >/dev/null
-
-      - name: Initialize and query XcodeBuildMCP IDE bridge
+      - name: Record optional Xcode IDE bridge status
+        continue-on-error: true
         working-directory: /Users/sieannasmith/Documents/my-simple-health
         shell: bash
         run: |
           set -euo pipefail
           xcodebuildmcp xcode-ide bridge-status
-          xcodebuildmcp xcode-ide bridge-sync
-          xcodebuildmcp xcode-ide bridge-status
-          xcodebuildmcp xcode-ide list-tools
 
       - name: Verify local HealthKit package
         if: ${{ inputs.operation == 'native-test' }}
@@ -194,7 +182,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Xcode: available"
             echo "- XcodeBuildMCP: available"
-            echo "- IDE bridge initialization/query: completed"
+            echo "- IDE bridge: diagnostic only; not required for native test execution"
             if [[ "${{ inputs.operation }}" == "native-test" ]]; then
               echo "- Native test execution: requested"
             fi
