@@ -26,6 +26,13 @@ assert.match(evaluator, /last\?\.result_status === 'blocked'/);
 assert.match(evaluator, /assigned_agent: legacyTarget\.assigned_agent/);
 assert.match(evaluator, /current_stage: legacyTarget\.current_stage/);
 assert.match(evaluator, /human_gate: null/);
+assert.match(evaluator, /isMissingExecutionApprovalGate/);
+assert.match(evaluator, /state\.human_gate\?\.reason_code === EXECUTION_APPROVAL_REQUIRED/);
+assert.match(evaluator, /routeMissingExecutionApprovalToCoordinator/);
+assert.match(evaluator, /current_stage: 'PRODUCT_COORDINATION'/);
+assert.match(evaluator, /assigned_agent: 'nomy'/);
+assert.match(evaluator, /event: 'EXECUTION_APPROVAL_COORDINATION_REQUIRED'/);
+assert.match(evaluator, /reason_code: EXECUTION_APPROVAL_REQUIRED/);
 
 assert.match(reconciler, /state\.status !== 'EXECUTING'/);
 assert.match(reconciler, /updated_at/);
