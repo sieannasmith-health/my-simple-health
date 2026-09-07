@@ -8,6 +8,7 @@ const workflowFile = process.env.AGENT_TURN_WORKFLOW || 'msh-agent-runtime.yml';
 const ref = process.env.AGENT_TURN_REF || 'main';
 const leaseMinutes = Number(process.env.AGENT_LEASE_MINUTES || 20);
 const maxRetriesDefault = Number(process.env.AGENT_MAX_RETRIES || 3);
+const EXECUTION_APPROVAL_REQUIRED = 'EXECUTION_APPROVAL_REQUIRED';
 
 if (!token || !repository || !issueNumber) throw new Error('Missing GITHUB_TOKEN, GITHUB_REPOSITORY, or ISSUE_NUMBER.');
 const [owner, repo] = repository.split('/');
@@ -110,8 +111,12 @@ function hasHistoryEvent(state, event) {
 }
 function executionGateSatisfied(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED') return false;
-  if (state.human_gate?.reason_code !== 'EXECUTION_APPROVAL_REQUIRED') return false;
+  if (state.human_gate?.reason_code !== EXECUTION_APPROVAL_REQUIRED) return false;
   return labels(issue).includes('execution:approved');
+}
+function isMissingExecutionApprovalGate(state) {
+  return state.status === 'HUMAN_APPROVAL_REQUIRED'
+    && state.human_gate?.reason_code === EXECUTION_APPROVAL_REQUIRED;
 }
 function legacyHumanGateRecoveryTarget(issue, state) {
   if (state.status !== 'HUMAN_APPROVAL_REQUIRED' || state.human_gate) return null;
@@ -141,7 +146,7 @@ function recoverHumanGate(issue, state) {
       history: [...(Array.isArray(state.history) ? state.history : []), {
         at: new Date().toISOString(),
         event: 'HUMAN_GATE_SATISFIED',
-        reason_code: 'EXECUTION_APPROVAL_REQUIRED',
+        reason_code: EXECUTION_APPROVAL_REQUIRED,
         satisfied_by: 'execution:approved'
       }].slice(-20)
     };
@@ -168,6 +173,24 @@ function recoverHumanGate(issue, state) {
   }
 
   return state;
+}
+function routeMissingExecutionApprovalToCoordinator(state) {
+  if (!isMissingExecutionApprovalGate(state)) return state;
+  return {
+    ...state,
+    status: 'PENDING',
+    current_stage: 'PRODUCT_COORDINATION',
+    assigned_agent: 'nomy',
+    execution: null,
+    human_gate: null,
+    history: [...(Array.isArray(state.history) ? state.history : []), {
+      at: new Date().toISOString(),
+      event: 'EXECUTION_APPROVAL_COORDINATION_REQUIRED',
+      reason_code: EXECUTION_APPROVAL_REQUIRED,
+      resume_agent: state.human_gate?.resume_agent || 'selah',
+      resume_stage: state.human_gate?.resume_stage || 'IMPLEMENTATION'
+    }].slice(-20)
+  };
 }
 async function dispatch(state) {
   await request(`/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`, {
@@ -210,6 +233,11 @@ if (state.status === 'HUMAN_APPROVAL_REQUIRED') {
   if (recovered !== state) {
     console.log(`[AUTONOMY] Reconciled satisfied or legacy human gate on issue #${issueNumber}; resuming ${recovered.assigned_agent}.`);
     state = recovered;
+  }
+  const coordinated = routeMissingExecutionApprovalToCoordinator(state);
+  if (coordinated !== state) {
+    console.log(`[AUTONOMY] Structured ${EXECUTION_APPROVAL_REQUIRED} gate on issue #${issueNumber}; routing to Nomy/Product coordination.`);
+    state = coordinated;
   }
 }
 
