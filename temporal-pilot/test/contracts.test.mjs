@@ -7,12 +7,12 @@ const activities = fs.readFileSync(new URL('../src/activities.ts', import.meta.u
 
 test('pilot preserves the required agent sequence', () => {
   for (const stage of ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE']) {
-    assert.match(workflow, new RegExp(`['"]${stage}['"]`));
+    assert.match(workflow, new RegExp(`['\"]${stage}['\"]`));
   }
 });
 
 test('Temporal owns bounded activity retry behavior', () => {
-  assert.match(workflow, /activityTimeout\s*=\s*['"]30 seconds['"]/);
+  assert.match(workflow, /activityTimeout\s*=\s*['\"]30 seconds['\"]/);
   assert.match(workflow, /startToCloseTimeout:\s*activityTimeout/);
   assert.match(workflow, /maximumAttempts:\s*3/);
 });
@@ -22,7 +22,9 @@ test('pilot does not import the quarantined legacy runtime', () => {
   assert.doesNotMatch(activities, /agent-runtime/);
 });
 
-test('in-memory activity state is explicitly rejected as durable proof', () => {
-  assert.match(activities, /new Set<string>/);
-  assert.match(activities, /Production persistence will replace this/);
+test('activity idempotency boundary is restart-safe by construction', () => {
+  assert.doesNotMatch(activities, /new Set<string>/);
+  assert.match(workflow, /idempotencyKey\s*=\s*`\$\{input\.objectiveId\}:\$\{stage\}:record-stage`/);
+  assert.match(activities, /IDEMPOTENCY_KEY_REQUIRED/);
+  assert.match(activities, /durable store or an external API's idempotency support/);
 });
