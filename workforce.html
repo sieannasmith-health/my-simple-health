@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MSH Workforce — asynchronous employee objectives, AI collaboration, onboarding, and progress.">
+  <title>MSH Workforce | My Simple Health</title>
+  <link rel="stylesheet" href="css/msh-workforce.css">
+</head>
+<body>
+  <div class="workforce-shell">
+    <aside class="workforce-sidebar" aria-label="Workforce navigation">
+      <a class="workforce-brand" href="workforce.html" aria-label="MSH Workforce home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span><strong>MSH</strong><small>Workforce</small></span>
+      </a>
+
+      <nav class="workforce-nav">
+        <button class="nav-item is-active" data-view="home"><span aria-hidden="true">⌂</span> Home</button>
+        <button class="nav-item" data-view="missions"><span aria-hidden="true">✦</span> Missions</button>
+        <button class="nav-item" data-view="tasks"><span aria-hidden="true">✓</span> Tasks</button>
+        <button class="nav-item" data-view="team"><span aria-hidden="true">◎</span> AI Team</button>
+        <button class="nav-item" data-view="progress"><span aria-hidden="true">↗</span> Progress</button>
+        <button class="nav-item" data-view="knowledge"><span aria-hidden="true">▤</span> Knowledge</button>
+      </nav>
+
+      <div class="sidebar-principle">
+        <span class="sidebar-principle-icon" aria-hidden="true">✦</span>
+        <p><strong>Work that matters.</strong><br>AI handles automatable work. You step in where your judgment or authority matters.</p>
+      </div>
+    </aside>
+
+    <main class="workforce-main">
+      <header class="workforce-topbar">
+        <div>
+          <p class="eyebrow">Employee workspace</p>
+          <h1 id="greeting">Good afternoon, Brandon.</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button" id="resetDemo" title="Reset demo data" aria-label="Reset demo data">↻</button>
+          <div class="avatar" aria-hidden="true">BS</div>
+        </div>
+      </header>
+
+      <section class="hero-grid" aria-label="Employee summary">
+        <article class="hero-card attention-card">
+          <div class="card-kicker"><span class="status-dot attention"></span> Needs you</div>
+          <strong class="hero-number" id="needsYouCount">0</strong>
+          <p>decisions or actions waiting</p>
+          <button class="text-button" data-filter="needs-you">Open my queue <span aria-hidden="true">→</span></button>
+        </article>
+
+        <article class="hero-card">
+          <div class="card-kicker"><span class="status-dot working"></span> AI active</div>
+          <strong class="hero-number" id="aiActiveCount">0</strong>
+          <p>workers moving objectives forward</p>
+          <button class="text-button" data-jump="team">See AI activity <span aria-hidden="true">→</span></button>
+        </article>
+
+        <article class="hero-card level-card">
+          <div class="level-heading">
+            <div>
+              <div class="card-kicker">Role progress</div>
+              <strong id="employeeLevel">Level 1</strong>
+            </div>
+            <span class="xp-pill" id="xpValue">0 XP</span>
+          </div>
+          <div class="progress-track" aria-label="Progress to next level"><span id="xpProgress"></span></div>
+          <p id="xpRemaining">0 XP to next level</p>
+        </article>
+      </section>
+
+      <section class="section-block" id="needs-you-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Today</p>
+            <h2>What actually needs you</h2>
+          </div>
+          <span class="quiet-label">Asynchronous · objective based</span>
+        </div>
+        <div class="task-list" id="humanTaskList"></div>
+      </section>
+
+      <section class="two-column-grid">
+        <div class="section-block panel-block">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">In motion</p>
+              <h2>AI is handling</h2>
+            </div>
+            <button class="text-button" data-jump="team">View team</button>
+          </div>
+          <div class="activity-list" id="aiTaskList"></div>
+        </div>
+
+        <div class="section-block panel-block campaign-panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">First campaign</p>
+              <h2>MSH onboarding</h2>
+            </div>
+            <span class="campaign-badge">Campaign 01</span>
+          </div>
+          <div class="campaign-progress-row">
+            <div class="campaign-ring" id="onboardingRing"><span id="onboardingPercent">0%</span></div>
+            <div>
+              <strong id="onboardingSummary">0 of 0 missions</strong>
+              <p>Build the context and confidence to operate independently with your AI team.</p>
+            </div>
+          </div>
+          <div class="mission-preview" id="missionPreview"></div>
+          <button class="primary-button" data-jump="missions">Continue campaign</button>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Your crew</p>
+            <h2>AI teammates</h2>
+          </div>
+          <span class="quiet-label">Supporting your workstream</span>
+        </div>
+        <div class="agent-grid" id="agentGrid"></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Progress</p>
+            <h2>Milestones</h2>
+          </div>
+          <button class="text-button" data-jump="progress">View all progress</button>
+        </div>
+        <div class="milestone-grid" id="milestoneGrid"></div>
+      </section>
+
+      <section class="workforce-view" id="secondaryView" hidden aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/msh-workforce.js"></script>
+</body>
+</html>
