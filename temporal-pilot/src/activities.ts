@@ -1,3 +1,4 @@
+import { assertAgentToolPermission } from './agent-registry.ts';
 import { connectMshGitHubMcpClient } from './github-mcp-client.ts';
 
 export interface StageEvidence {
@@ -52,12 +53,14 @@ export async function runAgentStage(
 
       switch (stage) {
         case 'NOMY': {
+          assertAgentToolPermission('nomy', 'github_read_issue');
           const result = await connection.client.callTool({ name: 'github_read_issue', arguments: { issueNumber } });
           const issue = jsonText(result);
           if (issue.number !== issueNumber) throw new Error('MCP_OBJECTIVE_MISMATCH');
           return { stage, artifactType: 'PRODUCT_OBJECTIVE', artifactRef: `issue:${issueNumber}`, status: 'READY' };
         }
         case 'SELAH': {
+          assertAgentToolPermission('selah', 'github_create_branch');
           const branchResult = await connection.client.callTool({
             name: 'github_create_branch',
             arguments: { branch, fromRef: baseRef, idempotencyKey: `${idempotencyKey}:branch` },
@@ -65,6 +68,7 @@ export async function runAgentStage(
           const branchArtifact = jsonText(branchResult);
           if (branchArtifact.branch !== branch) throw new Error('MCP_BRANCH_MISMATCH');
 
+          assertAgentToolPermission('selah', 'github_write_repository_file');
           const fileResult = await connection.client.callTool({
             name: 'github_write_repository_file',
             arguments: {
@@ -78,6 +82,7 @@ export async function runAgentStage(
           const fileArtifact = jsonText(fileResult);
           if (fileArtifact.branch !== branch || fileArtifact.path !== canaryPath) throw new Error('MCP_FILE_ARTIFACT_MISMATCH');
 
+          assertAgentToolPermission('selah', 'github_open_pull_request');
           const prResult = await connection.client.callTool({
             name: 'github_open_pull_request',
             arguments: {
@@ -99,23 +104,10 @@ export async function runAgentStage(
           if (!selah || selah.artifactType !== 'PULL_REQUEST' || !selah.artifactRef.startsWith('pr:')) {
             throw new Error('MCP_QA_PR_EVIDENCE_REQUIRED');
           }
-          const prResult = await connection.client.callTool({
-            name: 'github_open_pull_request',
-            arguments: {
-              head: branch,
-              base: baseRef,
-              title: `MSH autonomy canary #${objectiveId}`,
-              body: `Automated bounded canary artifact for Product objective #${objectiveId}. Do not merge.`,
-              idempotencyKey: `${idempotencyKey}:verify-pr`,
-            },
-          });
-          const prArtifact = jsonText(prResult);
-          if (`pr:${prArtifact.number}` !== selah.artifactRef || prArtifact.created !== false) {
-            throw new Error('MCP_QA_PR_VERIFICATION_FAILED');
-          }
 
           let lastConclusion = 'pending';
           for (let attempt = 0; attempt < 12; attempt += 1) {
+            assertAgentToolPermission('tessa', 'github_read_checks');
             const checksResult = await connection.client.callTool({
               name: 'github_read_checks',
               arguments: { ref: branch },
@@ -131,6 +123,7 @@ export async function runAgentStage(
           throw new Error(`MCP_QA_CI_NOT_SUCCESS:${lastConclusion}`);
         }
         case 'NOMY_ACCEPTANCE': {
+          assertAgentToolPermission('nomy', 'github_read_issue');
           const result = await connection.client.callTool({ name: 'github_read_issue', arguments: { issueNumber } });
           const issue = jsonText(result);
           const qa = priorArtifact(priorEvidence, 'TESSA');
