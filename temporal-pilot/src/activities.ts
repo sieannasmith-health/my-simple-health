@@ -8,6 +8,16 @@ export interface StageEvidence {
   status: 'READY' | 'PASS' | 'ACCEPTED';
 }
 
+export type Wave1AgentId = 'mira' | 'sage' | 'clara';
+
+export interface SpecialistReviewEvidence {
+  agentId: Wave1AgentId;
+  artifactType: 'SPECIALIST_REVIEW';
+  artifactRef: string;
+  status: 'READY';
+  provenance: readonly string[];
+}
+
 function jsonText(result: Awaited<ReturnType<Awaited<ReturnType<typeof connectMshGitHubMcpClient>>['client']['callTool']>>): Record<string, unknown> {
   const item = result.content?.find((entry) => entry.type === 'text');
   if (!item || item.type !== 'text') throw new Error('MCP_TEXT_RESULT_REQUIRED');
@@ -33,6 +43,47 @@ export async function recordStage(objectiveId: string, stage: string, idempotenc
   if (!idempotencyKey) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
   void objectiveId;
   return stage;
+}
+
+export async function runWave1SpecialistReview(
+  objectiveId: string,
+  agentId: Wave1AgentId,
+  idempotencyKey: string,
+): Promise<SpecialistReviewEvidence> {
+  if (!idempotencyKey) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
+  const issueNumber = objectiveIssueNumber(objectiveId);
+  const foundationPath = 'temporal-pilot/AGENT_INTEROPERABILITY_GATE2.md';
+
+  if (process.env.MSH_REAL_MCP_CANARY === '1') {
+    const connection = await connectMshGitHubMcpClient();
+    try {
+      assertAgentToolPermission(agentId, 'github_read_issue');
+      const issueResult = await connection.client.callTool({
+        name: 'github_read_issue',
+        arguments: { issueNumber },
+      });
+      const issue = jsonText(issueResult);
+      if (issue.number !== issueNumber) throw new Error('MCP_SPECIALIST_OBJECTIVE_MISMATCH');
+
+      assertAgentToolPermission(agentId, 'github_read_repository_file');
+      const foundationResult = await connection.client.callTool({
+        name: 'github_read_repository_file',
+        arguments: { path: foundationPath, ref: 'main' },
+      });
+      const foundation = jsonText(foundationResult);
+      if (foundation.path !== foundationPath) throw new Error('MCP_SPECIALIST_FOUNDATION_MISMATCH');
+    } finally {
+      await connection.close();
+    }
+  }
+
+  return {
+    agentId,
+    artifactType: 'SPECIALIST_REVIEW',
+    artifactRef: `specialist-review:${agentId}:issue:${issueNumber}`,
+    status: 'READY',
+    provenance: [`issue:${issueNumber}`, `repository-file:${foundationPath}@main`],
+  };
 }
 
 export async function runAgentStage(
