@@ -154,4 +154,18 @@ final class MSHCoreAuthorityTests: XCTestCase {
             MSHCoreMemberNamespace.recordPath(MSHCoreRecordIdentity.selectedFocus, memberID: second)
         )
     }
+
+    func testPersistenceBoundaryRejectsCrossAccountOwner() throws {
+        let first = try XCTUnwrap(MSHMemberID(rawValue: "member-a"))
+        let second = try XCTUnwrap(MSHMemberID(rawValue: "member-b"))
+
+        XCTAssertThrowsError(try MSHCoreFirestoreRepository.requireOwner(first, matches: second)) { error in
+            XCTAssertEqual(error as? MSHCorePersistenceError, .ownerMismatch)
+        }
+    }
+
+    func testPersistenceBoundaryAcceptsMatchingOwner() throws {
+        let member = try XCTUnwrap(MSHMemberID(rawValue: "member-a"))
+        XCTAssertNoThrow(try MSHCoreFirestoreRepository.requireOwner(member, matches: member))
+    }
 }
