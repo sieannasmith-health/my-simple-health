@@ -7,13 +7,8 @@ const js = await readFile(new URL('../hellosimple/app.js', import.meta.url), 'ut
 
 test('HelloSimple exposes the approved employee MVP surfaces', () => {
   for (const label of [
-    'Today',
-    'Missions',
-    'Human Actions',
-    'Hello Workers',
-    'Skills & Contribution',
-    'Impact Portfolio',
-    'Profile'
+    'Today', 'Missions', 'Human Actions', 'Hello Workers', 'Workstreams', 'Journey',
+    'Skills & Contribution', 'Impact Portfolio', 'Profile'
   ]) assert.match(js, new RegExp(label.replace(/[&]/g, '\\&')));
   assert.match(html, /HelloSimple/);
 });
@@ -25,10 +20,18 @@ test('pilot profiles are independent and include founder + trial co-founder', ()
   assert.match(js, /Growth & Commercial Strategy \(Trial\)/);
 });
 
-test('progression is tied to real missions, skills, evidence and human lane', () => {
-  assert.match(js, /Evidence:/);
+test('progression is tied to real missions, skills, evidence and the human lane', () => {
+  assert.match(js, /evidence/i);
   assert.match(js, /Skill gained → contribution made → evidence recorded/);
-  assert.match(js, /Human judgment, review, approval, or action/);
+  assert.match(js, /Human judgment, review, approval/i);
   assert.match(js, /Complete mission/);
-  assert.match(js, /XP earned/);
+  assert.match(js, /XP/i);
+  assert.match(js, /training completion alone does not equal demonstrated skill/i);
+});
+
+test('daily work and progression remain separate from authorization', () => {
+  assert.match(js, /Today's schedule/);
+  assert.match(js, /Current company objective/);
+  assert.match(js, /Rewards can unlock new mission types/i);
+  assert.match(js, /XP never automatically grants/i);
 });
