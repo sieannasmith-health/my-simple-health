@@ -1,0 +1,35 @@
+name: MSH Temporal Live Canary
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+  checks: read
+
+jobs:
+  live-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: temporal-pilot
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      MSH_REAL_MCP_CANARY: '1'
+      MSH_CANARY_BASE_REF: selah/temporal-foundation-pilot
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked pilot dependencies
+        run: npm ci --ignore-scripts
+      - name: TypeScript contract build
+        run: npm run build
+      - name: Run live Temporal MCP GitHub canary
+        run: npm run test:live-canary

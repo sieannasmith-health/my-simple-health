@@ -147,6 +147,54 @@ Supabase may be used for persistent application data, but schema changes must be
 - Schema migrations should be explicit and reviewable.
 - Never commit secrets, service-role keys, private API keys, passwords, or production credentials.
 
+## Foundation-first agent infrastructure rule
+
+Before designing, implementing, debugging, replacing, or extending agent infrastructure, first determine whether an established open foundation already solves the relevant layer. Prefer adopting, configuring, composing, or extending a proven foundation over creating MSH-specific infrastructure that duplicates it.
+
+Use primary sources in this order when applicable:
+
+1. Official specification or protocol documentation.
+2. Official SDK and implementation documentation.
+3. Official conformance tests, inspectors, validators, examples, and reference implementations.
+4. Official repository, releases, issues, discussions, and operational guidance.
+5. Only then design the smallest MSH-specific layer required by Product, health, privacy, security, compliance, or member-experience needs.
+
+Current MSH reference foundations include:
+
+- **Temporal** — durable workflows, retries, timers, queues, state, resume/recovery, and workflow diagnostics.
+- **Model Context Protocol (MCP)** — agent-to-tool/resource interoperability. Use the official specification, SDKs, Inspector, conformance tests, registry guidance, authorization/security guidance, and repository issues.
+- **Agent2Agent (A2A)** — agent-to-agent interoperability where independent runtimes or services genuinely need discovery, delegation, task state, status, and durable artifact exchange.
+- **agentgateway** — candidate foundation for secure routing, policy enforcement, authorization, observability, and governance across MCP/A2A/model/tool traffic. Evaluate it before building custom gateway infrastructure.
+- **Agentic AI Foundation (AAIF)** — ecosystem and governance reference for open agent infrastructure and interoperability work.
+- **AGENTS.md** — repository-level agent instruction convention. Keep this file authoritative for MSH coding-agent behavior.
+- **goose** — open agent implementation to study for practical agent execution, MCP/tool use, extensions, permissions, and operational patterns.
+
+Do not adopt every foundation automatically. Evaluate each against the current Product objective, security/privacy requirements, operational maturity, failure modes, maintainability, and diagnostic quality.
+
+### Manual-first failure protocol
+
+When infrastructure fails:
+
+1. Capture the exact error, logs, workflow history, and failing boundary.
+2. Reproduce or classify the failure as narrowly as possible.
+3. Consult the official manual/specification and official repository guidance for that exact behavior before patching.
+4. Compare the MSH implementation with the documented pattern.
+5. Make one bounded correction to the identified cause.
+6. Run the smallest relevant test first, then broader CI/canary validation.
+7. If it fails again, return to the manual and current upstream issues before making another patch.
+
+Do not stack speculative fixes. Do not ask Siea to perform infrastructure debugging that the runtime, logs, official documentation, or automated tests can resolve. A human gate is appropriate only for a real decision, credential, permission, account authorization, physical-device action, or other nondelegable requirement.
+
+### Interoperability safety rules
+
+- Discovery is not trust.
+- Registry presence is not authorization or proof of health.
+- Verify protocol negotiation, expected capabilities/tools, identity, authorization, version compatibility, and policy approval before trusting a discovered endpoint.
+- Use least privilege. Agents should see and invoke only the tools/resources required for their role and current task.
+- Prefer durable task/artifact evidence for critical handoffs. Do not rely on transient messages as the sole record of consequential results.
+- Preserve auditable provenance, failure/recovery history, QA evidence, and Product acceptance.
+- Do not expose MSH as an MCP or A2A provider merely because the protocol supports it. Expose only explicitly approved, narrowly scoped capabilities after privacy, security, compliance, and Product review.
+
 ## Before coding
 
 Before making a substantial change:
@@ -156,7 +204,8 @@ Before making a substantial change:
 3. Identify the narrowest product/system boundary required by the task.
 4. Preserve existing behavior outside that boundary.
 5. Check whether the task changes data structures, persistence, routing, or cross-page state.
-6. For recommendations, insights, notifications, or AI behaviors, verify that the behavior mirrors or assists rather than judges, and that agency stays with the person.
+6. For agent/runtime/integration work, apply the Foundation-first agent infrastructure rule and consult the applicable official sources before implementation or repair.
+7. For recommendations, insights, notifications, or AI behaviors, verify that the behavior mirrors or assists rather than judges, and that agency stays with the person.
 
 ## Definition of done
 
@@ -169,6 +218,8 @@ A change is done when:
 - the branch is reviewable as a focused PR,
 - the implementation still feels like one coherent My Simple Health system,
 - and the change increases the person's ability to understand or steward their health and life without unnecessarily increasing dependence on MSH.
+
+For agent infrastructure, “done” additionally requires applicable official-foundation guidance to have been consulted, relevant failure modes tested, diagnostics available, and MSH-specific custom infrastructure justified rather than duplicative.
 
 ## Agent runtime implementation contract
 
