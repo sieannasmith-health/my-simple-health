@@ -31,6 +31,7 @@ private struct MSHAccountScopedRootExperience: View {
     let memberID: MSHMemberID
     @StateObject private var onboardingStore: MSHOnboardingStore
     @State private var isResolvingAccountContinuity = true
+    @State private var requiresLegacyConfirmation = false
 
     init(memberID: MSHMemberID) {
         self.memberID = memberID
@@ -46,6 +47,11 @@ private struct MSHAccountScopedRootExperience: View {
                     MSHColor.cream.ignoresSafeArea()
                     ProgressView().tint(MSHColor.forest)
                 }
+            } else if requiresLegacyConfirmation {
+                MSHLegacyOnboardingConfirmation(
+                    onContinueExisting: continueExistingSetup,
+                    onStartFresh: startFreshForCurrentAccount
+                )
             } else if onboardingStore.shouldPresentOnboarding {
                 MSHOnboardingFlow(
                     store: onboardingStore,
@@ -68,20 +74,49 @@ private struct MSHAccountScopedRootExperience: View {
     private func synchronizeAccountContinuity() async {
         let repository = MSHFirestoreOnboardingAccountContinuityRepository()
         do {
-            if onboardingStore.state.completed {
+            if let completion = try await repository.completion(for: memberID),
+               completion.completed {
+                onboardingStore.restoreAccountCompletion()
+            } else if onboardingStore.state.completed {
                 try await repository.persistCompletion(
                     for: memberID,
                     completedAt: Date()
                 )
-            } else if let completion = try await repository.completion(for: memberID),
-                      completion.completed {
-                onboardingStore.restoreAccountCompletion()
+            } else if onboardingStore.hasUnclaimedLegacyCompletion {
+                requiresLegacyConfirmation = true
             }
         } catch {
             // Failure-safe by design: retain local state and allow a later launch to retry.
             // Infrastructure failure must not become a human approval gate.
+            if onboardingStore.hasUnclaimedLegacyCompletion {
+                requiresLegacyConfirmation = true
+            }
         }
         isResolvingAccountContinuity = false
+    }
+
+    @MainActor
+    private func continueExistingSetup() {
+        guard onboardingStore.claimLegacyCompletionForCurrentAccount() else {
+            requiresLegacyConfirmation = false
+            return
+        }
+
+        requiresLegacyConfirmation = false
+        let completedAt = Date()
+        Task {
+            let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+            try? await repository.persistCompletion(
+                for: memberID,
+                completedAt: completedAt
+            )
+        }
+    }
+
+    @MainActor
+    private func startFreshForCurrentAccount() {
+        onboardingStore.declineLegacyCompletionForCurrentAccount()
+        requiresLegacyConfirmation = false
     }
 
     @MainActor
@@ -94,6 +129,33 @@ private struct MSHAccountScopedRootExperience: View {
                 for: memberID,
                 completedAt: completedAt
             )
+        }
+    }
+}
+
+private struct MSHLegacyOnboardingConfirmation: View {
+    let onContinueExisting: () -> Void
+    let onStartFresh: () -> Void
+
+    var body: some View {
+        ZStack {
+            MSHOnboardingPalette.cream.ignoresSafeArea()
+            MSHOnboardingPage(
+                eyebrow: "YOUR ACCOUNT",
+                title: "Continue your existing setup?",
+                message: "We found an earlier My Simple Health setup on this device. Choose whether to connect that completed setup to the account you are signed in with now."
+            ) {
+                VStack(spacing: 12) {
+                    MSHPrimaryButton(
+                        title: "Continue existing setup",
+                        action: onContinueExisting
+                    )
+                    MSHSecondaryButton(
+                        title: "Start fresh with this account",
+                        action: onStartFresh
+                    )
+                }
+            }
         }
     }
 }
