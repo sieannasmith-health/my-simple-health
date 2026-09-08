@@ -42,7 +42,8 @@ export async function foundationArtifactPilot(input: FoundationPilotInput): Prom
   const evidence: StageEvidence[] = [];
   const { runAgentStage } = stageActivities(input.activityTimeout);
   for (const stage of FOUNDATION_STAGES) {
-    const artifact = await runAgentStage(input.objectiveId, stage, evidence, `${input.objectiveId}:${stage}:artifact-stage`);
+    const idempotencyKey = `${input.objectiveId}:${stage}:artifact-stage`;
+    const artifact = await runAgentStage(input.objectiveId, stage, evidence, idempotencyKey);
     if (artifact.stage !== stage || !artifact.artifactRef) throw ApplicationFailure.nonRetryable(`INVALID_STAGE_EVIDENCE:${stage}`);
     if (stage === 'TESSA' && artifact.status !== 'PASS') throw ApplicationFailure.nonRetryable('QA_NOT_PASSED');
     if (stage === 'NOMY_ACCEPTANCE' && artifact.status !== 'ACCEPTED') throw ApplicationFailure.nonRetryable('PRODUCT_NOT_ACCEPTED');
