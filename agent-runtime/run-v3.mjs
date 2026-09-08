@@ -41,20 +41,25 @@ function runBoundedWorker() {
 
 function enrichReasonCode(result) {
   if (!result || typeof result !== 'object') return result;
-  if (typeof result.reason_code === 'string' && result.reason_code) return result;
-
-  let reasonCode = null;
-  if (result.requires_human === true) {
-    reasonCode = 'HUMAN_APPROVAL_REQUIRED';
-  } else if (
-    result.agent === 'selah'
-    && result.status === 'blocked'
-    && result.execution_approved === false
-  ) {
-    reasonCode = 'EXECUTION_APPROVAL_REQUIRED';
+  if (typeof result.reason_code === 'string' && result.reason_code.trim()) {
+    return { ...result, reason_code: result.reason_code.trim() };
   }
 
-  return { ...result, reason_code: reasonCode };
+  // Compatibility mapping for the one authority fact that can be derived
+  // without consulting prose. Missing execution approval is operational and
+  // must route to Product coordination, never to a Siea pause.
+  if (
+    result.agent === 'selah' &&
+    result.status === 'blocked' &&
+    result.execution_approved === false
+  ) {
+    return { ...result, reason_code: 'EXECUTION_APPROVAL_REQUIRED' };
+  }
+
+  // A generic requires_human boolean is intentionally insufficient authority
+  // to manufacture a human-only reason code. Explicit Siea-only escalation
+  // requires a typed reason_code from a trusted structured producer.
+  return { ...result, reason_code: null };
 }
 
 let runtimeError = null;
