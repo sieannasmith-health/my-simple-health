@@ -25,7 +25,7 @@ export async function connectMshGitHubMcpClient(options: {
 
   const transport = new StdioClientTransport({
     command: options.command ?? process.execPath,
-    args: options.args ?? ['src/github-mcp-server-stdio.ts'],
+    args: options.args ?? [process.env.MSH_MCP_SERVER_PATH ?? 'src/github-mcp-server-stdio.ts'],
     env: stringEnv(process.env, options.env),
   });
 
