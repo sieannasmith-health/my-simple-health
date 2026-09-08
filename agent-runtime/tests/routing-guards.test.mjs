@@ -40,11 +40,14 @@ assert.match(reconciler, /reason_code/);
 assert.match(transitionPolicy, /runtimeStatus: 'PENDING'/);
 assert.match(transitionPolicy, /result\.status === 'review_requested'/);
 assert.match(transitionPolicy, /assignedAgent = 'tessa'/);
+assert.match(transitionPolicy, /PHYSICAL_DEVICE_ACTION/);
+assert.match(transitionPolicy, /ACCOUNT_OWNER_ACTION/);
+assert.doesNotMatch(transitionPolicy, /'HUMAN_APPROVAL_REQUIRED'/);
 
 assert.match(runV3, /post-turn-reconciler\.mjs/);
 assert.match(runV3, /enrichReasonCode\(await runBoundedWorker\(\)\)/);
 assert.match(runV3, /EXECUTION_APPROVAL_REQUIRED/);
-assert.match(runV3, /HUMAN_APPROVAL_REQUIRED/);
+assert.doesNotMatch(runV3, /reason_code:\s*'HUMAN_APPROVAL_REQUIRED'/);
 assert.match(runV3, /normalizeHumanGate\(\{ structuredResult: structuredWorkerResult \}\)/);
 assert.match(runV3, /await reconcileTurn\(structuredWorkerResult\)/);
 assert.ok(
