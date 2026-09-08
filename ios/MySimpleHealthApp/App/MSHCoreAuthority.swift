@@ -45,7 +45,7 @@ enum MSHCoreLifecycleStatus: String, Codable, CaseIterable, Sendable {
     case deleted = "DELETED"
 }
 
-/// Versioned account-backed envelope. B.1 defines the contract only; no Core domain is migrated yet.
+/// Versioned account-backed envelope shared by Core domain records.
 struct MSHCoreRecordEnvelope: Codable, Equatable, Sendable {
     static let schemaVersion = "1.0.0"
 
@@ -91,8 +91,122 @@ struct MSHCoreRecordEnvelope: Codable, Equatable, Sendable {
     }
 }
 
+/// Stable identities for the single current Landscape state and explicit selected Focus.
+/// A retry overwrites the same logical record rather than creating duplicate snapshots.
+enum MSHCoreRecordIdentity {
+    static let landscape = "landscape.current"
+    static let selectedFocus = "focus.selected"
+}
+
+/// Canonical Health Landscape identifiers from MSH Product Data Standard V1.
+enum MSHLandscapeInstrument {
+    static let instrumentID = "health_landscape"
+    static let instrumentVersion = "HL-1"
+    static let experienceVersion = "HEALTH-LANDSCAPE-V1"
+}
+
+/// Account-backed Landscape payload for partial resume and completed-result continuity.
+/// Member responses remain authored values; synthesis belongs in a separate derived record.
+struct MSHLandscapeAccountState: Codable, Equatable, Sendable {
+    let administrationID: String
+    let instrumentID: String
+    let instrumentVersion: String
+    let experienceVersion: String
+    let responses: [String: String]
+    let completedItemIDs: [String]
+    let dimensionContexts: [String: String]
+    let isComplete: Bool
+
+    init(
+        administrationID: String,
+        responses: [String: String] = [:],
+        completedItemIDs: [String] = [],
+        dimensionContexts: [String: String] = [:],
+        isComplete: Bool = false,
+        instrumentID: String = MSHLandscapeInstrument.instrumentID,
+        instrumentVersion: String = MSHLandscapeInstrument.instrumentVersion,
+        experienceVersion: String = MSHLandscapeInstrument.experienceVersion
+    ) {
+        self.administrationID = administrationID
+        self.instrumentID = instrumentID
+        self.instrumentVersion = instrumentVersion
+        self.experienceVersion = experienceVersion
+        self.responses = responses
+        self.completedItemIDs = completedItemIDs
+        self.dimensionContexts = dimensionContexts
+        self.isComplete = isComplete
+    }
+}
+
+/// Only an explicit member choice may inhabit this authoritative record.
+/// Recommended/model-generated Focus values must stay outside this type until selected.
+struct MSHMemberSelectedFocus: Codable, Equatable, Sendable {
+    let focusID: String
+    let selectedAt: Date
+
+    init?(focusID: String, selectedAt: Date) {
+        let value = focusID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+        self.focusID = value
+        self.selectedAt = selectedAt
+    }
+}
+
+/// Typed Core record keeps domain payload attached to its authority/provenance envelope.
+struct MSHCoreTypedRecord<Payload: Codable & Equatable & Sendable>: Codable, Equatable, Sendable {
+    let envelope: MSHCoreRecordEnvelope
+    let payload: Payload
+}
+
+enum MSHLandscapeFocusRecordFactory {
+    static func landscape(
+        ownerID: MSHMemberID,
+        state: MSHLandscapeAccountState,
+        createdAt: Date,
+        updatedAt: Date,
+        sourceRecordIDs: [String] = []
+    ) -> MSHCoreTypedRecord<MSHLandscapeAccountState> {
+        MSHCoreTypedRecord(
+            envelope: MSHCoreRecordEnvelope(
+                recordID: MSHCoreRecordIdentity.landscape,
+                ownerID: ownerID,
+                domain: .landscape,
+                recordType: "assessment.health_landscape.state",
+                provenance: .userStated,
+                authority: .member,
+                sourceRecordIDs: sourceRecordIDs,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            ),
+            payload: state
+        )
+    }
+
+    static func selectedFocus(
+        ownerID: MSHMemberID,
+        selection: MSHMemberSelectedFocus,
+        createdAt: Date,
+        updatedAt: Date,
+        sourceRecordIDs: [String] = []
+    ) -> MSHCoreTypedRecord<MSHMemberSelectedFocus> {
+        MSHCoreTypedRecord(
+            envelope: MSHCoreRecordEnvelope(
+                recordID: MSHCoreRecordIdentity.selectedFocus,
+                ownerID: ownerID,
+                domain: .focus,
+                recordType: "focus.member_selected",
+                provenance: .userStated,
+                authority: .member,
+                sourceRecordIDs: sourceRecordIDs,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            ),
+            payload: selection
+        )
+    }
+}
+
 /// Canonical Firestore namespace for synchronized Core records.
-/// Member journey domains will migrate here in later gated slices.
 enum MSHCoreMemberNamespace {
     static func memberPath(_ memberID: MSHMemberID) -> String {
         "users/\(memberID.rawValue)"
