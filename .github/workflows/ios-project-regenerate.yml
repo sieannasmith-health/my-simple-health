@@ -1,0 +1,39 @@
+name: iOS Project Regenerate
+
+on:
+  push:
+    branches:
+      - selah/repair-ios-project-generation
+    paths:
+      - ios/MySimpleHealthApp/project.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Regenerate MySimpleHealth.xcodeproj
+        working-directory: ios/MySimpleHealthApp
+        run: xcodegen generate
+
+      - name: Commit generated project
+        run: |
+          git add ios/MySimpleHealthApp/MySimpleHealth.xcodeproj
+          if git diff --cached --quiet; then
+            echo "Generated project already matches project.yml"
+            exit 0
+          fi
+          git config user.name "msh-project-regenerator"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Regenerate iOS project from project.yml"
+          git push origin HEAD:selah/repair-ios-project-generation
