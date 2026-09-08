@@ -9,16 +9,48 @@ private enum MSHOnboardingStep: Int, CaseIterable {
 }
 
 struct MSHRootExperience: View {
-    @StateObject private var onboardingStore: MSHOnboardingStore
+    @EnvironmentObject private var authStore: MSHAuthStore
 
-    init() {
-        _onboardingStore = StateObject(wrappedValue: MSHOnboardingStoreFactory.make())
+    var body: some View {
+        Group {
+            if let rawMemberID = authStore.userID,
+               let memberID = MSHMemberID(rawValue: rawMemberID) {
+                MSHAccountScopedRootExperience(memberID: memberID)
+                    .id(memberID.rawValue)
+            } else {
+                ZStack {
+                    MSHColor.cream.ignoresSafeArea()
+                    ProgressView().tint(MSHColor.forest)
+                }
+            }
+        }
+    }
+}
+
+private struct MSHAccountScopedRootExperience: View {
+    let memberID: MSHMemberID
+    @StateObject private var onboardingStore: MSHOnboardingStore
+    @State private var isResolvingAccountContinuity = true
+
+    init(memberID: MSHMemberID) {
+        self.memberID = memberID
+        _onboardingStore = StateObject(
+            wrappedValue: MSHOnboardingStoreFactory.make(memberID: memberID)
+        )
     }
 
     var body: some View {
         Group {
-            if onboardingStore.shouldPresentOnboarding {
-                MSHOnboardingFlow(store: onboardingStore)
+            if isResolvingAccountContinuity {
+                ZStack {
+                    MSHColor.cream.ignoresSafeArea()
+                    ProgressView().tint(MSHColor.forest)
+                }
+            } else if onboardingStore.shouldPresentOnboarding {
+                MSHOnboardingFlow(
+                    store: onboardingStore,
+                    onComplete: completeOnboarding
+                )
             } else {
                 MSHAppShell()
                     .safeAreaInset(edge: .top, spacing: 0) {
@@ -27,11 +59,48 @@ struct MSHRootExperience: View {
             }
         }
         .environmentObject(onboardingStore)
+        .task(id: memberID.rawValue) {
+            await synchronizeAccountContinuity()
+        }
+    }
+
+    @MainActor
+    private func synchronizeAccountContinuity() async {
+        let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+        do {
+            if onboardingStore.state.completed {
+                try await repository.persistCompletion(
+                    for: memberID,
+                    completedAt: Date()
+                )
+            } else if let completion = try await repository.completion(for: memberID),
+                      completion.completed {
+                onboardingStore.restoreAccountCompletion()
+            }
+        } catch {
+            // Failure-safe by design: retain local state and allow a later launch to retry.
+            // Infrastructure failure must not become a human approval gate.
+        }
+        isResolvingAccountContinuity = false
+    }
+
+    @MainActor
+    private func completeOnboarding() {
+        onboardingStore.complete()
+        let completedAt = Date()
+        Task {
+            let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+            try? await repository.persistCompletion(
+                for: memberID,
+                completedAt: completedAt
+            )
+        }
     }
 }
 
 private struct MSHOnboardingFlow: View {
     @ObservedObject var store: MSHOnboardingStore
+    let onComplete: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var step = MSHOnboardingStep.launch
     @State private var isWorking = false
@@ -150,7 +219,7 @@ private struct MSHOnboardingFlow: View {
             title: "Your health starts here.",
             message: "My Health is where your broader picture comes together."
         ) {
-            MSHPrimaryButton(title: "Go to My Health") { store.complete() }
+            MSHPrimaryButton(title: "Go to My Health", action: onComplete)
         }
     }
 
