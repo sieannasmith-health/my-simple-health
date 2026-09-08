@@ -2,13 +2,16 @@ import { ApplicationFailure } from '@temporalio/common';
 import { condition, defineSignal, proxyActivities, setHandler, sleep } from '@temporalio/workflow';
 import type * as activities from './activities.js';
 import type * as wave2Activities from './wave2-activities.js';
+import type * as wave3Activities from './wave3-activities.js';
 import type { SpecialistReviewEvidence, StageEvidence, Wave1AgentId } from './activities.js';
 import type { Wave2AgentId, Wave2ReviewEvidence } from './wave2-activities.js';
+import type { Wave3AgentId, Wave3ReviewEvidence } from './wave3-activities.js';
 
 const FOUNDATION_STAGES = ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE'] as const;
 type FoundationStage = (typeof FOUNDATION_STAGES)[number];
 const WAVE1_AGENTS: readonly Wave1AgentId[] = ['mira', 'sage', 'clara'];
 const WAVE2_AGENTS: readonly Wave2AgentId[] = ['aiden', 'vera', 'reese', 'eden'];
+const WAVE3_AGENTS: readonly Wave3AgentId[] = ['atlas', 'iris', 'june', 'ellis'];
 export const sieaApproveSignal = defineSignal('sieaApprove');
 
 export interface FoundationPilotInput { objectiveId: string; activityTimeout?: string; startDelay?: string; resumeFromStage?: FoundationStage; requireSieaApproval?: boolean; }
@@ -16,9 +19,11 @@ export interface FoundationPilotResult { objectiveId: string; stages: string[]; 
 export interface FoundationArtifactPilotResult { objectiveId: string; evidence: StageEvidence[]; terminalStatus: 'COMPLETED'; }
 export interface Wave1ActivationResult { objectiveId: string; evidence: SpecialistReviewEvidence[]; terminalStatus: 'COMPLETED'; }
 export interface Wave2ActivationResult { objectiveId: string; evidence: Wave2ReviewEvidence[]; terminalStatus: 'COMPLETED'; }
+export interface Wave3ActivationResult { objectiveId: string; evidence: Wave3ReviewEvidence[]; terminalStatus: 'COMPLETED'; }
 
 function stageActivities(activityTimeout = '30 seconds') { return proxyActivities<typeof activities>({ startToCloseTimeout: activityTimeout, retry: { initialInterval: '1 second', maximumAttempts: 3 } }); }
 function wave2StageActivities(activityTimeout = '30 seconds') { return proxyActivities<typeof wave2Activities>({ startToCloseTimeout: activityTimeout, retry: { initialInterval: '1 second', maximumAttempts: 3 } }); }
+function wave3StageActivities(activityTimeout = '30 seconds') { return proxyActivities<typeof wave3Activities>({ startToCloseTimeout: activityTimeout, retry: { initialInterval: '1 second', maximumAttempts: 3 } }); }
 
 export async function foundationPilot(input: FoundationPilotInput): Promise<FoundationPilotResult> {
   if (input.startDelay) await sleep(input.startDelay);
@@ -69,6 +74,17 @@ export async function wave2TrustEvidenceActivation(input: FoundationPilotInput):
   for (const agentId of WAVE2_AGENTS) {
     const artifact = await runWave2TrustEvidenceReview(input.objectiveId, agentId, `${input.objectiveId}:${agentId}:trust-evidence-review`);
     if (artifact.agentId !== agentId || artifact.artifactType !== 'TRUST_EVIDENCE_REVIEW' || artifact.status !== 'READY' || artifact.provenance.length < 2) throw ApplicationFailure.nonRetryable(`INVALID_WAVE2_EVIDENCE:${agentId}`);
+    evidence.push(artifact);
+  }
+  return { objectiveId: input.objectiveId, evidence, terminalStatus: 'COMPLETED' };
+}
+
+export async function wave3ProductInsightActivation(input: FoundationPilotInput): Promise<Wave3ActivationResult> {
+  const evidence: Wave3ReviewEvidence[] = [];
+  const { runWave3ProductInsightReview } = wave3StageActivities(input.activityTimeout);
+  for (const agentId of WAVE3_AGENTS) {
+    const artifact = await runWave3ProductInsightReview(input.objectiveId, agentId, `${input.objectiveId}:${agentId}:product-insight-review`);
+    if (artifact.agentId !== agentId || artifact.artifactType !== 'PRODUCT_INSIGHT_REVIEW' || artifact.status !== 'READY' || artifact.provenance.length < 2) throw ApplicationFailure.nonRetryable(`INVALID_WAVE3_EVIDENCE:${agentId}`);
     evidence.push(artifact);
   }
   return { objectiveId: input.objectiveId, evidence, terminalStatus: 'COMPLETED' };

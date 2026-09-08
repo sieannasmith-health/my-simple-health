@@ -55,13 +55,13 @@ export const MSH_AGENT_REGISTRY: readonly MshAgentMetadataCard[] = [
   activeReadOnlySpecialist('vera', 'Vera', 'Privacy & Trust', ['privacy_review', 'trust_governance']),
   activeReadOnlySpecialist('aiden', 'Aiden', 'Security Engineering', ['security_engineering', 'threat_review']),
   activeReadOnlySpecialist('reese', 'Reese', 'Regulatory & Compliance', ['regulatory_review', 'compliance']),
-  registered('ellis', 'Ellis', 'Economize & Health Affordability', ['health_affordability', 'cost_navigation']),
+  activeReadOnlySpecialist('ellis', 'Ellis', 'Economize & Health Affordability', ['health_affordability', 'cost_navigation']),
   registered('genesis', 'Genesis', 'Growth & Acquisition', ['growth_strategy', 'acquisition']),
   registered('newton', 'Newton', 'Business Strategy & Finance', ['business_strategy', 'finance']),
   registered('harper', 'Harper', 'People & Hiring', ['people_operations', 'hiring']),
-  registered('june', 'June', 'Member Experience & Operations', ['member_experience', 'operations']),
-  registered('atlas', 'Atlas', 'Data & Analytics', ['analytics', 'measurement']),
-  registered('iris', 'Iris', 'Research & Insights', ['research', 'insight_synthesis']),
+  activeReadOnlySpecialist('june', 'June', 'Member Experience & Operations', ['member_experience', 'operations']),
+  activeReadOnlySpecialist('atlas', 'Atlas', 'Data & Analytics', ['analytics', 'measurement']),
+  activeReadOnlySpecialist('iris', 'Iris', 'Research & Insights', ['research', 'insight_synthesis']),
 ] as const;
 
 const byId = new Map(MSH_AGENT_REGISTRY.map((card) => [card.id, card] as const));
