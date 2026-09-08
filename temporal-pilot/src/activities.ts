@@ -1,4 +1,4 @@
-import { connectMshGitHubMcpClient } from './github-mcp-client.js';
+import { connectMshGitHubMcpClient } from './github-mcp-client.ts';
 
 export interface StageEvidence {
   stage: 'NOMY' | 'SELAH' | 'TESSA' | 'NOMY_ACCEPTANCE';
