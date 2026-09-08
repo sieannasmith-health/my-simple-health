@@ -12,21 +12,30 @@
 		105237004C94BD66F3297C6C /* MSHAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11472DA81BF6F34067B30F1 /* MSHAuth.swift */; };
 		10801D4CF4DC806BFCCED832 /* MSHMyHealthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */; };
 		12798D94C30D525365CE9F3A /* MSHHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 37897D51A209B111301BBF74 /* MSHHealthCore */; };
+		1281482F1C3920BA86FB9204 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = DF0EB61F13E938E8B1B9D95A /* FirebaseFunctions */; };
 		1A49E62E20A10C358297F407 /* MSHMyHealthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A44F38F35A3B1282B9D6B1 /* MSHMyHealthScreen.swift */; };
+		1CF2F8FAA105BC0B9044145B /* MSHCoreAuthority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D21E0D552B02611E15D645 /* MSHCoreAuthority.swift */; };
 		1E04F597A57CB7A720AF7E9C /* MSHMeditateScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614EDADF6355798654BABDA9 /* MSHMeditateScreen.swift */; };
 		1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */; };
 		26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */; };
 		291AF110FED7BF3DF8C97BEB /* MSHNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A2EC03C77F19D427EFAA87F /* MSHNotificationService.swift */; };
+		2D3C34EC2AAF739E8DC097BB /* MSHSharingUXContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */; };
+		361C9D71A9145308A999F044 /* MSHHealthRecordCorrectionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1F9AF7AED1382E20BCAC63 /* MSHHealthRecordCorrectionsTests.swift */; };
+		38C785E8920C304F9DB97B59 /* MSHOnboardingContinuity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFB15DC74DEED6E3E05059D /* MSHOnboardingContinuity.swift */; };
 		3ADD0323DC0F51D0B774E7BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B3DB5402D73C03AA7ED2892 /* Assets.xcassets */; };
 		448443CE62E04BDFC2C3EF8E /* MSHSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C51FE87388D0DA401E52BF /* MSHSharing.swift */; };
+		48C470DC917945C32897C5C9 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
 		492DF631BD0F38AB33E0AAFB /* MSHConnectedHealthSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D44D8E1F47728D3F41AC810 /* MSHConnectedHealthSources.swift */; };
 		53E8B79FA77A4684B8004857 /* MSHWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA05488D28DF0D6053601B6 /* MSHWebView.swift */; };
 		594C1E3ACAD62F6E393FE810 /* MSHMyHealthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F39427D0DBB5BFBC9645A3 /* MSHMyHealthTests.swift */; };
 		59C56071B798F5F2B370CB4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 95FE22EF2929B21C0FD523B8 /* GoogleService-Info.plist */; };
 		5A1378B1645E17A7062F40F5 /* MSHMyHealthModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B248761DDAABD299490F9A51 /* MSHMyHealthModel.swift */; };
+		5E2983543CC665232083EEE1 /* MSHCoreAuthorityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E17B088E1335E61BF6FB13 /* MSHCoreAuthorityTests.swift */; };
 		5F996406B20BA241B6DB76BC /* SQLiteHealthRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D893C6BA5C93014EB3ED5A1B /* SQLiteHealthRecordStore.swift */; };
-		701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */; };
+		6C35D352C36CE01744A06B5D /* MSHPlaidConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610D829DBDD8ED6D0990B998 /* MSHPlaidConnection.swift */; };
+		701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */; };
 		74125FB20DE63614FBC19F48 /* MSHMyHealthHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF8673BD1F027F961A09EC1 /* MSHMyHealthHomeScreen.swift */; };
+		820B729203C1AAA5B90F97F0 /* MSHNativeGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C586D135D7B7DD731E84510 /* MSHNativeGlass.swift */; };
 		8C3CFE2C4DF260C5A501B749 /* MSHSharedContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */; };
 		8CB37FD6EAE9627C2B53F1FF /* MSHNotificationBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1B265B9AE7A6DEBAE88C00 /* MSHNotificationBridge.swift */; };
 		95EA82E521FD36B77FF1D1DD /* MSHAccountSessionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BB3469E61564263F7B1981 /* MSHAccountSessionBar.swift */; };
@@ -34,6 +43,7 @@
 		9B01CE7AB8C969109DC6C998 /* MSHSleepDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A63D25AA7134D7F4961227 /* MSHSleepDashboard.swift */; };
 		9F06AB60D571D27BEF7942EA /* AppleHealthBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */; };
 		A84BB3858AC8D2ECC81D2EB2 /* MSHAppleHealthRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDB504A090DE4AB63A6D1DD /* MSHAppleHealthRuntime.swift */; };
+		BC5A7C512CD8618FF1FDD826 /* MSHNativeFeatureCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7DCF5FFFDE671EB4B262BF /* MSHNativeFeatureCompatibility.swift */; };
 		C03BCF1A8E2BFCD2B8E1AAAA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C1F9CAA62C9BB4CC207B2A0B /* LaunchScreen.storyboard */; };
 		C22239AA972507CE2D428109 /* MSHOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54D74396292D4BCC80E7F8C5 /* MSHOnboardingView.swift */; };
 		C33B0A7CFCDFA421CF4D51ED /* MySimpleHealthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */; };
@@ -41,6 +51,7 @@
 		C828F4519931DB62E6CFBC1B /* MSHNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0ACC9C0BEC3229E76BC385 /* MSHNotificationTests.swift */; };
 		C82F84BEE92BE9CDF4223EFC /* MSHNavigationPerformance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077848C501B8EB7E9C8A5214 /* MSHNavigationPerformance.swift */; };
 		D9C2EEDCB224616F9BC42FC0 /* MSHNativeShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567531D5DE71A6BAB85FEEBA /* MSHNativeShellTests.swift */; };
+		DC6D07A91952F377A0EE1FB5 /* MSHHealthRecordCorrections.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D3D03F7A272D8E6E4C5071 /* MSHHealthRecordCorrections.swift */; };
 		DDD003124E25C6879AD2EF4A /* MSHMovementEditing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9918FCF1FDE98BCA10520C5E /* MSHMovementEditing.swift */; };
 		E2E226C59CBA5609EED72372 /* MSHOnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8AE904CF468D4F1EC8FB56B /* MSHOnboardingState.swift */; };
 		F1D8947E2594D9EE832390F7 /* MSHDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8FDCA9980654D31D9032BB8 /* MSHDesignTokens.swift */; };
@@ -48,6 +59,7 @@
 		FC602CCB9C3F6C73FEEC0B34 /* MSHOnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463C60E260C799F4ED741DA6 /* MSHOnboardingTests.swift */; };
 		FEC824609EB11E14AECB7B67 /* FileHealthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105124B82C67397BF1E74C25 /* FileHealthStore.swift */; };
 		FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */; };
+		FF51BEB1EF98EC9A3D528522 /* LinkKit in Frameworks */ = {isa = PBXBuildFile; productRef = BCA80D080F84F72B5A1E17FF /* LinkKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,12 +75,16 @@
 /* Begin PBXFileReference section */
 		02F39427D0DBB5BFBC9645A3 /* MSHMyHealthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthTests.swift; sourceTree = "<group>"; };
 		077848C501B8EB7E9C8A5214 /* MSHNavigationPerformance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNavigationPerformance.swift; sourceTree = "<group>"; };
+		0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharingUXContractTests.swift; sourceTree = "<group>"; };
 		0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStoreTests.swift; sourceTree = "<group>"; };
 		0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharedContentTests.swift; sourceTree = "<group>"; };
 		0AA05488D28DF0D6053601B6 /* MSHWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHWebView.swift; sourceTree = "<group>"; };
 		0EDB504A090DE4AB63A6D1DD /* MSHAppleHealthRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHAppleHealthRuntime.swift; sourceTree = "<group>"; };
 		105124B82C67397BF1E74C25 /* FileHealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHealthStore.swift; sourceTree = "<group>"; };
+		1CFB15DC74DEED6E3E05059D /* MSHOnboardingContinuity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingContinuity.swift; sourceTree = "<group>"; };
+		28D21E0D552B02611E15D645 /* MSHCoreAuthority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHCoreAuthority.swift; sourceTree = "<group>"; };
 		35F1BB04FC05967D5ADB24D2 /* AppleHealthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthBridge.swift; sourceTree = "<group>"; };
+		3C586D135D7B7DD731E84510 /* MSHNativeGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNativeGlass.swift; sourceTree = "<group>"; };
 		463C60E260C799F4ED741DA6 /* MSHOnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingTests.swift; sourceTree = "<group>"; };
 		473E376B311E1B177D3B4552 /* MySimpleHealthTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MySimpleHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D44D8E1F47728D3F41AC810 /* MSHConnectedHealthSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHConnectedHealthSources.swift; sourceTree = "<group>"; };
@@ -76,7 +92,9 @@
 		54C51FE87388D0DA401E52BF /* MSHSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharing.swift; sourceTree = "<group>"; };
 		54D74396292D4BCC80E7F8C5 /* MSHOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHOnboardingView.swift; sourceTree = "<group>"; };
 		567531D5DE71A6BAB85FEEBA /* MSHNativeShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNativeShellTests.swift; sourceTree = "<group>"; };
+		57E17B088E1335E61BF6FB13 /* MSHCoreAuthorityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHCoreAuthorityTests.swift; sourceTree = "<group>"; };
 		5F7438D1F99EC81EFE6E4739 /* MSHNotificationRouting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationRouting.swift; sourceTree = "<group>"; };
+		610D829DBDD8ED6D0990B998 /* MSHPlaidConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHPlaidConnection.swift; sourceTree = "<group>"; };
 		614EDADF6355798654BABDA9 /* MSHMeditateScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMeditateScreen.swift; sourceTree = "<group>"; };
 		6E608248DDF59732EF9EEC51 /* MSHSharedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHSharedContent.swift; sourceTree = "<group>"; };
 		792BEB57CE99566C69403D1F /* MySimpleHealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySimpleHealthApp.swift; sourceTree = "<group>"; };
@@ -94,7 +112,9 @@
 		AB0ACC9C0BEC3229E76BC385 /* MSHNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationTests.swift; sourceTree = "<group>"; };
 		B248761DDAABD299490F9A51 /* MSHMyHealthModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthModel.swift; sourceTree = "<group>"; };
 		B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthDataSource.swift; sourceTree = "<group>"; };
+		BB7DCF5FFFDE671EB4B262BF /* MSHNativeFeatureCompatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNativeFeatureCompatibility.swift; sourceTree = "<group>"; };
 		C1F9CAA62C9BB4CC207B2A0B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		C4D3D03F7A272D8E6E4C5071 /* MSHHealthRecordCorrections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHHealthRecordCorrections.swift; sourceTree = "<group>"; };
 		D40CD07AC85001504274A352 /* MySimpleHealth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MySimpleHealth.entitlements; sourceTree = "<group>"; };
 		D4BB3469E61564263F7B1981 /* MSHAccountSessionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHAccountSessionBar.swift; sourceTree = "<group>"; };
 		D6A44F38F35A3B1282B9D6B1 /* MSHMyHealthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthScreen.swift; sourceTree = "<group>"; };
@@ -102,6 +122,7 @@
 		E08CEDED5B19E322B00C097C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E11472DA81BF6F34067B30F1 /* MSHAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHAuth.swift; sourceTree = "<group>"; };
 		EBF8673BD1F027F961A09EC1 /* MSHMyHealthHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHMyHealthHomeScreen.swift; sourceTree = "<group>"; };
+		ED1F9AF7AED1382E20BCAC63 /* MSHHealthRecordCorrectionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHHealthRecordCorrectionsTests.swift; sourceTree = "<group>"; };
 		EF1B265B9AE7A6DEBAE88C00 /* MSHNotificationBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHNotificationBridge.swift; sourceTree = "<group>"; };
 		F8FDCA9980654D31D9032BB8 /* MSHDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSHDesignTokens.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -115,7 +136,10 @@
 				FF2B29B92B97F313148FF71F /* MSHAppleHealthKit in Frameworks */,
 				0E782D607237B80CCA2B4DB2 /* FirebaseCore in Frameworks */,
 				1E35627D0CE4EA089920E76B /* FirebaseAuth in Frameworks */,
-				701E9346BEEA40D82CB690A7 /* GoogleSignIn in Frameworks */,
+				701E9346BEEA40D82CB690A7 /* FirebaseFirestore in Frameworks */,
+				1281482F1C3920BA86FB9204 /* FirebaseFunctions in Frameworks */,
+				48C470DC917945C32897C5C9 /* GoogleSignIn in Frameworks */,
+				FF51BEB1EF98EC9A3D528522 /* LinkKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,20 +177,26 @@
 				0EDB504A090DE4AB63A6D1DD /* MSHAppleHealthRuntime.swift */,
 				E11472DA81BF6F34067B30F1 /* MSHAuth.swift */,
 				4D44D8E1F47728D3F41AC810 /* MSHConnectedHealthSources.swift */,
+				28D21E0D552B02611E15D645 /* MSHCoreAuthority.swift */,
 				F8FDCA9980654D31D9032BB8 /* MSHDesignTokens.swift */,
+				C4D3D03F7A272D8E6E4C5071 /* MSHHealthRecordCorrections.swift */,
 				614EDADF6355798654BABDA9 /* MSHMeditateScreen.swift */,
 				9918FCF1FDE98BCA10520C5E /* MSHMovementEditing.swift */,
 				B4585F8FE54A4642B966AF79 /* MSHMyHealthDataSource.swift */,
 				EBF8673BD1F027F961A09EC1 /* MSHMyHealthHomeScreen.swift */,
 				B248761DDAABD299490F9A51 /* MSHMyHealthModel.swift */,
 				D6A44F38F35A3B1282B9D6B1 /* MSHMyHealthScreen.swift */,
+				BB7DCF5FFFDE671EB4B262BF /* MSHNativeFeatureCompatibility.swift */,
+				3C586D135D7B7DD731E84510 /* MSHNativeGlass.swift */,
 				953C2AF46C6E6B552F2B9B31 /* MSHNativeShell.swift */,
 				077848C501B8EB7E9C8A5214 /* MSHNavigationPerformance.swift */,
 				EF1B265B9AE7A6DEBAE88C00 /* MSHNotificationBridge.swift */,
 				5F7438D1F99EC81EFE6E4739 /* MSHNotificationRouting.swift */,
 				9A2EC03C77F19D427EFAA87F /* MSHNotificationService.swift */,
+				1CFB15DC74DEED6E3E05059D /* MSHOnboardingContinuity.swift */,
 				A8AE904CF468D4F1EC8FB56B /* MSHOnboardingState.swift */,
 				54D74396292D4BCC80E7F8C5 /* MSHOnboardingView.swift */,
+				610D829DBDD8ED6D0990B998 /* MSHPlaidConnection.swift */,
 				6E608248DDF59732EF9EEC51 /* MSHSharedContent.swift */,
 				54C51FE87388D0DA401E52BF /* MSHSharing.swift */,
 				51A63D25AA7134D7F4961227 /* MSHSleepDashboard.swift */,
@@ -182,12 +212,15 @@
 			isa = PBXGroup;
 			children = (
 				0A2AAA80B53DC8A474A4A9B6 /* FileHealthStoreTests.swift */,
+				57E17B088E1335E61BF6FB13 /* MSHCoreAuthorityTests.swift */,
+				ED1F9AF7AED1382E20BCAC63 /* MSHHealthRecordCorrectionsTests.swift */,
 				02F39427D0DBB5BFBC9645A3 /* MSHMyHealthTests.swift */,
 				567531D5DE71A6BAB85FEEBA /* MSHNativeShellTests.swift */,
 				AB0ACC9C0BEC3229E76BC385 /* MSHNotificationTests.swift */,
 				463C60E260C799F4ED741DA6 /* MSHOnboardingTests.swift */,
 				0A89200165B9CFFF6290E87B /* MSHSharedContentTests.swift */,
 				9AE3CB1B800CE43B7A5FE5CC /* MSHSharingTests.swift */,
+				0969BFD4FEFAE3C1594EF2C6 /* MSHSharingUXContractTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -232,7 +265,10 @@
 				7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */,
 				482699F439ED47B5179E8A76 /* FirebaseCore */,
 				4399FFE2E53F5EBF1DF11E71 /* FirebaseAuth */,
+				4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */,
+				DF0EB61F13E938E8B1B9D95A /* FirebaseFunctions */,
 				735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */,
+				BCA80D080F84F72B5A1E17FF /* LinkKit */,
 			);
 			productName = MySimpleHealth;
 			productReference = 7BC4A6349D1004D170B6C977 /* MySimpleHealth.app */;
@@ -283,6 +319,7 @@
 			packageReferences = (
 				B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				1B382F0DC4E9DD2123631B04 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				F990C50A2BB380F6D4ADBF7F /* XCRemoteSwiftPackageReference "plaid-link-ios-spm" */,
 				BA44A31C33F6DFC2768304FA /* XCLocalSwiftPackageReference "../MySimpleHealthHealthKit" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -320,20 +357,26 @@
 				A84BB3858AC8D2ECC81D2EB2 /* MSHAppleHealthRuntime.swift in Sources */,
 				105237004C94BD66F3297C6C /* MSHAuth.swift in Sources */,
 				492DF631BD0F38AB33E0AAFB /* MSHConnectedHealthSources.swift in Sources */,
+				1CF2F8FAA105BC0B9044145B /* MSHCoreAuthority.swift in Sources */,
 				F1D8947E2594D9EE832390F7 /* MSHDesignTokens.swift in Sources */,
+				DC6D07A91952F377A0EE1FB5 /* MSHHealthRecordCorrections.swift in Sources */,
 				1E04F597A57CB7A720AF7E9C /* MSHMeditateScreen.swift in Sources */,
 				DDD003124E25C6879AD2EF4A /* MSHMovementEditing.swift in Sources */,
 				10801D4CF4DC806BFCCED832 /* MSHMyHealthDataSource.swift in Sources */,
 				74125FB20DE63614FBC19F48 /* MSHMyHealthHomeScreen.swift in Sources */,
 				5A1378B1645E17A7062F40F5 /* MSHMyHealthModel.swift in Sources */,
 				1A49E62E20A10C358297F407 /* MSHMyHealthScreen.swift in Sources */,
+				BC5A7C512CD8618FF1FDD826 /* MSHNativeFeatureCompatibility.swift in Sources */,
+				820B729203C1AAA5B90F97F0 /* MSHNativeGlass.swift in Sources */,
 				02775F53CE5DA82FC47878B2 /* MSHNativeShell.swift in Sources */,
 				C82F84BEE92BE9CDF4223EFC /* MSHNavigationPerformance.swift in Sources */,
 				8CB37FD6EAE9627C2B53F1FF /* MSHNotificationBridge.swift in Sources */,
 				C729CC630D266F45DCCB6D5B /* MSHNotificationRouting.swift in Sources */,
 				291AF110FED7BF3DF8C97BEB /* MSHNotificationService.swift in Sources */,
+				38C785E8920C304F9DB97B59 /* MSHOnboardingContinuity.swift in Sources */,
 				E2E226C59CBA5609EED72372 /* MSHOnboardingState.swift in Sources */,
 				C22239AA972507CE2D428109 /* MSHOnboardingView.swift in Sources */,
+				6C35D352C36CE01744A06B5D /* MSHPlaidConnection.swift in Sources */,
 				F35A5D698152BAF3F7A6C46D /* MSHSharedContent.swift in Sources */,
 				448443CE62E04BDFC2C3EF8E /* MSHSharing.swift in Sources */,
 				9B01CE7AB8C969109DC6C998 /* MSHSleepDashboard.swift in Sources */,
@@ -348,12 +391,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				26718EF28AC5A65BA947C5D8 /* FileHealthStoreTests.swift in Sources */,
+				5E2983543CC665232083EEE1 /* MSHCoreAuthorityTests.swift in Sources */,
+				361C9D71A9145308A999F044 /* MSHHealthRecordCorrectionsTests.swift in Sources */,
 				594C1E3ACAD62F6E393FE810 /* MSHMyHealthTests.swift in Sources */,
 				D9C2EEDCB224616F9BC42FC0 /* MSHNativeShellTests.swift in Sources */,
 				C828F4519931DB62E6CFBC1B /* MSHNotificationTests.swift in Sources */,
 				FC602CCB9C3F6C73FEEC0B34 /* MSHOnboardingTests.swift in Sources */,
 				8C3CFE2C4DF260C5A501B749 /* MSHSharedContentTests.swift in Sources */,
 				9A776D3B1E0EE520E0DB2926 /* MSHSharingTests.swift in Sources */,
+				2D3C34EC2AAF739E8DC097BB /* MSHSharingUXContractTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,8 +661,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.0.0;
+				kind = exactVersion;
+				version = 12.16.0;
+			};
+		};
+		F990C50A2BB380F6D4ADBF7F /* XCRemoteSwiftPackageReference "plaid-link-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/plaid/plaid-link-ios-spm";
+			requirement = {
+				kind = exactVersion;
+				version = 7.0.5;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -636,6 +690,11 @@
 			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
 		};
+		4BE8B8005BCA65AEBA419F9C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		735F7B5B5FD0DD16BE823D1E /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1B382F0DC4E9DD2123631B04 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
@@ -644,6 +703,16 @@
 		7DDE9A4214B6B955F1C0570F /* MSHAppleHealthKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MSHAppleHealthKit;
+		};
+		BCA80D080F84F72B5A1E17FF /* LinkKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F990C50A2BB380F6D4ADBF7F /* XCRemoteSwiftPackageReference "plaid-link-ios-spm" */;
+			productName = LinkKit;
+		};
+		DF0EB61F13E938E8B1B9D95A /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9299DA5567A07566F750B6C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
