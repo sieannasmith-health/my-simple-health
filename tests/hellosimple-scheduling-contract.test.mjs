@@ -11,8 +11,8 @@ test('HelloSimple exposes dynamic daily work concepts', () => {
   assert.match(app, /Hello Workers/i);
 });
 
-test('progression is evidence-oriented, not authority granting', () => {
+test('progression is evidence-oriented and explicitly separate from authority', () => {
   assert.match(app, /evidence/i);
   assert.match(app, /XP/i);
-  assert.doesNotMatch(app, /grant.*admin|admin.*unlock/i);
+  assert.match(app, /XP never automatically grants admin, secrets, production, legal, financial, or founder authority/i);
 });
