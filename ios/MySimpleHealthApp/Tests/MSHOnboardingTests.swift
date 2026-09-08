@@ -83,6 +83,161 @@ final class MSHOnboardingTests: XCTestCase {
         XCTAssertEqual(store.state.startingPoint, .movement)
     }
 
+    func testAccountScopedCompletionDoesNotLeakAcrossFirebaseUIDs() throws {
+        let memberA = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-a"))
+        let memberB = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-b"))
+
+        let firstMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberA
+        )
+        firstMember.complete()
+
+        let secondMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberB
+        )
+
+        XCTAssertTrue(firstMember.state.completed)
+        XCTAssertFalse(secondMember.state.completed)
+        XCTAssertTrue(secondMember.shouldPresentOnboarding)
+    }
+
+    func testLegacyUnscopedCompletionDoesNotAutomaticallyAuthorizeAnyFirebaseUID() throws {
+        let memberA = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-a"))
+        let memberB = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-b"))
+        let legacyState = MSHOnboardingState(
+            started: true,
+            completed: true,
+            appleHealthChoice: .notNow,
+            notificationChoice: .declined,
+            migratedExistingUser: true
+        )
+        defaults.set(
+            try JSONEncoder().encode(legacyState),
+            forKey: MSHOnboardingStore.storageKey
+        )
+
+        let firstMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberA
+        )
+        let secondMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberB
+        )
+
+        XCTAssertFalse(firstMember.state.completed)
+        XCTAssertFalse(secondMember.state.completed)
+        XCTAssertTrue(firstMember.hasUnclaimedLegacyCompletion)
+        XCTAssertTrue(secondMember.hasUnclaimedLegacyCompletion)
+        XCTAssertNil(defaults.string(forKey: MSHOnboardingStore.legacyClaimedOwnerKey))
+    }
+
+    func testExplicitLegacyClaimBindsCompletionToOnlyConfirmedFirebaseUID() throws {
+        let memberA = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-a"))
+        let memberB = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-b"))
+        let legacyState = MSHOnboardingState(
+            started: true,
+            completed: true,
+            appleHealthChoice: .notNow,
+            notificationChoice: .declined,
+            migratedExistingUser: true
+        )
+        defaults.set(
+            try JSONEncoder().encode(legacyState),
+            forKey: MSHOnboardingStore.storageKey
+        )
+
+        let firstMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberA
+        )
+        XCTAssertTrue(firstMember.claimLegacyCompletionForCurrentAccount())
+
+        let secondMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberB
+        )
+
+        XCTAssertTrue(firstMember.state.completed)
+        XCTAssertEqual(firstMember.state.appleHealthChoice, .notNow)
+        XCTAssertEqual(firstMember.state.notificationChoice, .declined)
+        XCTAssertFalse(secondMember.state.completed)
+        XCTAssertFalse(secondMember.hasUnclaimedLegacyCompletion)
+        XCTAssertEqual(
+            defaults.string(forKey: MSHOnboardingStore.legacyClaimedOwnerKey),
+            memberA.rawValue
+        )
+    }
+
+    func testDecliningLegacyForOneUIDKeepsLegacyAvailableForAnotherUID() throws {
+        let memberA = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-a"))
+        let memberB = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member-b"))
+        defaults.set(
+            try JSONEncoder().encode(MSHOnboardingState(started: true, completed: true)),
+            forKey: MSHOnboardingStore.storageKey
+        )
+
+        let firstMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberA
+        )
+        firstMember.declineLegacyCompletionForCurrentAccount()
+
+        let relaunchedFirstMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberA
+        )
+        let secondMember = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: memberB
+        )
+
+        XCTAssertFalse(relaunchedFirstMember.hasUnclaimedLegacyCompletion)
+        XCTAssertTrue(secondMember.hasUnclaimedLegacyCompletion)
+        XCTAssertNotNil(defaults.data(forKey: MSHOnboardingStore.storageKey))
+    }
+
+    func testExistingDeviceSignalDoesNotAutoCompleteAuthenticatedAccount() throws {
+        let member = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member"))
+        let store = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { true },
+            memberID: member
+        )
+
+        XCTAssertFalse(store.state.completed)
+        XCTAssertTrue(store.shouldPresentOnboarding)
+    }
+
+    func testAccountRestoreMarksOnlyCompletionAndLeavesDeviceChoicesUntouched() throws {
+        let member = try XCTUnwrap(MSHMemberID(rawValue: "firebase-member"))
+        let store = MSHOnboardingStore(
+            defaults: defaults,
+            existingUserDetector: { false },
+            memberID: member
+        )
+        store.setAppleHealthChoice(.notNow)
+        store.setNotificationChoice(.declined)
+
+        store.restoreAccountCompletion()
+
+        XCTAssertTrue(store.state.completed)
+        XCTAssertTrue(store.state.started)
+        XCTAssertEqual(store.state.appleHealthChoice, .notNow)
+        XCTAssertEqual(store.state.notificationChoice, .declined)
+    }
+
 #if DEBUG
     func testFreshOnboardingHarnessUsesIsolatedStateAndCanPersistAcrossTestRelaunch() {
         let productionState = MSHOnboardingState(started: true, completed: true)

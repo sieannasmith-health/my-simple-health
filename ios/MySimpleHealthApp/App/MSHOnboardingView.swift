@@ -9,16 +9,54 @@ private enum MSHOnboardingStep: Int, CaseIterable {
 }
 
 struct MSHRootExperience: View {
-    @StateObject private var onboardingStore: MSHOnboardingStore
+    @EnvironmentObject private var authStore: MSHAuthStore
 
-    init() {
-        _onboardingStore = StateObject(wrappedValue: MSHOnboardingStoreFactory.make())
+    var body: some View {
+        Group {
+            if let rawMemberID = authStore.userID,
+               let memberID = MSHMemberID(rawValue: rawMemberID) {
+                MSHAccountScopedRootExperience(memberID: memberID)
+                    .id(memberID.rawValue)
+            } else {
+                ZStack {
+                    MSHColor.cream.ignoresSafeArea()
+                    ProgressView().tint(MSHColor.forest)
+                }
+            }
+        }
+    }
+}
+
+private struct MSHAccountScopedRootExperience: View {
+    let memberID: MSHMemberID
+    @StateObject private var onboardingStore: MSHOnboardingStore
+    @State private var isResolvingAccountContinuity = true
+    @State private var requiresLegacyConfirmation = false
+
+    init(memberID: MSHMemberID) {
+        self.memberID = memberID
+        _onboardingStore = StateObject(
+            wrappedValue: MSHOnboardingStoreFactory.make(memberID: memberID)
+        )
     }
 
     var body: some View {
         Group {
-            if onboardingStore.shouldPresentOnboarding {
-                MSHOnboardingFlow(store: onboardingStore)
+            if isResolvingAccountContinuity {
+                ZStack {
+                    MSHColor.cream.ignoresSafeArea()
+                    ProgressView().tint(MSHColor.forest)
+                }
+            } else if requiresLegacyConfirmation {
+                MSHLegacyOnboardingConfirmation(
+                    onContinueExisting: continueExistingSetup,
+                    onStartFresh: startFreshForCurrentAccount
+                )
+            } else if onboardingStore.shouldPresentOnboarding {
+                MSHOnboardingFlow(
+                    store: onboardingStore,
+                    onComplete: completeOnboarding
+                )
             } else {
                 MSHAppShell()
                     .safeAreaInset(edge: .top, spacing: 0) {
@@ -27,11 +65,104 @@ struct MSHRootExperience: View {
             }
         }
         .environmentObject(onboardingStore)
+        .task(id: memberID.rawValue) {
+            await synchronizeAccountContinuity()
+        }
+    }
+
+    @MainActor
+    private func synchronizeAccountContinuity() async {
+        let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+        do {
+            if let completion = try await repository.completion(for: memberID),
+               completion.completed {
+                onboardingStore.restoreAccountCompletion()
+            } else if onboardingStore.state.completed {
+                try await repository.persistCompletion(
+                    for: memberID,
+                    completedAt: Date()
+                )
+            } else if onboardingStore.hasUnclaimedLegacyCompletion {
+                requiresLegacyConfirmation = true
+            }
+        } catch {
+            // Failure-safe by design: retain local state and allow a later launch to retry.
+            // Infrastructure failure must not become a human approval gate.
+            if onboardingStore.hasUnclaimedLegacyCompletion {
+                requiresLegacyConfirmation = true
+            }
+        }
+        isResolvingAccountContinuity = false
+    }
+
+    @MainActor
+    private func continueExistingSetup() {
+        guard onboardingStore.claimLegacyCompletionForCurrentAccount() else {
+            requiresLegacyConfirmation = false
+            return
+        }
+
+        requiresLegacyConfirmation = false
+        let completedAt = Date()
+        Task {
+            let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+            try? await repository.persistCompletion(
+                for: memberID,
+                completedAt: completedAt
+            )
+        }
+    }
+
+    @MainActor
+    private func startFreshForCurrentAccount() {
+        onboardingStore.declineLegacyCompletionForCurrentAccount()
+        requiresLegacyConfirmation = false
+    }
+
+    @MainActor
+    private func completeOnboarding() {
+        onboardingStore.complete()
+        let completedAt = Date()
+        Task {
+            let repository = MSHFirestoreOnboardingAccountContinuityRepository()
+            try? await repository.persistCompletion(
+                for: memberID,
+                completedAt: completedAt
+            )
+        }
+    }
+}
+
+private struct MSHLegacyOnboardingConfirmation: View {
+    let onContinueExisting: () -> Void
+    let onStartFresh: () -> Void
+
+    var body: some View {
+        ZStack {
+            MSHOnboardingPalette.cream.ignoresSafeArea()
+            MSHOnboardingPage(
+                eyebrow: "YOUR ACCOUNT",
+                title: "Continue your existing setup?",
+                message: "We found an earlier My Simple Health setup on this device. Choose whether to connect that completed setup to the account you are signed in with now."
+            ) {
+                VStack(spacing: 12) {
+                    MSHPrimaryButton(
+                        title: "Continue existing setup",
+                        action: onContinueExisting
+                    )
+                    MSHSecondaryButton(
+                        title: "Start fresh with this account",
+                        action: onStartFresh
+                    )
+                }
+            }
+        }
     }
 }
 
 private struct MSHOnboardingFlow: View {
     @ObservedObject var store: MSHOnboardingStore
+    let onComplete: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var step = MSHOnboardingStep.launch
     @State private var isWorking = false
@@ -92,11 +223,6 @@ private struct MSHOnboardingFlow: View {
             VStack(spacing: 14) {
                 MSHPrimaryButton(title: "Continue") { advance(to: .appleHealth) }
 
-                Link("Already have an account? Log in", destination: URL(string: "https://mysimplehealth.org/login")!)
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(MSHOnboardingPalette.forest)
-                    .frame(minHeight: 44)
-
                 HStack(spacing: 24) {
                     Link("Privacy", destination: URL(string: "https://mysimplehealth.org/privacy.html")!)
                     Link("Terms", destination: URL(string: "https://mysimplehealth.org/terms.html")!)
@@ -150,7 +276,7 @@ private struct MSHOnboardingFlow: View {
             title: "Your health starts here.",
             message: "My Health is where your broader picture comes together."
         ) {
-            MSHPrimaryButton(title: "Go to My Health") { store.complete() }
+            MSHPrimaryButton(title: "Go to My Health", action: onComplete)
         }
     }
 
