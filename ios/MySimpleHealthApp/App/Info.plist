@@ -35,6 +35,8 @@
 	<string>1</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>My Simple Health uses health information you choose to share from Apple Health to help bring your activity, sleep, and other health information together in My Health.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>My Simple Health may save health information you explicitly choose to record back to Apple Health so your health information can stay consistent across supported experiences.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UISupportedInterfaceOrientations</key>
