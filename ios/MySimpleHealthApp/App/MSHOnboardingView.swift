@@ -223,11 +223,6 @@ private struct MSHOnboardingFlow: View {
             VStack(spacing: 14) {
                 MSHPrimaryButton(title: "Continue") { advance(to: .appleHealth) }
 
-                Link("Already have an account? Log in", destination: URL(string: "https://mysimplehealth.org/login")!)
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(MSHOnboardingPalette.forest)
-                    .frame(minHeight: 44)
-
                 HStack(spacing: 24) {
                     Link("Privacy", destination: URL(string: "https://mysimplehealth.org/privacy.html")!)
                     Link("Terms", destination: URL(string: "https://mysimplehealth.org/terms.html")!)
