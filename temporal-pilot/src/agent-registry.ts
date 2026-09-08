@@ -57,6 +57,31 @@ const registered = (
   a2aExposure: 'none',
 });
 
+const activeReadOnlySpecialist = (
+  id: string,
+  name: string,
+  role: string,
+  capabilities: readonly string[],
+): MshAgentMetadataCard => ({
+  id,
+  name,
+  role,
+  owner: 'MSH',
+  version: '1.0.0',
+  status: 'active',
+  capabilities,
+  explicitNonCapabilities: [
+    'repository_write',
+    'merge',
+    'repository_admin',
+    'secrets_admin',
+    'destructive_repository_actions',
+  ],
+  protocolBindings: ['TEMPORAL_INTERNAL', 'MCP_TOOL_ACCESS'],
+  allowedTools: READ_ONLY_TOOLS,
+  a2aExposure: 'none',
+});
+
 export const MSH_AGENT_REGISTRY: readonly MshAgentMetadataCard[] = [
   {
     id: 'nomy',
@@ -97,9 +122,9 @@ export const MSH_AGENT_REGISTRY: readonly MshAgentMetadataCard[] = [
     allowedTools: READ_ONLY_TOOLS,
     a2aExposure: 'none',
   },
-  registered('sage', 'Sage', 'AI & Simple', ['ai_systems', 'simple_conversation_architecture']),
-  registered('clara', 'Clara', 'Health Data & Informatics', ['health_informatics', 'interoperability', 'data_structure']),
-  registered('mira', 'Mira', 'Design & UX', ['product_design', 'ux_flows', 'accessibility']),
+  activeReadOnlySpecialist('mira', 'Mira', 'Design & UX', ['product_design', 'ux_flows', 'accessibility']),
+  activeReadOnlySpecialist('sage', 'Sage', 'AI & Simple', ['ai_systems', 'simple_conversation_architecture']),
+  activeReadOnlySpecialist('clara', 'Clara', 'Health Data & Informatics', ['health_informatics', 'interoperability', 'data_structure']),
   registered('eden', 'Eden', 'Public Health & Evidence', ['public_health_evidence', 'recommendation_evidence']),
   registered('vera', 'Vera', 'Privacy & Trust', ['privacy_review', 'trust_governance']),
   registered('aiden', 'Aiden', 'Security Engineering', ['security_engineering', 'threat_review']),

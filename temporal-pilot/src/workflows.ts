@@ -7,10 +7,11 @@ import {
   sleep,
 } from '@temporalio/workflow';
 import type * as activities from './activities.js';
-import type { StageEvidence } from './activities.js';
+import type { SpecialistReviewEvidence, StageEvidence, Wave1AgentId } from './activities.js';
 
 const FOUNDATION_STAGES = ['NOMY', 'SELAH', 'TESSA', 'NOMY_ACCEPTANCE'] as const;
 type FoundationStage = (typeof FOUNDATION_STAGES)[number];
+const WAVE1_AGENTS: readonly Wave1AgentId[] = ['mira', 'sage', 'clara'];
 
 export const sieaApproveSignal = defineSignal('sieaApprove');
 
@@ -31,6 +32,12 @@ export interface FoundationPilotResult {
 export interface FoundationArtifactPilotResult {
   objectiveId: string;
   evidence: StageEvidence[];
+  terminalStatus: 'COMPLETED';
+}
+
+export interface Wave1ActivationResult {
+  objectiveId: string;
+  evidence: SpecialistReviewEvidence[];
   terminalStatus: 'COMPLETED';
 }
 
@@ -106,6 +113,35 @@ export async function foundationArtifactPilot(
 
     if (stage === 'NOMY_ACCEPTANCE' && artifact.status !== 'ACCEPTED') {
       throw ApplicationFailure.nonRetryable('PRODUCT_NOT_ACCEPTED');
+    }
+
+    evidence.push(artifact);
+  }
+
+  return {
+    objectiveId: input.objectiveId,
+    evidence,
+    terminalStatus: 'COMPLETED',
+  };
+}
+
+export async function wave1SpecialistActivation(
+  input: FoundationPilotInput,
+): Promise<Wave1ActivationResult> {
+  const evidence: SpecialistReviewEvidence[] = [];
+  const { runWave1SpecialistReview } = stageActivities(input.activityTimeout);
+
+  for (const agentId of WAVE1_AGENTS) {
+    const idempotencyKey = `${input.objectiveId}:${agentId}:specialist-review`;
+    const artifact = await runWave1SpecialistReview(input.objectiveId, agentId, idempotencyKey);
+
+    if (
+      artifact.agentId !== agentId
+      || artifact.artifactType !== 'SPECIALIST_REVIEW'
+      || artifact.status !== 'READY'
+      || artifact.provenance.length < 2
+    ) {
+      throw ApplicationFailure.nonRetryable(`INVALID_SPECIALIST_EVIDENCE:${agentId}`);
     }
 
     evidence.push(artifact);

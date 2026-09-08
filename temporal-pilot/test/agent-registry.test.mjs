@@ -12,6 +12,8 @@ const expectedWorkers = [
   'nomy', 'selah', 'sage', 'clara', 'mira', 'eden', 'vera', 'aiden', 'ellis',
   'genesis', 'newton', 'harper', 'june', 'atlas', 'reese', 'iris', 'tessa',
 ];
+const wave1Workers = ['mira', 'sage', 'clara'];
+const bootstrapWorkers = ['nomy', 'selah', 'tessa'];
 
 test('registry contains the authoritative 17-worker roster with stable unique IDs', () => {
   assert.equal(MSH_AGENT_REGISTRY.length, 17);
@@ -24,12 +26,12 @@ test('registry contains the authoritative 17-worker roster with stable unique ID
   assert.ok(MSH_AGENT_REGISTRY.every((card) => card.a2aExposure === 'none'));
 });
 
-test('only proven Temporal workers are active at Gate 2 bootstrap', () => {
+test('Wave 1 provisionally activates Mira, Sage, and Clara on the proven Temporal boundary', () => {
   assert.deepEqual(
     discoverAgents({ status: 'active' }).map((card) => card.id).sort(),
-    ['nomy', 'selah', 'tessa'],
+    [...bootstrapWorkers, ...wave1Workers].sort(),
   );
-  assert.equal(discoverAgents({ status: 'registered' }).length, 14);
+  assert.equal(discoverAgents({ status: 'registered' }).length, 11);
 });
 
 test('discovery selects workers by declared capability rather than hard-coded handoff order', () => {
@@ -41,8 +43,9 @@ test('discovery selects workers by declared capability rather than hard-coded ha
 test('Selah alone holds bounded repository write authority', () => {
   for (const tool of ['github_create_branch', 'github_write_repository_file', 'github_open_pull_request']) {
     assert.equal(canAgentUseTool('selah', tool), true);
-    assert.equal(canAgentUseTool('nomy', tool), false);
-    assert.equal(canAgentUseTool('tessa', tool), false);
+    for (const agentId of ['nomy', 'tessa', ...wave1Workers]) {
+      assert.equal(canAgentUseTool(agentId, tool), false);
+    }
   }
 
   assert.deepEqual(
@@ -51,8 +54,8 @@ test('Selah alone holds bounded repository write authority', () => {
   );
 });
 
-test('Nomy and Tessa retain only read-only MCP authority', () => {
-  for (const agentId of ['nomy', 'tessa']) {
+test('Nomy, Tessa, and Wave 1 specialists retain read-only MCP authority', () => {
+  for (const agentId of ['nomy', 'tessa', ...wave1Workers]) {
     assert.equal(canAgentUseTool(agentId, 'github_read_issue'), true);
     assert.equal(canAgentUseTool(agentId, 'github_read_repository_file'), true);
     assert.equal(canAgentUseTool(agentId, 'github_read_checks'), true);
@@ -60,8 +63,8 @@ test('Nomy and Tessa retain only read-only MCP authority', () => {
   }
 });
 
-test('registered specialists are discoverable but receive no live tool authority before onboarding', () => {
-  for (const agentId of expectedWorkers.filter((id) => !['nomy', 'selah', 'tessa'].includes(id))) {
+test('later-wave specialists remain discoverable with zero live tool authority', () => {
+  for (const agentId of expectedWorkers.filter((id) => ![...bootstrapWorkers, ...wave1Workers].includes(id))) {
     const card = getAgentCard(agentId);
     assert.equal(card?.status, 'registered');
     assert.deepEqual(card?.allowedTools, []);
@@ -70,10 +73,12 @@ test('registered specialists are discoverable but receive no live tool authority
 });
 
 test('forbidden tool use fails closed with auditable agent and tool identity', () => {
-  assert.throws(
-    () => assertAgentToolPermission('tessa', 'github_open_pull_request'),
-    /AGENT_TOOL_FORBIDDEN:tessa:github_open_pull_request/,
-  );
+  for (const agentId of wave1Workers) {
+    assert.throws(
+      () => assertAgentToolPermission(agentId, 'github_write_repository_file'),
+      new RegExp(`AGENT_TOOL_FORBIDDEN:${agentId}:github_write_repository_file`),
+    );
+  }
   assert.throws(
     () => assertAgentToolPermission('aiden', 'github_read_issue'),
     /AGENT_TOOL_FORBIDDEN:aiden:github_read_issue/,
