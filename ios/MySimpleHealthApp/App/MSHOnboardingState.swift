@@ -43,37 +43,60 @@ struct MSHOnboardingState: Codable, Equatable {
 @MainActor
 final class MSHOnboardingStore: ObservableObject {
     static let storageKey = "org.mysimplehealth.onboarding.v1"
+    static let accountStorageKeyPrefix = "org.mysimplehealth.onboarding.account.v1"
+    static let legacyClaimedOwnerKey = "org.mysimplehealth.onboarding.v1.claimed-owner"
 
     @Published private(set) var state: MSHOnboardingState
 
     private let defaults: UserDefaults
     private let existingUserDetector: () -> Bool
+    private let persistenceKey: String
 
     init(
         defaults: UserDefaults = .standard,
-        existingUserDetector: @escaping () -> Bool = MSHExistingUserDetector.hasExistingNativeHealthState
+        existingUserDetector: @escaping () -> Bool = MSHExistingUserDetector.hasExistingNativeHealthState,
+        memberID: MSHMemberID? = nil
     ) {
         self.defaults = defaults
         self.existingUserDetector = existingUserDetector
+        self.persistenceKey = memberID.map(Self.accountStorageKey(for:)) ?? Self.storageKey
 
-        if let data = defaults.data(forKey: Self.storageKey),
+        if let data = defaults.data(forKey: persistenceKey),
            var decoded = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) {
-            if decoded.schemaVersion < MSHOnboardingState.currentSchemaVersion {
-                // Preserve the established-member decision recorded by older
-                // schemas. Reconnecting the first-run gate must not replay
-                // onboarding for a member already migrated past it.
-                decoded.schemaVersion = MSHOnboardingState.currentSchemaVersion
-            }
+            Self.upgradeIfNeeded(&decoded)
             state = decoded
             persist()
-        } else {
-            let isExistingUser = existingUserDetector()
-            state = MSHOnboardingState(
-                completed: isExistingUser,
-                migratedExistingUser: isExistingUser
-            )
-            persist()
+            return
         }
+
+        if let memberID,
+           let legacyData = defaults.data(forKey: Self.storageKey),
+           Self.canClaimLegacyState(for: memberID, defaults: defaults),
+           var legacyState = try? JSONDecoder().decode(MSHOnboardingState.self, from: legacyData) {
+            Self.upgradeIfNeeded(&legacyState)
+            state = legacyState
+            defaults.set(memberID.rawValue, forKey: Self.legacyClaimedOwnerKey)
+            persist()
+            return
+        }
+
+        let canAdoptExistingDeviceState: Bool
+        if let memberID {
+            let claimedOwner = defaults.string(forKey: Self.legacyClaimedOwnerKey)
+            canAdoptExistingDeviceState = claimedOwner == nil || claimedOwner == memberID.rawValue
+        } else {
+            canAdoptExistingDeviceState = true
+        }
+
+        let isExistingUser = canAdoptExistingDeviceState && existingUserDetector()
+        state = MSHOnboardingState(
+            completed: isExistingUser,
+            migratedExistingUser: isExistingUser
+        )
+        if isExistingUser, let memberID {
+            defaults.set(memberID.rawValue, forKey: Self.legacyClaimedOwnerKey)
+        }
+        persist()
     }
 
     var shouldPresentOnboarding: Bool { !state.completed }
@@ -105,6 +128,13 @@ final class MSHOnboardingStore: ObservableObject {
         persist()
     }
 
+    func restoreAccountCompletion() {
+        guard !state.completed else { return }
+        state.started = true
+        state.completed = true
+        persist()
+    }
+
     func prepareAppleHealthChoiceForSettingsReview() {
         state.appleHealthChoice = .notAsked
         persist()
@@ -115,9 +145,24 @@ final class MSHOnboardingStore: ObservableObject {
         persist()
     }
 
+    static func accountStorageKey(for memberID: MSHMemberID) -> String {
+        "\(accountStorageKeyPrefix).\(memberID.rawValue)"
+    }
+
+    private static func canClaimLegacyState(for memberID: MSHMemberID, defaults: UserDefaults) -> Bool {
+        guard let claimedOwner = defaults.string(forKey: legacyClaimedOwnerKey) else { return true }
+        return claimedOwner == memberID.rawValue
+    }
+
+    private static func upgradeIfNeeded(_ state: inout MSHOnboardingState) {
+        if state.schemaVersion < MSHOnboardingState.currentSchemaVersion {
+            state.schemaVersion = MSHOnboardingState.currentSchemaVersion
+        }
+    }
+
     private func persist() {
         guard let data = try? JSONEncoder().encode(state) else { return }
-        defaults.set(data, forKey: Self.storageKey)
+        defaults.set(data, forKey: persistenceKey)
     }
 }
 
@@ -129,7 +174,10 @@ enum MSHOnboardingStoreFactory {
     static let freshOnboardingTestSuiteName = "org.mysimplehealth.onboarding.fresh-test"
 #endif
 
-    static func make(arguments: [String] = ProcessInfo.processInfo.arguments) -> MSHOnboardingStore {
+    static func make(
+        arguments: [String] = ProcessInfo.processInfo.arguments,
+        memberID: MSHMemberID? = nil
+    ) -> MSHOnboardingStore {
 #if DEBUG
         if arguments.contains(freshOnboardingTestArgument),
            let defaults = UserDefaults(suiteName: freshOnboardingTestSuiteName) {
@@ -142,7 +190,7 @@ enum MSHOnboardingStoreFactory {
             )
         }
 #endif
-        return MSHOnboardingStore()
+        return MSHOnboardingStore(memberID: memberID)
     }
 }
 
