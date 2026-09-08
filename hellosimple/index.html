@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HelloSimple | My Simple Health</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="HelloSimple navigation">
+      <div class="brand">
+        <div class="brand-mark">H</div>
+        <div><strong>HelloSimple</strong><span>My Simple Health</span></div>
+      </div>
+      <nav id="nav" class="nav"></nav>
+      <div class="sidebar-note">Work + learning + progress + impact</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="todayLabel"></p>
+          <h1 id="pageTitle">Today</h1>
+        </div>
+        <div class="profile-switcher">
+          <label for="profileSelect">Pilot</label>
+          <select id="profileSelect" aria-label="Choose pilot profile"></select>
+          <button id="profileButton" class="avatar-button" aria-label="Open profile"></button>
+        </div>
+      </header>
+      <section id="view" tabindex="-1"></section>
+    </main>
+  </div>
+  <input id="photoInput" type="file" accept="image/*" hidden />
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
