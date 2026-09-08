@@ -24,9 +24,11 @@ Deliberately fail the MCP/GitHub dependency during the canary and verify:
 - the failure never becomes a Siea gate;
 - after dependency recovery, Temporal resumes and completes the same workflow correctly.
 
-## Current blocking implementation
+## Current implementation
 
-`src/activities.ts` still contains canned `runAgentStage()` evidence. Those canned NOMY/SELAH/TESSA/NOMY_ACCEPTANCE results must be replaced by the approved real MCP/GitHub activity boundary before this gate can pass.
+`src/activities.ts` now includes the approved real MCP-backed path behind `MSH_REAL_MCP_CANARY=1`. The normal isolated contract tests retain deterministic fallback evidence, while the live canary exercises the real Temporal → MCP → GitHub → Tessa → Nomy path.
+
+`test/real-mcp-recovery.integration.test.mjs` exercises the production MCP stdio client/server boundary with a persisted GitHub HTTP test backend. The first Selah attempt deliberately points to an unavailable MCP server process; Temporal retries the same Activity with the same idempotency key, the dependency is restored, and the same workflow must reach Tessa PASS and Nomy ACCEPTED. The persisted backend asserts exactly one branch creation, one repository-file write, and one pull-request creation across recovery.
 
 ## Product gate
 
