@@ -30,7 +30,8 @@ export async function foundationPilot(input: FoundationPilotInput): Promise<Foun
   if (startIndex < 0) throw ApplicationFailure.nonRetryable('INVALID_RESUME_STAGE');
   for (const stage of FOUNDATION_STAGES.slice(startIndex)) {
     if (input.requireSieaApproval && stage === 'TESSA') await condition(() => sieaApproved);
-    const recorded = await recordStage(input.objectiveId, stage, `${input.objectiveId}:${stage}:record-stage`);
+    const idempotencyKey = `${input.objectiveId}:${stage}:record-stage`;
+    const recorded = await recordStage(input.objectiveId, stage, idempotencyKey);
     if (recorded !== stage) throw ApplicationFailure.nonRetryable(`MALFORMED_AGENT_RESULT:${stage}`);
     stages.push(recorded);
   }
