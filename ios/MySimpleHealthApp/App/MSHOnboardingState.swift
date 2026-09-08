@@ -45,11 +45,13 @@ final class MSHOnboardingStore: ObservableObject {
     static let storageKey = "org.mysimplehealth.onboarding.v1"
     static let accountStorageKeyPrefix = "org.mysimplehealth.onboarding.account.v1"
     static let legacyClaimedOwnerKey = "org.mysimplehealth.onboarding.v1.claimed-owner"
+    static let legacyDeclinedOwnerKeyPrefix = "org.mysimplehealth.onboarding.v1.declined-owner"
 
     @Published private(set) var state: MSHOnboardingState
 
     private let defaults: UserDefaults
     private let existingUserDetector: () -> Bool
+    private let memberID: MSHMemberID?
     private let persistenceKey: String
 
     init(
@@ -59,6 +61,7 @@ final class MSHOnboardingStore: ObservableObject {
     ) {
         self.defaults = defaults
         self.existingUserDetector = existingUserDetector
+        self.memberID = memberID
         self.persistenceKey = memberID.map(Self.accountStorageKey(for:)) ?? Self.storageKey
 
         if let data = defaults.data(forKey: persistenceKey),
@@ -69,37 +72,37 @@ final class MSHOnboardingStore: ObservableObject {
             return
         }
 
-        if let memberID,
-           let legacyData = defaults.data(forKey: Self.storageKey),
-           Self.canClaimLegacyState(for: memberID, defaults: defaults),
-           var legacyState = try? JSONDecoder().decode(MSHOnboardingState.self, from: legacyData) {
-            Self.upgradeIfNeeded(&legacyState)
-            state = legacyState
-            defaults.set(memberID.rawValue, forKey: Self.legacyClaimedOwnerKey)
+        if memberID != nil {
+            // Authenticated account state starts fresh unless that exact UID already has
+            // account-scoped state or canonical Firestore completion. Ambiguous legacy
+            // device state must never silently authorize whichever account signs in first.
+            state = MSHOnboardingState()
             persist()
             return
         }
 
-        let canAdoptExistingDeviceState: Bool
-        if let memberID {
-            let claimedOwner = defaults.string(forKey: Self.legacyClaimedOwnerKey)
-            canAdoptExistingDeviceState = claimedOwner == nil || claimedOwner == memberID.rawValue
-        } else {
-            canAdoptExistingDeviceState = true
-        }
-
-        let isExistingUser = canAdoptExistingDeviceState && existingUserDetector()
+        let isExistingUser = existingUserDetector()
         state = MSHOnboardingState(
             completed: isExistingUser,
             migratedExistingUser: isExistingUser
         )
-        if isExistingUser, let memberID {
-            defaults.set(memberID.rawValue, forKey: Self.legacyClaimedOwnerKey)
-        }
         persist()
     }
 
     var shouldPresentOnboarding: Bool { !state.completed }
+
+    var hasUnclaimedLegacyCompletion: Bool {
+        guard let memberID,
+              !state.completed,
+              !isLegacyDeclined(for: memberID),
+              Self.canClaimLegacyState(for: memberID, defaults: defaults),
+              let data = defaults.data(forKey: Self.storageKey),
+              var legacyState = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) else {
+            return false
+        }
+        Self.upgradeIfNeeded(&legacyState)
+        return legacyState.completed
+    }
 
     func markStarted() {
         guard !state.started else { return }
@@ -135,6 +138,31 @@ final class MSHOnboardingStore: ObservableObject {
         persist()
     }
 
+    @discardableResult
+    func claimLegacyCompletionForCurrentAccount() -> Bool {
+        guard let memberID,
+              hasUnclaimedLegacyCompletion,
+              let data = defaults.data(forKey: Self.storageKey),
+              var legacyState = try? JSONDecoder().decode(MSHOnboardingState.self, from: data) else {
+            return false
+        }
+
+        Self.upgradeIfNeeded(&legacyState)
+        guard legacyState.completed else { return false }
+
+        // This assignment happens only after an explicit member confirmation in the UI.
+        state = legacyState
+        defaults.set(memberID.rawValue, forKey: Self.legacyClaimedOwnerKey)
+        defaults.removeObject(forKey: Self.legacyDeclinedOwnerKey(for: memberID))
+        persist()
+        return true
+    }
+
+    func declineLegacyCompletionForCurrentAccount() {
+        guard let memberID else { return }
+        defaults.set(true, forKey: Self.legacyDeclinedOwnerKey(for: memberID))
+    }
+
     func prepareAppleHealthChoiceForSettingsReview() {
         state.appleHealthChoice = .notAsked
         persist()
@@ -147,6 +175,14 @@ final class MSHOnboardingStore: ObservableObject {
 
     static func accountStorageKey(for memberID: MSHMemberID) -> String {
         "\(accountStorageKeyPrefix).\(memberID.rawValue)"
+    }
+
+    static func legacyDeclinedOwnerKey(for memberID: MSHMemberID) -> String {
+        "\(legacyDeclinedOwnerKeyPrefix).\(memberID.rawValue)"
+    }
+
+    private func isLegacyDeclined(for memberID: MSHMemberID) -> Bool {
+        defaults.bool(forKey: Self.legacyDeclinedOwnerKey(for: memberID))
     }
 
     private static func canClaimLegacyState(for memberID: MSHMemberID, defaults: UserDefaults) -> Bool {
