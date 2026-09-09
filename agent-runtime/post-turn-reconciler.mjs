@@ -137,6 +137,7 @@ export async function reconcileTurn(structuredWorkerResult) {
     status: 'COMPLETED',
     result_status: transition.publicStatus,
     reason_code: reasonCode,
+    graph_transition: transition.graphTransition || null,
     evidence: state.evidence || null,
     telemetry: {
       run_id: runId,
@@ -153,6 +154,7 @@ export async function reconcileTurn(structuredWorkerResult) {
     human_gate: transition.humanGate,
     execution: null,
     retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
+    last_graph_transition: transition.graphTransition || null,
     history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
     updated_at: completedAt
   };
@@ -163,6 +165,9 @@ export async function reconcileTurn(structuredWorkerResult) {
 
   await reconcileLabels(transition);
   console.log(`[MSH Runtime] State atomically consumed from structured result. Transitioned to ${nextState.current_stage} / ${nextState.assigned_agent || 'none'} / ${nextState.status}.`);
+  if (transition.graphTransition) {
+    console.log(`[MSH Agent Graph] ${transition.graphTransition.from} -> ${transition.graphTransition.to} (${transition.graphTransition.source}).`);
+  }
 
   if (nextState.status === 'PENDING' && nextState.assigned_agent) {
     console.log(`[MSH Runtime] Explicitly igniting evaluator for next owner ${nextState.assigned_agent} on issue #${issueNumber}.`);
