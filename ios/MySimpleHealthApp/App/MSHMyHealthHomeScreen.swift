@@ -111,6 +111,7 @@ struct MSHMyHealthHomeScreen: View {
     @AppStorage("msh.mySpaceLighting") private var lightingRawValue = MSHSpaceLighting.auto.rawValue
     @AppStorage("msh.usePersonalEnvironment") private var usePersonalEnvironment = false
     @State private var isEnvironmentPresented = false
+    @State private var isSimplePresented = false
     @State private var personalEnvironmentImage: UIImage?
 
     init(viewModel: MSHMyHealthViewModel = MSHMyHealthViewModel()) {
@@ -180,6 +181,16 @@ struct MSHMyHealthHomeScreen: View {
                     usePersonalEnvironment = false
                 }
             )
+        }
+        .sheet(isPresented: $isSimplePresented) {
+            NavigationStack {
+                ZStack {
+                    MSHColor.canvas.ignoresSafeArea()
+                    MSHWebView(route: MSHWebRoute(rawValue: "hello.html")!)
+                }
+                .navigationTitle("Simple")
+                .navigationBarTitleDisplayMode(.inline)
+            }
         }
         .accessibilityIdentifier("my-health-home")
     }
@@ -284,7 +295,7 @@ struct MSHMyHealthHomeScreen: View {
                 tint: MSHColor.sage,
                 foreground: primaryContentColor,
                 haptic: .softImpact,
-                action: {}
+                action: { isSimplePresented = true }
             ) {
                 HStack(spacing: 8) {
                     Text("Ask Simple")
@@ -316,7 +327,16 @@ struct MSHMyHealthHomeScreen: View {
                             .font(.caption2.weight(.semibold))
                             .tracking(1.7)
                         Spacer()
-                        Text("View all insights →").font(.caption)
+                        NavigationLink {
+                            MSHImmediateDestination(title: "All Insights") {
+                                MSHMyHealthScreen(viewModel: viewModel)
+                            }
+                        } label: {
+                            Text("View all insights →").font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("View all insights")
+                        .accessibilityIdentifier("view-all-insights")
                     }
                     .foregroundStyle(primaryContentColor.opacity(0.78))
 
@@ -467,13 +487,13 @@ struct MSHMyHealthHomeScreen: View {
         return content()
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(shape.fill(isPlainEnvironment ? Color.white.opacity(0.14) : Color.black.opacity(0.045)))
+            .background(shape.fill(isPlainEnvironment ? Color.white.opacity(0.14) : Color.black.opacity(0.46)))
             .mshNativeGlass(
                 in: shape,
                 tint: tint,
-                edgeStrength: isPlainEnvironment ? 0.34 : 0.46,
-                shadowStrength: isPlainEnvironment ? 0.16 : 0.30,
-                glowStrength: isPlainEnvironment ? 0.01 : 0.06
+                edgeStrength: isPlainEnvironment ? 0.34 : 0.68,
+                shadowStrength: isPlainEnvironment ? 0.16 : 0.42,
+                glowStrength: isPlainEnvironment ? 0.01 : 0.04
             )
     }
 
