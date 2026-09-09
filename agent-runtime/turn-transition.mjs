@@ -1,3 +1,5 @@
+import { resolveAgentEdge } from './agent-graph.mjs';
+
 const SIEA_REASON_CODES = new Set([
   'PHYSICAL_DEVICE_ACTION',
   'ACCOUNT_OWNER_ACTION',
@@ -53,17 +55,26 @@ export function deriveTransitionFromResult(result, state) {
     };
   }
 
+  // Agent-to-agent routing is control-plane behavior. The graph resolver uses
+  // only structured fields and intentionally ignores conversational prose.
+  const edge = resolveAgentEdge(result, state);
+
   // Completing one bounded agent turn does not complete the objective when a
-  // next owner is declared. Keep the objective PENDING so the reconciler can
-  // immediately ignite the evaluator for that next agent.
-  if (result.status === 'completed' && result.next_agent) {
+  // graph edge exists. Keep the objective PENDING so the reconciler can
+  // immediately ignite the evaluator for the destination node.
+  if (edge.toAgent) {
     return {
       runtimeStatus: 'PENDING',
-      assignedAgent: result.next_agent,
-      nextStage: stageForAgent(result.next_agent, state.current_stage),
-      publicStatus: 'completed',
+      assignedAgent: edge.toAgent,
+      nextStage: stageForAgent(edge.toAgent, state.current_stage),
+      publicStatus: result.status,
       needsHuman: false,
-      humanGate: null
+      humanGate: null,
+      graphTransition: {
+        from: edge.fromAgent,
+        to: edge.toAgent,
+        source: edge.source
+      }
     };
   }
 
@@ -74,22 +85,19 @@ export function deriveTransitionFromResult(result, state) {
       nextStage: state.current_stage,
       publicStatus: 'completed',
       needsHuman: false,
-      humanGate: null
+      humanGate: null,
+      graphTransition: null
     };
   }
 
-  let assignedAgent = result.next_agent || null;
-  if (!assignedAgent && result.status === 'review_requested') assignedAgent = 'tessa';
-  if (!assignedAgent && result.status === 'ready_for_product') assignedAgent = 'nomy';
-  if (!assignedAgent && result.status === 'blocked') assignedAgent = 'nomy';
-  if (!assignedAgent) assignedAgent = state.assigned_agent;
-
+  // Nonterminal work with no next graph node remains with its current owner.
   return {
     runtimeStatus: 'PENDING',
-    assignedAgent,
-    nextStage: stageForAgent(assignedAgent, state.current_stage),
+    assignedAgent: state.assigned_agent,
+    nextStage: stageForAgent(state.assigned_agent, state.current_stage),
     publicStatus: result.status,
     needsHuman: false,
-    humanGate: null
+    humanGate: null,
+    graphTransition: null
   };
 }

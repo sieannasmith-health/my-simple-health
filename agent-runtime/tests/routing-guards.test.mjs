@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 const evaluator = await fs.readFile(new URL('../state-evaluator.mjs', import.meta.url), 'utf8');
 const reconciler = await fs.readFile(new URL('../post-turn-reconciler.mjs', import.meta.url), 'utf8');
 const transitionPolicy = await fs.readFile(new URL('../turn-transition.mjs', import.meta.url), 'utf8');
+const agentGraph = await fs.readFile(new URL('../agent-graph.mjs', import.meta.url), 'utf8');
 const runV3 = await fs.readFile(new URL('../run-v3.mjs', import.meta.url), 'utf8');
 const runtimeWorkflow = await fs.readFile(new URL('../../.github/workflows/msh-agent-runtime.yml', import.meta.url), 'utf8');
 
@@ -36,13 +37,22 @@ assert.match(reconciler, /updated_at/);
 assert.match(reconciler, /deriveTransitionFromResult\(structuredWorkerResult, state\)/);
 assert.match(reconciler, /State atomically consumed/);
 assert.match(reconciler, /reason_code/);
+assert.match(reconciler, /last_graph_transition/);
+assert.match(reconciler, /Explicitly igniting evaluator for next owner/);
 
+assert.match(transitionPolicy, /import \{ resolveAgentEdge \} from '\.\/agent-graph\.mjs'/);
 assert.match(transitionPolicy, /runtimeStatus: 'PENDING'/);
-assert.match(transitionPolicy, /result\.status === 'review_requested'/);
-assert.match(transitionPolicy, /assignedAgent = 'tessa'/);
+assert.match(transitionPolicy, /const edge = resolveAgentEdge\(result, state\)/);
+assert.match(transitionPolicy, /graphTransition/);
 assert.match(transitionPolicy, /PHYSICAL_DEVICE_ACTION/);
 assert.match(transitionPolicy, /ACCOUNT_OWNER_ACTION/);
 assert.doesNotMatch(transitionPolicy, /'HUMAN_APPROVAL_REQUIRED'/);
+
+assert.match(agentGraph, /if \(result\?\.status === 'review_requested'\) return 'tessa'/);
+assert.match(agentGraph, /if \(result\?\.status === 'changes_requested' && state\?\.assigned_agent === 'tessa'\) return 'selah'/);
+assert.match(agentGraph, /Human-readable `message` is intentionally ignored/);
+assert.match(agentGraph, /Self-handoff is not allowed/);
+assert.match(agentGraph, /Disallowed agent graph edge/);
 
 assert.match(runV3, /post-turn-reconciler\.mjs/);
 assert.match(runV3, /enrichReasonCode\(await runBoundedWorker\(\)\)/);
