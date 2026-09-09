@@ -29,6 +29,7 @@ export function isAllowedEdge(fromAgent, toAgent) {
 export function defaultNextAgent(result, state) {
   if (result?.next_agent) return result.next_agent;
   if (result?.status === 'review_requested') return 'tessa';
+  if (result?.status === 'changes_requested' && state?.assigned_agent === 'tessa') return 'selah';
   if (result?.status === 'ready_for_product') return 'nomy';
   if (result?.status === 'blocked') return 'nomy';
   return null;
