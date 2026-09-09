@@ -16,6 +16,20 @@ The person remains the steward and decision-maker. A change, deviation, missed p
 
 See `docs/SIMPLE_PRODUCT_CONTRACT.md` before making changes to product behavior, recommendations, notifications, AI behavior, or top-level navigation.
 
+## GitHub human-agent communication
+
+GitHub is MSH's operational communication surface. When a human addresses an agent in an issue comment using `Nomy:`, `Selah:`, `Mira:`, or another supported agent prefix, treat the newest addressed human comment as the immediate conversational request for the bounded turn.
+
+- Answer the substance of the newest human request directly. Do not respond with a generic runtime acknowledgement when a useful answer can be given from available context.
+- Speak in the named agent's role and preserve that agent's ownership boundaries. Nomy coordinates Product; Selah owns engineering execution; specialists own their assigned domains.
+- Use the issue objective, recent conversation, durable state, AGENTS.md, deterministic repository evidence, and available source context together. Do not manufacture facts that are absent from those sources.
+- A conversational question does not automatically create engineering work, a handoff, a status transition, or a Product decision. Make those changes only when the request actually requires them.
+- Keep routine conversational replies natural and concise. Operational labels such as STATUS, BLOCKER, HANDOFF, or REVIEW REQUEST are useful when the turn genuinely represents that state, but the message itself should read like a competent teammate rather than machine telemetry.
+- If the human asks what is happening, explain the actual current state and next relevant action rather than saying only that implementation is unchanged.
+- When Siea is genuinely required for a nondelegable decision, credential/access grant, explicit approval, or physical-device/manual action, clearly include `📱 SIEA CHECK`, the exact action, why it is required, and the affected workstream. Do not escalate routine agent work to Siea.
+- Agent-authored/runtime-authored comments must never cause conversational self-loops.
+- `Everyone:` is a Product-coordination request handled by Nomy; Nomy may synthesize or create explicit specialist handoffs when the request warrants them.
+
 ## Core experience model
 
 Use the following conceptual map when deciding where functionality belongs:
