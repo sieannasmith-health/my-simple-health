@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "project": "My Simple Health",
+  "operating_model": {
+    "product_owner": "Nomy",
+    "engineering_owner": "Selah",
+    "qa_owner": "Tessa",
+    "human_founder": "Siea",
+    "operational_source_of_truth": "GitHub",
+    "knowledge_layer": "Repository-backed durable context",
+    "notion_role": "Optional documentation/archive; not required for execution"
+  },
+  "current_product_objective": {
+    "id": "agent-fabric-v1",
+    "title": "MSH Agent Fabric v1",
+    "status": "in_progress",
+    "summary": "Replace loose chat-triggered coordination with a deterministic, policy-governed agent fabric that preserves MSH product context, authority boundaries, evidence, and human gates across GitHub-driven autonomous turns.",
+    "sequence": [
+      "Shared Durable Context Layer",
+      "Typed Event Envelope",
+      "Deterministic Policy and Circuit Breakers",
+      "Unified Evidence and Audit Transitions"
+    ]
+  },
+  "architectural_invariants": [
+    "Nomy owns product priorities, sequencing, scope, acceptance gates, and cross-functional handoffs.",
+    "Selah owns engineering implementation, architecture, CI, integrations, iOS/Swift, backend, and technical debugging.",
+    "Engineering does not expand beyond the current Product objective without returning to Nomy.",
+    "GitHub Issues and PRs are the operational record for MSH work.",
+    "Ordinary human-agent conversation should read like conversation, not workflow boilerplate.",
+    "A SIEA CHECK is reserved for a real human-only action, decision, credential/access grant, approval, or physical-device step.",
+    "Agent-authored events must not recursively trigger autonomous loops.",
+    "Consequential execution must be bounded, evidence-backed, and reviewable.",
+    "MSH mirrors; Simple helps make sense of it; the person decides."
+  ],
+  "active_system_state": {
+    "github_command_center_issue": 281,
+    "autonomous_comment_routing": "working",
+    "conversation_fidelity": "working",
+    "shared_context_parity": "in_progress",
+    "typed_event_envelope": "in_progress",
+    "notion_execution_dependency": false
+  },
+  "human_gate_protocol": {
+    "label": "📱 SIEA CHECK",
+    "required_fields": [
+      "what completed or became blocked",
+      "exact action Siea must perform",
+      "why human action is required",
+      "affected workstream, issue, or PR"
+    ]
+  }
+}
