@@ -41,12 +41,14 @@ const completed = (nextAgent, message = 'Turn complete.') => ({
 }
 
 {
+  // QA failure is a deterministic graph edge back to Engineering.
   const transition = deriveTransitionFromResult(
     { ...completed(null), status: 'changes_requested' },
     { assigned_agent: 'tessa', current_stage: 'QA' }
   );
   assert.equal(transition.runtimeStatus, 'PENDING');
-  assert.equal(transition.assignedAgent, 'tessa');
+  assert.equal(transition.assignedAgent, 'selah');
+  assert.deepEqual(transition.graphTransition, { from: 'tessa', to: 'selah', source: 'status_default' });
 }
 
 {
