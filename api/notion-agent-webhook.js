@@ -7,29 +7,32 @@ import {
   verifyNotionSignature
 } from '../agent-runtime/notion-bridge.mjs';
 
+export const config = { api: { bodyParser: false } };
 const NOTION_VERSION = '2025-09-03';
 
 function notionHeaders(token) {
   return { Authorization: `Bearer ${token}`, 'Notion-Version': NOTION_VERSION, 'Content-Type': 'application/json' };
 }
-
 async function notionRequest(path, token, options = {}) {
   const response = await fetch(`https://api.notion.com/v1${path}`, { ...options, headers: { ...notionHeaders(token), ...(options.headers || {}) } });
   if (!response.ok) throw new Error(`Notion ${response.status}: ${await response.text()}`);
   if (response.status === 204) return null;
   return response.json();
 }
+async function readRawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  return Buffer.concat(chunks).toString('utf8');
+}
 
 const fetchComment = (id, token) => notionRequest(`/comments/${encodeURIComponent(id)}`, token);
 const fetchPage = (id, token) => notionRequest(`/pages/${encodeURIComponent(id)}`, token);
 const markerUrl = id => `https://mysimplehealth.org/msh-agent-event/${encodeURIComponent(id)}`;
-
 async function alreadyHandled(pageId, commentId, token) {
   const result = await notionRequest(`/comments?block_id=${encodeURIComponent(pageId)}&page_size=100`, token);
   const marker = markerUrl(commentId);
   return (result?.results || []).some(comment => (comment?.rich_text || []).some(part => part?.href === marker || part?.text?.link?.url === marker));
 }
-
 async function replyToDiscussion({ pageId, discussionId, commentId, text, token }) {
   const split = text.indexOf(':');
   const agentLabel = split > 0 ? text.slice(0, split + 1) : 'MSH Agent:';
@@ -37,8 +40,7 @@ async function replyToDiscussion({ pageId, discussionId, commentId, text, token 
   return notionRequest('/comments', token, {
     method: 'POST',
     body: JSON.stringify({
-      parent: { page_id: pageId },
-      discussion_id: discussionId,
+      parent: { page_id: pageId }, discussion_id: discussionId,
       rich_text: [
         { type: 'text', text: { content: agentLabel, link: { url: markerUrl(commentId) } } },
         { type: 'text', text: { content: remainder.slice(0, 1850) } }
@@ -46,11 +48,9 @@ async function replyToDiscussion({ pageId, discussionId, commentId, text, token 
     })
   });
 }
-
 const eventType = body => body?.type || body?.event?.type || '';
 const eventCommentId = body => body?.entity?.id || body?.data?.id || body?.comment?.id || null;
 const eventPageId = (body, comment) => body?.data?.parent?.id || comment?.parent?.page_id || comment?.parent?.id || null;
-
 function pageContext(page) {
   const lines = [];
   for (const [name, value] of Object.entries(page?.properties || {})) {
@@ -65,7 +65,7 @@ function pageContext(page) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
-  const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
+  const rawBody = await readRawBody(req);
   const verificationToken = process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN;
   const notionToken = process.env.NOTION_TOKEN;
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -75,7 +75,8 @@ export default async function handler(req, res) {
   }
   if (!verifyNotionSignature(rawBody, req.headers['x-notion-signature'], verificationToken)) return res.status(401).json({ error: 'invalid_signature' });
 
-  const body = typeof req.body === 'object' ? req.body : JSON.parse(rawBody);
+  let body;
+  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: 'invalid_json' }); }
   if (eventType(body) !== 'comment.created') return res.status(202).json({ ignored: true });
   const commentId = eventCommentId(body);
   if (!commentId) return res.status(400).json({ error: 'missing_comment_id' });
