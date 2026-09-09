@@ -1,0 +1,82 @@
+name: MSH Agent Comment Router
+run-name: MSH Agent Comment Router • #${{ github.event.issue.number }}
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  route-comment:
+    if: >-
+      github.event.comment.user.type != 'Bot' &&
+      github.event.comment.user.login != 'github-actions[bot]' &&
+      contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AGENT_MODEL: ${{ vars.MSH_AGENT_MODEL || 'gpt-5.6-luna' }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ github.token }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+    steps:
+      - name: Resolve addressed MSH agent
+        id: route
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          import re
+
+          body = os.environ.get('COMMENT_BODY', '')
+          first_line = body.splitlines()[0].strip() if body.splitlines() else ''
+          match = re.match(r'^\s*([A-Za-z]+)\s*:\s*', first_line)
+          addressed = match.group(1).lower() if match else ''
+
+          aliases = {
+              'nomy': 'nomy',
+              'selah': 'selah',
+              'tessa': 'tessa',
+              'mira': 'mira',
+              'ellis': 'ellis',
+              'iris': 'iris',
+              'reese': 'reese',
+              'genesis': 'genesis',
+              'everyone': 'nomy',
+          }
+
+          agent = aliases.get(addressed, '')
+          print(f'agent={agent}')
+          print(f'addressed={addressed}')
+          print(f'should_run={"true" if agent else "false"}')
+          PY
+
+      - name: Ignore non-agent comments
+        if: steps.route.outputs.should_run != 'true'
+        run: echo "No supported MSH agent prefix found; no runtime turn started."
+
+      - name: Check out repository
+        if: steps.route.outputs.should_run == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node 24
+        if: steps.route.outputs.should_run == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Run addressed MSH agent
+        if: steps.route.outputs.should_run == 'true'
+        env:
+          AGENT_NAME: ${{ steps.route.outputs.agent }}
+        run: node agent-runtime/run-v2.mjs
