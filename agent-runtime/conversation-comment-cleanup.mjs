@@ -32,7 +32,7 @@ function cleanConversationBody(body) {
   const escapedName = agentName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   text = text.replace(new RegExp(`^\\*\\*STATUS: ${escapedName}\\*\\*\\s*`, 'i'), '');
 
-  // Remove only the narrow runtime boilerplate already observed in conversational turns.
+  // Remove only narrow no-op runtime boilerplate from routine conversation.
   // Real blockers, handoffs, review requests, evidence, and SIEA CHECK sections are untouched.
   text = text
     .replace(/\s*No new product decision, engineering handoff, or Siea action is required\. Implementation remains unchanged\.?\s*/gi, ' ')
@@ -44,7 +44,11 @@ function cleanConversationBody(body) {
     .replace(/ {2,}/g, ' ')
     .trim();
 
-  return text;
+  if (!text) return text;
+
+  // GitHub Actions is the transport identity. Keep the named MSH agent visibly
+  // attributable in the rendered conversation so humans can audit who spoke.
+  return `**${agentName}**\n\n${text}`;
 }
 
 const comments = await request(`/issues/${issueNumber}/comments?per_page=100`);
@@ -78,4 +82,4 @@ await request(`/issues/comments/${candidate.id}`, {
   body: JSON.stringify({ body: cleaned })
 });
 
-console.log(`[CONVERSATION_CLEANUP] Rewrote conversational ${agentName} reply as plain dialogue.`);
+console.log(`[CONVERSATION_CLEANUP] Rewrote conversational ${agentName} reply with visible agent attribution.`);
