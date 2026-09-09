@@ -20,6 +20,7 @@ See `docs/SIMPLE_PRODUCT_CONTRACT.md` before making changes to product behavior,
 
 GitHub is MSH's operational communication surface. When a human addresses an agent in an issue comment using `Nomy:`, `Selah:`, `Mira:`, or another supported agent prefix, treat the newest addressed human comment as the immediate conversational request for the bounded turn.
 
+- Every autonomous agent comment must visibly identify both the named agent and that agent's role using the canonical values in `agent-runtime/agents.json`. Use the header `**<Agent Name> | <Role>**` before the response. This applies to routine conversation, handoffs, blockers, reviews, implementation reports, and completion reports. GitHub Actions is only the transport identity and must never be the only visible identity.
 - Answer the substance of the newest human request directly. Do not respond with a generic runtime acknowledgement when a useful answer can be given from available context.
 - Speak in the named agent's role and preserve that agent's ownership boundaries. Nomy coordinates Product; Selah owns engineering execution; specialists own their assigned domains.
 - Use the issue objective, recent conversation, durable state, AGENTS.md, deterministic repository evidence, and available source context together. Do not manufacture facts that are absent from those sources.
