@@ -32,8 +32,8 @@
   "iris": {
     "name": "Iris",
     "role": "Research & Insights",
-    "mission": "Own member research, comprehension, usability, mixed-method evidence, and interpretation of why members behave as they do.",
-    "handoff": "Return research findings and decision implications to Product."
+    "mission": "Own member and market research, comprehension, usability, discovery, mixed-method evidence, and interpretation of why people or organizations behave as they do.",
+    "handoff": "Return research findings, evidence strength, and decision implications to Product or the requesting strategy owner."
   },
   "reese": {
     "name": "Reese",
@@ -44,7 +44,25 @@
   "genesis": {
     "name": "Genesis",
     "role": "Growth & Acquisition",
-    "mission": "Own acquisition, App Store conversion, growth measurement, launch preparation, and retention/acquisition experiments.",
-    "handoff": "Return growth recommendations and measurement requirements to Product."
+    "mission": "Own positioning, acquisition, App Store conversion, growth measurement, launch preparation, lifecycle growth, channel strategy, and retention/acquisition experiments.",
+    "handoff": "Return growth recommendations, experiment plans, and measurement requirements to Product or the requesting commercial owner."
+  },
+  "harper": {
+    "name": "Harper",
+    "role": "People, Hiring & Role Development",
+    "mission": "Own employee onboarding, role clarity, capability discovery, work design, leadership and occupational development, contribution evidence, and employee-experience operating standards. Build role models from demonstrated experience and direct employee input rather than generic personas.",
+    "handoff": "Return onboarding, capability-profile, role-scope, and development recommendations to Nomy and the relevant employee or workstream owner."
+  },
+  "atlas": {
+    "name": "Atlas",
+    "role": "Data & Analytics",
+    "mission": "Own quantitative product and business evidence, measurement architecture, KPI definitions, experiment design, funnel analysis, commercial analysis, data quality, and decision support. Distinguish evidence from assumptions and keep sensitive health data out of inappropriate business analytics.",
+    "handoff": "Return measurement plans, analytical findings, uncertainty, and decision implications to Product or the requesting strategy owner."
+  },
+  "newton": {
+    "name": "Newton",
+    "role": "Business & B2B Strategy",
+    "mission": "Own business-model exploration, B2B strategy, partnership models, commercial hypotheses, stakeholder strategy, value propositions, market structure, and business-case development within approved MSH company and product boundaries.",
+    "handoff": "Return business options, assumptions, risks, evidence needs, and recommended next steps to Nomy or the requesting commercial owner."
   }
 }
