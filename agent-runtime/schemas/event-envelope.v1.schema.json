@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mysimplehealth.org/schemas/agent-fabric/event-envelope.v1.schema.json",
+  "title": "MSH Agent Fabric Event Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "correlation_id", "created_at", "expires_at", "objective", "actor", "owner", "target_agent", "state", "authority", "evidence", "human_gate", "provenance"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "correlation_id": { "type": "string", "format": "uuid" },
+    "causation_id": { "type": ["string", "null"], "format": "uuid" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "scope"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "scope": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "enum": ["human", "agent", "system"] },
+        "id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "target_agent": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "hop_count", "max_hops", "remaining_steps"],
+      "properties": {
+        "status": { "enum": ["pending", "in_progress", "blocked", "review_requested", "completed"] },
+        "hop_count": { "type": "integer", "minimum": 0 },
+        "max_hops": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "remaining_steps": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_agents", "allowed_tools", "execution_approved"],
+      "properties": {
+        "allowed_agents": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "allowed_tools": { "type": "array", "items": { "type": "string" } },
+        "execution_approved": { "type": "boolean" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "ref"],
+        "properties": {
+          "type": { "enum": ["issue", "pull_request", "commit", "workflow_run", "test", "document", "artifact"] },
+          "ref": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+        }
+      }
+    },
+    "human_gate": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "kind", "reason", "action"],
+          "properties": {
+            "required": { "const": true },
+            "kind": { "enum": ["decision", "approval", "credential", "manual_action", "physical_device", "legal_or_policy"] },
+            "reason": { "type": "string", "minLength": 1 },
+            "action": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "ref"],
+        "properties": {
+          "source": { "enum": ["github", "runtime", "human", "repository_context"] },
+          "ref": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
