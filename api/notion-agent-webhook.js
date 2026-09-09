@@ -73,7 +73,6 @@ export default async function handler(req, res) {
   // Notion's initial subscription handshake arrives before signed event delivery.
   // Accept it without requiring runtime secrets and never log the token.
 if (body?.verification_token && !eventType(body)) {
-  console.log('NOTION_VERIFICATION_TOKEN', body.verification_token);
   return res.status(200).json({ verification_token: body.verification_token });
 }
 
