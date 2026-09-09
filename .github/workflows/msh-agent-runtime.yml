@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       agent:
-        description: Agent key (nomy, selah, tessa, mira, ellis, iris, reese, genesis)
+        description: Agent key (nomy, selah, tessa, mira, ellis, iris, reese, genesis, harper, atlas, newton)
         required: true
         type: string
 
