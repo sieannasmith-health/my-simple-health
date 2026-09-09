@@ -53,6 +53,20 @@ export function deriveTransitionFromResult(result, state) {
     };
   }
 
+  // Completing one bounded agent turn does not complete the objective when a
+  // next owner is declared. Keep the objective PENDING so the reconciler can
+  // immediately ignite the evaluator for that next agent.
+  if (result.status === 'completed' && result.next_agent) {
+    return {
+      runtimeStatus: 'PENDING',
+      assignedAgent: result.next_agent,
+      nextStage: stageForAgent(result.next_agent, state.current_stage),
+      publicStatus: 'completed',
+      needsHuman: false,
+      humanGate: null
+    };
+  }
+
   if (result.status === 'completed') {
     return {
       runtimeStatus: 'COMPLETED',
