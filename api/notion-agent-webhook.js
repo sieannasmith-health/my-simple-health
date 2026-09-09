@@ -66,6 +66,16 @@ function pageContext(page) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   const rawBody = await readRawBody(req);
+
+  let body;
+  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: 'invalid_json' }); }
+
+  // Notion's initial subscription handshake arrives before signed event delivery.
+  // Accept it without requiring runtime secrets and never log the token.
+  if (body?.verification_token && !eventType(body)) {
+    return res.status(200).json({ verification_token: body.verification_token });
+  }
+
   const verificationToken = process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN;
   const notionToken = process.env.NOTION_TOKEN;
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -75,8 +85,6 @@ export default async function handler(req, res) {
   }
   if (!verifyNotionSignature(rawBody, req.headers['x-notion-signature'], verificationToken)) return res.status(401).json({ error: 'invalid_signature' });
 
-  let body;
-  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: 'invalid_json' }); }
   if (eventType(body) !== 'comment.created') return res.status(202).json({ ignored: true });
   const commentId = eventCommentId(body);
   if (!commentId) return res.status(400).json({ error: 'missing_comment_id' });
