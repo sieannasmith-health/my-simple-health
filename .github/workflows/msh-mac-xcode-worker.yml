@@ -1,4 +1,4 @@
-name: MSH Mac Xcode Worker
+name: MSH Cloud Xcode Worker
 
 on:
   workflow_dispatch:
@@ -11,18 +11,26 @@ on:
         options:
           - verify
           - native-test
+  pull_request:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/msh-mac-xcode-worker.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
 
 permissions:
   contents: read
 
 concurrency:
-  group: msh-mac-xcode-worker
-  cancel-in-progress: false
+  group: msh-cloud-xcode-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  mac-xcode-worker:
-    name: MSH Mac → XcodeBuildMCP → Xcode
-    runs-on: [self-hosted, macOS, ARM64, msh-xcode]
+  cloud-xcode-worker:
+    name: MSH Cloud macOS Xcode tests
+    runs-on: macos-15
     timeout-minutes: 30
     env:
       PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -31,48 +39,26 @@ jobs:
       - name: Checkout requested revision
         uses: actions/checkout@v4
 
-      - name: Verify runner identity
+      - name: Verify cloud runner and Xcode
         shell: bash
         run: |
           set -euo pipefail
           echo "runner_name=${RUNNER_NAME}"
           echo "runner_os=${RUNNER_OS}"
           echo "runner_arch=${RUNNER_ARCH}"
-          echo "workspace=${GITHUB_WORKSPACE}"
           uname -a
-
-      - name: Verify Xcode
-        shell: bash
-        run: |
-          set -euo pipefail
           xcode-select -p
           xcodebuild -version
-
-      - name: Verify XcodeBuildMCP installation
-        shell: bash
-        run: |
-          set -euo pipefail
-          command -v xcodebuildmcp
-          xcodebuildmcp --version
 
       - name: Verify checked-out MSH workspace
         shell: bash
         run: |
           set -euo pipefail
-          test -d "$GITHUB_WORKSPACE"
           test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthApp"
           test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthHealthKit"
-          echo "workspace=$GITHUB_WORKSPACE"
-
-      - name: Record optional Xcode IDE bridge status
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          xcodebuildmcp xcode-ide bridge-status
 
       - name: Verify local HealthKit package
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ inputs.operation != 'verify' }}
         working-directory: ios/MySimpleHealthHealthKit
         shell: bash
         run: |
@@ -80,8 +66,8 @@ jobs:
           test -f Package.swift
           swift package describe
 
-      - name: Ensure XcodeGen is available
-        if: ${{ inputs.operation == 'native-test' }}
+      - name: Install XcodeGen
+        if: ${{ inputs.operation != 'verify' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -90,8 +76,8 @@ jobs:
           fi
           xcodegen --version
 
-      - name: Regenerate Xcode project from canonical config
-        if: ${{ inputs.operation == 'native-test' }}
+      - name: Regenerate Xcode project
+        if: ${{ inputs.operation != 'verify' }}
         working-directory: ios/MySimpleHealthApp
         shell: bash
         run: |
@@ -99,7 +85,7 @@ jobs:
           xcodegen generate
 
       - name: Select available iPhone simulator
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ inputs.operation != 'verify' }}
         id: simulator
         shell: bash
         run: |
@@ -107,45 +93,26 @@ jobs:
           SIMULATOR_UDID="$(python3 - <<'PY'
           import json
           import subprocess
-
-          payload = json.loads(subprocess.check_output([
-              'xcrun', 'simctl', 'list', 'devices', 'available', '-j'
-          ]))
-          preferred_names = (
-              'iPhone 17 Pro', 'iPhone 17',
-              'iPhone 16 Pro', 'iPhone 16',
-              'iPhone 15 Pro', 'iPhone 15'
-          )
-          preferred = []
-          fallback = []
+          payload = json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))
+          candidates = []
           for runtime, devices in payload.get('devices', {}).items():
               if 'iOS' not in runtime:
                   continue
               for device in devices:
-                  if not device.get('isAvailable'):
-                      continue
                   name = device.get('name', '')
                   udid = device.get('udid')
-                  if not udid or not name.startswith('iPhone'):
-                      continue
-                  fallback.append((name, udid))
-                  if name in preferred_names:
-                      preferred.append((preferred_names.index(name), name, udid))
-          if preferred:
-              preferred.sort()
-              print(preferred[0][2])
-          elif fallback:
-              fallback.sort()
-              print(fallback[0][1])
-          else:
-              raise SystemExit('No available iPhone simulator found on runner')
+                  if device.get('isAvailable') and udid and name.startswith('iPhone'):
+                      candidates.append((name, udid))
+          if not candidates:
+              raise SystemExit('No available iPhone simulator found on GitHub-hosted runner')
+          candidates.sort(reverse=True)
+          print(candidates[0][1])
           PY
           )"
           echo "udid=$SIMULATOR_UDID" >> "$GITHUB_OUTPUT"
-          echo "Using simulator $SIMULATOR_UDID"
 
       - name: Run MySimpleHealth native unit tests
-        if: ${{ inputs.operation == 'native-test' }}
+        if: ${{ inputs.operation != 'verify' }}
         working-directory: ios/MySimpleHealthApp
         shell: bash
         run: |
@@ -160,7 +127,7 @@ jobs:
             test CODE_SIGNING_ALLOWED=NO
 
       - name: Upload native test result bundle
-        if: ${{ always() && inputs.operation == 'native-test' }}
+        if: ${{ always() && inputs.operation != 'verify' }}
         uses: actions/upload-artifact@v4
         with:
           name: msh-native-test-xcresult
@@ -173,18 +140,12 @@ jobs:
         shell: bash
         run: |
           {
-            echo "## MSH Mac Xcode worker"
+            echo "## MSH Cloud Xcode worker"
             echo ""
-            echo "- Operation: ${{ inputs.operation }}"
             echo "- Runner: $RUNNER_NAME"
             echo "- OS: $RUNNER_OS"
             echo "- Architecture: $RUNNER_ARCH"
             echo "- Commit: $GITHUB_SHA"
-            echo "- Workspace: $GITHUB_WORKSPACE"
-            echo "- Xcode: available"
-            echo "- XcodeBuildMCP: available"
-            echo "- IDE bridge: diagnostic only; not required for native test execution"
-            if [[ "${{ inputs.operation }}" == "native-test" ]]; then
-              echo "- Native test execution: requested"
-            fi
+            echo "- Xcode: cloud-hosted"
+            echo "- Laptop dependency: none"
           } >> "$GITHUB_STEP_SUMMARY"
