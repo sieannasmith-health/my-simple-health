@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import RetryPolicy
+from langgraph.types import RetryPolicy, interrupt
 
+from .adapters import classify_reason, recovery_owner_for
+from .checkpoint import build_checkpointer
 from .state import AgentOSState
 
 
@@ -12,35 +13,31 @@ def execute(state: AgentOSState):
 
 
 def evaluate_runtime(state: AgentOSState):
-    # Runtime adapters replace this placeholder with deterministic execution evidence.
+    # Runtime adapter will replace this placeholder with deterministic execution evidence.
     return {}
 
 
 def classify_failure(state: AgentOSState):
-    reason = state.get("reason_code", "")
-    if reason in {"RATE_LIMIT", "TIMEOUT", "TOOL_UNAVAILABLE"}:
-        failure_class = "transient"
-    elif reason in {"DEPENDENCY_REQUIRED", "MISSING_EVIDENCE"}:
-        failure_class = "dependency"
-    elif reason in {"QA_FAILED", "IMPLEMENTATION_DEFECT"}:
-        failure_class = "quality"
-    elif reason in {"AUTHORIZATION_REQUIRED", "PROTECTED_WRITE"}:
-        failure_class = "authorization"
-    elif reason in {"FOUNDER_INPUT_REQUIRED", "CREDENTIAL_REQUIRED"}:
-        failure_class = "human_input"
-    else:
-        failure_class = "terminal"
-    return {"failure_class": failure_class}
+    failure_class = classify_reason(state.get("reason_code", ""))
+    return {
+        "failure_class": failure_class,
+        "recovery_owner": recovery_owner_for(failure_class, {"assigned_agent": state.get("current_agent")}),
+        "failed_stage": state.get("failed_stage") or state["current_stage"],
+        "failed_agent": state.get("failed_agent") or state["current_agent"],
+        "status": "recovery_required",
+    }
 
 
 def recover(state: AgentOSState):
-    attempts = state["attempt"] + 1
-    redrives = state["redrive_count"] + 1
     return {
-        "attempt": attempts,
-        "redrive_count": redrives,
+        # Redrive is a new local attempt from the failed checkpoint, while redrive_count
+        # tracks bounded objective-level recovery cycles.
+        "attempt": 0,
+        "redrive_count": state["redrive_count"] + 1,
+        "current_agent": state.get("recovery_owner", state["current_agent"]),
         "status": "recovering",
         "resume_from": state.get("failed_stage", state["current_stage"]),
+        "reason_code": "",
     }
 
 
@@ -53,6 +50,7 @@ def refine(state: AgentOSState):
         "current_agent": state.get("recovery_owner", "selah"),
         "current_stage": "REPAIR",
         "status": "recovering",
+        "reason_code": "",
     }
 
 
@@ -61,7 +59,18 @@ def accept(state: AgentOSState):
 
 
 def human_gate(state: AgentOSState):
-    return {"status": "input_required"}
+    request = state.get("human_gate") or {
+        "reason_code": state.get("reason_code", "INPUT_REQUIRED"),
+        "failed_stage": state.get("failed_stage", state["current_stage"]),
+        "failed_agent": state.get("failed_agent", state["current_agent"]),
+    }
+    response = interrupt(request)
+    return {
+        "status": "recovery_required",
+        "human_gate": {},
+        "reason_code": "",
+        "qa_feedback": f"Human gate resumed: {response}",
+    }
 
 
 def route_runtime(state: AgentOSState):
@@ -74,10 +83,10 @@ def route_failure(state: AgentOSState):
     kind = state["failure_class"]
     if kind == "quality":
         return "refine"
-    if kind in {"transient", "dependency", "authorization"}:
-        if state["redrive_count"] < state["max_redrives"] and state["attempt"] < state["max_attempts"]:
-            return "recover"
-        return "human_gate" if kind == "authorization" else END
+    if kind in {"transient", "dependency"}:
+        return "recover" if state["redrive_count"] < state["max_redrives"] else END
+    if kind == "authorization":
+        return "recover" if state["redrive_count"] < state["max_redrives"] else "human_gate"
     if kind == "human_input":
         return "human_gate"
     return END
@@ -110,6 +119,6 @@ def build_graph(checkpointer=None):
     graph.add_conditional_edges("tessa_evaluate", route_qa)
     graph.add_edge("refine", "execute")
     graph.add_edge("accept", END)
-    graph.add_edge("human_gate", END)
+    graph.add_edge("human_gate", "execute")
 
-    return graph.compile(checkpointer=checkpointer or InMemorySaver())
+    return graph.compile(checkpointer=checkpointer or build_checkpointer())
