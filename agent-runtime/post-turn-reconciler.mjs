@@ -1,5 +1,6 @@
 import { drainMaintenanceGrant } from './maintenance-authorization.mjs';
 import { deriveTransitionFromResult } from './turn-transition.mjs';
+import { runtimeTransitionEvent } from './knowledge-events.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -15,51 +16,25 @@ if (!token || !repository || !issueNumber) process.exit(0);
 
 const [owner, repo] = repository.split('/');
 const apiBase = `https://api.github.com/repos/${owner}/${repo}`;
-const headers = {
-  Authorization: `Bearer ${token}`,
-  Accept: 'application/vnd.github+json',
-  'X-GitHub-Api-Version': '2022-11-28',
-  'Content-Type': 'application/json'
-};
+const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' };
 
 async function request(path, options = {}) {
-  const response = await fetch(`${apiBase}${path}`, {
-    ...options,
-    headers: { ...headers, ...(options.headers || {}) }
-  });
+  const response = await fetch(`${apiBase}${path}`, { ...options, headers: { ...headers, ...(options.headers || {}) } });
   if (!response.ok) throw new Error(`GitHub ${response.status}: ${await response.text()}`);
   if (response.status === 204) return null;
   return response.json();
 }
-
-function labelNames(issue) {
-  return (issue.labels || [])
-    .map(label => typeof label === 'string' ? label : label.name)
-    .filter(Boolean);
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
+function labelNames(issue) { return (issue.labels || []).map(label => typeof label === 'string' ? label : label.name).filter(Boolean); }
+function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function parseState(body = '') {
   const fence = '```';
-  const pattern = new RegExp(
-    `${escapeRegExp(START)}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapeRegExp(END)}`
-  );
+  const pattern = new RegExp(`${escapeRegExp(START)}\\s*${fence}json\\s*([\\s\\S]*?)\\s*${fence}\\s*${escapeRegExp(END)}`);
   const match = body.match(pattern);
   if (!match) return null;
   try { return JSON.parse(match[1]); } catch { return null; }
 }
-
-function sequenceOf(state) {
-  return Number.isInteger(state?.sequence_version) ? state.sequence_version : 0;
-}
-
-function stateBlock(state) {
-  return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
-}
-
+function sequenceOf(state) { return Number.isInteger(state?.sequence_version) ? state.sequence_version : 0; }
+function stateBlock(state) { return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`; }
 async function persistWithOptimisticGuard(snapshot, nextState) {
   const verify = await request(`/issues/${issueNumber}`);
   const verifiedState = parseState(verify.body || '');
@@ -69,106 +44,56 @@ async function persistWithOptimisticGuard(snapshot, nextState) {
     console.log(`[MSH Runtime] Concurrency Guard: stale state on issue #${issueNumber} (expected sequence=${expectedSequence}, actual=${actualSequence}). No-op success.`);
     return false;
   }
-
-  const versionedState = {
-    ...nextState,
-    sequence_version: expectedSequence + 1
-  };
+  const versionedState = { ...nextState, sequence_version: expectedSequence + 1 };
   const pattern = new RegExp(`${escapeRegExp(START)}[\\s\\S]*?${escapeRegExp(END)}`);
   const block = stateBlock(versionedState);
-  const body = pattern.test(snapshot.body || '')
-    ? (snapshot.body || '').replace(pattern, block)
-    : `${snapshot.body || ''}\n\n${block}`.trim();
-
-  await request(`/issues/${issueNumber}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ body })
-  });
+  const body = pattern.test(snapshot.body || '') ? (snapshot.body || '').replace(pattern, block) : `${snapshot.body || ''}\n\n${block}`.trim();
+  await request(`/issues/${issueNumber}`, { method: 'PATCH', body: JSON.stringify({ body }) });
   return true;
 }
-
 async function reconcileLabels(transition) {
   const fresh = await request(`/issues/${issueNumber}`);
-  const preserved = labelNames(fresh).filter(
-    name => !name.startsWith('agent:') && !name.startsWith('status:') && name !== 'needs:siea'
-  );
+  const preserved = labelNames(fresh).filter(name => !name.startsWith('agent:') && !name.startsWith('status:') && name !== 'needs:siea');
   const next = [...preserved, `status:${transition.publicStatus}`];
   if (transition.assignedAgent) next.push(`agent:${transition.assignedAgent}`);
   if (transition.needsHuman) next.push('needs:siea');
-  await request(`/issues/${issueNumber}/labels`, {
-    method: 'PUT',
-    body: JSON.stringify({ labels: [...new Set(next)] })
-  });
+  await request(`/issues/${issueNumber}/labels`, { method: 'PUT', body: JSON.stringify({ labels: [...new Set(next)] }) });
 }
-
 async function dispatchEvaluator() {
-  await request(`/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, {
-    method: 'POST',
-    body: JSON.stringify({
-      ref: evaluatorRef,
-      inputs: { issue_number: String(issueNumber) }
-    })
-  });
+  await request(`/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, { method: 'POST', body: JSON.stringify({ ref: evaluatorRef, inputs: { issue_number: String(issueNumber) } }) });
 }
 
 export async function reconcileTurn(structuredWorkerResult) {
   const freshIssue = await request(`/issues/${issueNumber}`);
   const state = parseState(freshIssue.body || '');
-  if (!state) {
-    console.log(`[MSH Runtime] No durable state block on issue #${issueNumber}; nothing to consume.`);
-    return;
-  }
-
-  if (state.status !== 'EXECUTING') {
-    console.log(`[MSH Runtime] Concurrency Guard: State is no longer EXECUTING (Current: ${state.status}). Aborting consumption to prevent data overwrite.`);
-    return;
-  }
+  if (!state) { console.log(`[MSH Runtime] No durable state block on issue #${issueNumber}; nothing to consume.`); return; }
+  if (state.status !== 'EXECUTING') { console.log(`[MSH Runtime] Concurrency Guard: State is no longer EXECUTING (Current: ${state.status}). Aborting consumption to prevent data overwrite.`); return; }
 
   const transition = deriveTransitionFromResult(structuredWorkerResult, state);
-  const reasonCode = typeof structuredWorkerResult?.reason_code === 'string'
-    ? structuredWorkerResult.reason_code
-    : null;
-  console.log(`[RECONCILER] Structured result authority: status=${structuredWorkerResult.status}, reason_code=${reasonCode || 'none'}, next_agent=${structuredWorkerResult.next_agent || 'none'}, requires_human=${Boolean(structuredWorkerResult.requires_human)}.`);
-
+  const reasonCode = typeof structuredWorkerResult?.reason_code === 'string' ? structuredWorkerResult.reason_code : null;
   const completedAt = new Date().toISOString();
-  const historyEntry = {
-    stage: state.current_stage,
-    agent: state.assigned_agent,
-    status: 'COMPLETED',
-    result_status: transition.publicStatus,
-    reason_code: reasonCode,
-    graph_transition: transition.graphTransition || null,
-    evidence: state.evidence || null,
-    telemetry: {
-      run_id: runId,
-      duration_ms: runStartedAt > 0 ? Math.max(0, Date.now() - runStartedAt) : null,
-      timestamp: completedAt
-    }
-  };
+  const knowledgeEvent = runtimeTransitionEvent({ issueNumber, state, transition, result: structuredWorkerResult, occurredAt: completedAt, runId, repository });
+  console.log(`[RECONCILER] Structured result authority: status=${structuredWorkerResult.status}, reason_code=${reasonCode || 'none'}, next_agent=${structuredWorkerResult.next_agent || 'none'}, requires_human=${Boolean(structuredWorkerResult.requires_human)}.`);
+  console.log(`[MSH Knowledge Event] ${JSON.stringify(knowledgeEvent)}`);
 
+  const historyEntry = {
+    stage: state.current_stage, agent: state.assigned_agent, status: 'COMPLETED', result_status: transition.publicStatus,
+    reason_code: reasonCode, graph_transition: transition.graphTransition || null, knowledge_event: knowledgeEvent,
+    evidence: state.evidence || null,
+    telemetry: { run_id: runId, duration_ms: runStartedAt > 0 ? Math.max(0, Date.now() - runStartedAt) : null, timestamp: completedAt }
+  };
   let nextState = {
-    ...state,
-    status: transition.runtimeStatus,
-    current_stage: transition.nextStage,
-    assigned_agent: transition.assignedAgent,
-    human_gate: transition.humanGate,
-    execution: null,
-    retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
-    last_graph_transition: transition.graphTransition || null,
-    history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20),
-    updated_at: completedAt
+    ...state, status: transition.runtimeStatus, current_stage: transition.nextStage, assigned_agent: transition.assignedAgent,
+    human_gate: transition.humanGate, execution: null, retry_count: transition.runtimeStatus === 'PENDING' ? 0 : state.retry_count,
+    last_graph_transition: transition.graphTransition || null, last_knowledge_event: knowledgeEvent,
+    history: [...(Array.isArray(state.history) ? state.history : []), historyEntry].slice(-20), updated_at: completedAt
   };
   nextState = drainMaintenanceGrant(nextState, { at: completedAt, outcome: `reconciled:${transition.publicStatus}` });
-
   const persisted = await persistWithOptimisticGuard(freshIssue, nextState);
   if (!persisted) return;
-
   await reconcileLabels(transition);
   console.log(`[MSH Runtime] State atomically consumed from structured result. Transitioned to ${nextState.current_stage} / ${nextState.assigned_agent || 'none'} / ${nextState.status}.`);
-  if (transition.graphTransition) {
-    console.log(`[MSH Agent Graph] ${transition.graphTransition.from} -> ${transition.graphTransition.to} (${transition.graphTransition.source}).`);
-  }
-
+  if (transition.graphTransition) console.log(`[MSH Agent Graph] ${transition.graphTransition.from} -> ${transition.graphTransition.to} (${transition.graphTransition.source}).`);
   if (nextState.status === 'PENDING' && nextState.assigned_agent) {
     console.log(`[MSH Runtime] Explicitly igniting evaluator for next owner ${nextState.assigned_agent} on issue #${issueNumber}.`);
     await dispatchEvaluator();
