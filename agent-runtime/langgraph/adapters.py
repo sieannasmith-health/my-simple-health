@@ -2,21 +2,17 @@ from __future__ import annotations
 
 from typing import Any
 
-from .state import AgentOSState
+from state import AgentOSState
 
 
 LEGACY_TERMINAL_LIKE = {"ORCHESTRATION_BLOCKED"}
 
 
 def legacy_state_to_agent_os(issue_number: int, legacy: dict[str, Any]) -> AgentOSState:
-    """Translate the current GitHub durable state into LangGraph state without
-    treating legacy ORCHESTRATION_BLOCKED as terminal authority.
-    """
     objective_id = f"github-issue-{issue_number}"
     legacy_status = str(legacy.get("status") or "PENDING")
     reason_code = _latest_reason_code(legacy)
     failure_class = classify_reason(reason_code) if legacy_status in LEGACY_TERMINAL_LIKE else "none"
-
     return AgentOSState(
         objective_id=objective_id,
         correlation_id=objective_id,
@@ -25,8 +21,8 @@ def legacy_state_to_agent_os(issue_number: int, legacy: dict[str, Any]) -> Agent
         status="recovery_required" if legacy_status in LEGACY_TERMINAL_LIKE else legacy_status.lower(),
         attempt=int(legacy.get("retry_count") or 0),
         max_attempts=int(legacy.get("max_retries") or 3),
-        redrive_count=0,
-        max_redrives=3,
+        redrive_count=int(legacy.get("redrive_count") or 0),
+        max_redrives=int(legacy.get("max_redrives") or 3),
         failed_stage=str(legacy.get("current_stage") or "PRODUCT_COORDINATION") if legacy_status in LEGACY_TERMINAL_LIKE else "",
         failed_agent=str(legacy.get("assigned_agent") or "nomy") if legacy_status in LEGACY_TERMINAL_LIKE else "",
         failure_class=failure_class,
@@ -66,7 +62,7 @@ def classify_reason(reason_code: str) -> str:
     reason = str(reason_code or "").upper()
     if reason in {"RATE_LIMIT", "TIMEOUT", "TOOL_UNAVAILABLE", "NETWORK_ERROR"}:
         return "transient"
-    if reason in {"DEPENDENCY_REQUIRED", "MISSING_EVIDENCE", "BUILD_EVIDENCE_REQUIRED"}:
+    if reason in {"DEPENDENCY_REQUIRED", "MISSING_EVIDENCE", "BUILD_EVIDENCE_REQUIRED", "LEGACY_ORCHESTRATION_BLOCKED_WITHOUT_RECOVERY_CHECKPOINT"}:
         return "dependency"
     if reason in {"QA_FAILED", "IMPLEMENTATION_DEFECT", "TEST_FAILED"}:
         return "quality"
@@ -80,14 +76,10 @@ def classify_reason(reason_code: str) -> str:
 
 
 def recovery_owner_for(failure_class: str, legacy: dict[str, Any] | None = None) -> str:
-    if failure_class == "quality":
-        return "selah"
-    if failure_class == "dependency":
-        return "nomy"
-    if failure_class == "authorization":
-        return "nomy"
-    if failure_class == "transient":
-        return str((legacy or {}).get("assigned_agent") or "nomy")
+    if failure_class == "quality": return "selah"
+    if failure_class == "dependency": return "nomy"
+    if failure_class == "authorization": return "nomy"
+    if failure_class == "transient": return str((legacy or {}).get("assigned_agent") or "nomy")
     return "nomy"
 
 
@@ -98,7 +90,8 @@ def _latest_reason_code(legacy: dict[str, Any]) -> str:
             return str(item["reason_code"])
         if isinstance(item, dict) and item.get("event") == "LIVELOCK_CIRCUIT_BREAKER":
             return str(item.get("reason_code") or "REPEATED_BLOCKED_NO_NEW_EVIDENCE")
-    return ""
+    recovery = legacy.get("recovery") if isinstance(legacy.get("recovery"), dict) else {}
+    return str(recovery.get("reason_code") or "")
 
 
 def _completed_branches(legacy: dict[str, Any]) -> list[str]:
@@ -109,8 +102,7 @@ def _completed_branches(legacy: dict[str, Any]) -> list[str]:
 def _pending_branches(legacy: dict[str, Any]) -> list[str]:
     fanout = legacy.get("fanout") if isinstance(legacy.get("fanout"), dict) else {}
     values = []
-    if fanout.get("active_agent"):
-        values.append(fanout["active_agent"])
+    if fanout.get("active_agent"): values.append(fanout["active_agent"])
     values.extend(fanout.get("pending") or [])
     return _uniq(values)
 
@@ -119,6 +111,5 @@ def _uniq(values: list[Any]) -> list[str]:
     out: list[str] = []
     for value in values:
         item = str(value or "").strip().lower()
-        if item and item not in out:
-            out.append(item)
+        if item and item not in out: out.append(item)
     return out
