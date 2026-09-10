@@ -60,3 +60,16 @@ jobs:
         run: node agent-runtime/tests/reconciliation-authority-livelock-boundary.test.mjs
       - name: Verify P0 autonomy context and Everyone join semantics
         run: node agent-runtime/tests/p0-autonomy-context.test.mjs
+
+  langgraph-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install bounded LangGraph migration dependencies
+        run: pip install -r agent-runtime/langgraph/requirements.txt pytest
+      - name: Verify LangGraph adapter and controller conformance
+        run: python -m pytest -q agent-runtime/langgraph
