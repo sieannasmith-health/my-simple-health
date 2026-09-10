@@ -15,10 +15,14 @@ assert.doesNotMatch(evaluator, /reconcileLabels\([^\n]+true\)/);
 assert.doesNotMatch(evaluator, /Human review is required before execution resumes/);
 
 const maintenanceIndex = evaluator.indexOf('authorizeMaintenanceFromEvent({');
-const blockedTerminalIndex = evaluator.indexOf("else if (state.status === 'ORCHESTRATION_BLOCKED')");
-assert.ok(maintenanceIndex >= 0 && blockedTerminalIndex > maintenanceIndex,
-  'Owner-authenticated maintenance recovery must be evaluated before ORCHESTRATION_BLOCKED becomes terminal');
-assert.match(evaluator, /Orchestration-blocked issue .* remains terminal without a fresh owner-authenticated maintenance grant/);
+const blockedRecoveryIndex = evaluator.indexOf("else if (state.status === 'ORCHESTRATION_BLOCKED')");
+assert.ok(maintenanceIndex >= 0 && blockedRecoveryIndex > maintenanceIndex,
+  'Owner-authenticated maintenance recovery must be evaluated before automatic ORCHESTRATION_BLOCKED redrive');
+assert.match(evaluator, /Automatic redrive accepted on issue/);
+assert.match(evaluator, /redriveEligible\(state\)/);
+assert.match(evaluator, /redriveFromCheckpoint\(state\)/);
+assert.match(evaluator, /AUTOMATIC_REDRIVE_STARTED/);
+assert.match(evaluator, /Redrive budget exhausted on issue/);
 
 assert.match(evaluator, /legacyHumanGateRecoveryTarget/);
 assert.match(evaluator, /lastWorkerTurn/);
