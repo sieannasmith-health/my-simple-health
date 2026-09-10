@@ -1,8 +1,8 @@
 from langgraph.checkpoint.memory import InMemorySaver
 
-from .adapters import legacy_state_to_agent_os
-from .controller import build_graph
-from .ports import ScriptedPorts, fail_closed_ports
+from adapters import legacy_state_to_agent_os
+from controller import build_graph
+from ports import ScriptedPorts, fail_closed_ports
 
 
 def base_state():
@@ -53,12 +53,7 @@ def test_fanout_preserves_completed_branches_and_joins_before_tessa():
 def test_tessa_failure_routes_back_to_selah_then_retests():
     state = base_state()
     scripted = ScriptedPorts(
-        execution_results={
-            "selah": [
-                {"status": "completed"},
-                {"status": "completed"},
-            ]
-        },
+        execution_results={"selah": [{"status": "completed"}, {"status": "completed"}]},
         qa_results=[
             {"qa_status": "fail", "qa_feedback": "Repair required"},
             {"qa_status": "pass", "qa_feedback": "Repair verified"},
