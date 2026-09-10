@@ -53,6 +53,19 @@ def refine(state: AgentOSState):
         "status": "recovering",
         "reason_code": "",
         "qa_status": "not_run",
+        "redrive_count": state["redrive_count"] + 1,
+        "attempt": 0,
+    }
+
+
+def refinement_exhausted(state: AgentOSState):
+    return {
+        "status": "blocked",
+        "reason_code": "MAX_REDRIVE_EXCEEDED",
+        "failure_class": "terminal",
+        "recovery_owner": "nomy",
+        "failed_stage": "QA",
+        "failed_agent": "tessa",
     }
 
 
@@ -80,6 +93,12 @@ def human_gate(state: AgentOSState):
     }
 
 
+def route_entry(state: AgentOSState):
+    if state.get("status") == "recovery_required" and state.get("reason_code"):
+        return "classify_failure"
+    return "execute"
+
+
 def route_runtime(state: AgentOSState):
     if state.get("reason_code"):
         return "classify_failure"
@@ -91,7 +110,7 @@ def route_runtime(state: AgentOSState):
 def route_failure(state: AgentOSState):
     kind = state["failure_class"]
     if kind == "quality":
-        return "refine"
+        return "refine" if state["redrive_count"] < state["max_redrives"] else "refinement_exhausted"
     if kind in {"transient", "dependency"}:
         return "recover" if state["redrive_count"] < state["max_redrives"] else END
     if kind == "authorization":
@@ -105,7 +124,10 @@ def route_qa(state: AgentOSState):
     if state["qa_status"] == "pass":
         return "accept"
     if state["qa_status"] == "fail":
-        return "refine"
+        failure_class = classify_reason(state.get("reason_code", "QA_FAILED"))
+        if failure_class != "quality":
+            return "classify_failure"
+        return "refine" if state["redrive_count"] < state["max_redrives"] else "refinement_exhausted"
     return "classify_failure"
 
 
@@ -172,10 +194,11 @@ def build_graph(checkpointer=None, ports: AgentOSPorts | None = None):
     graph.add_node("join_next", join_next)
     graph.add_node("tessa_evaluate", tessa_evaluate)
     graph.add_node("refine", refine)
+    graph.add_node("refinement_exhausted", refinement_exhausted)
     graph.add_node("accept", accept)
     graph.add_node("human_gate", human_gate)
 
-    graph.add_edge(START, "execute")
+    graph.add_conditional_edges(START, route_entry)
     graph.add_edge("execute", "evaluate_runtime")
     graph.add_conditional_edges("evaluate_runtime", route_runtime)
     graph.add_conditional_edges("classify_failure", route_failure)
@@ -183,6 +206,7 @@ def build_graph(checkpointer=None, ports: AgentOSPorts | None = None):
     graph.add_edge("join_next", "execute")
     graph.add_conditional_edges("tessa_evaluate", route_qa)
     graph.add_edge("refine", "execute")
+    graph.add_edge("refinement_exhausted", END)
     graph.add_edge("accept", END)
     graph.add_edge("human_gate", "execute")
 
