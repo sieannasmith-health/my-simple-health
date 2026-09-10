@@ -8,6 +8,8 @@ const workflowFile = process.env.AGENT_TURN_WORKFLOW || 'msh-agent-runtime.yml';
 const ref = process.env.AGENT_TURN_REF || 'main';
 const leaseMinutes = Number(process.env.AGENT_LEASE_MINUTES || 20);
 const maxRetriesDefault = Number(process.env.AGENT_MAX_RETRIES || 3);
+const maxRedrivesDefault = Number(process.env.AGENT_MAX_REDRIVES || 2);
+const redriveCooldownMinutes = Number(process.env.AGENT_REDRIVE_COOLDOWN_MINUTES || 15);
 
 if (!token || !repository || !issueNumber) throw new Error('Missing GITHUB_TOKEN, GITHUB_REPOSITORY, or ISSUE_NUMBER.');
 const [owner, repo] = repository.split('/');
@@ -38,7 +40,7 @@ async function readEventContext() {
 }
 
 function isEventEligibleForStateWrite({ eventName, payload }) {
-  if (!eventName || eventName === 'workflow_dispatch' || eventName === 'issues' || eventName === 'schedule') return true;
+  if (!eventName || eventName === 'workflow_dispatch' || eventName === 'issues' || eventName === 'schedule' || eventName === 'repository_dispatch') return true;
   if (eventName !== 'issue_comment') return false;
 
   const senderType = String(payload?.sender?.type || '');
@@ -95,9 +97,12 @@ function defaultState(issue) {
     status: 'PENDING',
     retry_count: 0,
     max_retries: maxRetriesDefault,
+    redrive_count: 0,
+    max_redrives: maxRedrivesDefault,
     history: [],
     execution: null,
     human_gate: null,
+    recovery: null,
     updated_at: new Date().toISOString()
   };
 }
@@ -227,6 +232,67 @@ function resumeSieaGate(state) {
   };
 }
 
+function recoveryOwnerFor({ failedAgent, failedStage }) {
+  if (failedAgent === 'tessa' || failedStage === 'QA') return 'selah';
+  if (failedAgent === 'selah' || failedStage === 'IMPLEMENTATION') return 'selah';
+  return failedAgent || 'nomy';
+}
+
+function buildRecoveryState(state, now = new Date()) {
+  const failedAgent = state.assigned_agent || 'nomy';
+  const failedStage = state.current_stage || 'PRODUCT_COORDINATION';
+  const recoveryOwner = recoveryOwnerFor({ failedAgent, failedStage });
+  return {
+    failed_agent: failedAgent,
+    failed_stage: failedStage,
+    recovery_owner: recoveryOwner,
+    resume_agent: recoveryOwner,
+    resume_stage: recoveryOwner === 'selah' ? 'IMPLEMENTATION' : failedStage,
+    reason_code: 'RETRY_BUDGET_EXHAUSTED',
+    failed_at: now.toISOString(),
+    not_before: new Date(now.getTime() + redriveCooldownMinutes * 60_000).toISOString()
+  };
+}
+
+function redriveEligible(state, now = Date.now()) {
+  if (state.status !== 'ORCHESTRATION_BLOCKED') return false;
+  if (state.human_gate) return false;
+  const recovery = state.recovery;
+  if (!recovery?.resume_agent || !recovery?.resume_stage) return false;
+  const redriveCount = Number(state.redrive_count || 0);
+  const maxRedrives = Number(state.max_redrives || maxRedrivesDefault);
+  if (redriveCount >= maxRedrives) return false;
+  if (recovery.not_before && Date.parse(recovery.not_before) > now) return false;
+  return true;
+}
+
+function redriveFromCheckpoint(state, now = new Date()) {
+  return {
+    ...state,
+    status: 'PENDING',
+    assigned_agent: state.recovery.resume_agent,
+    current_stage: state.recovery.resume_stage,
+    retry_count: 0,
+    redrive_count: Number(state.redrive_count || 0) + 1,
+    execution: null,
+    human_gate: null,
+    recovery: {
+      ...state.recovery,
+      redriven_at: now.toISOString()
+    },
+    history: [...(Array.isArray(state.history) ? state.history : []), {
+      at: now.toISOString(),
+      event: 'AUTOMATIC_REDRIVE_STARTED',
+      failed_agent: state.recovery.failed_agent,
+      failed_stage: state.recovery.failed_stage,
+      recovery_owner: state.recovery.recovery_owner,
+      resume_agent: state.recovery.resume_agent,
+      resume_stage: state.recovery.resume_stage,
+      redrive_count: Number(state.redrive_count || 0) + 1
+    }].slice(-20)
+  };
+}
+
 async function dispatch(state) {
   await request(`/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`, {
     method: 'POST',
@@ -274,8 +340,16 @@ if (maintenanceAuthorization.authorized) {
   state = maintenanceAuthorization.state;
   console.log(`[SECURITY] Accepted owner-authenticated runtime-maintenance grant ${maintenanceAuthorization.grant.grant_id} for issue #${issueNumber}.`);
 } else if (state.status === 'ORCHESTRATION_BLOCKED') {
-  console.log(`[MSH Evaluator] Orchestration-blocked issue #${issueNumber} remains terminal without a fresh owner-authenticated maintenance grant.`);
-  process.exit(0);
+  if (redriveEligible(state)) {
+    state = redriveFromCheckpoint(state);
+    console.log(`[AUTONOMY] Automatic redrive accepted on issue #${issueNumber}; resuming ${state.assigned_agent} at ${state.current_stage}.`);
+  } else {
+    const recovery = state.recovery;
+    const exhausted = Number(state.redrive_count || 0) >= Number(state.max_redrives || maxRedrivesDefault);
+    if (exhausted) console.log(`[MSH Evaluator] Redrive budget exhausted on issue #${issueNumber}; coordinator review required.`);
+    else console.log(`[MSH Evaluator] Orchestration-blocked issue #${issueNumber} is waiting for its redrive checkpoint/cooldown.`);
+    process.exit(0);
+  }
 }
 
 if (state.status === 'HUMAN_APPROVAL_REQUIRED') {
@@ -294,21 +368,30 @@ if (leaseExpired(state)) {
 }
 
 if (state.retry_count >= state.max_retries) {
+  const now = new Date();
+  const recovery = buildRecoveryState(state, now);
   state.status = 'ORCHESTRATION_BLOCKED';
   state.current_stage = 'PRODUCT_COORDINATION';
   state.assigned_agent = 'nomy';
   state.execution = null;
   state.human_gate = null;
+  state.max_redrives = Number(state.max_redrives || maxRedrivesDefault);
+  state.recovery = recovery;
   state.history = [...(state.history || []), {
-    at: new Date().toISOString(),
-    event: 'CIRCUIT_BREAKER_TO_COORDINATOR',
-    retry_count: state.retry_count
+    at: now.toISOString(),
+    event: 'CIRCUIT_BREAKER_TO_RECOVERY',
+    retry_count: state.retry_count,
+    failed_agent: recovery.failed_agent,
+    failed_stage: recovery.failed_stage,
+    recovery_owner: recovery.recovery_owner,
+    resume_agent: recovery.resume_agent,
+    resume_stage: recovery.resume_stage,
+    not_before: recovery.not_before
   }].slice(-20);
   const persisted = await persist(expectedState, state);
   if (!persisted) process.exit(0);
   await reconcileLabels('nomy', 'blocked', false);
-  await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: '**ORCHESTRATION CIRCUIT BREAKER**\n\nMaximum bounded-turn retries reached. Routing this operational failure to Nomy for coordinator diagnosis. This is not a Siea gate.' }) });
-  await dispatch({ ...state, assigned_agent: 'nomy' });
+  await request(`/issues/${issueNumber}/comments`, { method: 'POST', body: JSON.stringify({ body: `**ORCHESTRATION RECOVERY**\n\nMaximum bounded-turn retries reached. Recovery checkpoint captured for ${recovery.failed_agent} / ${recovery.failed_stage}. Automatic redrive is scheduled after the cooldown and will resume with ${recovery.resume_agent}. This is not a Siea gate.` }) });
   process.exit(0);
 }
 
@@ -322,7 +405,8 @@ state.status = 'EXECUTING';
 state.execution = {
   claimed_at: now.toISOString(),
   lease_expires_at: new Date(now.getTime() + leaseMinutes * 60_000).toISOString(),
-  attempt: state.retry_count + 1
+  attempt: state.retry_count + 1,
+  redrive: Number(state.redrive_count || 0)
 };
 const persisted = await persist(expectedState, state);
 if (!persisted) process.exit(0);
