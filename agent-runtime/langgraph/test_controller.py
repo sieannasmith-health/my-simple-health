@@ -1,0 +1,73 @@
+from langgraph.checkpoint.memory import InMemorySaver
+
+from .adapters import legacy_state_to_agent_os
+from .controller import build_graph
+from .ports import ScriptedPorts, fail_closed_ports
+
+
+def base_state():
+    return legacy_state_to_agent_os(
+        318,
+        {
+            "status": "PENDING",
+            "current_stage": "IMPLEMENTATION",
+            "assigned_agent": "selah",
+            "retry_count": 0,
+            "sequence_version": 21,
+        },
+    )
+
+
+def invoke(graph, state):
+    return graph.invoke(state, config={"configurable": {"thread_id": state["correlation_id"]}})
+
+
+def test_missing_adapter_fails_closed():
+    state = base_state()
+    graph = build_graph(checkpointer=InMemorySaver(), ports=fail_closed_ports())
+    result = invoke(graph, state)
+    assert result["status"] == "recovery_required"
+    assert result["reason_code"] == "EXECUTION_ADAPTER_NOT_CONFIGURED"
+    assert result["failure_class"] == "terminal"
+
+
+def test_fanout_preserves_completed_branches_and_joins_before_tessa():
+    state = base_state()
+    scripted = ScriptedPorts(
+        execution_results={
+            "selah": [{"status": "completed", "next_agents": ["vera", "aiden"]}],
+            "vera": [{"status": "completed"}],
+            "aiden": [{"status": "completed"}],
+        },
+        qa_results=[{"qa_status": "pass", "qa_feedback": "Conformant"}],
+    )
+    graph = build_graph(checkpointer=InMemorySaver(), ports=scripted.as_ports())
+    result = invoke(graph, state)
+    assert result["status"] == "completed"
+    assert result["qa_status"] == "pass"
+    assert result["completed_branches"] == ["selah", "vera", "aiden"]
+    assert result["pending_branches"] == []
+    assert any(event["event_type"] == "fanout.branch_joined" for event in scripted.events)
+
+
+def test_tessa_failure_routes_back_to_selah_then_retests():
+    state = base_state()
+    scripted = ScriptedPorts(
+        execution_results={
+            "selah": [
+                {"status": "completed"},
+                {"status": "completed"},
+            ]
+        },
+        qa_results=[
+            {"qa_status": "fail", "qa_feedback": "Repair required"},
+            {"qa_status": "pass", "qa_feedback": "Repair verified"},
+        ],
+    )
+    graph = build_graph(checkpointer=InMemorySaver(), ports=scripted.as_ports())
+    result = invoke(graph, state)
+    assert result["status"] == "completed"
+    assert result["qa_status"] == "pass"
+    assert result["qa_feedback"] == "Repair verified"
+    qa_finished = [event for event in scripted.events if event["event_type"] == "qa.finished"]
+    assert [event["qa_status"] for event in qa_finished] == ["fail", "pass"]
