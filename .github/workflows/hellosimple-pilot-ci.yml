@@ -1,0 +1,33 @@
+name: HelloSimple Pilot CI
+
+on:
+  pull_request:
+    paths:
+      - 'hellosimple/**'
+      - 'tests/hellosimple*.test.mjs'
+      - '.github/workflows/hellosimple-pilot-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hellosimple-pilot-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run HelloSimple contract tests
+        run: node --test tests/hellosimple*.test.mjs
+      - name: Verify prototype assets
+        run: |
+          test -f hellosimple/index.html
+          test -f hellosimple/styles.css
+          test -f hellosimple/app.js
+          test -f hellosimple/PILOT_CHECKLIST.md
