@@ -1,6 +1,7 @@
 import XCTest
 @testable import MySimpleHealth
 
+// CI diagnostic refresh: exercise this PR against the current repository/toolchain state.
 final class MSHCoreAuthorityTests: XCTestCase {
     func testFirebaseUIDBacksCanonicalMemberNamespace() throws {
         let member = try XCTUnwrap(MSHMemberID(rawValue: "firebase-user-123"))
