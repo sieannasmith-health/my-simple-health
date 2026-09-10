@@ -21,17 +21,15 @@ concurrency:
 
 jobs:
   mac-xcode-worker:
-    name: MSH Mac → XcodeBuildMCP → Xcode
-    runs-on: [self-hosted, macOS, ARM64, msh-xcode]
+    name: MSH GitHub macOS Xcode Worker
+    runs-on: macos-latest
     timeout-minutes: 30
-    env:
-      PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
     steps:
       - name: Checkout requested revision
         uses: actions/checkout@v4
 
-      - name: Verify runner identity
+      - name: Verify GitHub-hosted runner identity
         shell: bash
         run: |
           set -euo pipefail
@@ -48,13 +46,6 @@ jobs:
           xcode-select -p
           xcodebuild -version
 
-      - name: Verify XcodeBuildMCP installation
-        shell: bash
-        run: |
-          set -euo pipefail
-          command -v xcodebuildmcp
-          xcodebuildmcp --version
-
       - name: Verify checked-out MSH workspace
         shell: bash
         run: |
@@ -63,13 +54,6 @@ jobs:
           test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthApp"
           test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthHealthKit"
           echo "workspace=$GITHUB_WORKSPACE"
-
-      - name: Record optional Xcode IDE bridge status
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          xcodebuildmcp xcode-ide bridge-status
 
       - name: Verify local HealthKit package
         if: ${{ inputs.operation == 'native-test' }}
@@ -173,7 +157,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "## MSH Mac Xcode worker"
+            echo "## MSH GitHub-hosted macOS Xcode worker"
             echo ""
             echo "- Operation: ${{ inputs.operation }}"
             echo "- Runner: $RUNNER_NAME"
@@ -182,8 +166,8 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Workspace: $GITHUB_WORKSPACE"
             echo "- Xcode: available"
-            echo "- XcodeBuildMCP: available"
-            echo "- IDE bridge: diagnostic only; not required for native test execution"
+            echo "- Host: GitHub-hosted macOS runner"
+            echo "- Local laptop dependency: none"
             if [[ "${{ inputs.operation }}" == "native-test" ]]; then
               echo "- Native test execution: requested"
             fi
