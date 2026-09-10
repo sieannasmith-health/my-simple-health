@@ -117,6 +117,18 @@ export async function resolveRequiredEvidence({ state, issue, comments, eventPay
     return { required: true, pr: await fetchPREvidence(payloadNumber, github), resolved_via: 'EVENT_PAYLOAD' };
   }
 
+  // GitHub issue_comment events on pull requests expose the PR marker on
+  // issue.pull_request while issue.number remains the canonical PR number.
+  // Resolve that thread directly instead of requiring the PR to self-reference.
+  const currentThreadPRNumber = issue?.pull_request ? normalizePRNumber(issue) : null;
+  if (currentThreadPRNumber) {
+    return {
+      required: true,
+      pr: await fetchPREvidence(currentThreadPRNumber, github),
+      resolved_via: 'CURRENT_PR_THREAD'
+    };
+  }
+
   const historicalNumber = historicalPRNumber(state);
   let historicalEvidence = null;
   if (historicalNumber) {
