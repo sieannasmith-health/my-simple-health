@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mysimplehealth.org/schemas/simple-personalization.schema.json",
+  "title": "Simple Personalization Profile",
+  "description": "Member-controlled communication preferences. This schema never grants health-data access, tool authority, consent, or permissions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "presence", "voice", "temperament", "rhythm", "flow", "depth", "structure", "energy", "expression"],
+  "properties": {
+    "version": {"type": "integer", "minimum": 1},
+    "presence": {"type": "string", "enum": ["reserved", "grounded", "warm", "companionable"]},
+    "voice": {"type": "string", "enum": ["plain", "professional", "conversational", "expert_peer"]},
+    "temperament": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = clinical, 5 = gentle"},
+    "rhythm": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = polished, 5 = natural"},
+    "flow": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = dense, 5 = conversational"},
+    "depth": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = quick, 5 = detailed"},
+    "structure": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = conversational, 5 = organized"},
+    "energy": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = calm, 5 = animated"},
+    "expression": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = reserved, 5 = expressive"},
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_contractions": {"type": "boolean"},
+        "allow_sentence_fragments": {"type": "boolean"},
+        "default_to_bullets": {"type": "boolean"},
+        "emoji_level": {"type": "integer", "minimum": 0, "maximum": 3},
+        "avoid_phrases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "voice_references": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 10}
+      }
+    },
+    "continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "preference_source": {"type": "string", "enum": ["member_set", "member_confirmed", "system_default"]}
+      }
+    }
+  }
+}
