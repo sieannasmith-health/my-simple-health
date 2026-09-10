@@ -1,0 +1,164 @@
+name: MSH TestFlight Distribution
+
+on:
+  workflow_run:
+    workflows: ["MSH Cloud Xcode Worker"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msh-testflight-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  distribute-testflight:
+    name: Archive and upload My Simple Health to TestFlight
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+      TEAM_ID: 736NRP69T9
+
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Verify App Store Connect credentials are configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Missing required GitHub Actions secret: $name"
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Verify Xcode and install XcodeGen
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Regenerate canonical Xcode project
+        working-directory: ios/MySimpleHealthApp
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodegen generate
+
+      - name: Prepare App Store Connect API key
+        id: auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          KEY_DIR="$RUNNER_TEMP/appstoreconnect"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
+          printf '%s' "$ASC_PRIVATE_KEY" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "key_path=$KEY_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Archive signed iOS app
+        working-directory: ios/MySimpleHealthApp
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE_PATH="$RUNNER_TEMP/MySimpleHealth.xcarchive"
+          rm -rf "$ARCHIVE_PATH"
+          xcodebuild \
+            -project MySimpleHealth.xcodeproj \
+            -scheme MySimpleHealth \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${{ steps.auth.outputs.key_path }}" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            clean archive
+
+      - name: Create App Store Connect export options
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>$TEAM_ID</string>
+            <key>manageAppVersionAndBuildNumber</key>
+            <true/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+          plutil -lint "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Upload tested archive to App Store Connect
+        working-directory: ios/MySimpleHealthApp
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPORT_PATH="$RUNNER_TEMP/MySimpleHealthExport"
+          rm -rf "$EXPORT_PATH"
+          mkdir -p "$EXPORT_PATH"
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/MySimpleHealth.xcarchive" \
+            -exportPath "$EXPORT_PATH" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${{ steps.auth.outputs.key_path }}" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Distribution summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          {
+            echo "## MSH TestFlight distribution"
+            echo ""
+            echo "- Source commit: ${{ github.event.workflow_run.head_sha }}"
+            echo "- Source test run: ${{ github.event.workflow_run.html_url }}"
+            echo "- Runner: GitHub-hosted macOS"
+            echo "- Bundle ID: org.mysimplehealth.app"
+            echo "- Destination: App Store Connect / TestFlight"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove temporary API key
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/appstoreconnect"
