@@ -49,6 +49,10 @@ export function defaultNextAgent(result, state) {
   return null;
 }
 
+/**
+ * Resolve an agent-to-agent transition as control-plane state, never from
+ * conversational prose. Human-readable `message` is intentionally ignored.
+ */
 export function resolveAgentEdge(result, state) {
   const fromAgent = state?.assigned_agent || null;
   const requestedNextAgent = defaultNextAgent(result, state);
