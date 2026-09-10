@@ -1,11 +1,25 @@
+const SPECIALISTS = Object.freeze([
+  'sage', 'clara', 'mira', 'eden', 'vera', 'aiden', 'ellis', 'genesis',
+  'newton', 'harper', 'june', 'atlas', 'reese', 'iris'
+]);
+
 const GRAPH = Object.freeze({
-  nomy: Object.freeze(['mira', 'iris', 'ellis', 'reese', 'genesis', 'selah', 'tessa']),
-  mira: Object.freeze(['nomy']),
-  iris: Object.freeze(['nomy']),
-  ellis: Object.freeze(['nomy']),
-  reese: Object.freeze(['nomy']),
-  genesis: Object.freeze(['nomy']),
+  nomy: Object.freeze([...SPECIALISTS, 'selah', 'tessa']),
   selah: Object.freeze(['tessa', 'nomy']),
+  sage: Object.freeze(['selah', 'nomy']),
+  clara: Object.freeze(['selah', 'nomy']),
+  mira: Object.freeze(['selah', 'nomy']),
+  eden: Object.freeze(['selah', 'nomy']),
+  vera: Object.freeze(['selah', 'nomy']),
+  aiden: Object.freeze(['selah', 'nomy']),
+  ellis: Object.freeze(['selah', 'nomy']),
+  genesis: Object.freeze(['nomy']),
+  newton: Object.freeze(['nomy']),
+  harper: Object.freeze(['nomy']),
+  june: Object.freeze(['selah', 'nomy']),
+  atlas: Object.freeze(['selah', 'nomy']),
+  reese: Object.freeze(['selah', 'nomy']),
+  iris: Object.freeze(['nomy']),
   tessa: Object.freeze(['selah', 'nomy'])
 });
 
@@ -53,7 +67,7 @@ export function resolveAgentEdge(result, state) {
   }
 
   if (requestedNextAgent === fromAgent) {
-    throw new AgentGraphTransitionError('Self-handoff is not allowed in MSH Agent Graph v1.', {
+    throw new AgentGraphTransitionError('Self-handoff is not allowed in MSH Agent Graph.', {
       fromAgent,
       toAgent: requestedNextAgent
     });

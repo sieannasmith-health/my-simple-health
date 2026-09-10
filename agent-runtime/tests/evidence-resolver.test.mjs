@@ -88,6 +88,33 @@ function pr(number, { state = 'open', sha = `sha${number}`, ref = `fix/${number}
 }
 
 {
+  const calls = [];
+  const github = async path => {
+    calls.push(path);
+    if (path === '/pulls/324') return pr(324, { sha: 'head324', ref: 'selah/agent-os-runtime-hydration' });
+    if (path === '/pulls/324/files?per_page=100') return [{ filename: 'agent-runtime/agent-graph.mjs', status: 'modified', additions: 25, deletions: 22, patch: '@@ routing @@' }];
+    if (path === '/commits/head324/check-runs?per_page=100') return { check_runs: [{ name: 'MSH Agent Runtime Structural Test', status: 'completed', conclusion: 'success' }] };
+    if (path === '/commits/head324/status') return { state: 'success', statuses: [] };
+    throw new Error(`Unexpected GitHub call: ${path}`);
+  };
+
+  const result = await resolveRequiredEvidence({
+    state: { current_stage: 'QA', history: [] },
+    issue: { number: 324, body: '', pull_request: { url: 'https://api.github.com/repos/example/repo/pulls/324' } },
+    comments: [],
+    eventPayload: { pull_request: null },
+    github
+  });
+
+  assert.equal(result.required, true);
+  assert.equal(result.resolved_via, 'CURRENT_PR_THREAD');
+  assert.equal(result.pr.pr_number, 324);
+  assert.equal(result.pr.head_sha, 'head324');
+  assert.ok(calls.includes('/pulls/324'));
+  assert.ok(!calls.some(path => path.startsWith('/pulls?')), 'PR-thread evidence must not fall through to association search');
+}
+
+{
   const github = async path => {
     if (path.startsWith('/pulls?')) return [];
     throw new Error(`Unexpected GitHub call: ${path}`);
@@ -103,4 +130,4 @@ function pr(number, { state = 'open', sha = `sha${number}`, ref = `fix/${number}
   assert.equal(planning.resolved_via, 'NOT_REQUIRED');
 }
 
-console.log('PASS: QA evidence prefers the one active issue PR over closed stale history and remains optional in triage.');
+console.log('PASS: QA evidence resolves current PR threads, prefers the one active issue PR over closed stale history, and remains optional in triage.');
