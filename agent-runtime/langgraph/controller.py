@@ -24,8 +24,7 @@ def recover(state: AgentOSState):
 
 def refine(state: AgentOSState):
     owner = state.get("recovery_owner") or state.get("failed_agent") or "selah"
-    if owner in {"tessa", "nomy"}:
-        owner = "selah"
+    if owner in {"tessa", "nomy"}: owner = "selah"
     return {"current_agent": owner, "current_stage": "REPAIR", "status": "recovering", "reason_code": "", "qa_status": "not_run", "redrive_count": state["redrive_count"] + 1, "attempt": 0}
 
 
@@ -44,17 +43,13 @@ def human_gate(state: AgentOSState):
 
 
 def route_entry(state: AgentOSState):
-    if state.get("status") == "recovery_required" and state.get("reason_code"):
-        return "classify_failure"
-    return "execute"
+    return "classify_failure" if state.get("status") == "recovery_required" and state.get("reason_code") else "execute"
 
 
 def route_runtime(state: AgentOSState):
-    if state.get("reason_code"):
-        return "classify_failure"
-    if state.get("pending_branches"):
-        return "join_next"
-    return "tessa_evaluate"
+    if state.get("reason_code"): return "classify_failure"
+    if state.get("pending_branches"): return "join_next"
+    return "finalize_branch"
 
 
 def route_failure(state: AgentOSState):
@@ -86,16 +81,24 @@ def build_graph(checkpointer=None, ports: AgentOSPorts | None = None):
         active_ports.emit_event(_event(state, "execution.finished", result_status=result.get("status"), reason_code=result.get("reason_code", "")))
         return updates
 
-    def evaluate_runtime(state: AgentOSState):
-        return {}
+    def evaluate_runtime(state: AgentOSState): return {}
+
+    def _complete_current(state: AgentOSState):
+        completed = list(state.get("completed_branches", [])); current = str(state.get("current_agent") or "").lower()
+        if current and current not in completed: completed.append(current)
+        return completed, current
 
     def join_next(state: AgentOSState):
-        pending = list(state.get("pending_branches", [])); completed = list(state.get("completed_branches", [])); current = str(state.get("current_agent") or "").lower()
-        if current and current not in completed: completed.append(current)
+        pending = list(state.get("pending_branches", [])); completed, current = _complete_current(state)
         if not pending: return {"completed_branches": completed}
         next_agent = pending.pop(0)
         active_ports.emit_event(_event(state, "fanout.branch_joined", completed_agent=current, next_agent=next_agent))
         return {"completed_branches": completed, "pending_branches": pending, "current_agent": next_agent, "current_stage": "IMPLEMENTATION", "status": "executing", "reason_code": "", "attempt": 0}
+
+    def finalize_branch(state: AgentOSState):
+        completed, current = _complete_current(state)
+        active_ports.emit_event(_event(state, "fanout.join_complete", completed_agent=current, completed_branches=completed))
+        return {"completed_branches": completed}
 
     def tessa_evaluate(state: AgentOSState):
         qa_state = {**state, "current_agent": "tessa", "current_stage": "QA"}
@@ -107,11 +110,10 @@ def build_graph(checkpointer=None, ports: AgentOSPorts | None = None):
         if result.get("reason_code"): updates["reason_code"] = str(result["reason_code"])
         elif qa_status == "fail": updates["reason_code"] = "QA_FAILED"
         else: updates["reason_code"] = ""
-        if qa_status == "fail" and classify_reason(updates["reason_code"]) == "quality":
-            updates.update({"failed_agent": "selah", "failed_stage": "IMPLEMENTATION", "recovery_owner": "selah"})
+        if qa_status == "fail" and classify_reason(updates["reason_code"]) == "quality": updates.update({"failed_agent": "selah", "failed_stage": "IMPLEMENTATION", "recovery_owner": "selah"})
         return updates
 
     graph = StateGraph(AgentOSState)
-    graph.add_node("execute", execute, retry_policy=RetryPolicy(max_attempts=3)); graph.add_node("evaluate_runtime", evaluate_runtime); graph.add_node("classify_failure", classify_failure); graph.add_node("recover", recover); graph.add_node("join_next", join_next); graph.add_node("tessa_evaluate", tessa_evaluate); graph.add_node("refine", refine); graph.add_node("refinement_exhausted", refinement_exhausted); graph.add_node("accept", accept); graph.add_node("human_gate", human_gate)
-    graph.add_conditional_edges(START, route_entry); graph.add_edge("execute", "evaluate_runtime"); graph.add_conditional_edges("evaluate_runtime", route_runtime); graph.add_conditional_edges("classify_failure", route_failure); graph.add_edge("recover", "execute"); graph.add_edge("join_next", "execute"); graph.add_conditional_edges("tessa_evaluate", route_qa); graph.add_edge("refine", "execute"); graph.add_edge("refinement_exhausted", END); graph.add_edge("accept", END); graph.add_edge("human_gate", "execute")
+    graph.add_node("execute", execute, retry_policy=RetryPolicy(max_attempts=3)); graph.add_node("evaluate_runtime", evaluate_runtime); graph.add_node("classify_failure", classify_failure); graph.add_node("recover", recover); graph.add_node("join_next", join_next); graph.add_node("finalize_branch", finalize_branch); graph.add_node("tessa_evaluate", tessa_evaluate); graph.add_node("refine", refine); graph.add_node("refinement_exhausted", refinement_exhausted); graph.add_node("accept", accept); graph.add_node("human_gate", human_gate)
+    graph.add_conditional_edges(START, route_entry); graph.add_edge("execute", "evaluate_runtime"); graph.add_conditional_edges("evaluate_runtime", route_runtime); graph.add_conditional_edges("classify_failure", route_failure); graph.add_edge("recover", "execute"); graph.add_edge("join_next", "execute"); graph.add_edge("finalize_branch", "tessa_evaluate"); graph.add_conditional_edges("tessa_evaluate", route_qa); graph.add_edge("refine", "execute"); graph.add_edge("refinement_exhausted", END); graph.add_edge("accept", END); graph.add_edge("human_gate", "execute")
     return graph.compile(checkpointer=checkpointer or build_checkpointer())
