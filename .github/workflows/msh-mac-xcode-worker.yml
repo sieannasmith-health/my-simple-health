@@ -60,7 +60,8 @@ jobs:
         run: |
           set -euo pipefail
           test -d "$GITHUB_WORKSPACE"
-          test -f "$GITHUB_WORKSPACE/.xcodebuildmcp/config.yaml"
+          test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthApp"
+          test -d "$GITHUB_WORKSPACE/ios/MySimpleHealthHealthKit"
           echo "workspace=$GITHUB_WORKSPACE"
 
       - name: Record optional Xcode IDE bridge status
