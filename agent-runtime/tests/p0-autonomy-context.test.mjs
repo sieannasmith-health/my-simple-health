@@ -51,9 +51,31 @@ assert.equal(partial.complete, false);
 assert.equal(partial.received, 2);
 assert.ok(partial.missing.includes('sage'));
 
+const falseCompleteInputs = plan.targets.map((agent, index) => ({
+  agent,
+  status: index === 0 ? 'failed' : index === 1 ? 'pending' : 'completed'
+}));
+const notComplete = joinEveryoneResults(plan, falseCompleteInputs);
+assert.equal(notComplete.complete, false);
+assert.equal(notComplete.received, 14);
+assert.ok(notComplete.missing.includes(plan.targets[0]));
+assert.ok(notComplete.missing.includes(plan.targets[1]));
+assert.ok(notComplete.unresolved.includes(plan.targets[0]));
+assert.ok(notComplete.unresolved.includes(plan.targets[1]));
+assert.ok(!notComplete.results.some(result => ['failed', 'pending'].includes(result.status)));
+
+const recovered = joinEveryoneResults(plan, [
+  ...falseCompleteInputs,
+  { agent: plan.targets[0], status: 'success' },
+  { agent: plan.targets[1], status: 'passed' }
+]);
+assert.equal(recovered.complete, true);
+assert.equal(recovered.received, 16);
+assert.equal(recovered.missing.length, 0);
+
 const complete = joinEveryoneResults(plan, plan.targets.map(agent => ({ agent, status: 'completed' })));
 assert.equal(complete.complete, true);
 assert.equal(complete.received, 16);
 assert.equal(complete.missing.length, 0);
 
-console.log('PASS: P0 runtime hydration rejects stale context and Everyone fan-out/join is bounded and deterministic.');
+console.log('PASS: P0 runtime hydration rejects stale context and Everyone fan-out/join only completes for successful worker results.');

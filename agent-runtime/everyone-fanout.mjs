@@ -4,6 +4,11 @@ function normalizeAgent(value) {
   return String(value || '').trim().toLowerCase();
 }
 
+function isCompletedResult(result) {
+  const status = String(result?.status || '').trim().toLowerCase();
+  return status === 'completed' || status === 'success' || status === 'passed' || status === 'pass';
+}
+
 export function planEveryoneFanout({ agents = {}, coordinator = 'nomy', requestedAgents = null, maxFanout = DEFAULT_MAX_FANOUT } = {}) {
   const coordinatorKey = normalizeAgent(coordinator);
   const available = Object.keys(agents).map(normalizeAgent).filter(Boolean);
@@ -24,22 +29,34 @@ export function planEveryoneFanout({ agents = {}, coordinator = 'nomy', requeste
 }
 
 export function joinEveryoneResults(plan, results = []) {
-  const byAgent = new Map();
+  const completedByAgent = new Map();
+  const unresolvedByAgent = new Map();
+
   for (const result of results) {
     const key = normalizeAgent(result?.agent);
-    if (!key || !plan.targets.includes(key) || byAgent.has(key)) continue;
-    byAgent.set(key, result);
+    if (!key || !plan.targets.includes(key)) continue;
+
+    if (isCompletedResult(result)) {
+      if (!completedByAgent.has(key)) completedByAgent.set(key, result);
+      unresolvedByAgent.delete(key);
+      continue;
+    }
+
+    if (!completedByAgent.has(key) && !unresolvedByAgent.has(key)) unresolvedByAgent.set(key, result);
   }
 
-  const completed = plan.targets.filter(key => byAgent.has(key));
-  const missing = plan.targets.filter(key => !byAgent.has(key));
+  const completed = plan.targets.filter(key => completedByAgent.has(key));
+  const missing = plan.targets.filter(key => !completedByAgent.has(key));
+  const unresolved = missing.filter(key => unresolvedByAgent.has(key));
+
   return {
     coordinator: plan.coordinator,
     expected: plan.expected,
     received: completed.length,
-    complete: missing.length === 0,
+    complete: plan.expected > 0 && missing.length === 0,
     completed,
     missing,
-    results: completed.map(key => byAgent.get(key))
+    unresolved,
+    results: completed.map(key => completedByAgent.get(key))
   };
 }
