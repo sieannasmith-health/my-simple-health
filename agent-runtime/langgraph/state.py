@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Literal, NotRequired, TypedDict
+import operator
+from typing import Annotated, Any, Literal, NotRequired, TypedDict
 
 FailureClass = Literal[
     "none",
@@ -11,6 +12,7 @@ FailureClass = Literal[
     "human_input",
     "terminal",
 ]
+
 
 class AgentOSState(TypedDict):
     objective_id: str
@@ -30,7 +32,10 @@ class AgentOSState(TypedDict):
     resume_from: NotRequired[str]
     completed_branches: list[str]
     pending_branches: list[str]
+    branch_results: Annotated[list[dict[str, Any]], operator.add]
     qa_status: Literal["not_run", "pass", "fail"]
     qa_feedback: NotRequired[str]
     human_gate: NotRequired[dict]
     evidence_version: int
+    runtime_result: NotRequired[dict[str, Any]]
+    audit_events: Annotated[list[dict[str, Any]], operator.add]
