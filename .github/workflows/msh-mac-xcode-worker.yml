@@ -25,7 +25,6 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, msh-xcode]
     timeout-minutes: 30
     env:
-      MSH_WORKSPACE: /Users/sieannasmith/Documents/my-simple-health
       PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
     steps:
@@ -39,6 +38,7 @@ jobs:
           echo "runner_name=${RUNNER_NAME}"
           echo "runner_os=${RUNNER_OS}"
           echo "runner_arch=${RUNNER_ARCH}"
+          echo "workspace=${GITHUB_WORKSPACE}"
           uname -a
 
       - name: Verify Xcode
@@ -55,17 +55,16 @@ jobs:
           command -v xcodebuildmcp
           xcodebuildmcp --version
 
-      - name: Verify configured MSH workspace
+      - name: Verify checked-out MSH workspace
         shell: bash
         run: |
           set -euo pipefail
-          test -d "$MSH_WORKSPACE"
-          test -f "$MSH_WORKSPACE/.xcodebuildmcp/config.yaml"
-          echo "workspace=$MSH_WORKSPACE"
+          test -d "$GITHUB_WORKSPACE"
+          test -f "$GITHUB_WORKSPACE/.xcodebuildmcp/config.yaml"
+          echo "workspace=$GITHUB_WORKSPACE"
 
       - name: Record optional Xcode IDE bridge status
         continue-on-error: true
-        working-directory: /Users/sieannasmith/Documents/my-simple-health
         shell: bash
         run: |
           set -euo pipefail
@@ -180,6 +179,7 @@ jobs:
             echo "- OS: $RUNNER_OS"
             echo "- Architecture: $RUNNER_ARCH"
             echo "- Commit: $GITHUB_SHA"
+            echo "- Workspace: $GITHUB_WORKSPACE"
             echo "- Xcode: available"
             echo "- XcodeBuildMCP: available"
             echo "- IDE bridge: diagnostic only; not required for native test execution"
