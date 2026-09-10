@@ -3,10 +3,10 @@ from __future__ import annotations
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import RetryPolicy, interrupt
 
-from .adapters import classify_reason, recovery_owner_for, worker_result_to_updates
-from .checkpoint import build_checkpointer
-from .ports import AgentOSPorts, fail_closed_ports
-from .state import AgentOSState
+from adapters import classify_reason, recovery_owner_for, worker_result_to_updates
+from checkpoint import build_checkpointer
+from ports import AgentOSPorts, fail_closed_ports
+from state import AgentOSState
 
 
 def _event(state: AgentOSState, event_type: str, **payload):
