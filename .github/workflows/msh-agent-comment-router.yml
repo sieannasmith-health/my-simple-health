@@ -41,17 +41,10 @@ jobs:
           match = re.match(r'^\s*([A-Za-z]+)\s*:\s*', first_line)
           addressed = match.group(1).lower() if match else ''
 
-          aliases = {
-              'nomy': ('nomy', 'Nomy'),
-              'selah': ('selah', 'Selah'),
-              'tessa': ('tessa', 'Tessa'),
-              'mira': ('mira', 'Mira'),
-              'ellis': ('ellis', 'Ellis'),
-              'iris': ('iris', 'Iris'),
-              'reese': ('reese', 'Reese'),
-              'genesis': ('genesis', 'Genesis'),
-              'everyone': ('nomy', 'Nomy'),
-          }
+          names = ['nomy','selah','sage','clara','mira','eden','vera','aiden','ellis','genesis','newton','harper','june','atlas','reese','iris','tessa']
+          aliases = {name: (name, name.title()) for name in names}
+          # Everyone is an orchestration request. Nomy owns bounded fan-out and join semantics.
+          aliases['everyone'] = ('nomy', 'Nomy')
 
           agent, display = aliases.get(addressed, ('', ''))
           print(f'agent={agent}')
