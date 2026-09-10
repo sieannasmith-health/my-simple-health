@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from collections import defaultdict, deque
 from dataclasses import dataclass
@@ -96,6 +97,11 @@ class ScriptedPorts:
         )
 
 
+def _issue_number(state: AgentOSState) -> int | None:
+    match = re.fullmatch(r"github-issue-(\d+)", str(state.get("objective_id") or ""))
+    return int(match.group(1)) if match else None
+
+
 class JsonSubprocessExecutionPort:
     """Bounded real-executor seam using one JSON request/response.
 
@@ -118,6 +124,7 @@ class JsonSubprocessExecutionPort:
 
     def __call__(self, state: AgentOSState) -> dict[str, Any]:
         payload = {
+            "issue_number": _issue_number(state),
             "objective_id": state["objective_id"],
             "correlation_id": state["correlation_id"],
             "agent": state["current_agent"],
