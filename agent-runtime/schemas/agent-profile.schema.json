@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mysimplehealth.org/schemas/agent-profile.schema.json",
+  "title": "MSH Agent Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "role", "capability", "communication_profile"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+    "name": {"type": "string", "minLength": 1},
+    "role": {"type": "string", "minLength": 1},
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expertise", "authority", "tools", "responsibilities", "execution_policy", "routing"],
+      "properties": {
+        "expertise": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["can", "cannot"],
+          "properties": {
+            "can": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+            "cannot": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+          }
+        },
+        "tools": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "responsibilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "execution_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["may_execute", "requires_human_gate_for"],
+          "properties": {
+            "may_execute": {"type": "boolean"},
+            "requires_human_gate_for": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+          }
+        },
+        "routing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed_next_agents"],
+          "properties": {
+            "allowed_next_agents": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"}, "uniqueItems": true}
+          }
+        }
+      }
+    },
+    "communication_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presence", "voice", "temperament", "rhythm", "flow", "depth", "structure", "energy", "expression"],
+      "properties": {
+        "presence": {"type": "string", "enum": ["reserved", "grounded", "warm", "companionable"]},
+        "voice": {"type": "string", "enum": ["plain", "professional", "conversational", "expert_peer"]},
+        "temperament": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = clinical, 5 = gentle"},
+        "rhythm": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = polished/uniform, 5 = natural/varied"},
+        "flow": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = dense/blocky, 5 = light/conversational"},
+        "depth": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = quick answer, 5 = detailed explanation"},
+        "structure": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = conversational, 5 = highly organized"},
+        "energy": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = calm, 5 = animated"},
+        "expression": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 = reserved, 5 = expressive"},
+        "preferences": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "use_contractions": {"type": "boolean"},
+            "default_to_bullets": {"type": "boolean"},
+            "allow_sentence_fragments": {"type": "boolean"},
+            "emoji_level": {"type": "integer", "minimum": 0, "maximum": 3},
+            "avoid_phrases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "voice_references": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 10}
+          }
+        }
+      }
+    }
+  }
+}
