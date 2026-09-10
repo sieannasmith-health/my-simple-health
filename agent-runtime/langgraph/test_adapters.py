@@ -1,4 +1,4 @@
-from .adapters import classify_reason, legacy_state_to_agent_os, worker_result_to_updates
+from adapters import classify_reason, legacy_state_to_agent_os, worker_result_to_updates
 
 
 def test_orchestration_blocked_becomes_recovery_required():
@@ -31,3 +31,4 @@ def test_reason_classification():
     assert classify_reason("TIMEOUT") == "transient"
     assert classify_reason("QA_FAILED") == "quality"
     assert classify_reason("CREDENTIAL_REQUIRED") == "human_input"
+    assert classify_reason("LEGACY_ORCHESTRATION_BLOCKED_WITHOUT_RECOVERY_CHECKPOINT") == "dependency"
