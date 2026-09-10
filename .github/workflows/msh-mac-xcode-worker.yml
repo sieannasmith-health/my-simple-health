@@ -15,10 +15,13 @@ on:
     paths:
       - 'ios/**'
       - '.github/workflows/msh-mac-xcode-worker.yml'
+      - '.github/workflows/msh-testflight-distribution.yml'
   push:
     branches: [main]
     paths:
       - 'ios/**'
+      - '.github/workflows/msh-mac-xcode-worker.yml'
+      - '.github/workflows/msh-testflight-distribution.yml'
 
 permissions:
   contents: read
