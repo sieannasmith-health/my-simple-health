@@ -59,6 +59,11 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then issue="$DISPATCH_ISSUE"; else issue="$EVENT_ISSUE"; fi
           test -n "$issue"
           echo "number=$issue" >> "$GITHUB_OUTPUT"
+      - name: Recover legacy blocked state when actionable
+        env:
+          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
+          MSH_INLINE_EVALUATOR: '1'
+        run: node agent-runtime/recovery-redrive-bootstrap.mjs
       - name: Evaluate durable task state
         env:
           ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
