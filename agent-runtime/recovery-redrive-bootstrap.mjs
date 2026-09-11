@@ -98,6 +98,7 @@ async function main() {
   const issueNumber = Number(process.env.ISSUE_NUMBER || 0);
   const evaluatorWorkflow = process.env.AGENT_EVALUATOR_WORKFLOW || 'msh-agent-state-evaluator.yml';
   const evaluatorRef = process.env.AGENT_EVALUATOR_REF || 'main';
+  const inlineEvaluator = process.env.MSH_INLINE_EVALUATOR === '1';
   if (!token || !repository || !issueNumber) throw new Error('Missing GITHUB_TOKEN, GITHUB_REPOSITORY, or ISSUE_NUMBER.');
 
   const [owner, repo] = repository.split('/');
@@ -125,10 +126,12 @@ async function main() {
   const body = (fresh.body || '').replace(pattern, renderStateBlock(nextState));
   await request(apiBase, token, `/issues/${issueNumber}`, { method: 'PATCH', body: JSON.stringify({ body }) });
 
-  await request(apiBase, token, `/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, {
-    method: 'POST',
-    body: JSON.stringify({ ref: evaluatorRef, inputs: { issue_number: String(issueNumber) } })
-  });
+  if (!inlineEvaluator) {
+    await request(apiBase, token, `/actions/workflows/${encodeURIComponent(evaluatorWorkflow)}/dispatches`, {
+      method: 'POST',
+      body: JSON.stringify({ ref: evaluatorRef, inputs: { issue_number: String(issueNumber) } })
+    });
+  }
 
   console.log(`[AUTONOMY] Legacy ORCHESTRATION_BLOCKED state on issue #${issueNumber} recovered and redriven to ${nextState.assigned_agent} / ${nextState.current_stage}.`);
 }
