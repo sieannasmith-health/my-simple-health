@@ -24,6 +24,8 @@ assert.equal(below.human_gate, null);
 assert.equal(below.recovery.resume_agent, 'selah');
 assert.equal(below.recovery.resume_stage, 'IMPLEMENTATION');
 
+assert.equal(deriveLegacyRecovery({ ...base, redrive_count: 0, max_redrives: 0 }, now), null);
+assert.equal(bootstrapLegacyBlockedState({ ...base, redrive_count: 0, max_redrives: 0 }, now), null);
 assert.equal(deriveLegacyRecovery({ ...base, redrive_count: 2 }, now), null);
 assert.equal(bootstrapLegacyBlockedState({ ...base, redrive_count: 2 }, now), null);
 assert.equal(deriveLegacyRecovery({ ...base, redrive_count: 3 }, now), null);
