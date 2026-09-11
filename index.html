@@ -1,136 +1,88 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="My Simple Health brings health information, priorities, routines, decisions, and resources into one understandable system organized around you.">
-  <title>My Simple Health | Your health, organized around you.</title>
-  <link rel="stylesheet" href="css/msh-public-home-v2.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="My Simple Health brings your health information together so you can see what matters and take real steps toward the life you want.">
+<title>My Simple Health | A clearer, healthier you.</title>
+<link rel="stylesheet" href="css/msh-public-home-v3.css">
 </head>
-<body class="msh-home-v2">
-<a class="msh-skip" href="#main">Skip to main content</a>
-<header class="msh-nav">
-  <div class="msh-nav__inner">
-    <a class="msh-brand" href="index.html">My Simple Health</a>
-    <nav aria-label="Primary navigation">
-      <a href="#how-it-works">How it works</a>
-      <a href="#for-your-health">For your health</a>
-      <a href="#trust">Trust</a>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="site-nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">My Simple Health</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a class="active" href="#journey">Explore</a>
       <a href="about.html">About</a>
-      <a class="msh-signin" href="my-health.html">Sign in</a>
+      <a href="resources.html">Resources</a>
     </nav>
-    <a class="msh-pill" href="my-health.html">Get started</a>
+    <div class="nav-actions">
+      <a class="signin" href="my-health.html">Sign In</a>
+      <a class="nav-cta" href="my-health.html">Explore My Health →</a>
+    </div>
   </div>
 </header>
 <main id="main">
-  <section class="msh-section msh-hero" aria-labelledby="hero-title">
-    <div class="msh-shell msh-hero__grid">
-      <div class="msh-hero__copy msh-reveal">
-        <p class="msh-kicker">HEALTH, CENTERED ON THE PERSON</p>
-        <h1 class="msh-title" id="hero-title">Your health,<br>organized around you.</h1>
-        <p class="msh-lede">Bring your health information, priorities, routines, decisions, and resources into one understandable system built around you.</p>
-        <div class="msh-hero__actions">
-          <a class="msh-pill" href="my-health.html">Start with what matters</a>
-          <a class="msh-text-link" href="#how-it-works">See how it works →</a>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">ONE CONNECTED JOURNEY</p>
+        <h1 id="hero-title">A clearer,<br>healthier you.</h1>
+        <p>Bring your health information together, see what matters, and take real steps toward the life you want.</p>
+        <a class="primary-cta" href="#journey">Explore the Journey →</a>
+      </div>
+      <div class="hero-visual" aria-label="Health information coming together around one person">
+        <div class="float-card small one"><b>□</b>Appointments</div>
+        <div class="float-card small two"><b>▤</b>Lab Results</div>
+        <div class="float-card small three"><b>◊</b>Medications</div>
+        <div class="float-card small four"><b>☾</b>Sleep</div>
+        <div class="float-card small five"><b>⌁</b>Activity</div>
+        <div class="float-card small six"><b>◉</b>Nutrition</div>
+        <div class="ribbons" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="health-panel">
+          <h3>↗ A more complete picture</h3>
+          <ul>
+            <li>Health Records</li><li>Activity &amp; Sleep</li><li>Medications</li><li>Nutrition</li><li>Mental Wellbeing</li><li>Care Team</li><li>Life &amp; Environment</li>
+          </ul>
         </div>
-        <p class="msh-hero__note">Start with what matters today. Add more only when it becomes useful.</p>
-      </div>
-      <aside class="msh-proof msh-reveal" aria-label="Example of a useful health insight">
-        <p class="msh-proof__eyebrow">TODAY</p>
-        <h2>One thing is worth<br>your attention.</h2>
-        <div class="msh-proof__signal"><span>MEDICATION</span><strong>Your out-of-pocket cost<br>changed this month.</strong></div>
-        <p class="msh-proof__body">Understand what changed, compare options, or talk it through with Simple.</p>
-        <div class="msh-proof__actions"><a href="#simple">Ask Simple</a><a href="#economize">Compare options</a></div>
-        <p class="msh-proof__source">From your permitted health context · See source</p>
-      </aside>
-    </div>
-  </section>
-
-  <section class="msh-section msh-problem" id="how-it-works" aria-labelledby="problem-title">
-    <div class="msh-shell msh-reveal">
-      <p class="msh-kicker">THE PROBLEM</p>
-      <h2 class="msh-h2" id="problem-title">Health is fragmented. People are not.</h2>
-      <p class="msh-lede">Records, routines, questions, care, and costs often live in separate systems. MSH brings those pieces into one coherent health context around the person who actually has to live with them.</p>
-      <div class="msh-fragments" aria-label="Fragmented health information becoming one health context">
-        <div class="msh-chip">Records</div><div class="msh-chip">Routines</div><div class="msh-chip">Questions</div><div class="msh-chip">Care</div><div class="msh-chip">Costs</div><div class="msh-fragments__arrow" aria-hidden="true">→</div><div class="msh-unified"><span>YOU</span><strong>One health context</strong></div>
+        <div class="scribble left">From<br>scattered...</div>
+        <div class="scribble right">Your health.<br>In context.</div>
       </div>
     </div>
   </section>
 
-  <section class="msh-section msh-kinetic" data-kinetic aria-labelledby="kinetic-title">
-    <div class="msh-shell">
-      <div class="msh-reveal"><p class="msh-kicker">HEALTH, CENTERED ON THE PERSON</p><h2 class="msh-h2" id="kinetic-title">The system can be complex underneath. Your experience should not be.</h2><p class="msh-lede">MSH connects the pieces that matter, then presents only the context that is useful in the moment.</p></div>
-      <div class="msh-kinetic__stage" aria-label="Health information converging around one personal health context">
-        <div class="msh-orbit">Health records</div><div class="msh-orbit">Daily patterns</div><div class="msh-orbit">Priorities</div><div class="msh-orbit">Questions</div><div class="msh-orbit">Care</div><div class="msh-orbit">Costs</div><div class="msh-orbit">Reflections</div>
-        <div class="msh-core"><span>YOU</span><strong>One personal<br>health context</strong><small>Organized around what matters now.</small></div>
-      </div>
-      <div class="msh-motion-note"><b>KINETIC INFORMATION</b><span>As this section enters view, scattered inputs converge toward the personal health context. The motion communicates relationship and organization; reduced-motion users see the complete grouping without animation.</span></div>
+  <section class="journey" id="journey" aria-label="One connected health journey">
+    <div class="journey-grid">
+      <article class="journey-step landscape">
+        <div class="step-top"><span class="step-num">01</span><span class="step-name">LANDSCAPE</span></div>
+        <div class="visual-bubble" aria-hidden="true"><span class="orb big"></span><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span><span class="orb d"></span></div>
+        <h2>See where you are.</h2><p class="sub">BRING THE PIECES TOGETHER</p><a class="step-link" href="my-health.html">Explore Landscape</a>
+      </article>
+      <article class="journey-step horizon">
+        <div class="step-top"><span class="step-num">02</span><span class="step-name">HORIZON</span></div>
+        <div class="visual-bubble" aria-hidden="true"><span class="orb big"></span></div>
+        <h2>See where you<br>want to go.</h2><p class="sub">CLARIFY WHAT MATTERS</p><a class="step-link" href="my-health.html">Explore Horizon</a>
+      </article>
+      <article class="journey-step path">
+        <div class="step-top"><span class="step-num">03</span><span class="step-name">PATH</span></div>
+        <div class="visual-bubble" aria-hidden="true"><span class="orb big"></span></div>
+        <h2>Choose what<br>matters now.</h2><p class="sub">TURN INSIGHTS INTO DIRECTION</p><a class="step-link" href="my-health.html">Explore Path</a>
+      </article>
+      <article class="journey-step practice">
+        <div class="step-top"><span class="step-num">04</span><span class="step-name">PRACTICE</span></div>
+        <div class="visual-bubble" aria-hidden="true"><span class="orb big"></span></div>
+        <h2>Try something<br>in real life.</h2><p class="sub">SMALL STEPS. REAL PROGRESS.</p><a class="step-link" href="my-health.html">Explore Practice</a>
+      </article>
+      <article class="journey-step discovery">
+        <div class="step-top"><span class="step-num">05</span><span class="step-name">DISCOVERY</span></div>
+        <div class="visual-bubble" aria-hidden="true"><span class="orb big"></span></div>
+        <h2>Notice what<br>happened.</h2><p class="sub">LEARN, ADJUST, AND KEEP GOING</p><a class="step-link" href="my-health.html">Explore Discovery</a>
+      </article>
     </div>
+    <div class="progress-rail" aria-label="Journey progress"><div class="rail-item">Landscape</div><div class="rail-item">Horizon</div><div class="rail-item">Path</div><div class="rail-item">Practice</div><div class="rail-item">Discovery</div></div>
+    <p class="closing-note">A healthier<br>tomorrow, together.</p>
   </section>
-
-  <section class="msh-section msh-journey" aria-labelledby="journey-title">
-    <div class="msh-shell">
-      <div class="msh-reveal"><p class="msh-kicker">YOUR HEALTH JOURNEY</p><h2 class="msh-h2" id="journey-title">MSH follows the way health decisions actually unfold.</h2><p class="msh-lede">You do not need to learn a maze of features. The system reveals the right depth as you move from understanding to action, reflection, and adaptation.</p></div>
-      <div class="msh-journey__grid">
-        <article class="msh-step"><span class="msh-step__n">01</span><h3>My Health</h3><b>UNDERSTAND</b><p>What is happening?</p></article>
-        <article class="msh-step"><span class="msh-step__n">02</span><h3>Landscape</h3><b>ORIENT</b><p>Where am I now?</p></article>
-        <article class="msh-step"><span class="msh-step__n">03</span><h3>Focus</h3><b>PRIORITIZE</b><p>What matters most?</p></article>
-        <article class="msh-step"><span class="msh-step__n">04</span><h3>Current Vision</h3><b>ENVISION</b><p>Where do I want to go?</p></article>
-        <article class="msh-step"><span class="msh-step__n">05</span><h3>Project</h3><b>ACT</b><p>What am I working toward?</p></article>
-        <article class="msh-step"><span class="msh-step__n">06</span><h3>Practice</h3><b>TRY</b><p>What can I do now?</p></article>
-        <article class="msh-step"><span class="msh-step__n">07</span><h3>Reflection</h3><b>LEARN</b><p>What happened?</p></article>
-        <article class="msh-step"><span class="msh-step__n">08</span><h3>Progress</h3><b>ADAPT</b><p>What is changing over time?</p></article>
-      </div>
-    </div>
-  </section>
-
-  <section class="msh-section msh-simple" id="simple" aria-labelledby="simple-title">
-    <div class="msh-shell msh-simple__grid">
-      <div class="msh-reveal"><p class="msh-kicker">SIMPLE</p><h2 class="msh-h2" id="simple-title">Ask without starting from zero.</h2><p class="msh-lede">Simple begins with the smallest answer that meaningfully moves you forward, then deepens when your question, uncertainty, risk, or interest calls for it.</p><p class="msh-copy"><strong>The intelligence is in the usefulness—not the performance of being AI.</strong></p></div>
-      <div class="msh-simple__panel msh-reveal"><div class="msh-simple__you">YOU</div><p class="msh-simple__question">Why did this medication suddenly cost more?</p><div class="msh-simple__answer"><strong>A few things can change what you pay.</strong><p>Your pharmacy price, insurance coverage, dose, or available discounts may have changed. I can compare the pieces you permit MSH to use—or we can talk it through without using your health data.</p></div><div class="msh-simple__choices"><span>Use my permitted context</span><span>Just talk it through</span></div><p class="msh-simple__policy">Simple only uses eligible context you have permitted for that purpose.</p></div>
-    </div>
-  </section>
-
-  <section class="msh-section msh-landscape" id="for-your-health" aria-labelledby="landscape-title">
-    <div class="msh-shell">
-      <div class="msh-reveal"><p class="msh-kicker">MY HEALTH</p><h2 class="msh-h2" id="landscape-title">See your health as a living picture—not a dashboard.</h2><p class="msh-lede">What is known, what has your attention, what you are trying, what you are learning, and how things are changing can live in one understandable place.</p></div>
-      <div class="msh-landscape__field msh-reveal"><p class="msh-kicker">LANDSCAPE</p><h3>Your health, in context.</h3><div class="msh-landscape__cards"><div class="msh-landscape__card"><strong>Sleep</strong><span>Changing</span></div><div class="msh-landscape__card"><strong>Movement</strong><span>Steady</span></div><div class="msh-landscape__card"><strong>Medication cost</strong><span>Needs attention</span></div><div class="msh-landscape__card"><strong>Stress</strong><span>Worth noticing</span></div><div class="msh-landscape__card"><strong>Care</strong><span>Up to date</span></div></div></div>
-    </div>
-  </section>
-
-  <section class="msh-section msh-flow" aria-labelledby="flow-title">
-    <div class="msh-shell">
-      <div class="msh-reveal"><p class="msh-kicker">FOCUS → CURRENT VISION</p><h2 class="msh-h2" id="flow-title">What matters now can become a direction.</h2><p class="msh-lede">Landscape helps you notice. Focus helps you choose what deserves attention. Current Vision gives that attention a meaningful direction—without turning every signal into a goal.</p></div>
-      <div class="msh-flow__row"><div class="msh-flow__card"><span>LANDSCAPE</span><strong>Medication cost needs attention.</strong><p>A signal is not automatically a goal.</p></div><div class="msh-flow__arrow">→</div><div class="msh-flow__card"><span>FOCUS</span><strong>I want to understand why this changed.</strong><p>Attention becomes intentional.</p></div><div class="msh-flow__arrow">→</div><div class="msh-flow__card"><span>CURRENT VISION</span><strong>I want medication costs to feel predictable.</strong><p>A direction—not an assignment.</p></div></div>
-    </div>
-  </section>
-
-  <section class="msh-section msh-actions" aria-labelledby="actions-title">
-    <div class="msh-shell">
-      <div class="msh-reveal"><p class="msh-kicker">MEANINGFUL ACTION</p><h2 class="msh-h2" id="actions-title">Turn direction into something small enough to try.</h2><p class="msh-lede">MSH helps the member move from intention to action without turning life into a task manager.</p></div>
-      <div class="msh-actions__grid"><article class="msh-actions__card"><span>PROJECT</span><strong>Understand what changed in my prescription cost.</strong><p>A bounded piece of meaningful work—not a backlog.</p></article><article class="msh-actions__card"><span>PRACTICE</span><strong>Compare my usual pharmacy with one alternative.</strong><p>A small action I can realistically repeat or test.</p></article><article class="msh-actions__card"><span>REFLECTION</span><strong>Was the lower-cost option actually workable for me?</strong><p>A moment to notice fit, friction, and what I learned.</p></article></div>
-    </div>
-  </section>
-
-  <section class="msh-section msh-progress" aria-labelledby="progress-title">
-    <div class="msh-shell"><div class="msh-reveal"><p class="msh-kicker">PROGRESS OVER TIME</p><h2 class="msh-h2" id="progress-title">Progress is something you discover, not something MSH awards.</h2><p class="msh-lede">The signal is what changed, what was learned, and what becomes easier or more sustainable next.</p></div><div class="msh-progress__grid"><div class="msh-progress__story"><p class="msh-kicker">WHAT CHANGED</p><div class="msh-timeline"><div class="msh-timeline__item">Compared two options</div><div class="msh-timeline__item">Changed pharmacies</div><div class="msh-timeline__item">Reflected after 30 days</div><div class="msh-timeline__item">Learned the lower price was sustainable</div></div></div><div class="msh-progress__rhythm"><p class="msh-kicker">RHYTHM, NOT STREAKS</p><div class="dots" aria-label="Five of seven opportunities completed">● ● ○ ● ○ ● ●</div><p>You made space for this 5 times this week. Rest, change, and missed days are valid states too.</p><strong>No punishment. No reset-to-zero.</strong></div></div></div>
-  </section>
-
-  <section class="msh-section msh-feature-duo" aria-labelledby="social-title">
-    <div class="msh-shell"><div class="msh-reveal"><p class="msh-kicker">SOCIAL WELLBEING</p><h2 class="msh-h2" id="social-title">Belonging should feel supportive—not performative.</h2><p class="msh-lede">MSH should help someone judge whether a place, event, or community feels right for them using signals like values, purpose, setting, accessibility, social comfort, and expected experience.</p></div><div class="msh-duo"><div class="msh-duo__card"><p class="msh-kicker">WOULD THIS FEEL LIKE A GOOD FIT?</p><h3>Neighborhood walking group</h3><div class="msh-tags"><div class="msh-tag">Small group</div><div class="msh-tag">Outdoors</div><div class="msh-tag">Beginner-friendly</div><div class="msh-tag">Quiet pace</div><div class="msh-tag">Wheelchair-accessible route</div></div></div><div class="msh-duo__card"><p class="msh-kicker">THE QUESTION MSH SHOULD HELP ANSWER</p><h3>“Would this environment support me?”</h3><p class="msh-copy">The product should surface fit and context—not social proof designed to pressure participation.</p></div></div></div>
-  </section>
-
-  <section class="msh-section msh-economize" id="economize" aria-labelledby="economize-title">
-    <div class="msh-shell"><div class="msh-reveal"><p class="msh-kicker">ECONOMIZE</p><h2 class="msh-h2" id="economize-title">Make health costs easier to understand—and easier to act on.</h2><p class="msh-lede">Economize should feel like decision support, not shopping.</p></div><div class="msh-economize__steps"><div class="msh-economize__step"><span>01</span><b>FIND</b><strong>See relevant options</strong></div><div class="msh-economize__step"><span>02</span><b>COMPARE</b><strong>Understand differences</strong></div><div class="msh-economize__step"><span>03</span><b>UNDERSTAND</b><strong>Know the tradeoffs</strong></div><div class="msh-economize__step"><span>04</span><b>USE</b><strong>Take the next step</strong></div><div class="msh-economize__step"><span>05</span><b>TRACK</b><strong>See realized savings</strong></div></div><div class="msh-example"><div><b>EXAMPLE</b><p>Your medication cost changed. Compare two nearby options, understand the difference, then decide what is workable for you.</p></div><small>No sale badges. No sponsored ranking. No countdowns.</small></div></div>
-  </section>
-
-  <section class="msh-section msh-trust" id="trust" aria-labelledby="trust-title">
-    <div class="msh-shell"><div class="msh-reveal"><p class="msh-kicker">TRUST, BUILT INTO THE SYSTEM</p><h2 class="msh-h2" id="trust-title">You should be able to understand what MSH knows—and why.</h2><p class="msh-lede">Privacy, provenance, evidence, permissions, and accessibility should be inspectable parts of the product—not generic reassurance at the bottom of a page.</p></div><div class="msh-trust__grid"><div class="msh-trust__card"><span>SOURCE</span><strong>Where did this come from?</strong><p>Apple Health · clinical record · member entry · derived context</p></div><div class="msh-trust__card"><span>USE</span><strong>Why is MSH using it?</strong><p>Purpose-limited context with explicit permission boundaries</p></div><div class="msh-trust__card"><span>EVIDENCE</span><strong>What supports this?</strong><p>Source, method, recency, applicability, and uncertainty</p></div><div class="msh-trust__card"><span>ACCESS</span><strong>Can I understand and use this?</strong><p>Semantic structure, keyboard access, readable visualizations, reduced motion</p></div></div><div class="msh-provenance"><b>PROVENANCE TRACE</b><strong>Source → normalized health context → permitted use → member-visible explanation</strong><p>The member should be able to inspect this path wherever a consequential health claim, summary, or recommendation appears.</p></div></div>
-  </section>
-
-  <section class="msh-section msh-invite" aria-labelledby="invite-title"><div class="msh-shell msh-invite__row"><div class="msh-invite__copy"><p class="msh-kicker">BEGIN WITH WHAT MATTERS NOW</p><h2 class="msh-h2" id="invite-title">Your health has finally been organized around you.</h2><p class="msh-lede">You do not have to understand every part of MSH before you begin. Start with the question, priority, or change that matters most right now.</p></div><div class="msh-invite__actions"><a class="msh-pill" href="my-health.html">Get started</a><a class="msh-pill msh-pill--light" href="#how-it-works">See how it works</a></div></div></section>
 </main>
-<footer class="msh-footer"><div class="msh-shell msh-footer__row"><strong>My Simple Health</strong><nav aria-label="Footer navigation"><a href="about.html">About</a><a href="resources.html">Resources</a><a href="privacy.html">Privacy</a><a href="support.html">Support</a></nav></div></footer>
-<script src="js/msh-public-home-v2.js" defer></script>
 </body>
 </html>
