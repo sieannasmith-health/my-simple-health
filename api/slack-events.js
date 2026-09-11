@@ -105,6 +105,9 @@ function developmentStore() {
       if (devEventIds.has(key)) return false;
       devEventIds.add(key);
       return true;
+    },
+    async release(key) {
+      devEventIds.delete(key);
     }
   };
 }
@@ -112,19 +115,29 @@ function developmentStore() {
 function httpIdempotencyStore(env) {
   const url = env.MSH_SLACK_IDEMPOTENCY_STORE_URL;
   if (!url) return null;
+  const headers = {
+    'content-type': 'application/json',
+    ...(env.MSH_SLACK_IDEMPOTENCY_STORE_TOKEN ? { authorization: `Bearer ${env.MSH_SLACK_IDEMPOTENCY_STORE_TOKEN}` } : {})
+  };
   return {
     async claim(key) {
       const response = await withTimeout(fetch(url, {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...(env.MSH_SLACK_IDEMPOTENCY_STORE_TOKEN ? { authorization: `Bearer ${env.MSH_SLACK_IDEMPOTENCY_STORE_TOKEN}` } : {})
-        },
-        body: JSON.stringify({ key, ttl_seconds: 600 })
+        headers,
+        body: JSON.stringify({ action: 'claim', key, ttl_seconds: 600 })
       }), 5_000, 'idempotency');
       if (!response.ok) throw Object.assign(new Error(`idempotency_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
       const data = await response.json();
       return Boolean(data.claimed);
+    },
+    async release(key) {
+      const response = await withTimeout(fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: 'release', key })
+      }), 5_000, 'idempotency_release');
+      if (!response.ok) throw Object.assign(new Error(`idempotency_release_http_${response.status}`), { transient: true });
+      return true;
     }
   };
 }
@@ -139,6 +152,11 @@ function defaultStore(env) {
 async function claim(store, key) {
   if (!store || typeof store.claim !== 'function') throw new Error('durable idempotency store unavailable');
   return store.claim(key);
+}
+
+async function release(store, key) {
+  if (!store || typeof store.release !== 'function') throw new Error('durable idempotency release unavailable');
+  return store.release(key);
 }
 
 async function governedRuntime(input, env) {
@@ -226,6 +244,14 @@ export async function handlePayload(payload, options = {}) {
     return { status: 200, body: { accepted: true, agent: address.agent.name }, audit };
   } catch (error) {
     const retryable = Boolean(error?.transient || transient.test(error?.message || ''));
+    if (retryable) {
+      try { await release(store, data.id); }
+      catch {
+        const audit = auditRecord(data, 'runtime_failure', address.agent.name, 'retry_release_failed');
+        emitAudit(audit);
+        return { status: 503, body: { error: 'idempotency_release_failed', retryable: false }, audit };
+      }
+    }
     const audit = auditRecord(data, 'runtime_failure', address.agent.name, retryable ? 'transient_failure' : 'permanent_failure');
     emitAudit(audit);
     return { status: retryable ? 202 : 502, body: { error: 'runtime_failure', retryable }, audit };
