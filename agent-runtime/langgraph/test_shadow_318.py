@@ -37,5 +37,9 @@ def test_issue_318_blocked_snapshot_recovers_without_false_siea_gate():
     assert state["redrive_count"] == 1
     assert state["completed_branches"] == ["nomy", "selah"]
     event_types = [event["event_type"] for event in result["events"]]
-    assert "fanout.branch_joined" in event_types
+    assert "fanout.dispatched" in event_types
+    assert "fanout.branch_started" in event_types
+    assert "fanout.branch_finished" in event_types
+    assert "fanout.join_complete" in event_types
+    assert "fanout.branch_joined" not in event_types
     assert event_types.count("qa.finished") == 1
