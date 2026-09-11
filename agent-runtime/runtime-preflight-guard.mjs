@@ -1,4 +1,5 @@
 import { hasLivelock } from './livelock-policy.mjs';
+import { isFreshAddressedHumanComment } from './comment-trigger-policy.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -97,9 +98,14 @@ async function stopLivelock(issue, state) {
 
 const issue = await request(`/issues/${issueNumber}`);
 const state = parseState(issue.body || '');
+const freshAddressedHumanComment = isFreshAddressedHumanComment();
 
 if (state && hasLivelock(state, BLOCKED_TURN_LIMIT)) {
-  await stopLivelock(issue, state);
-  console.log(`[AUTONOMY] Livelock circuit breaker stopped issue #${issueNumber} before another worker turn.`);
-  process.exit(0);
+  if (freshAddressedHumanComment) {
+    console.log(`[AUTONOMY] Fresh addressed human comment bypassed historical livelock state on issue #${issueNumber}.`);
+  } else {
+    await stopLivelock(issue, state);
+    console.log(`[AUTONOMY] Livelock circuit breaker stopped issue #${issueNumber} before another worker turn.`);
+    process.exit(0);
+  }
 }
