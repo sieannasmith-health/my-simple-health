@@ -143,40 +143,19 @@ async function claim(store, key) {
 
 async function governedRuntime(input, env) {
   const url = env.MSH_GOVERNED_RUNTIME_URL;
-  if (url) {
-    const response = await withTimeout(fetch(url, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(env.MSH_GOVERNED_RUNTIME_TOKEN ? { authorization: `Bearer ${env.MSH_GOVERNED_RUNTIME_TOKEN}` } : {})
-      },
-      body: JSON.stringify(input)
-    }), MAX_RUNTIME_MS, 'runtime');
-    if (!response.ok) throw Object.assign(new Error(`runtime_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
-    const body = await response.json();
-    return String(body.response || body.text || body.message || '').trim();
-  }
+  if (!url) throw Object.assign(new Error('governed_runtime_not_configured'), { transient: false });
 
-  if (!env.OPENAI_API_KEY) throw Object.assign(new Error('governed_runtime_not_configured'), { transient: false });
-  const response = await withTimeout(fetch(env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions', {
+  const response = await withTimeout(fetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${env.OPENAI_API_KEY}` },
-    body: JSON.stringify({
-      model: env.OPENAI_MODEL || 'gpt-5.6-luna',
-      temperature: 0.2,
-      max_tokens: 900,
-      messages: [
-        {
-          role: 'system',
-          content: `You are ${input.agent}, the My Simple Health agent whose canonical role is ${input.role}. Mission: ${input.mission || 'Operate within your assigned MSH domain.'} Answer the authorized Slack request directly and concisely. Slack is a conversational transport only. Do not mutate GitHub, deploy, approve, change permissions, bypass human gates, request secrets, or handle PHI/private member health data from this path. When durable work is required, explain that it must be routed through the governed MSH Agent OS.`
-        },
-        { role: 'user', content: input.prompt }
-      ]
-    })
-  }), MAX_RUNTIME_MS, 'model');
-  if (!response.ok) throw Object.assign(new Error(`model_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
+    headers: {
+      'content-type': 'application/json',
+      ...(env.MSH_GOVERNED_RUNTIME_TOKEN ? { authorization: `Bearer ${env.MSH_GOVERNED_RUNTIME_TOKEN}` } : {})
+    },
+    body: JSON.stringify(input)
+  }), MAX_RUNTIME_MS, 'runtime');
+  if (!response.ok) throw Object.assign(new Error(`runtime_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
   const body = await response.json();
-  return String(body.choices?.[0]?.message?.content || '').trim();
+  return String(body.response || body.text || body.message || '').trim();
 }
 
 async function postSlackReply({ channel, thread, text, env }) {
