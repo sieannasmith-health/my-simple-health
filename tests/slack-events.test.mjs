@@ -11,7 +11,10 @@ const realEvent = (text = 'Iris: summarize the research plan', user = 'U_SIEA') 
 });
 const memoryStore = () => {
   const seen = new Set();
-  return { async claim(key) { if (seen.has(key)) return false; seen.add(key); return true; } };
+  return {
+    async claim(key) { if (seen.has(key)) return false; seen.add(key); return true; },
+    async release(key) { seen.delete(key); return true; }
+  };
 };
 
 const quiet = async (fn) => {
@@ -128,4 +131,26 @@ test('classifies transient runtime failure as retryable without leaking body int
   assert.equal(result.status, 202);
   assert.equal(result.body.retryable, true);
   assert.equal(JSON.stringify(result.audit).includes(secretText), false);
+});
+
+test('transient failure releases claim so same Slack event can retry', async () => {
+  const item = realEvent();
+  const store = memoryStore();
+  let calls = 0;
+  const first = await quiet(() => handlePayload(item, {
+    env,
+    idempotency: store,
+    runtime: async () => { calls++; throw Object.assign(new Error('temporary network failure'), { transient: true }); },
+    publisher: async () => {}
+  }));
+  const second = await quiet(() => handlePayload(item, {
+    env,
+    idempotency: store,
+    runtime: async () => { calls++; return 'recovered'; },
+    publisher: async () => {}
+  }));
+  assert.equal(first.status, 202);
+  assert.equal(second.status, 200);
+  assert.equal(second.body.accepted, true);
+  assert.equal(calls, 2);
 });
