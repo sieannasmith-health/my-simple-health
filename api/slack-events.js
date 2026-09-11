@@ -31,6 +31,8 @@ function eventData(payload) {
     user: event.user_id || event.user,
     channel: event.channel_id || event.channel,
     ts: event.thread_ts || event.ts,
+    messageTs: event.ts,
+    threadTs: event.thread_ts || null,
     text: event.text,
     type: event.type,
     subtype: event.subtype,
@@ -97,6 +99,30 @@ function auditRecord(data, result, agent, reason = null) {
 
 function emitAudit(record) {
   console.info(JSON.stringify({ type: 'msh_slack_bridge_audit', ...record }));
+}
+
+async function slackThreadRoot({ channel, thread, env = process.env }) {
+  const token = String(env.SLACK_BOT_TOKEN || '');
+  if (!token) throw Object.assign(new Error('slack_bot_token_not_configured'), { transient: false });
+  const params = new URLSearchParams({ channel, ts: thread, limit: '1', inclusive: 'true' });
+  const response = await withTimeout(fetch(`https://slack.com/api/conversations.replies?${params.toString()}`, {
+    headers: { authorization: `Bearer ${token}` }
+  }), MAX_SLACK_MS, 'slack_thread');
+  if (!response.ok) throw Object.assign(new Error(`slack_thread_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
+  const body = await response.json();
+  if (!body?.ok) throw Object.assign(new Error(`slack_thread_api_${body?.error || 'unknown'}`), { transient: body?.error === 'ratelimited' });
+  return body.messages?.[0] || null;
+}
+
+export async function resolveAddress(data, options = {}) {
+  const direct = parseAddress(data.text);
+  if (direct.ok || direct.reason !== 'missing_address' || !data.threadTs) return direct;
+
+  const reader = options.threadReader || ((input) => slackThreadRoot({ ...input, env: options.env || process.env }));
+  const root = await reader({ channel: data.channel, thread: data.threadTs });
+  const inherited = parseAddress(root?.text);
+  if (!inherited.ok) return direct;
+  return { ...inherited, prompt: String(data.text || '').trim(), inherited: true };
 }
 
 function developmentStore() {
@@ -208,7 +234,16 @@ export async function handlePayload(payload, options = {}) {
     return { status: 403, body: { denied: true, reason: auth.reason }, audit };
   }
 
-  const address = parseAddress(data.text);
+  let address;
+  try {
+    address = await resolveAddress(data, { env, threadReader: options.threadReader });
+  } catch (error) {
+    const retryable = Boolean(error?.transient || transient.test(error?.message || ''));
+    const audit = auditRecord(data, 'failed', null, 'thread_context_unavailable');
+    emitAudit(audit);
+    return { status: retryable ? 503 : 200, body: { error: 'thread_context_unavailable', retryable }, audit };
+  }
+
   const deniedReason = !address.ok ? address.reason : restricted.test(address.prompt) ? 'restricted_content' : mutation.test(address.prompt) ? 'durable_mutation_denied' : null;
   if (deniedReason) {
     const audit = auditRecord(data, 'denied', address.agent?.name, deniedReason);
@@ -243,6 +278,7 @@ export async function handlePayload(payload, options = {}) {
       prompt: address.prompt,
       channel: data.channel,
       thread: data.ts,
+      thread_continuation: Boolean(address.inherited),
       governed: true,
       source: 'slack'
     });
