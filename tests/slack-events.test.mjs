@@ -10,10 +10,19 @@ const realEvent = (text = 'Iris: summarize the research plan', user = 'U_SIEA') 
   event: { type: 'message', user, channel: 'C0C0T9F3LUF', ts: '123.456', text }
 });
 const memoryStore = () => {
-  const seen = new Set();
+  const claims = new Map();
   return {
-    async claim(key) { if (seen.has(key)) return false; seen.add(key); return true; },
-    async release(key) { seen.delete(key); return true; }
+    async claim(key) {
+      if (claims.has(key)) return { claimed: false, claimToken: null };
+      const claimToken = crypto.randomUUID();
+      claims.set(key, claimToken);
+      return { claimed: true, claimToken };
+    },
+    async release(key, claimToken) {
+      if (claims.get(key) !== claimToken) return false;
+      claims.delete(key);
+      return true;
+    }
   };
 };
 
@@ -115,12 +124,12 @@ test('default production runtime fails closed when governed runtime is not confi
     idempotency: memoryStore(),
     publisher: async () => {}
   }));
-  assert.equal(result.status, 502);
+  assert.equal(result.status, 200);
   assert.equal(result.body.error, 'runtime_failure');
   assert.equal(result.body.retryable, false);
 });
 
-test('classifies transient runtime failure as retryable without leaking body into audit', async () => {
+test('transient runtime failure returns non-2xx for Slack retry without leaking body into audit', async () => {
   const secretText = 'ordinary non-sensitive request';
   const result = await quiet(() => handlePayload(realEvent(`Iris: ${secretText}`), {
     env,
@@ -128,12 +137,12 @@ test('classifies transient runtime failure as retryable without leaking body int
     runtime: async () => { throw Object.assign(new Error('network unavailable'), { transient: true }); },
     publisher: async () => {}
   }));
-  assert.equal(result.status, 202);
+  assert.equal(result.status, 503);
   assert.equal(result.body.retryable, true);
   assert.equal(JSON.stringify(result.audit).includes(secretText), false);
 });
 
-test('transient failure releases claim so same Slack event can retry', async () => {
+test('transient failure releases owned claim so same Slack event can retry', async () => {
   const item = realEvent();
   const store = memoryStore();
   let calls = 0;
@@ -149,8 +158,43 @@ test('transient failure releases claim so same Slack event can retry', async () 
     runtime: async () => { calls++; return 'recovered'; },
     publisher: async () => {}
   }));
-  assert.equal(first.status, 202);
+  assert.equal(first.status, 503);
   assert.equal(second.status, 200);
   assert.equal(second.body.accepted, true);
   assert.equal(calls, 2);
+});
+
+test('stale owner cannot release a newer claim', async () => {
+  const item = realEvent();
+  let currentToken = 'token-b';
+  const store = {
+    async claim() { return { claimed: true, claimToken: 'token-a' }; },
+    async release(_key, claimToken) { return claimToken === currentToken; }
+  };
+  const result = await quiet(() => handlePayload(item, {
+    env,
+    idempotency: store,
+    runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); },
+    publisher: async () => {}
+  }));
+  assert.equal(result.status, 200);
+  assert.equal(result.body.error, 'stale_claim_owner');
+  assert.equal(currentToken, 'token-b');
+});
+
+test('release outage fails closed and does not assume retry is safe', async () => {
+  const item = realEvent();
+  const store = {
+    async claim() { return { claimed: true, claimToken: 'token-a' }; },
+    async release() { throw new Error('redis unavailable'); }
+  };
+  const result = await quiet(() => handlePayload(item, {
+    env,
+    idempotency: store,
+    runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); },
+    publisher: async () => {}
+  }));
+  assert.equal(result.status, 503);
+  assert.equal(result.body.error, 'idempotency_release_uncertain');
+  assert.equal(result.body.retryable, false);
 });
