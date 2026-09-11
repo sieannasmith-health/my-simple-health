@@ -1,42 +1,128 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
+import {
+  createOrchestrationFetchGuard,
+  shouldSuppressWorkerWrite
+} from '../langgraph-worker-bridge.mjs';
 
-const bridge = await fs.readFile(new URL('../langgraph-worker-bridge.mjs', import.meta.url), 'utf8');
+const baseEnv = {
+  GITHUB_REPOSITORY: 'sieannasmith-health/my-simple-health',
+  ISSUE_NUMBER: '12'
+};
 
-assert.match(
-  bridge,
-  /MSH_ORCHESTRATION_OWNER:\s*'langgraph'/,
-  'LangGraph bridge must mark child worker execution as LangGraph-owned.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12',
+    method: 'PATCH',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  true,
+  'LangGraph-owned worker must suppress current issue mutation.'
 );
 
-assert.match(
-  bridge,
-  /process\.env\.MSH_ORCHESTRATION_OWNER === 'langgraph'/,
-  'Worker write suppression must be conditioned on explicit LangGraph ownership.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12/comments',
+    method: 'POST',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  true,
+  'LangGraph-owned worker must suppress current issue comment publication.'
 );
 
-assert.match(
-  bridge,
-  /url\.startsWith\(issuePrefix\) && isWrite/,
-  'LangGraph-owned worker must suppress GitHub issue orchestration writes.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12/labels/agent%3Aselah',
+    method: 'DELETE',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  true,
+  'LangGraph-owned worker must suppress current issue label mutation.'
 );
 
-assert.match(
-  bridge,
-  /url === repositoryLabels && isWrite/,
-  'LangGraph-owned worker must suppress repository label mutation used by orchestration.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/123',
+    method: 'PATCH',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  false,
+  'Issue 12 authority guard must not collide with issue 123.'
 );
 
-assert.match(
-  bridge,
-  /return realFetch\(input, init\)/,
-  'Non-orchestration calls must continue through the real fetch implementation.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12',
+    method: 'PATCH',
+    env: baseEnv
+  }),
+  false,
+  'Ordinary Node runtime writes must pass through when LangGraph ownership is absent.'
 );
 
-assert.doesNotMatch(
-  bridge,
-  /url\.startsWith\([^\n]*\/pulls[^\n]*\) && isWrite/,
-  'Bounded implementation PR creation must not be suppressed by the LangGraph authority guard.'
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.github.com/repos/sieannasmith-health/my-simple-health/pulls',
+    method: 'POST',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  false,
+  'Bounded implementation PR creation must remain allowed under LangGraph ownership.'
 );
 
-console.log('Single-orchestrator regression contract passed.');
+assert.equal(
+  shouldSuppressWorkerWrite({
+    url: 'https://api.openai.com/v1/responses',
+    method: 'POST',
+    env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' }
+  }),
+  false,
+  'Bounded specialist model execution must remain allowed under LangGraph ownership.'
+);
+
+const calls = [];
+const logs = [];
+const fakeResponse = new Response('{"ok":true}', { status: 201, headers: { 'content-type': 'application/json' } });
+const fakeFetch = async (input, init = {}) => {
+  calls.push({ input, init });
+  return fakeResponse;
+};
+
+const guarded = createOrchestrationFetchGuard({
+  realFetch: fakeFetch,
+  env: { ...baseEnv, MSH_ORCHESTRATION_OWNER: 'langgraph' },
+  writeLog: message => logs.push(message)
+});
+
+const suppressed = await guarded(
+  'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12/comments',
+  { method: 'POST', body: '{"body":"duplicate orchestration"}' }
+);
+assert.equal(suppressed.status, 200);
+assert.equal(calls.length, 0, 'Suppressed orchestration writes must not reach real fetch.');
+assert.equal(logs.length, 1, 'Suppressed orchestration writes must emit one authority diagnostic.');
+
+const prResponse = await guarded(
+  'https://api.github.com/repos/sieannasmith-health/my-simple-health/pulls',
+  { method: 'POST', body: '{"head":"agent/test"}' }
+);
+assert.equal(prResponse, fakeResponse);
+assert.equal(calls.length, 1, 'PR creation must pass through to real fetch.');
+
+const ordinaryCalls = [];
+const ordinaryGuard = createOrchestrationFetchGuard({
+  realFetch: async (input, init = {}) => {
+    ordinaryCalls.push({ input, init });
+    return fakeResponse;
+  },
+  env: baseEnv,
+  writeLog: () => {
+    throw new Error('Ordinary Node path must not log suppression.');
+  }
+});
+await ordinaryGuard(
+  'https://api.github.com/repos/sieannasmith-health/my-simple-health/issues/12',
+  { method: 'PATCH', body: '{"state":"open"}' }
+);
+assert.equal(ordinaryCalls.length, 1, 'Ordinary Node issue writes must pass through unchanged.');
+
+console.log('Single-orchestrator behavioral regression passed.');
