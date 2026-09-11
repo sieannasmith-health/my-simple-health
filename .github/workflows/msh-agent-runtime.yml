@@ -28,6 +28,10 @@ jobs:
       AGENT_MODEL: ${{ vars.MSH_AGENT_MODEL || 'gpt-5.6-luna' }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       GITHUB_TOKEN: ${{ github.token }}
+      MSH_AGENT_RUNTIME_ENGINE: ${{ vars.MSH_AGENT_RUNTIME_ENGINE || 'node' }}
+      LANGGRAPH_CHECKPOINTER: ${{ vars.MSH_LANGGRAPH_CHECKPOINTER || 'memory' }}
+      LANGGRAPH_POSTGRES_URI: ${{ secrets.LANGGRAPH_POSTGRES_URI }}
+      PYTHONPATH: agent-runtime/langgraph
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -61,8 +65,39 @@ jobs:
       - name: Confirm Node runtime
         run: node --version
 
-      - name: Run MSH specialist agent
+      - name: Set up Python for LangGraph
+        if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install LangGraph runtime dependencies
+        if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
+        run: pip install -r agent-runtime/langgraph/requirements.txt
+
+      - name: Validate LangGraph production persistence
+        if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
+        shell: bash
+        run: |
+          if [ "$LANGGRAPH_CHECKPOINTER" != "postgres" ]; then
+            echo "LangGraph cutover is fail-closed: MSH_LANGGRAPH_CHECKPOINTER must be postgres." >&2
+            exit 1
+          fi
+          if [ -z "$LANGGRAPH_POSTGRES_URI" ]; then
+            echo "LangGraph cutover is fail-closed: LANGGRAPH_POSTGRES_URI is required." >&2
+            exit 1
+          fi
+
+      - name: Run legacy MSH specialist runtime
+        if: env.MSH_AGENT_RUNTIME_ENGINE != 'langgraph'
         env:
           ISSUE_NUMBER: ${{ steps.route.outputs.issue }}
           AGENT_NAME: ${{ steps.route.outputs.agent }}
         run: node agent-runtime/run-v2.mjs
+
+      - name: Run LangGraph MSH specialist runtime
+        if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
+        env:
+          ISSUE_NUMBER: ${{ steps.route.outputs.issue }}
+          AGENT_NAME: ${{ steps.route.outputs.agent }}
+        run: python agent-runtime/langgraph/runtime.py
