@@ -20,8 +20,8 @@ export function decideActionableWork(state, now = Date.now(), maxRedrivesDefault
   }
 
   if (state.status === 'ORCHESTRATION_BLOCKED' && !state.human_gate) {
-    const redriveCount = Number(state.redrive_count || 0);
-    const maxRedrives = Number(state.max_redrives || maxRedrivesDefault);
+    const redriveCount = Number(state.redrive_count ?? 0);
+    const maxRedrives = Number(state.max_redrives ?? maxRedrivesDefault);
     if (redriveCount >= maxRedrives) return { action: 'none', reason: 'redrive_budget_exhausted' };
 
     const recovery = state.recovery;
