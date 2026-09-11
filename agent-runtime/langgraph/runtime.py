@@ -7,7 +7,7 @@ import sys
 import urllib.request
 
 from adapters import legacy_state_to_agent_os
-from checkpoint import build_checkpointer
+from checkpoint import checkpointer_scope
 from controller import build_graph
 from ports import AgentOSPorts, JsonSubprocessExecutionPort
 
@@ -72,9 +72,10 @@ def main() -> int:
         env=os.environ,
     )
     ports = AgentOSPorts(execute_agent=worker, evaluate_qa=_qa_adapter(worker), emit_event=_emit_event)
-    graph = build_graph(checkpointer=build_checkpointer(), ports=ports)
     config = {"configurable": {"thread_id": state["correlation_id"]}}
-    result = graph.invoke(state, config=config)
+    with checkpointer_scope() as checkpointer:
+        graph = build_graph(checkpointer=checkpointer, ports=ports)
+        result = graph.invoke(state, config=config)
     sys.stdout.write(json.dumps(result, sort_keys=True) + "\n")
     return 0
 
