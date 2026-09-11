@@ -20,13 +20,14 @@ export function decideActionableWork(state, now = Date.now(), maxRedrivesDefault
   }
 
   if (state.status === 'ORCHESTRATION_BLOCKED' && !state.human_gate) {
+    const redriveCount = Number(state.redrive_count || 0);
+    const maxRedrives = Number(state.max_redrives || maxRedrivesDefault);
+    if (redriveCount >= maxRedrives) return { action: 'none', reason: 'redrive_budget_exhausted' };
+
     const recovery = state.recovery;
     if (!recovery?.resume_agent || !recovery?.resume_stage) {
       return { action: 'bootstrap_recovery', reason: 'blocked_without_recovery_checkpoint' };
     }
-    const redriveCount = Number(state.redrive_count || 0);
-    const maxRedrives = Number(state.max_redrives || maxRedrivesDefault);
-    if (redriveCount >= maxRedrives) return { action: 'none', reason: 'redrive_budget_exhausted' };
     const notBefore = recovery.not_before ? Date.parse(recovery.not_before) : 0;
     if (Number.isFinite(notBefore) && notBefore > now) return { action: 'wait', reason: 'bounded_redrive_cooldown' };
     return { action: 'redrive', reason: 'recovery_checkpoint_is_actionable' };
