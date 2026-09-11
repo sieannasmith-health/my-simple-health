@@ -66,3 +66,22 @@ def test_tessa_failure_routes_back_to_selah_then_retests():
     assert result["qa_feedback"] == "Repair verified"
     qa_finished = [event for event in scripted.events if event["event_type"] == "qa.finished"]
     assert [event["qa_status"] for event in qa_finished] == ["fail", "pass"]
+
+
+def test_tessa_refinement_stops_at_redrive_budget():
+    state = base_state()
+    state["max_redrives"] = 1
+    scripted = ScriptedPorts(
+        execution_results={"selah": [{"status": "completed"}, {"status": "completed"}]},
+        qa_results=[
+            {"qa_status": "fail", "qa_feedback": "First failure", "reason_code": "QA_FAILED"},
+            {"qa_status": "fail", "qa_feedback": "Still failing", "reason_code": "QA_FAILED"},
+        ],
+    )
+    graph = build_graph(checkpointer=InMemorySaver(), ports=scripted.as_ports())
+    result = invoke(graph, state)
+    assert result["status"] == "blocked"
+    assert result["reason_code"] == "MAX_REDRIVE_EXCEEDED"
+    assert result["failure_class"] == "terminal"
+    assert result["recovery_owner"] == "nomy"
+    assert result["redrive_count"] == 1
