@@ -50,6 +50,8 @@ jobs:
         run: node agent-runtime/tests/evidence-resolver.test.mjs
       - name: Verify routing guard regressions
         run: node agent-runtime/tests/routing-guards.test.mjs
+      - name: Verify Nomy ready-for-product terminal routing
+        run: node agent-runtime/tests/nomy-ready-terminal.test.mjs
       - name: Verify orchestration authority policy
         run: node agent-runtime/tests/orchestration-policy.test.mjs
       - name: Verify lifecycle exit boundary
