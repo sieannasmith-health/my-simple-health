@@ -50,6 +50,14 @@ function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
 }
 
+export function isFreshAddressedHumanComment(env = process.env) {
+  const triggerCommentId = Number(env.TRIGGER_COMMENT_ID || 0);
+  const commentBody = String(env.COMMENT_BODY || '');
+  if (!triggerCommentId || !commentBody) return false;
+  const firstLine = commentBody.splitlines?.()[0] ?? commentBody.split(/\r?\n/, 1)[0];
+  return /^\s*[A-Za-z]+\s*:\s*/.test(String(firstLine || ''));
+}
+
 async function stopLivelock(issue, state) {
   const now = new Date().toISOString();
   const history = Array.isArray(state.history) ? state.history : [];
@@ -97,9 +105,14 @@ async function stopLivelock(issue, state) {
 
 const issue = await request(`/issues/${issueNumber}`);
 const state = parseState(issue.body || '');
+const freshAddressedHumanComment = isFreshAddressedHumanComment();
 
 if (state && hasLivelock(state, BLOCKED_TURN_LIMIT)) {
-  await stopLivelock(issue, state);
-  console.log(`[AUTONOMY] Livelock circuit breaker stopped issue #${issueNumber} before another worker turn.`);
-  process.exit(0);
+  if (freshAddressedHumanComment) {
+    console.log(`[AUTONOMY] Fresh addressed human comment bypassed historical livelock state on issue #${issueNumber}.`);
+  } else {
+    await stopLivelock(issue, state);
+    console.log(`[AUTONOMY] Livelock circuit breaker stopped issue #${issueNumber} before another worker turn.`);
+    process.exit(0);
+  }
 }
