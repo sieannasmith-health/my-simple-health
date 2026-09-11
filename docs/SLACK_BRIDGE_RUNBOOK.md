@@ -1,29 +1,24 @@
-# Governed Slack bridge runbook
+# Governed Slack bridge
 
-## Deployment
+Callback endpoint: `POST https://<MSH Vercel deployment>/api/slack-events`.
 
-Deploy the repository to the existing Vercel project. The callback endpoint is:
+Required secret configuration:
 
-`https://<MSH_VERCEL_DOMAIN>/api/slack-events`
-
-Configure these Vercel production/preview secrets and variables without placing values in GitHub comments or source:
-
-- `SLACK_SIGNING_SECRET`
-- `SLACK_BOT_TOKEN`
+- `MSH_SLACK_SIGNING_SECRET`
+- `MSH_SLACK_BOT_TOKEN`
 - `MSH_SLACK_TEAM_ID`
-- `MSH_SLACK_ALLOWED_USERS` (initially Siea and Brandon Slack user IDs)
-- `MSH_SLACK_ALLOWED_CHANNELS` (initially `C0C0T9F3LUF`)
-- `MSH_GOVERNED_RUNTIME_URL` and `MSH_GOVERNED_RUNTIME_TOKEN` when the governed runtime endpoint is available
-- Otherwise `OPENAI_API_KEY` and optional `OPENAI_MODEL`/`OPENAI_API_URL`
+- `MSH_SLACK_ALLOWED_CHANNELS`
+- `MSH_SLACK_ALLOWED_USERS`
+- `MSH_SLACK_IDEMPOTENCY_URL`
+- `MSH_SLACK_IDEMPOTENCY_TOKEN`
+- `MSH_GOVERNED_RUNTIME_URL` (preferred) or `MSH_OPENAI_API_KEY` and optional `MSH_OPENAI_MODEL`
 
-In Slack app configuration, enable Events API and set the Request URL to the endpoint above. Subscribe to message events for the collaboration channel. The app must have permission to post messages in that channel.
+The idempotency service must accept `POST {key, ttl_seconds, operation:"claim"}` and return `409` for an already-claimed key. Production ingress fails closed when this durable store is not configured. The store must retain keys for at least 24 hours.
 
-## Operating contract
+Slack URL verification is handled by the same endpoint. Slack signatures must be verified against the raw request body and a five-minute timestamp window. Only the configured workspace, channel, and human IDs can invoke the bridge. `Everyone:` routes only to Nomy. Unknown agents, sensitive/PHI-like content, and durable-state mutation requests are rejected.
 
-Use `AgentName: request`, for example `Iris: summarize the research plan`. `Everyone:` routes only to Nomy. Unknown agents, unapproved users/channels, restricted health content, and requests to mutate GitHub/product state are denied. Slack is transport only; GitHub and LangGraph remain durable authority.
+Responses are posted by the single Slack service identity into the originating thread and visibly identify the canonical agent and role. Audit records contain correlation, identity, channel, purpose, timestamp, result, and reason only. Message bodies and tokens are never logged.
 
-## Failure and rollback
+The governed runtime remains the authority for agent execution. Slack is transport only and cannot merge, deploy, alter GitHub state, bypass human gates, or create durable orchestration state. Disable ingress by removing the Vercel route or Slack event subscription. Agent OS execution is unaffected.
 
-A 401 indicates signature or timestamp rejection. A 403 indicates workspace/channel/user denial. A 503 indicates a transient runtime or Slack failure and is retryable. Disable the Slack Events subscription or remove the Vercel deployment environment variables to stop ingress. This does not affect Agent OS execution.
-
-Audit records contain correlation IDs and routing metadata, never message bodies, credentials, or restricted content. The in-memory duplicate window is intentionally bounded to the serverless instance lifetime; a durable idempotency store should be added only through a separately governed infrastructure decision.
+For account-owner setup, configure the Slack Request URL above and the secret values through the approved deployment secret manager. Do not place credentials in GitHub issues, comments, source, or tests.
