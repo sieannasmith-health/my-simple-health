@@ -16,10 +16,12 @@ export function validateClaimInput(input) {
   const key = String(input?.key || '').trim();
   const action = String(input?.action || 'claim').trim().toLowerCase();
   const ttl = Number(input?.ttl_seconds ?? 600);
+  const claimToken = String(input?.claim_token || '').trim();
   if (!key || key.length > 256) return { ok: false, status: 400, error: 'invalid_key' };
   if (!['claim', 'release'].includes(action)) return { ok: false, status: 400, error: 'invalid_action' };
   if (action === 'claim' && (!Number.isInteger(ttl) || ttl < 60 || ttl > 3600)) return { ok: false, status: 400, error: 'invalid_ttl' };
-  return { ok: true, key, action, ttl: action === 'claim' ? ttl : null };
+  if (action === 'release' && (!claimToken || claimToken.length > 256)) return { ok: false, status: 400, error: 'invalid_claim_token' };
+  return { ok: true, key, action, ttl: action === 'claim' ? ttl : null, claimToken: action === 'release' ? claimToken : null };
 }
 
 function redisKeyFor(key) {
@@ -48,24 +50,27 @@ async function redisRequest(command, env = process.env, fetchImpl = fetch) {
 }
 
 export async function claimWithRedis({ key, ttl }, env = process.env, fetchImpl = fetch) {
-  const result = await redisRequest(['SET', redisKeyFor(key), '1', 'NX', 'EX', ttl], env, fetchImpl);
-  return result === 'OK';
+  const claimToken = crypto.randomBytes(32).toString('hex');
+  const result = await redisRequest(['SET', redisKeyFor(key), claimToken, 'NX', 'EX', ttl], env, fetchImpl);
+  return result === 'OK' ? claimToken : null;
 }
 
-export async function releaseWithRedis({ key }, env = process.env, fetchImpl = fetch) {
-  await redisRequest(['DEL', redisKeyFor(key)], env, fetchImpl);
-  return true;
+export async function releaseWithRedis({ key, claimToken }, env = process.env, fetchImpl = fetch) {
+  if (!claimToken) throw Object.assign(new Error('claim_token_required'), { status: 400 });
+  const script = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
+  const result = await redisRequest(['EVAL', script, 1, redisKeyFor(key), claimToken], env, fetchImpl);
+  return Number(result) === 1;
 }
 
 export async function processIdempotency(input, env = process.env, fetchImpl = fetch) {
   const validated = validateClaimInput(input);
   if (!validated.ok) return validated;
   if (validated.action === 'release') {
-    await releaseWithRedis(validated, env, fetchImpl);
-    return { ok: true, released: true };
+    const released = await releaseWithRedis(validated, env, fetchImpl);
+    return { ok: true, released };
   }
-  const claimed = await claimWithRedis(validated, env, fetchImpl);
-  return { ok: true, claimed };
+  const claimToken = await claimWithRedis(validated, env, fetchImpl);
+  return { ok: true, claimed: Boolean(claimToken), claim_token: claimToken || null };
 }
 
 export default async function handler(req, res) {
@@ -80,11 +85,11 @@ export default async function handler(req, res) {
 
   try {
     if (validated.action === 'release') {
-      await releaseWithRedis(validated, process.env);
-      return res.status(200).json({ released: true });
+      const released = await releaseWithRedis(validated, process.env);
+      return res.status(200).json({ released });
     }
-    const claimed = await claimWithRedis(validated, process.env);
-    return res.status(200).json({ claimed });
+    const claimToken = await claimWithRedis(validated, process.env);
+    return res.status(200).json({ claimed: Boolean(claimToken), claim_token: claimToken || null });
   } catch (error) {
     console.error(JSON.stringify({ event: 'slack_idempotency_failure', error: String(error?.message || error) }));
     return res.status(Number(error?.status) || 503).json({ error: 'idempotency_unavailable' });
