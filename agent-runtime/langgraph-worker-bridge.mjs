@@ -37,7 +37,8 @@ function runWorker(payload) {
       env: {
         ...process.env,
         ISSUE_NUMBER: String(issueNumber),
-        AGENT_NAME: agent
+        AGENT_NAME: agent,
+        MSH_ORCHESTRATION_OWNER: 'langgraph'
       },
       stdio: ['ignore', 'pipe', 'pipe']
     });
