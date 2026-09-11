@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   null-pr-evidence-recovery:
@@ -82,3 +83,9 @@ jobs:
         run: pip install -r agent-runtime/langgraph/requirements.txt pytest
       - name: Verify LangGraph adapter and controller conformance
         run: python -m pytest -q agent-runtime/langgraph
+      - name: Verify live #318 shadow conformance
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SHADOW_ISSUE_NUMBER: '318'
+        run: python agent-runtime/langgraph/live_shadow_conformance.py
