@@ -78,7 +78,7 @@ export function deriveTransitionFromResult(result, state) {
     };
   }
 
-  if (result.status === 'completed') {
+  if (edge.terminalCandidate || result.status === 'completed') {
     return {
       runtimeStatus: 'COMPLETED',
       assignedAgent: null,
