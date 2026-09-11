@@ -24,6 +24,38 @@ function issueNumberFromPayload(payload) {
   return match ? Number(match[1]) : 0;
 }
 
+function workerBootstrap() {
+  return String.raw`
+const realFetch = globalThis.fetch;
+globalThis.fetch = async (input, init = {}) => {
+  const url = typeof input === 'string' ? input : (input?.url || String(input));
+  const method = String(init?.method || (typeof input !== 'string' ? input?.method : '') || 'GET').toUpperCase();
+  const repository = process.env.GITHUB_REPOSITORY || '';
+  const issueNumber = process.env.ISSUE_NUMBER || '';
+  const apiBase = 'https://api.github.com/repos/' + repository;
+  const issuePrefix = apiBase + '/issues/' + issueNumber;
+  const repositoryLabels = apiBase + '/labels';
+  const isWrite = method !== 'GET' && method !== 'HEAD';
+  const isIssueOrchestrationWrite = url.startsWith(issuePrefix) && isWrite;
+  const isRepositoryLabelWrite = url === repositoryLabels && isWrite;
+
+  if (
+    process.env.MSH_ORCHESTRATION_OWNER === 'langgraph' &&
+    (isIssueOrchestrationWrite || isRepositoryLabelWrite)
+  ) {
+    process.stderr.write('[LANGGRAPH_AUTHORITY] Suppressed worker orchestration write ' + method + ' ' + url + '\n');
+    return new Response('{}', {
+      status: 200,
+      headers: { 'content-type': 'application/json' }
+    });
+  }
+
+  return realFetch(input, init);
+};
+await import('./agent-runtime/state-hydrated-runner.mjs');
+`;
+}
+
 function runWorker(payload) {
   return new Promise((resolve, reject) => {
     const issueNumber = issueNumberFromPayload(payload);
@@ -33,7 +65,7 @@ function runWorker(payload) {
       return;
     }
 
-    const child = spawn(process.execPath, ['agent-runtime/state-hydrated-runner.mjs'], {
+    const child = spawn(process.execPath, ['--input-type=module', '--eval', workerBootstrap()], {
       env: {
         ...process.env,
         ISSUE_NUMBER: String(issueNumber),
