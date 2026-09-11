@@ -1,4 +1,5 @@
 import { hasLivelock } from './livelock-policy.mjs';
+import { isFreshAddressedHumanComment } from './comment-trigger-policy.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -48,14 +49,6 @@ function parseState(body = '') {
 
 function stateBlock(state) {
   return `${START}\n\`\`\`json\n${JSON.stringify(state, null, 2)}\n\`\`\`\n${END}`;
-}
-
-export function isFreshAddressedHumanComment(env = process.env) {
-  const triggerCommentId = Number(env.TRIGGER_COMMENT_ID || 0);
-  const commentBody = String(env.COMMENT_BODY || '');
-  if (!triggerCommentId || !commentBody) return false;
-  const firstLine = commentBody.splitlines?.()[0] ?? commentBody.split(/\r?\n/, 1)[0];
-  return /^\s*[A-Za-z]+\s*:\s*/.test(String(firstLine || ''));
 }
 
 async function stopLivelock(issue, state) {
