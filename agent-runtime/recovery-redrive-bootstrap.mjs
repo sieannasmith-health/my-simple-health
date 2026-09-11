@@ -24,6 +24,10 @@ export function deriveLegacyRecovery(state, now = new Date()) {
   if (state.human_gate) return null;
   if (state.recovery?.resume_agent && state.recovery?.resume_stage) return null;
 
+  const redriveCount = Number(state.redrive_count ?? 0);
+  const maxRedrives = Number(state.max_redrives ?? 2);
+  if (redriveCount >= maxRedrives) return null;
+
   const history = Array.isArray(state.history) ? state.history : [];
   const lastBlockedWorker = [...history].reverse().find(entry => entry?.agent && entry?.result_status === 'blocked');
   const failedAgent = lastBlockedWorker?.agent || state.last_graph_transition?.to || state.assigned_agent || 'nomy';
@@ -47,14 +51,18 @@ export function bootstrapLegacyBlockedState(state, now = new Date()) {
   const recovery = deriveLegacyRecovery(state, now);
   if (!recovery) return null;
 
+  const currentRedrives = Number(state.redrive_count ?? 0);
+  const maxRedrives = Number(state.max_redrives ?? 2);
+  if (currentRedrives >= maxRedrives) return null;
+
   return {
     ...state,
     status: 'PENDING',
     assigned_agent: recovery.resume_agent,
     current_stage: recovery.resume_stage,
     retry_count: 0,
-    redrive_count: Number(state.redrive_count || 0) + 1,
-    max_redrives: Number(state.max_redrives || 2),
+    redrive_count: currentRedrives + 1,
+    max_redrives: maxRedrives,
     execution: null,
     human_gate: null,
     recovery: { ...recovery, redriven_at: now.toISOString() },
@@ -66,7 +74,7 @@ export function bootstrapLegacyBlockedState(state, now = new Date()) {
       recovery_owner: recovery.recovery_owner,
       resume_agent: recovery.resume_agent,
       resume_stage: recovery.resume_stage,
-      redrive_count: Number(state.redrive_count || 0) + 1
+      redrive_count: currentRedrives + 1
     }].slice(-20),
     updated_at: now.toISOString()
   };

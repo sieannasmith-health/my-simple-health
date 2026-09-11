@@ -43,6 +43,8 @@ jobs:
           node --check agent-runtime/runtime-context-hydration.mjs
           node --check agent-runtime/everyone-fanout.mjs
           node --check agent-runtime/langgraph-worker-bridge.mjs
+          node --check agent-runtime/actionable-work-invariant.mjs
+          node --check agent-runtime/recovery-redrive-bootstrap.mjs
       - name: Verify null PR recovery
         run: node agent-runtime/tests/evidence-resolver.test.mjs
       - name: Verify routing guard regressions
@@ -61,6 +63,10 @@ jobs:
         run: node agent-runtime/tests/reconciliation-authority-livelock-boundary.test.mjs
       - name: Verify P0 autonomy context and Everyone join semantics
         run: node agent-runtime/tests/p0-autonomy-context.test.mjs
+      - name: Verify ACTIONABLE_WORK_MUST_NOT_IDLE policy
+        run: node agent-runtime/actionable-work-invariant.test.mjs
+      - name: Verify legacy recovery redrive budget
+        run: node agent-runtime/tests/recovery-redrive-bootstrap.test.mjs
 
   langgraph-migration:
     runs-on: ubuntu-latest
