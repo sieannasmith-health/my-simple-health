@@ -67,10 +67,18 @@ export function resolveAgentEdge(result, state) {
   }
 
   if (requestedNextAgent === fromAgent) {
-    throw new AgentGraphTransitionError('Self-handoff is not allowed in MSH Agent Graph.', {
+    if (result?.next_agent) {
+      throw new AgentGraphTransitionError('Self-handoff is not allowed in MSH Agent Graph.', {
+        fromAgent,
+        toAgent: requestedNextAgent
+      });
+    }
+    return {
       fromAgent,
-      toAgent: requestedNextAgent
-    });
+      toAgent: null,
+      terminalCandidate: result?.status === 'completed' || result?.status === 'ready_for_product',
+      source: 'status_default_terminal'
+    };
   }
 
   if (!isAllowedEdge(fromAgent, requestedNextAgent)) {
