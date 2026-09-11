@@ -1,0 +1,27 @@
+name: Slack Bridge CI
+
+on:
+  pull_request:
+    paths:
+      - 'api/slack-events.js'
+      - 'tests/slack-events.test.mjs'
+      - 'agent-runtime/agents.json'
+      - 'docs/SLACK_BRIDGE_RUNBOOK.md'
+      - '.github/workflows/slack-bridge-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run canonical Node tests
+        run: node --test tests/*.test.mjs
