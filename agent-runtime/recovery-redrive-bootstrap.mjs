@@ -24,8 +24,8 @@ export function deriveLegacyRecovery(state, now = new Date()) {
   if (state.human_gate) return null;
   if (state.recovery?.resume_agent && state.recovery?.resume_stage) return null;
 
-  const redriveCount = Number(state.redrive_count || 0);
-  const maxRedrives = Number(state.max_redrives || 2);
+  const redriveCount = Number(state.redrive_count ?? 0);
+  const maxRedrives = Number(state.max_redrives ?? 2);
   if (redriveCount >= maxRedrives) return null;
 
   const history = Array.isArray(state.history) ? state.history : [];
@@ -51,8 +51,8 @@ export function bootstrapLegacyBlockedState(state, now = new Date()) {
   const recovery = deriveLegacyRecovery(state, now);
   if (!recovery) return null;
 
-  const currentRedrives = Number(state.redrive_count || 0);
-  const maxRedrives = Number(state.max_redrives || 2);
+  const currentRedrives = Number(state.redrive_count ?? 0);
+  const maxRedrives = Number(state.max_redrives ?? 2);
   if (currentRedrives >= maxRedrives) return null;
 
   return {
