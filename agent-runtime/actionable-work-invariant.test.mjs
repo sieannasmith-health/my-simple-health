@@ -12,6 +12,9 @@ assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_g
 assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 1, max_redrives: 2, recovery: null }, now), {
   action: 'bootstrap_recovery', reason: 'blocked_without_recovery_checkpoint'
 });
+assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 0, max_redrives: 0, recovery: null }, now), {
+  action: 'none', reason: 'redrive_budget_exhausted'
+});
 assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 2, max_redrives: 2, recovery: null }, now), {
   action: 'none', reason: 'redrive_budget_exhausted'
 });
@@ -21,6 +24,9 @@ assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_g
 assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 0, max_redrives: 2, recovery: {
   resume_agent: 'selah', resume_stage: 'IMPLEMENTATION', not_before: '2026-09-10T21:59:00Z'
 } }, now), { action: 'redrive', reason: 'recovery_checkpoint_is_actionable' });
+assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 0, max_redrives: 0, recovery: {
+  resume_agent: 'selah', resume_stage: 'IMPLEMENTATION', not_before: '2026-09-10T21:59:00Z'
+} }, now), { action: 'none', reason: 'redrive_budget_exhausted' });
 assert.deepEqual(decideActionableWork({ status: 'ORCHESTRATION_BLOCKED', human_gate: null, redrive_count: 0, max_redrives: 2, recovery: {
   resume_agent: 'selah', resume_stage: 'IMPLEMENTATION', not_before: '2026-09-10T22:05:00Z'
 } }, now), { action: 'wait', reason: 'bounded_redrive_cooldown' });
