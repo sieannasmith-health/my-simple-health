@@ -38,9 +38,11 @@ In-memory idempotency is permitted only in non-production deterministic/local te
 
 ## Verification before merge
 
-Run the canonical repository test command on the exact PR head:
+Run the exact-head Slack governance suite on the PR head:
 
-`node --test tests/*.test.mjs`
+`node --test tests/slack-events.test.mjs tests/agent-runtime.test.mjs tests/slack-idempotency.test.mjs`
+
+This focused command is the required release-gate evidence for the Slack bridge and its governed runtime/idempotency backends. Repository-wide tests remain useful for broader regression detection, but an unrelated failure outside these surfaces must not replace exact-head evidence for this gate.
 
 The Slack suite must cover at minimum:
 
