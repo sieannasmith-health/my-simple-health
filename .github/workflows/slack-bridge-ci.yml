@@ -4,7 +4,11 @@ on:
   pull_request:
     paths:
       - 'api/slack-events.js'
+      - 'api/agent-runtime.js'
+      - 'api/slack-idempotency.js'
       - 'tests/slack-events.test.mjs'
+      - 'tests/agent-runtime.test.mjs'
+      - 'tests/slack-idempotency.test.mjs'
       - 'agent-runtime/agents.json'
       - 'docs/SLACK_BRIDGE_RUNBOOK.md'
       - '.github/workflows/slack-bridge-ci.yml'
@@ -23,5 +27,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run canonical Node tests
-        run: node --test tests/*.test.mjs
+      - name: Run exact-head Slack governance tests
+        run: node --test tests/slack-events.test.mjs tests/agent-runtime.test.mjs tests/slack-idempotency.test.mjs
