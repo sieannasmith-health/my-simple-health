@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
-    "test:adversarial": "vitest run test/adversarial.test.ts",
-    "test:api": "vitest run test/worker-api.test.ts"
+    "test": "vitest run --no-file-parallelism",
+    "test:adversarial": "vitest run --no-file-parallelism test/adversarial.test.ts",
+    "test:api": "vitest run --no-file-parallelism test/worker-api.test.ts"
   },
   "dependencies": {
     "express": "^5.1.0",
