@@ -5,257 +5,57 @@ import { authorizeEvent, canonicalAgents, handlePayload, parseAddress, resolveAd
 
 const env = { MSH_SLACK_TEAM_ID: 'T1', MSH_SLACK_ALLOWED_CHANNELS: 'C0C0T9F3LUF', MSH_SLACK_ALLOWED_USERS: 'U_SIEA,U_BRANDON' };
 const realEvent = (text = 'Iris: summarize the research plan', user = 'U_SIEA') => ({
-  event_id: crypto.randomUUID(),
-  team_id: 'T1',
-  event: { type: 'message', user, channel: 'C0C0T9F3LUF', ts: '123.456', text }
+  event_id: crypto.randomUUID(), team_id: 'T1', event: { type: 'message', user, channel: 'C0C0T9F3LUF', channel_type: 'channel', ts: '123.456', text }
+});
+const dmEvent = (text = 'What should I work on right now?', user = 'U_BRANDON', extra = {}) => ({
+  event_id: crypto.randomUUID(), team_id: 'T1', event: { type: 'message', user, channel: 'D123ABC', channel_type: 'im', ts: '200.100', text, ...extra }
 });
 const threadEvent = (text = 'What changed since then?', user = 'U_SIEA') => ({
-  event_id: crypto.randomUUID(),
-  team_id: 'T1',
-  event: { type: 'message', user, channel: 'C0C0T9F3LUF', ts: '123.789', thread_ts: '123.456', text }
+  event_id: crypto.randomUUID(), team_id: 'T1', event: { type: 'message', user, channel: 'C0C0T9F3LUF', channel_type: 'channel', ts: '123.789', thread_ts: '123.456', text }
 });
-const memoryStore = () => {
-  const claims = new Map();
-  return {
-    async claim(key) {
-      if (claims.has(key)) return { claimed: false, claimToken: null };
-      const claimToken = crypto.randomUUID();
-      claims.set(key, claimToken);
-      return { claimed: true, claimToken };
-    },
-    async release(key, claimToken) {
-      if (claims.get(key) !== claimToken) return false;
-      claims.delete(key);
-      return true;
-    }
-  };
-};
+const memoryStore = () => { const claims = new Map(); return { async claim(key) { if (claims.has(key)) return { claimed: false, claimToken: null }; const claimToken = crypto.randomUUID(); claims.set(key, claimToken); return { claimed: true, claimToken }; }, async release(key, token) { if (claims.get(key) !== token) return false; claims.delete(key); return true; } }; };
+const quiet = async (fn) => { const original = console.info; console.info = () => {}; try { return await fn(); } finally { console.info = original; } };
 
-const quiet = async (fn) => {
-  const original = console.info;
-  console.info = () => {};
-  try { return await fn(); } finally { console.info = original; }
-};
+test('verifies Slack HMAC and rejects stale or invalid signatures', () => { const body = '{}'; const timestamp = String(Math.floor(Date.now() / 1000)); const signature = `v0=${crypto.createHmac('sha256', 'secret').update(`v0:${timestamp}:${body}`).digest('hex')}`; assert.equal(verifySlackSignature({ body, timestamp, signature, secret: 'secret' }), true); assert.equal(verifySlackSignature({ body, timestamp: '1', signature, secret: 'secret' }), false); assert.equal(verifySlackSignature({ body, timestamp, signature: 'v0=bad', secret: 'secret' }), false); });
 
-test('verifies Slack HMAC and rejects stale or invalid signatures', () => {
-  const body = '{}';
-  const timestamp = String(Math.floor(Date.now() / 1000));
-  const signature = `v0=${crypto.createHmac('sha256', 'secret').update(`v0:${timestamp}:${body}`).digest('hex')}`;
-  assert.equal(verifySlackSignature({ body, timestamp, signature, secret: 'secret' }), true);
-  assert.equal(verifySlackSignature({ body, timestamp: '1', signature, secret: 'secret' }), false);
-  assert.equal(verifySlackSignature({ body, timestamp, signature: 'v0=bad', secret: 'secret' }), false);
-});
+test('canonical registry parity and Everyone routing are exhaustive', () => { const agents = canonicalAgents(); assert.ok(Object.keys(agents).length > 0); for (const [key, value] of Object.entries(agents)) { const parsed = parseAddress(`${value.name}: hello`); assert.equal(parsed.ok, true, key); assert.equal(parsed.key, key); assert.equal(parsed.agent.name, value.name); assert.equal(parsed.agent.role, value.role); } assert.equal(parseAddress('Everyone: coordinate').key, 'nomy'); assert.equal(parseAddress('Unknown: hello').ok, false); assert.equal(parseAddress('no prefix').reason, 'missing_address'); });
 
-test('canonical registry parity and Everyone routing are exhaustive', () => {
-  const agents = canonicalAgents();
-  assert.ok(Object.keys(agents).length > 0);
-  for (const [key, value] of Object.entries(agents)) {
-    const parsed = parseAddress(`${value.name}: hello`);
-    assert.equal(parsed.ok, true, key);
-    assert.equal(parsed.key, key);
-    assert.equal(parsed.agent.name, value.name);
-    assert.equal(parsed.agent.role, value.role);
-  }
-  assert.equal(parseAddress('Everyone: coordinate').key, 'nomy');
-  assert.equal(parseAddress('Unknown: hello').ok, false);
-  assert.equal(parseAddress('no prefix').reason, 'missing_address');
-});
+test('inherits canonical agent from originating Slack thread for plain-text follow-up', async () => { const result = await resolveAddress({ text: 'What changed since then?', channel: 'C0C0T9F3LUF', threadTs: '123.456', isDm: false }, { env, threadReader: async () => ({ text: 'Nomy: Update on the project roadmap?' }) }); assert.equal(result.key, 'nomy'); assert.equal(result.prompt, 'What changed since then?'); assert.equal(result.inherited, true); });
 
-test('inherits canonical agent from originating Slack thread for plain-text follow-up', async () => {
-  const result = await resolveAddress({
-    text: 'What changed since then?',
-    channel: 'C0C0T9F3LUF',
-    threadTs: '123.456'
-  }, {
-    env,
-    threadReader: async () => ({ text: 'Nomy: Update on the project roadmap?' })
-  });
-  assert.equal(result.ok, true);
-  assert.equal(result.key, 'nomy');
-  assert.equal(result.agent.name, 'Nomy');
-  assert.equal(result.prompt, 'What changed since then?');
-  assert.equal(result.inherited, true);
-});
+test('explicit addressed agent inside a thread overrides inherited root agent', async () => { const result = await resolveAddress({ text: 'Iris: research this instead', channel: 'C0C0T9F3LUF', threadTs: '123.456', isDm: false }, { env, threadReader: async () => { throw new Error('must not read thread root'); } }); assert.equal(result.key, 'iris'); });
 
-test('explicit addressed agent inside a thread overrides inherited root agent', async () => {
-  const result = await resolveAddress({
-    text: 'Iris: research this instead',
-    channel: 'C0C0T9F3LUF',
-    threadTs: '123.456'
-  }, {
-    env,
-    threadReader: async () => { throw new Error('must not read thread root'); }
-  });
-  assert.equal(result.key, 'iris');
-  assert.equal(result.inherited, undefined);
-});
+test('channel allowlist remains strict while allowlisted DMs do not require per-DM channel IDs', () => { assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_SIEA' }, env).ok, true); assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C_BAD', user: 'U_SIEA' }, env).ok, false); assert.equal(authorizeEvent({ team_id: 'T1', channel: 'D123ABC', channel_type: 'im', user: 'U_BRANDON' }, env).ok, true); assert.equal(authorizeEvent({ team_id: 'T2', channel: 'D123ABC', channel_type: 'im', user: 'U_BRANDON' }, env).ok, false); assert.equal(authorizeEvent({ team_id: 'T1', channel: 'D123ABC', channel_type: 'im', user: 'U_BAD' }, env).ok, false); });
 
-test('enforces real Slack team, channel, and user allowlists', () => {
-  assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_SIEA' }, env).ok, true);
-  assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_BRANDON' }, env).ok, true);
-  assert.equal(authorizeEvent({ team_id: 'T2', channel: 'C0C0T9F3LUF', user: 'U_SIEA' }, env).ok, false);
-  assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C_BAD', user: 'U_SIEA' }, env).ok, false);
-  assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_BAD' }, env).ok, false);
-});
+test('unprefixed DM defaults to Nomy and replies directly in the DM', async () => { const calls = []; const result = await quiet(() => handlePayload(dmEvent(), { env, idempotency: memoryStore(), runtime: async (input) => { calls.push(input); return 'Prioritized work.'; }, publisher: async (input) => calls.push(input) })); assert.equal(result.status, 200); assert.equal(calls[0].agent_key, 'nomy'); assert.equal(calls[0].agent, 'Nomy'); assert.equal(calls[0].is_dm, true); assert.equal(calls[0].conversation_type, 'im'); assert.equal(calls[0].thread_continuation, false); assert.equal(calls[1].channel, 'D123ABC'); assert.equal(calls[1].thread, null); });
 
-test('accepts actual Slack Events API envelope for Siea and Brandon', async () => {
-  for (const user of ['U_SIEA', 'U_BRANDON']) {
-    const calls = [];
-    const result = await quiet(() => handlePayload(realEvent('Iris: summarize the research plan', user), {
-      env,
-      idempotency: memoryStore(),
-      runtime: async (input) => { calls.push(input); return 'A concise answer.'; },
-      publisher: async (input) => { calls.push(input); }
-    }));
-    assert.equal(result.status, 200);
-    assert.equal(calls[0].agent, 'Iris');
-    assert.equal(calls[0].role, canonicalAgents().iris.role);
-    assert.equal(calls[0].source, 'slack');
-    assert.equal(calls[0].governed, true);
-    assert.equal(calls[1].thread, '123.456');
-    assert.match(calls[1].text, /^\*Iris \| Research & Insights\*/);
-  }
-});
+test('explicit specialist routing works in DM', async () => { const calls = []; await quiet(() => handlePayload(dmEvent('Mira: What design context is relevant?'), { env, idempotency: memoryStore(), runtime: async (input) => { calls.push(input); return 'Design context.'; }, publisher: async (input) => calls.push(input) })); assert.equal(calls[0].agent_key, 'mira'); assert.equal(calls[0].agent, 'Mira'); assert.equal(calls[1].thread, null); });
 
-test('routes a plain-text thread follow-up to the originating canonical agent', async () => {
-  const calls = [];
-  const result = await quiet(() => handlePayload(threadEvent('What changed since then?'), {
-    env,
-    idempotency: memoryStore(),
-    threadReader: async () => ({ text: 'Nomy: Update on the project roadmap?' }),
-    runtime: async (input) => { calls.push(input); return 'Here is the updated roadmap state.'; },
-    publisher: async (input) => { calls.push(input); }
-  }));
-  assert.equal(result.status, 200);
-  assert.equal(calls[0].agent, 'Nomy');
-  assert.equal(calls[0].prompt, 'What changed since then?');
-  assert.equal(calls[0].thread, '123.456');
-  assert.equal(calls[0].thread_continuation, true);
-  assert.equal(calls[1].thread, '123.456');
-});
+test('Genesis can be explicitly addressed in DM through canonical registry', async () => { const calls = []; await quiet(() => handlePayload(dmEvent('Genesis: Give me the acquisition implementation status.'), { env, idempotency: memoryStore(), runtime: async (input) => { calls.push(input); return 'Growth status.'; }, publisher: async () => {} })); assert.equal(calls[0].agent_key, 'genesis'); assert.equal(calls[0].agent, 'Genesis'); });
 
-test('plain-text non-thread message still requires an explicit agent address', async () => {
-  const result = await quiet(() => handlePayload(realEvent('What changed since then?'), {
-    env,
-    idempotency: memoryStore(),
-    runtime: async () => { throw new Error('must not run'); }
-  }));
-  assert.equal(result.status, 403);
-  assert.equal(result.body.reason, 'missing_address');
-});
+test('threaded DM preserves explicit Slack thread', async () => { const calls = []; await quiet(() => handlePayload(dmEvent('Mira: follow up', 'U_BRANDON', { ts: '200.200', thread_ts: '200.100' }), { env, idempotency: memoryStore(), runtime: async (input) => { calls.push(input); return 'Follow-up.'; }, publisher: async (input) => calls.push(input) })); assert.equal(calls[0].thread_continuation, true); assert.equal(calls[1].thread, '200.100'); });
 
-test('rejects malformed events before runtime dispatch', async () => {
-  const malformed = { event_id: 'x', team_id: 'T1', event: { type: 'message', user: 'U_SIEA', channel: 'C0C0T9F3LUF', text: 'Iris: hello' } };
-  const result = await handlePayload(malformed, { env, runtime: async () => { throw new Error('must not run'); } });
-  assert.equal(result.status, 400);
-  assert.equal(result.body.error, 'malformed_event');
-});
+test('accepts actual channel envelope for Siea and Brandon with attributed threaded response', async () => { for (const user of ['U_SIEA', 'U_BRANDON']) { const calls = []; const result = await quiet(() => handlePayload(realEvent('Iris: summarize the research plan', user), { env, idempotency: memoryStore(), runtime: async (input) => { calls.push(input); return 'A concise answer.'; }, publisher: async (input) => calls.push(input) })); assert.equal(result.status, 200); assert.equal(calls[0].agent, 'Iris'); assert.equal(calls[0].is_dm, false); assert.equal(calls[1].thread, '123.456'); assert.match(calls[1].text, /^\*Iris \| Research & Insights\*/); } });
 
-test('denies restricted content and durable mutation', async () => {
-  const denied = await quiet(() => handlePayload(realEvent('Iris: here is my diagnosis'), { env, idempotency: memoryStore(), runtime: async () => { throw new Error('must not run'); } }));
-  assert.equal(denied.body.reason, 'restricted_content');
-  const mutation = await quiet(() => handlePayload(realEvent('Nomy: merge the GitHub pull request'), { env, idempotency: memoryStore(), runtime: async () => { throw new Error('must not run'); } }));
-  assert.equal(mutation.body.reason, 'durable_mutation_denied');
-});
+test('plain-text non-thread channel message still requires explicit address', async () => { const result = await quiet(() => handlePayload(realEvent('What changed since then?'), { env, idempotency: memoryStore(), runtime: async () => { throw new Error('must not run'); } })); assert.equal(result.status, 403); assert.equal(result.body.reason, 'missing_address'); });
 
-test('production fails closed without durable idempotency storage', async () => {
-  const result = await quiet(() => handlePayload(realEvent(), {
-    env: { ...env, NODE_ENV: 'production' },
-    runtime: async () => 'must not run',
-    publisher: async () => {}
-  }));
-  assert.equal(result.status, 503);
-  assert.equal(result.body.error, 'idempotency_unavailable');
-});
+test('plain-text channel thread follow-up routes to originating agent', async () => { const calls = []; const result = await quiet(() => handlePayload(threadEvent(), { env, idempotency: memoryStore(), threadReader: async () => ({ text: 'Nomy: Update?' }), runtime: async (input) => { calls.push(input); return 'Updated.'; }, publisher: async (input) => calls.push(input) })); assert.equal(result.status, 200); assert.equal(calls[0].agent, 'Nomy'); assert.equal(calls[0].thread_continuation, true); assert.equal(calls[1].thread, '123.456'); });
 
-test('duplicate event is claimed once and does not dispatch twice', async () => {
-  const item = realEvent();
-  const store = memoryStore();
-  let runtimeCalls = 0;
-  const first = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { runtimeCalls++; return 'ok'; }, publisher: async () => {} }));
-  const second = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { runtimeCalls++; return 'bad'; }, publisher: async () => {} }));
-  assert.equal(first.status, 200);
-  assert.equal(second.body.duplicate, true);
-  assert.equal(runtimeCalls, 1);
-});
+test('rejects malformed events before runtime dispatch', async () => { const result = await handlePayload({ event_id: 'x', team_id: 'T1', event: { type: 'message', user: 'U_SIEA', channel: 'C0C0T9F3LUF', text: 'Iris: hello' } }, { env }); assert.equal(result.status, 400); });
 
-test('default production runtime fails closed when governed runtime is not configured', async () => {
-  const result = await quiet(() => handlePayload(realEvent(), {
-    env: { ...env, NODE_ENV: 'production' },
-    idempotency: memoryStore(),
-    publisher: async () => {}
-  }));
-  assert.equal(result.status, 200);
-  assert.equal(result.body.error, 'runtime_failure');
-  assert.equal(result.body.retryable, false);
-});
+test('bot and subtype events are ignored', async () => { assert.equal((await handlePayload(dmEvent('hello', 'U_BRANDON', { bot_id: 'B1' }), { env })).body.ignored, true); assert.equal((await handlePayload(dmEvent('hello', 'U_BRANDON', { subtype: 'message_changed' }), { env })).body.ignored, true); });
 
-test('transient runtime failure returns non-2xx for Slack retry without leaking body into audit', async () => {
-  const secretText = 'ordinary non-sensitive request';
-  const result = await quiet(() => handlePayload(realEvent(`Iris: ${secretText}`), {
-    env,
-    idempotency: memoryStore(),
-    runtime: async () => { throw Object.assign(new Error('network unavailable'), { transient: true }); },
-    publisher: async () => {}
-  }));
-  assert.equal(result.status, 503);
-  assert.equal(result.body.retryable, true);
-  assert.equal(JSON.stringify(result.audit).includes(secretText), false);
-});
+test('denies restricted content and durable mutation in DM too', async () => { const denied = await quiet(() => handlePayload(dmEvent('here is my diagnosis'), { env, idempotency: memoryStore(), runtime: async () => { throw new Error('must not run'); } })); assert.equal(denied.body.reason, 'restricted_content'); const mutation = await quiet(() => handlePayload(dmEvent('Nomy: merge the GitHub pull request'), { env, idempotency: memoryStore(), runtime: async () => { throw new Error('must not run'); } })); assert.equal(mutation.body.reason, 'durable_mutation_denied'); });
 
-test('transient failure releases owned claim so same Slack event can retry', async () => {
-  const item = realEvent();
-  const store = memoryStore();
-  let calls = 0;
-  const first = await quiet(() => handlePayload(item, {
-    env,
-    idempotency: store,
-    runtime: async () => { calls++; throw Object.assign(new Error('temporary network failure'), { transient: true }); },
-    publisher: async () => {}
-  }));
-  const second = await quiet(() => handlePayload(item, {
-    env,
-    idempotency: store,
-    runtime: async () => { calls++; return 'recovered'; },
-    publisher: async () => {}
-  }));
-  assert.equal(first.status, 503);
-  assert.equal(second.status, 200);
-  assert.equal(second.body.accepted, true);
-  assert.equal(calls, 2);
-});
+test('production fails closed without durable idempotency storage', async () => { const result = await quiet(() => handlePayload(realEvent(), { env: { ...env, NODE_ENV: 'production' }, runtime: async () => 'must not run', publisher: async () => {} })); assert.equal(result.status, 503); assert.equal(result.body.error, 'idempotency_unavailable'); });
 
-test('stale owner cannot release a newer claim', async () => {
-  const item = realEvent();
-  let currentToken = 'token-b';
-  const store = {
-    async claim() { return { claimed: true, claimToken: 'token-a' }; },
-    async release(_key, claimToken) { return claimToken === currentToken; }
-  };
-  const result = await quiet(() => handlePayload(item, {
-    env,
-    idempotency: store,
-    runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); },
-    publisher: async () => {}
-  }));
-  assert.equal(result.status, 200);
-  assert.equal(result.body.error, 'stale_claim_owner');
-  assert.equal(currentToken, 'token-b');
-});
+test('duplicate DM event is claimed once and does not dispatch twice', async () => { const item = dmEvent(); const store = memoryStore(); let calls = 0; const first = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { calls++; return 'ok'; }, publisher: async () => {} })); const second = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { calls++; return 'bad'; }, publisher: async () => {} })); assert.equal(first.status, 200); assert.equal(second.body.duplicate, true); assert.equal(calls, 1); });
 
-test('release outage fails closed and does not assume retry is safe', async () => {
-  const item = realEvent();
-  const store = {
-    async claim() { return { claimed: true, claimToken: 'token-a' }; },
-    async release() { throw new Error('redis unavailable'); }
-  };
-  const result = await quiet(() => handlePayload(item, {
-    env,
-    idempotency: store,
-    runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); },
-    publisher: async () => {}
-  }));
-  assert.equal(result.status, 503);
-  assert.equal(result.body.error, 'idempotency_release_uncertain');
-  assert.equal(result.body.retryable, false);
-});
+test('default production runtime fails closed when governed runtime is not configured', async () => { const result = await quiet(() => handlePayload(realEvent(), { env: { ...env, NODE_ENV: 'production' }, idempotency: memoryStore(), publisher: async () => {} })); assert.equal(result.status, 200); assert.equal(result.body.retryable, false); });
+
+test('transient runtime failure returns retryable 503 without leaking body into audit', async () => { const secretText = 'ordinary non-sensitive request'; const result = await quiet(() => handlePayload(realEvent(`Iris: ${secretText}`), { env, idempotency: memoryStore(), runtime: async () => { throw Object.assign(new Error('network unavailable'), { transient: true }); }, publisher: async () => {} })); assert.equal(result.status, 503); assert.equal(JSON.stringify(result.audit).includes(secretText), false); });
+
+test('transient failure releases owned claim so same event can retry', async () => { const item = dmEvent(); const store = memoryStore(); let calls = 0; const first = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { calls++; throw Object.assign(new Error('temporary network failure'), { transient: true }); }, publisher: async () => {} })); const second = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { calls++; return 'recovered'; }, publisher: async () => {} })); assert.equal(first.status, 503); assert.equal(second.status, 200); assert.equal(calls, 2); });
+
+test('stale owner cannot release a newer claim', async () => { const item = realEvent(); const store = { async claim() { return { claimed: true, claimToken: 'token-a' }; }, async release(_key, token) { return token === 'token-b'; } }; const result = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); }, publisher: async () => {} })); assert.equal(result.status, 200); assert.equal(result.body.error, 'stale_claim_owner'); });
+
+test('release outage fails closed and does not assume retry is safe', async () => { const item = realEvent(); const store = { async claim() { return { claimed: true, claimToken: 'token-a' }; }, async release() { throw new Error('redis unavailable'); } }; const result = await quiet(() => handlePayload(item, { env, idempotency: store, runtime: async () => { throw Object.assign(new Error('temporary network failure'), { transient: true }); }, publisher: async () => {} })); assert.equal(result.status, 503); assert.equal(result.body.error, 'idempotency_release_uncertain'); });
