@@ -59,6 +59,7 @@ jobs:
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/001_runtime_core.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/002_worker_interface.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/003_identity_authority.sql
 
       - name: Typecheck
         run: npm run typecheck
