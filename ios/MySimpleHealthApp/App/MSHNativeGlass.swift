@@ -32,19 +32,18 @@ enum MSHNativeHaptic {
 
 enum MSHNativeGlassAccessibility {
     /// Accessibility fallback for glass content whose foreground is known.
-    /// White foreground needs a deliberately dark opaque surface when iOS Reduce
-    /// Transparency is enabled; otherwise iOS can flatten the material to a light
-    /// surface and destroy contrast.
+    /// The fallback remains fully opaque, but keeps MSH's dark/light surface
+    /// relationship so foreground contrast stays predictable.
     static func fallbackSurface(for foreground: Color) -> Color {
         foreground == Color.white
-            ? Color.black.opacity(0.88)
-            : MSHColor.surface
+            ? Color(red: 0.105, green: 0.112, blue: 0.122)
+            : Color(red: 0.955, green: 0.948, blue: 0.928)
     }
 
-    /// Direct optical-glass surfaces in MSH are used primarily over photography
-    /// with light foreground content. Keep that content legible when transparency
-    /// is reduced instead of allowing the material to become an opaque white card.
-    static let directSurfaceFallback = Color.black.opacity(0.88)
+    /// Direct optical-glass surfaces in MSH are primarily used over photography
+    /// with light foreground content. This base is intentionally opaque so Reduce
+    /// Transparency is respected without reverting the UI to a washed-out card.
+    static let directSurfaceFallback = Color(red: 0.105, green: 0.112, blue: 0.122)
 }
 
 struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
@@ -156,7 +155,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     @ViewBuilder
     private func glassBackground(editorial: Bool) -> some View {
         if reduceTransparency {
-            shape.fill(reducedTransparencyFill)
+            reducedTransparencyBackground(editorial: editorial)
         } else {
             let material = shape
                 .fill(.ultraThinMaterial)
@@ -208,6 +207,59 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
                     endPoint: .bottomTrailing
                 ))
             }
+        }
+    }
+
+    /// Opaque accessibility rendering that preserves the visual character of MSH
+    /// glass without revealing content underneath the surface. Because the first
+    /// layer is fully opaque, the subsequent tint/highlight overlays add depth but
+    /// do not reintroduce transparency to the underlying photo or interface.
+    private func reducedTransparencyBackground(editorial: Bool) -> some View {
+        let base = shape.fill(reducedTransparencyFill)
+        let tinted = base.overlay {
+            shape.fill(tint.opacity(editorial ? 0.075 : 0.12 + (0.04 * glowStrength)))
+        }
+        let coolDepth = tinted.overlay {
+            shape.fill(
+                RadialGradient(
+                    colors: [
+                        Color(red: 0.40, green: 0.67, blue: 0.78)
+                            .opacity(editorial ? 0.075 : 0.14),
+                        Color.clear
+                    ],
+                    center: .topLeading,
+                    startRadius: 2,
+                    endRadius: 190
+                )
+            )
+        }
+        let warmDepth = coolDepth.overlay {
+            shape.fill(
+                RadialGradient(
+                    colors: [
+                        tint.opacity(editorial ? 0.055 : 0.11),
+                        Color(red: 0.45, green: 0.31, blue: 0.52)
+                            .opacity(editorial ? 0.035 : 0.08),
+                        Color.clear
+                    ],
+                    center: .bottomTrailing,
+                    startRadius: 4,
+                    endRadius: 210
+                )
+            )
+        }
+        return warmDepth.overlay {
+            shape.fill(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(editorial ? 0.075 : 0.12),
+                        Color.clear,
+                        Color.black.opacity(editorial ? 0.045 : 0.08)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
         }
     }
 }
