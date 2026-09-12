@@ -24,7 +24,9 @@ jobs:
       AGENT_MODEL: ${{ vars.MSH_AGENT_MODEL || 'gpt-5.6-luna' }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       GITHUB_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ github.token }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
       COMMENT_BODY: ${{ github.event.comment.body }}
       TRIGGER_COMMENT_ID: ${{ github.event.comment.id }}
     steps:
@@ -47,37 +49,46 @@ jobs:
           aliases['everyone'] = ('nomy', 'Nomy')
 
           agent, display = aliases.get(addressed, ('', ''))
+          governed = '<!-- MSH_STATE_LOCK -->' in os.environ.get('ISSUE_BODY', '')
           print(f'agent={agent}')
           print(f'display={display}')
           print(f'addressed={addressed}')
           print(f'should_run={"true" if agent else "false"}')
+          print(f'governed={"true" if governed else "false"}')
           PY
 
       - name: Ignore non-agent comments
         if: steps.route.outputs.should_run != 'true'
         run: echo "No supported MSH agent prefix found; no runtime turn started."
 
+      - name: Route governed task through durable evaluator
+        if: steps.route.outputs.should_run == 'true' && steps.route.outputs.governed == 'true'
+        shell: bash
+        run: |
+          echo "Governed issue detected; durable evaluator owns execution scheduling."
+          gh workflow run msh-agent-state-evaluator.yml --ref main -f issue_number="$ISSUE_NUMBER"
+
       - name: Check out repository
-        if: steps.route.outputs.should_run == 'true'
+        if: steps.route.outputs.should_run == 'true' && steps.route.outputs.governed != 'true'
         uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
 
       - name: Set up Node 24
-        if: steps.route.outputs.should_run == 'true'
+        if: steps.route.outputs.should_run == 'true' && steps.route.outputs.governed != 'true'
         uses: actions/setup-node@v5
         with:
           node-version: '24'
 
       - name: Run addressed MSH agent
-        if: steps.route.outputs.should_run == 'true'
+        if: steps.route.outputs.should_run == 'true' && steps.route.outputs.governed != 'true'
         env:
           AGENT_NAME: ${{ steps.route.outputs.agent }}
         run: node agent-runtime/run-v2.mjs
 
       - name: Present routine conversation as conversation
-        if: steps.route.outputs.should_run == 'true'
+        if: steps.route.outputs.should_run == 'true' && steps.route.outputs.governed != 'true'
         env:
           AGENT_DISPLAY_NAME: ${{ steps.route.outputs.display }}
         run: node agent-runtime/conversation-comment-cleanup.mjs
