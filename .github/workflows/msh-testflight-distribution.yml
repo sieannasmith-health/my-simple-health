@@ -18,7 +18,7 @@ jobs:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -48,11 +48,16 @@ jobs:
             exit 1
           fi
 
-      - name: Verify Xcode and install XcodeGen
+      - name: Verify Xcode 26+ and install XcodeGen
         shell: bash
         run: |
           set -euo pipefail
           xcodebuild -version
+          XCODE_MAJOR="$(xcodebuild -version | awk '/^Xcode / {split($2, v, "."); print v[1]}')"
+          if [[ -z "$XCODE_MAJOR" || "$XCODE_MAJOR" -lt 26 ]]; then
+            echo "::error::App Store Connect requires Xcode 26 or later; runner reported major version ${XCODE_MAJOR:-unknown}."
+            exit 1
+          fi
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
           fi
@@ -169,10 +174,15 @@ jobs:
                 find "$root" -type f \
                   \( -name 'IDEDistribution*.log' \
                      -o -name 'DistributionSummary.plist' \
-                     -o -name 'ExportOptions.plist' \
-                     -o -name '*.xcdistributionlogs' \) \
+                     -o -name 'ExportOptions.plist' \) \
                   -mmin -60 -print0 2>/dev/null || true
               )
+              while IFS= read -r -d '' bundle; do
+                bundle_name=$(basename "$bundle")
+                destination="$DIAGNOSTICS_PATH/$bundle_name"
+                [[ -e "$destination" ]] && destination="$DIAGNOSTICS_PATH/$(date +%s)-$bundle_name"
+                cp -R "$bundle" "$destination" || true
+              done < <(find "$root" -type d -name '*.xcdistributionlogs' -mmin -60 -print0 2>/dev/null || true)
             done
             cp "$RUNNER_TEMP/ExportOptions.plist" "$DIAGNOSTICS_PATH/ExportOptions.used.plist" || true
             find "$EXPORT_PATH" -maxdepth 3 -type f -print > "$DIAGNOSTICS_PATH/export-path-files.txt" 2>/dev/null || true
@@ -198,6 +208,7 @@ jobs:
             echo "- Source commit: ${{ github.event.workflow_run.head_sha }}"
             echo "- Source test run: ${{ github.event.workflow_run.html_url }}"
             echo "- Runner: GitHub-hosted macOS"
+            echo "- Xcode: $(xcodebuild -version | head -n 1)"
             echo "- Bundle ID: org.mysimplehealth.app"
             echo "- Destination: App Store Connect / TestFlight"
             echo "- Upload step outcome: ${{ steps.xcode_upload.outcome }}"
