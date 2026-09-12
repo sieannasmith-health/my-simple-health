@@ -126,13 +126,18 @@ jobs:
           plutil -lint "$RUNNER_TEMP/ExportOptions.plist"
 
       - name: Upload tested archive to App Store Connect
+        id: xcode_upload
         working-directory: ios/MySimpleHealthApp
         shell: bash
         run: |
           set -euo pipefail
           EXPORT_PATH="$RUNNER_TEMP/MySimpleHealthExport"
-          rm -rf "$EXPORT_PATH"
-          mkdir -p "$EXPORT_PATH"
+          DIAGNOSTICS_PATH="$RUNNER_TEMP/testflight-distribution-diagnostics"
+          XCODE_LOG="$DIAGNOSTICS_PATH/xcodebuild-exportArchive.log"
+          rm -rf "$EXPORT_PATH" "$DIAGNOSTICS_PATH"
+          mkdir -p "$EXPORT_PATH" "$DIAGNOSTICS_PATH"
+
+          set +e
           xcodebuild \
             -exportArchive \
             -archivePath "$RUNNER_TEMP/MySimpleHealth.xcarchive" \
@@ -141,7 +146,47 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "${{ steps.auth.outputs.key_path }}" \
             -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            2>&1 | tee "$XCODE_LOG"
+          upload_status=${PIPESTATUS[0]}
+          set -e
+
+          echo "exit_code=$upload_status" >> "$GITHUB_OUTPUT"
+
+          if [[ "$upload_status" -ne 0 ]]; then
+            echo "::error::App Store Connect upload failed with xcodebuild exit code $upload_status"
+            for root in "$RUNNER_TEMP" "${TMPDIR:-/tmp}"; do
+              [[ -d "$root" ]] || continue
+              while IFS= read -r -d '' file; do
+                [[ "$file" == "$RUNNER_TEMP/appstoreconnect/"* ]] && continue
+                relative_name=$(basename "$file")
+                destination="$DIAGNOSTICS_PATH/$relative_name"
+                if [[ -e "$destination" ]]; then
+                  destination="$DIAGNOSTICS_PATH/$(date +%s)-$relative_name"
+                fi
+                cp -p "$file" "$destination" || true
+              done < <(
+                find "$root" -type f \
+                  \( -name 'IDEDistribution*.log' \
+                     -o -name 'DistributionSummary.plist' \
+                     -o -name 'ExportOptions.plist' \
+                     -o -name '*.xcdistributionlogs' \) \
+                  -mmin -60 -print0 2>/dev/null || true
+              )
+            done
+            cp "$RUNNER_TEMP/ExportOptions.plist" "$DIAGNOSTICS_PATH/ExportOptions.used.plist" || true
+            find "$EXPORT_PATH" -maxdepth 3 -type f -print > "$DIAGNOSTICS_PATH/export-path-files.txt" 2>/dev/null || true
+            exit "$upload_status"
+          fi
+
+      - name: Upload TestFlight failure diagnostics
+        if: ${{ failure() && steps.xcode_upload.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: testflight-distribution-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/testflight-distribution-diagnostics
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Distribution summary
         if: ${{ always() }}
@@ -155,6 +200,8 @@ jobs:
             echo "- Runner: GitHub-hosted macOS"
             echo "- Bundle ID: org.mysimplehealth.app"
             echo "- Destination: App Store Connect / TestFlight"
+            echo "- Upload step outcome: ${{ steps.xcode_upload.outcome }}"
+            echo "- xcodebuild upload exit code: ${{ steps.xcode_upload.outputs.exit_code || 'not-run' }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove temporary API key
