@@ -1,0 +1,68 @@
+name: Durable Runtime Core Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'agent-runtime/durable-core/**'
+      - '.github/workflows/durable-runtime-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'agent-runtime/durable-core/**'
+      - '.github/workflows/durable-runtime-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-kernel-core:
+    name: runtime / durable-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: asdlc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d asdlc_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: agent-runtime/durable-core
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/asdlc_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Apply database migration
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/001_runtime_core.sql
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run adversarial tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
