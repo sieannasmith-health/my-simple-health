@@ -6,12 +6,18 @@ import { AuthenticatedWorker, IdentityAuthorityService, WorkerAuthority } from '
 const idempotency = z.string().min(1).max(255);
 const leaseToken = z.string().min(32).max(256);
 const taskId = z.string().uuid();
+const authority = z.enum(['READ','PROPOSE','WRITE','REVIEW','MERGE','DEPLOY']);
 const artifact = z.object({ uri: z.string().min(1).max(2048), contentType: z.string().min(1).max(100) }).strict();
 const claimSchema = z.object({ role: z.string().min(1).max(100), idempotencyKey: idempotency }).strict();
 const leasedTaskSchema = z.object({ leaseToken, idempotencyKey: idempotency }).strict();
 const artifactSchema = leasedTaskSchema.extend({ artifact });
 const completionSchema = leasedTaskSchema.extend({ artifacts: z.array(artifact).max(100).default([]) });
 const failureSchema = leasedTaskSchema.extend({ failureClass: z.string().min(1).max(100), errorLog: z.string().max(20000).nullable().optional() });
+const tokenSchema = z.object({
+  authorities: z.array(authority).max(10),
+  capabilities: z.array(z.string().min(1).max(120)).max(50),
+  ttlSeconds: z.number().int().min(1).max(3600).default(900),
+}).strict();
 
 type AuthenticatedRequest = Request & { worker?: AuthenticatedWorker };
 
@@ -28,6 +34,14 @@ export function createWorkerApi(kernel: DurableKernel, identity?: IdentityAuthor
     try { req.worker = await identity.authenticateAccessToken(secret); }
     catch { req.worker = await identity.authenticateBearer(secret); }
     next();
+  }));
+
+  app.post('/v1/auth/tokens', asyncRoute(async (req: AuthenticatedRequest, res) => {
+    if (!identity) throw new Error('Authentication failed');
+    const worker = requireWorker(req, identity);
+    const body = tokenSchema.parse(req.body);
+    const issued = await identity.issueAccessToken(worker, body.authorities, body.capabilities, body.ttlSeconds);
+    return res.status(201).json(issued);
   }));
 
   app.post('/v1/worker/claims', asyncRoute(async (req: AuthenticatedRequest, res) => {
@@ -69,6 +83,7 @@ export function createWorkerApi(kernel: DurableKernel, identity?: IdentityAuthor
     if (/Lease fencing breach/.test(message)) return res.status(409).json({ error: 'LEASE_FENCED' });
     if (/Invalid .* transition|Concurrency conflict/.test(message)) return res.status(409).json({ error: 'STATE_CONFLICT' });
     if (/Task not found/.test(message)) return res.status(404).json({ error: 'TASK_NOT_FOUND' });
+    if (/Invalid token TTL/.test(message)) return res.status(400).json({ error: 'INVALID_TOKEN_SCOPE' });
     return res.status(500).json({ error: 'RUNTIME_ERROR' });
   });
   return app;
