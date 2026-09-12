@@ -30,12 +30,30 @@ enum MSHNativeHaptic {
     }
 }
 
+enum MSHNativeGlassAccessibility {
+    /// Accessibility fallback for glass content whose foreground is known.
+    /// White foreground needs a deliberately dark opaque surface when iOS Reduce
+    /// Transparency is enabled; otherwise iOS can flatten the material to a light
+    /// surface and destroy contrast.
+    static func fallbackSurface(for foreground: Color) -> Color {
+        foreground == Color.white
+            ? Color.black.opacity(0.88)
+            : MSHColor.surface
+    }
+
+    /// Direct optical-glass surfaces in MSH are used primarily over photography
+    /// with light foreground content. Keep that content legible when transparency
+    /// is reduced instead of allowing the material to become an opaque white card.
+    static let directSurfaceFallback = Color.black.opacity(0.88)
+}
+
 struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     let shape: S
     let tint: Color
     let edgeStrength: Double
     let shadowStrength: Double
     let glowStrength: Double
+    let reducedTransparencyFill: Color
 
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
@@ -138,7 +156,7 @@ struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
     @ViewBuilder
     private func glassBackground(editorial: Bool) -> some View {
         if reduceTransparency {
-            shape.fill(Color.white.opacity(0.94))
+            shape.fill(reducedTransparencyFill)
         } else {
             let material = shape
                 .fill(.ultraThinMaterial)
@@ -200,7 +218,8 @@ extension View {
         tint: Color = .white,
         edgeStrength: Double = 1,
         shadowStrength: Double = 1,
-        glowStrength: Double = 0
+        glowStrength: Double = 0,
+        reducedTransparencyFill: Color = MSHNativeGlassAccessibility.directSurfaceFallback
     ) -> some View {
         modifier(
             MSHNativeGlassSurface(
@@ -208,7 +227,8 @@ extension View {
                 tint: tint,
                 edgeStrength: edgeStrength,
                 shadowStrength: shadowStrength,
-                glowStrength: glowStrength
+                glowStrength: glowStrength,
+                reducedTransparencyFill: reducedTransparencyFill
             )
         )
     }
@@ -229,7 +249,8 @@ struct MSHNativeGlassButtonStyle<S: InsettableShape>: ButtonStyle {
                 tint: tint,
                 edgeStrength: configuration.isPressed ? 2.05 : 1.28,
                 shadowStrength: configuration.isPressed ? 1.50 : 1.0,
-                glowStrength: configuration.isPressed ? 1.55 : 0.42
+                glowStrength: configuration.isPressed ? 1.55 : 0.42,
+                reducedTransparencyFill: MSHNativeGlassAccessibility.fallbackSurface(for: foreground)
             )
             .overlay {
                 if configuration.isPressed {
