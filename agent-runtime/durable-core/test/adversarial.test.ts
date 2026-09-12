@@ -6,7 +6,9 @@ import { DurableKernel } from '../src/kernel.js';
 const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/asdlc_test';
 
 describe('DurableKernel adversarial execution', () => {
-  const pool = new Pool({ connectionString: databaseUrl, max: 110 });
+  // Keep application-level contention at 100 callers while bounding physical
+  // PostgreSQL connections below the server's default max_connections ceiling.
+  const pool = new Pool({ connectionString: databaseUrl, max: 90 });
   const kernel = new DurableKernel(pool);
 
   beforeAll(async () => {
