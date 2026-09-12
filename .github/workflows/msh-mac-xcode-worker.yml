@@ -35,7 +35,7 @@ concurrency:
 jobs:
   cloud-xcode-worker:
     name: MSH Cloud macOS Xcode tests
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 30
     env:
       PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -44,7 +44,7 @@ jobs:
       - name: Checkout requested revision
         uses: actions/checkout@v4
 
-      - name: Verify cloud runner and Xcode
+      - name: Verify cloud runner and Xcode 26+
         shell: bash
         run: |
           set -euo pipefail
@@ -54,6 +54,11 @@ jobs:
           uname -a
           xcode-select -p
           xcodebuild -version
+          XCODE_MAJOR="$(xcodebuild -version | awk '/^Xcode / {split($2, v, "."); print v[1]}')"
+          if [[ -z "$XCODE_MAJOR" || "$XCODE_MAJOR" -lt 26 ]]; then
+            echo "::error::TestFlight requires Xcode 26 or later; runner reported major version ${XCODE_MAJOR:-unknown}."
+            exit 1
+          fi
 
       - name: Verify checked-out MSH workspace
         shell: bash
@@ -151,6 +156,6 @@ jobs:
             echo "- OS: $RUNNER_OS"
             echo "- Architecture: $RUNNER_ARCH"
             echo "- Commit: $GITHUB_SHA"
-            echo "- Xcode: cloud-hosted"
+            echo "- Xcode: $(xcodebuild -version | head -n 1)"
             echo "- Laptop dependency: none"
           } >> "$GITHUB_STEP_SUMMARY"
