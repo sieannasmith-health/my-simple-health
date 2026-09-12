@@ -14,17 +14,18 @@ concurrency:
 
 jobs:
   distribute-testflight:
-    name: Archive and upload My Simple Health to TestFlight
+    name: Archive, upload, and verify My Simple Health in TestFlight
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
       TEAM_ID: 736NRP69T9
+      BUNDLE_ID: org.mysimplehealth.app
 
     steps:
       - name: Checkout tested commit
@@ -48,7 +49,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verify Xcode 26+ and install XcodeGen
+      - name: Verify Xcode 26+ and distribution tooling
         shell: bash
         run: |
           set -euo pipefail
@@ -61,6 +62,12 @@ jobs:
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
           fi
+          for command_name in ruby curl jq; do
+            if ! command -v "$command_name" >/dev/null 2>&1; then
+              echo "::error::Required TestFlight verification tool is missing: $command_name"
+              exit 1
+            fi
+          done
           xcodegen --version
 
       - name: Regenerate canonical Xcode project
@@ -83,6 +90,15 @@ jobs:
           chmod 600 "$KEY_PATH"
           echo "key_path=$KEY_PATH" >> "$GITHUB_OUTPUT"
 
+      - name: Allocate unique TestFlight build number
+        id: build_metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILD_NUMBER="$(date -u +%s)"
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Allocated TestFlight build number $BUILD_NUMBER for source commit ${{ github.event.workflow_run.head_sha }}"
+
       - name: Archive signed iOS app
         working-directory: ios/MySimpleHealthApp
         shell: bash
@@ -102,6 +118,7 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="${{ steps.build_metadata.outputs.build_number }}" \
             clean archive
 
       - name: Create App Store Connect export options
@@ -122,7 +139,7 @@ jobs:
             <key>teamID</key>
             <string>$TEAM_ID</string>
             <key>manageAppVersionAndBuildNumber</key>
-            <true/>
+            <false/>
             <key>uploadSymbols</key>
             <true/>
           </dict>
@@ -189,13 +206,155 @@ jobs:
             exit "$upload_status"
           fi
 
+      - name: Wait for exact build to become available in TestFlight
+        id: testflight_ready
+        shell: bash
+        env:
+          ASC_KEY_PATH: ${{ steps.auth.outputs.key_path }}
+          BUILD_NUMBER: ${{ steps.build_metadata.outputs.build_number }}
+        run: |
+          set -euo pipefail
+          DIAGNOSTICS_PATH="$RUNNER_TEMP/testflight-distribution-diagnostics"
+          mkdir -p "$DIAGNOSTICS_PATH"
+
+          asc_token() {
+            ruby -ropenssl -rjson -rbase64 -e '
+              def b64url(value)
+                Base64.urlsafe_encode64(value).delete("=")
+              end
+              now = Time.now.to_i
+              header = { alg: "ES256", kid: ENV.fetch("ASC_KEY_ID"), typ: "JWT" }
+              payload = { iss: ENV.fetch("ASC_ISSUER_ID"), iat: now, exp: now + 900, aud: "appstoreconnect-v1" }
+              signing_input = "#{b64url(JSON.generate(header))}.#{b64url(JSON.generate(payload))}"
+              key = OpenSSL::PKey.read(File.read(ENV.fetch("ASC_KEY_PATH")))
+              der = key.sign(OpenSSL::Digest::SHA256.new, signing_input)
+              sequence = OpenSSL::ASN1.decode(der).value
+              raw = sequence.map { |integer| [integer.value.to_i.to_s(16).rjust(64, "0")].pack("H*") }.join
+              puts "#{signing_input}.#{b64url(raw)}"
+            '
+          }
+
+          asc_get() {
+            local url="$1"
+            local output_file="$2"
+            local token
+            token="$(asc_token)"
+            local status
+            status="$(curl --silent --show-error --globoff \
+              --output "$output_file" \
+              --write-out '%{http_code}' \
+              --header "Authorization: Bearer $token" \
+              --header 'Accept: application/json' \
+              "$url")"
+            printf '%s' "$status"
+          }
+
+          APP_JSON="$DIAGNOSTICS_PATH/app.json"
+          app_status="$(asc_get "https://api.appstoreconnect.apple.com/v1/apps?filter%5BbundleId%5D=$BUNDLE_ID&limit=1" "$APP_JSON")"
+          if [[ "$app_status" != "200" ]]; then
+            echo "::error::App Store Connect app lookup failed with HTTP $app_status. Response: $(cat "$APP_JSON")"
+            exit 1
+          fi
+
+          APP_ID="$(jq -r '.data[0].id // empty' "$APP_JSON")"
+          if [[ -z "$APP_ID" ]]; then
+            echo "::error::No App Store Connect app was found for bundle ID $BUNDLE_ID."
+            cat "$APP_JSON"
+            exit 1
+          fi
+
+          deadline=$(( $(date +%s) + 2400 ))
+          build_id=""
+          build_state=""
+          internal_state=""
+
+          while (( $(date +%s) < deadline )); do
+            BUILD_JSON="$DIAGNOSTICS_PATH/build.json"
+            build_status="$(asc_get "https://api.appstoreconnect.apple.com/v1/builds?filter%5Bapp%5D=$APP_ID&filter%5Bversion%5D=$BUILD_NUMBER&limit=1" "$BUILD_JSON")"
+            if [[ "$build_status" != "200" ]]; then
+              echo "::warning::Build lookup returned HTTP $build_status while waiting for build $BUILD_NUMBER."
+              sleep 20
+              continue
+            fi
+
+            build_id="$(jq -r '.data[0].id // empty' "$BUILD_JSON")"
+            if [[ -z "$build_id" ]]; then
+              echo "Waiting for uploaded build $BUILD_NUMBER to appear in App Store Connect..."
+              sleep 20
+              continue
+            fi
+
+            build_state="$(jq -r '.data[0].attributes.processingState // "UNKNOWN"' "$BUILD_JSON")"
+            expired="$(jq -r '.data[0].attributes.expired // false' "$BUILD_JSON")"
+            echo "Build $BUILD_NUMBER processing state: $build_state"
+
+            if [[ "$expired" == "true" ]]; then
+              echo "::error::TestFlight build $BUILD_NUMBER is expired and cannot be tested."
+              exit 1
+            fi
+
+            case "$build_state" in
+              INVALID)
+                echo "::error::Apple marked TestFlight build $BUILD_NUMBER INVALID during processing. Build response: $(cat "$BUILD_JSON")"
+                exit 1
+                ;;
+              FAILED)
+                echo "::error::Apple marked TestFlight build $BUILD_NUMBER FAILED during processing. Build response: $(cat "$BUILD_JSON")"
+                exit 1
+                ;;
+              VALID)
+                BETA_JSON="$DIAGNOSTICS_PATH/build-beta-detail.json"
+                beta_status="$(asc_get "https://api.appstoreconnect.apple.com/v1/builds/$build_id/buildBetaDetail" "$BETA_JSON")"
+                if [[ "$beta_status" == "200" ]]; then
+                  internal_state="$(jq -r '.data.attributes.internalBuildState // "UNKNOWN"' "$BETA_JSON")"
+                  echo "Build $BUILD_NUMBER internal TestFlight state: $internal_state"
+                  case "$internal_state" in
+                    READY_FOR_BETA_TESTING|IN_BETA_TESTING)
+                      echo "build_id=$build_id" >> "$GITHUB_OUTPUT"
+                      echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+                      echo "processing_state=$build_state" >> "$GITHUB_OUTPUT"
+                      echo "internal_state=$internal_state" >> "$GITHUB_OUTPUT"
+                      echo "TestFlight build $BUILD_NUMBER is processed and available for internal testing."
+                      exit 0
+                      ;;
+                    MISSING_EXPORT_COMPLIANCE)
+                      echo "::error::TestFlight build $BUILD_NUMBER is blocked by missing export-compliance information. Next fix: answer the encryption/export-compliance questions for this build in App Store Connect, or set the appropriate Info.plist encryption declaration if the app qualifies. Response: $(cat "$BETA_JSON")"
+                      exit 1
+                      ;;
+                    EXPIRED)
+                      echo "::error::TestFlight build $BUILD_NUMBER is expired and cannot be tested."
+                      exit 1
+                      ;;
+                    *)
+                      echo "Build is valid but not yet internally testable; waiting on state $internal_state..."
+                      ;;
+                  esac
+                elif [[ "$beta_status" == "404" ]]; then
+                  echo "Build is valid; waiting for its TestFlight beta-detail record..."
+                else
+                  echo "::warning::TestFlight beta-detail lookup returned HTTP $beta_status. Response: $(cat "$BETA_JSON")"
+                fi
+                ;;
+              PROCESSING|UNKNOWN)
+                ;;
+              *)
+                echo "::warning::Unexpected App Store Connect processing state for build $BUILD_NUMBER: $build_state"
+                ;;
+            esac
+
+            sleep 20
+          done
+
+          echo "::error::Timed out waiting for TestFlight build $BUILD_NUMBER to become available. Last processing state: ${build_state:-not-found}; last internal state: ${internal_state:-not-found}. Inspect the uploaded diagnostic JSON for the exact App Store Connect state before declaring this build ready."
+          exit 1
+
       - name: Upload TestFlight failure diagnostics
-        if: ${{ failure() && steps.xcode_upload.outcome == 'failure' }}
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: testflight-distribution-diagnostics-${{ github.run_id }}
           path: ${{ runner.temp }}/testflight-distribution-diagnostics
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Distribution summary
@@ -209,10 +368,15 @@ jobs:
             echo "- Source test run: ${{ github.event.workflow_run.html_url }}"
             echo "- Runner: GitHub-hosted macOS"
             echo "- Xcode: $(xcodebuild -version | head -n 1)"
-            echo "- Bundle ID: org.mysimplehealth.app"
+            echo "- Bundle ID: $BUNDLE_ID"
+            echo "- Build number: ${{ steps.build_metadata.outputs.build_number || 'not-allocated' }}"
             echo "- Destination: App Store Connect / TestFlight"
             echo "- Upload step outcome: ${{ steps.xcode_upload.outcome }}"
             echo "- xcodebuild upload exit code: ${{ steps.xcode_upload.outputs.exit_code || 'not-run' }}"
+            echo "- TestFlight verification outcome: ${{ steps.testflight_ready.outcome }}"
+            echo "- App Store Connect build ID: ${{ steps.testflight_ready.outputs.build_id || 'not-confirmed' }}"
+            echo "- Processing state: ${{ steps.testflight_ready.outputs.processing_state || 'not-confirmed' }}"
+            echo "- Internal TestFlight state: ${{ steps.testflight_ready.outputs.internal_state || 'not-confirmed' }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove temporary API key
