@@ -1,5 +1,7 @@
 name: MSH Cloud Xcode Worker
 
+# Workflow touch for #294: force one current-main native-test -> TestFlight handoff proof.
+
 on:
   workflow_dispatch:
     inputs:
