@@ -1,13 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { authorizeEvent, canonicalAgents, handlePayload, parseAddress, verifySlackSignature } from '../api/slack-events.js';
+import { authorizeEvent, canonicalAgents, handlePayload, parseAddress, resolveAddress, verifySlackSignature } from '../api/slack-events.js';
 
 const env = { MSH_SLACK_TEAM_ID: 'T1', MSH_SLACK_ALLOWED_CHANNELS: 'C0C0T9F3LUF', MSH_SLACK_ALLOWED_USERS: 'U_SIEA,U_BRANDON' };
 const realEvent = (text = 'Iris: summarize the research plan', user = 'U_SIEA') => ({
   event_id: crypto.randomUUID(),
   team_id: 'T1',
   event: { type: 'message', user, channel: 'C0C0T9F3LUF', ts: '123.456', text }
+});
+const threadEvent = (text = 'What changed since then?', user = 'U_SIEA') => ({
+  event_id: crypto.randomUUID(),
+  team_id: 'T1',
+  event: { type: 'message', user, channel: 'C0C0T9F3LUF', ts: '123.789', thread_ts: '123.456', text }
 });
 const memoryStore = () => {
   const claims = new Map();
@@ -56,6 +61,35 @@ test('canonical registry parity and Everyone routing are exhaustive', () => {
   assert.equal(parseAddress('no prefix').reason, 'missing_address');
 });
 
+test('inherits canonical agent from originating Slack thread for plain-text follow-up', async () => {
+  const result = await resolveAddress({
+    text: 'What changed since then?',
+    channel: 'C0C0T9F3LUF',
+    threadTs: '123.456'
+  }, {
+    env,
+    threadReader: async () => ({ text: 'Nomy: Update on the project roadmap?' })
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.key, 'nomy');
+  assert.equal(result.agent.name, 'Nomy');
+  assert.equal(result.prompt, 'What changed since then?');
+  assert.equal(result.inherited, true);
+});
+
+test('explicit addressed agent inside a thread overrides inherited root agent', async () => {
+  const result = await resolveAddress({
+    text: 'Iris: research this instead',
+    channel: 'C0C0T9F3LUF',
+    threadTs: '123.456'
+  }, {
+    env,
+    threadReader: async () => { throw new Error('must not read thread root'); }
+  });
+  assert.equal(result.key, 'iris');
+  assert.equal(result.inherited, undefined);
+});
+
 test('enforces real Slack team, channel, and user allowlists', () => {
   assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_SIEA' }, env).ok, true);
   assert.equal(authorizeEvent({ team_id: 'T1', channel: 'C0C0T9F3LUF', user: 'U_BRANDON' }, env).ok, true);
@@ -81,6 +115,33 @@ test('accepts actual Slack Events API envelope for Siea and Brandon', async () =
     assert.equal(calls[1].thread, '123.456');
     assert.match(calls[1].text, /^\*Iris \| Research & Insights\*/);
   }
+});
+
+test('routes a plain-text thread follow-up to the originating canonical agent', async () => {
+  const calls = [];
+  const result = await quiet(() => handlePayload(threadEvent('What changed since then?'), {
+    env,
+    idempotency: memoryStore(),
+    threadReader: async () => ({ text: 'Nomy: Update on the project roadmap?' }),
+    runtime: async (input) => { calls.push(input); return 'Here is the updated roadmap state.'; },
+    publisher: async (input) => { calls.push(input); }
+  }));
+  assert.equal(result.status, 200);
+  assert.equal(calls[0].agent, 'Nomy');
+  assert.equal(calls[0].prompt, 'What changed since then?');
+  assert.equal(calls[0].thread, '123.456');
+  assert.equal(calls[0].thread_continuation, true);
+  assert.equal(calls[1].thread, '123.456');
+});
+
+test('plain-text non-thread message still requires an explicit agent address', async () => {
+  const result = await quiet(() => handlePayload(realEvent('What changed since then?'), {
+    env,
+    idempotency: memoryStore(),
+    runtime: async () => { throw new Error('must not run'); }
+  }));
+  assert.equal(result.status, 403);
+  assert.equal(result.body.reason, 'missing_address');
 });
 
 test('rejects malformed events before runtime dispatch', async () => {
