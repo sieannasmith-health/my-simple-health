@@ -40,6 +40,11 @@ enum MSHNativeGlassAccessibility {
             ? Color.black.opacity(0.88)
             : MSHColor.surface
     }
+
+    /// Direct optical-glass surfaces in MSH are used primarily over photography
+    /// with light foreground content. Keep that content legible when transparency
+    /// is reduced instead of allowing the material to become an opaque white card.
+    static let directSurfaceFallback = Color.black.opacity(0.88)
 }
 
 struct MSHNativeGlassSurface<S: InsettableShape>: ViewModifier {
@@ -214,7 +219,7 @@ extension View {
         edgeStrength: Double = 1,
         shadowStrength: Double = 1,
         glowStrength: Double = 0,
-        reducedTransparencyFill: Color = Color.white.opacity(0.94)
+        reducedTransparencyFill: Color = MSHNativeGlassAccessibility.directSurfaceFallback
     ) -> some View {
         modifier(
             MSHNativeGlassSurface(
