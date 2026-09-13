@@ -1,8 +1,8 @@
 # Newton — MSH Business Operating Baseline
 
 **Owner:** Newton — Business Strategy & Finance  
-**Status:** Proposed operating control for Nomy review  
-**Last updated:** 2026-09-10
+**Status:** Operating control under Nomy governance  
+**Last updated:** 2026-09-13
 
 ## Purpose
 
@@ -23,7 +23,7 @@ MSH management reporting should classify spending into four categories while pre
 
 ### Founder-supplied expense baseline
 
-The current MSH Expense Ledger contains four recorded purchases. Dates and amounts below are treated as authoritative because they come from the Founder-maintained ledger; this management view does not alter the source ledger.
+The current MSH Expense Ledger / Founder finance documentation contains five recorded purchases currently available to Newton. Dates and amounts below are treated as authoritative because they come from Founder-maintained records; this management view does not alter the source ledger.
 
 | Expense | Expense date | Recorded amount | Renewal / cost behavior | Newton classification |
 | --- | --- | ---: | --- | --- |
@@ -31,13 +31,15 @@ The current MSH Expense Ledger contains four recorded purchases. Dates and amoun
 | Squarespace Domain (MSH) | 2026-08-30 | $9.00 | Renews 2027-08-30 at $20.00 | Fixed operating burn |
 | OpenAI API Billing | 2026-09-05 | $10.00 | Pay-As-You-Go | Variable member-serving / AI cost |
 | Apple Developer Program | 2026-09-05 | $107.17 | Renews 2027-09-05 at $107.17 | Fixed operating burn |
+| ChatGPT Business | 2026-09-08 | $480.00 | Software / AI subscription; renewal cadence to be verified | Fixed operating burn pending cadence verification |
 
-**Recorded purchases to date:** $135.17  
-**Known annual fixed renewals:** $147.17  
-**Monthly equivalent of known annual fixed renewals:** approximately $12.26  
-**Recorded variable AI/API spend:** $10.00
+**Recorded purchases to date:** $615.17  
+**Known annual fixed renewals with verified cadence:** $147.17  
+**Monthly equivalent of known annual fixed renewals with verified cadence:** approximately $12.26  
+**Recorded variable OpenAI API spend:** $10.00  
+**Recorded ChatGPT Business subscription spend:** $480.00
 
-These figures describe only the Founder-supplied entries currently available. They are not a claim that all MSH expenses have been captured.
+The $480 ChatGPT Business purchase is included in spend-to-date but is not annualized into fixed burn until its renewal cadence is verified. These figures describe only the Founder-supplied entries currently available and are not a claim that all MSH expenses have been captured.
 
 ### Monthly Newton financial review
 
@@ -46,13 +48,14 @@ Report only values supported by current financial records.
 | Metric | Current value | Source / note |
 | --- | ---: | --- |
 | Cash available | TBD | Requires authoritative cash balance |
-| Known fixed recurring-cost equivalent | ~$12.26/month | Annualized from currently recorded fixed renewals only |
+| Known fixed recurring-cost equivalent | ~$12.26/month + ChatGPT Business cadence TBD | Annualized only from fixed renewals whose cadence is currently verified |
 | Recorded variable AI/API/member-serving cost | $10.00 | Current OpenAI API ledger entry; not yet representative of normalized monthly production usage |
-| Known annual fixed renewals | $147.17/year | Two domain renewals plus Apple Developer Program |
-| Recorded purchases to date | $135.17 | Four Founder-supplied ledger entries |
-| Estimated runway | **Not calculated** | Cash balance and representative burn are incomplete |
+| Recorded ChatGPT Business subscription spend | $480.00 | Expense date 2026-09-08; recurrence/cadence must be verified before annualization |
+| Known annual fixed renewals with verified cadence | $147.17/year | Two domain renewals plus Apple Developer Program |
+| Recorded purchases to date | $615.17 | Five Founder-supplied finance entries currently available to Newton |
+| Estimated runway | **Not calculated** | Cash balance and representative complete burn are incomplete |
 
-**Runway rule:** never manufacture a runway estimate from incomplete inputs. The current ~$12.26/month figure is a known-renewal equivalent, not a complete monthly burn rate.
+**Runway rule:** never manufacture a runway estimate from incomplete inputs. The current ~$12.26/month figure is only the equivalent of fixed renewals with verified cadence, not a complete monthly burn rate.
 
 ## 2. Build-vs-integrate decision gate
 
@@ -94,17 +97,19 @@ Maintain this register for **material** dependencies only. Unknown information r
 | Apple / iOS / HealthKit ecosystem | iOS Xcode project and native MSH source are present in the repository | Native member app and Apple health-platform integration | High for current product strategy | Apple Developer Program ledger renewal: $107.17/year; other Apple-related costs TBD | Health-data authorization/governance requires Vera/Reese/Clara review | MSH is intentionally iOS-native today; product portability is a future strategic question, not a current requirement |
 | GitHub | Repository, Issues/PRs, `.github/workflows`, and #281 command-center operating model | Source control, CI/workflows, operational coordination | High for development operations | TBD | Repository content/data handling terms TBD | Migration is possible in principle but workflow/automation coupling creates operational switching cost |
 | OpenAI API | `.env.example` contains `OPENAI_API_KEY`; Founder ledger records OpenAI API Billing | AI/model API capability used by MSH components where configured | Potentially high as Simple/runtime usage grows | Pay-As-You-Go; $10.00 currently recorded | Retention/training/contractual terms **TBD and must be verified before sensitive production use** | Preserve model/provider optionality; no 24-hour hot-swap requirement adopted |
+| ChatGPT Business | Founder finance documentation records $480 subscription spend | Team AI workspace / productivity capability; exact MSH operating dependency should remain distinct from production API dependency | Medium operationally; not the production model-serving layer by default | $480.00 recorded on 2026-09-08; renewal cadence TBD | Workspace data-use/privacy terms should be reviewed separately from OpenAI API terms | Operationally replaceable in principle; migration cost depends on workflows and retained knowledge |
 | Vercel | `vercel.json` configures Vite build and functions including `api/simple.js`, `api/notion.js`, `api/notion-records.js`, `api/verify-id-token.js`, and `api/agent/*` | Web/API/runtime deployment for configured services | Medium–High for current deployed runtime paths | TBD | Data-use and processing terms TBD; review required for sensitive flows | Runtime can theoretically move, but function/deployment configuration creates migration work |
-| Firebase | `.firebaserc` declares default project `msh-health`; repository includes token-verification API path | Firebase project dependency; exact production services/use require technical verification | Potentially high if authentication/data services depend on it | TBD | Exact data handled and applicable terms TBD; Grant/Vera/Reese review as relevant | Exit effort depends on which Firebase services are actually in production; inventory still required |
-| Notion | `.env.example` includes `NOTION_TOKEN` and `NOTION_DATABASE_ID`; repo contains Notion API/tool code | Existing documentation/bridge integration | Low–Medium strategically; #281 designates Notion secondary/optional for execution | TBD | Integration data scope/retention terms TBD | GitHub is operational source of truth; Notion should remain removable from day-to-day execution dependency |
+| Firebase | `.firebaserc` declares default project `msh-health`; repository includes token-verification API path | Firebase project dependency; exact production services/use require technical verification | Potentially high if authentication/data services depend on it | TBD | Exact data handled and applicable terms TBD; Aiden/Vera/Reese review as relevant | Exit effort depends on which Firebase services are actually in production; inventory still required |
+| Notion | `.env.example` includes `NOTION_TOKEN` and `NOTION_DATABASE_ID`; repo contains Notion API/tool code | Legacy/reference documentation bridge | Low strategically for active execution; Notion is currently a holding/reference surface during migration | TBD | Integration data scope/retention terms TBD | GitHub is the durable work-management control plane and Slack is the growing collaboration surface; avoid new Notion-only execution dependencies |
 
 ### Dependency conclusions supported now
 
 1. **Apple dependency is intentional and strategic**, not something MSH should eliminate merely for vendor neutrality. MSH should avoid unnecessary coupling outside the Apple capabilities that materially improve the native health experience.
-2. **OpenAI/model dependency should remain abstractable enough to preserve future choice**, but current evidence does not justify building complex multi-provider routing infrastructure.
-3. **GitHub is now an operationally critical dependency** because it carries repository, PR/CI, and command-center workflows; this is acceptable, but its importance should be recognized in continuity planning.
-4. **Notion should not regain execution-critical status** because #281 explicitly made it secondary/optional.
-5. **Vercel and Firebase require a deeper technical/service inventory** before Newton can quantify cost concentration, data exposure, or switching economics.
+2. **OpenAI API/model dependency should remain abstractable enough to preserve future choice**, but current evidence does not justify building complex multi-provider routing infrastructure.
+3. **ChatGPT Business and OpenAI API are economically distinct dependencies** and must not be conflated in unit-economics reporting: one is a team/workspace subscription; the other is usage-based production-capable API spend.
+4. **GitHub is an operationally critical dependency** because it carries repository, PR/CI, work-management, and command-center workflows; this is acceptable, but its importance should be recognized in continuity planning.
+5. **Notion should not regain execution-critical status** while it is serving as a holding/reference surface during migration toward Slack + GitHub operating patterns.
+6. **Vercel and Firebase require a deeper technical/service inventory** before Newton can quantify cost concentration, data exposure, or switching economics.
 
 ### Vendor review minimum
 
@@ -133,7 +138,7 @@ Track when production usage exists:
 
 **Current pricing posture:** no member-facing token/credit pricing is adopted by this baseline.
 
-**Current evidence:** the ledger records $10.00 of OpenAI API billing. That is sufficient to establish that AI usage is already a variable-cost category, but not sufficient to estimate steady-state cost per member, conversation, or month.
+**Current evidence:** the ledger records $10.00 of OpenAI API billing and a separate $480.00 ChatGPT Business subscription expense. The $480 workspace subscription must not be treated as inference cost per member/conversation. The $10 API entry establishes a variable AI-cost category but is not sufficient to estimate steady-state production unit economics.
 
 ## 5. Strategic infrastructure MSH should own
 
@@ -177,7 +182,8 @@ MSH does **not** currently adopt:
 The following remain intentionally unresolved until authoritative records or technical verification are available:
 
 - current MSH cash available,
-- complete recurring-expense inventory beyond the current Founder ledger entries,
+- complete recurring-expense inventory beyond the current Founder finance entries,
+- ChatGPT Business renewal cadence,
 - representative normalized monthly AI/API usage,
 - OpenAI and other vendor contractual data-retention/training terms applicable to MSH,
 - exact Firebase services and production data flows,
