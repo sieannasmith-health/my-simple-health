@@ -12,13 +12,8 @@ describe('Worker API integration', () => {
   const kernel = new DurableKernel(pool);
   const app = createWorkerApi(kernel);
 
-  beforeAll(async () => {
-    await pool.query('SELECT 1');
-  });
-
-  afterAll(async () => {
-    await pool.end();
-  });
+  beforeAll(async () => { await pool.query('SELECT 1'); });
+  afterAll(async () => { await pool.end(); });
 
   beforeEach(async () => {
     await pool.query('TRUNCATE event_ledger, artifacts, task_attempts, task_dependencies, acceptance_criteria, tasks, objectives CASCADE');
@@ -45,7 +40,7 @@ describe('Worker API integration', () => {
   async function claim(role = 'api-role') {
     const response = await request(app)
       .post('/v1/worker/claims')
-      .send({ workerId: 'worker-api-test', role, idempotencyKey: randomUUID() })
+      .send({ role, idempotencyKey: randomUUID() })
       .expect(200);
     return response.body as { taskId: string; leaseToken: string; leaseExpiresAt: string; attemptNumber: number };
   }
@@ -53,47 +48,20 @@ describe('Worker API integration', () => {
   test('rejects malformed contracts', async () => {
     await request(app)
       .post('/v1/worker/claims')
-      .send({ workerId: '', role: 'api-role' })
+      .send({ role: '' })
       .expect(400)
-      .expect(({ body }) => {
-        expect(body.error).toBe('INVALID_CONTRACT');
-      });
+      .expect(({ body }) => { expect(body.error).toBe('INVALID_CONTRACT'); });
   });
 
   test('claims, starts, heartbeats, registers artifact, and completes a task', async () => {
     const { taskId } = await createReadyTask();
     const lease = await claim();
     expect(lease.taskId).toBe(taskId);
-
-    await request(app)
-      .post(`/v1/tasks/${taskId}/start`)
-      .send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() })
-      .expect(204);
-
-    const heartbeat = await request(app)
-      .post(`/v1/tasks/${taskId}/heartbeat`)
-      .send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() })
-      .expect(200);
+    await request(app).post(`/v1/tasks/${taskId}/start`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() }).expect(204);
+    const heartbeat = await request(app).post(`/v1/tasks/${taskId}/heartbeat`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() }).expect(200);
     expect(Date.parse(heartbeat.body.leaseExpiresAt)).toBeGreaterThan(Date.now());
-
-    await request(app)
-      .post(`/v1/tasks/${taskId}/artifacts`)
-      .send({
-        leaseToken: lease.leaseToken,
-        idempotencyKey: randomUUID(),
-        artifact: { uri: 'artifact://api-log', contentType: 'application/json' },
-      })
-      .expect(201);
-
-    await request(app)
-      .post(`/v1/tasks/${taskId}/complete`)
-      .send({
-        leaseToken: lease.leaseToken,
-        idempotencyKey: randomUUID(),
-        artifacts: [{ uri: 'artifact://final', contentType: 'application/json' }],
-      })
-      .expect(204);
-
+    await request(app).post(`/v1/tasks/${taskId}/artifacts`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID(), artifact: { uri: 'artifact://api-log', contentType: 'application/json' } }).expect(201);
+    await request(app).post(`/v1/tasks/${taskId}/complete`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID(), artifacts: [{ uri: 'artifact://final', contentType: 'application/json' }] }).expect(204);
     const task = await pool.query('SELECT status FROM tasks WHERE task_id=$1', [taskId]);
     expect(task.rows[0].status).toBe('VALIDATING');
     const artifacts = await pool.query('SELECT COUNT(*)::int AS count FROM artifacts WHERE associated_task_id=$1', [taskId]);
@@ -104,30 +72,13 @@ describe('Worker API integration', () => {
     const { taskId } = await createReadyTask('stale-role');
     const lease = await claim('stale-role');
     await pool.query("UPDATE task_attempts SET lease_expires_at=CURRENT_TIMESTAMP-INTERVAL '1 second' WHERE task_id=$1", [taskId]);
-
-    await request(app)
-      .post(`/v1/tasks/${taskId}/heartbeat`)
-      .send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() })
-      .expect(409)
-      .expect(({ body }) => {
-        expect(body.error).toBe('LEASE_FENCED');
-      });
+    await request(app).post(`/v1/tasks/${taskId}/heartbeat`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID() }).expect(409).expect(({ body }) => { expect(body.error).toBe('LEASE_FENCED'); });
   });
 
   test('records explicit failure and returns task to the retry pool', async () => {
     const { taskId } = await createReadyTask('failure-role');
     const lease = await claim('failure-role');
-
-    await request(app)
-      .post(`/v1/tasks/${taskId}/fail`)
-      .send({
-        leaseToken: lease.leaseToken,
-        idempotencyKey: randomUUID(),
-        failureClass: 'TOOL_ERROR',
-        errorLog: 'simulated failure',
-      })
-      .expect(204);
-
+    await request(app).post(`/v1/tasks/${taskId}/fail`).send({ leaseToken: lease.leaseToken, idempotencyKey: randomUUID(), failureClass: 'TOOL_ERROR', errorLog: 'simulated failure' }).expect(204);
     const task = await pool.query('SELECT status FROM tasks WHERE task_id=$1', [taskId]);
     expect(task.rows[0].status).toBe('READY');
     const attempt = await pool.query('SELECT status, failure_class FROM task_attempts WHERE task_id=$1', [taskId]);
@@ -139,15 +90,9 @@ describe('Worker API integration', () => {
     const { taskId } = await createReadyTask('artifact-role');
     const lease = await claim('artifact-role');
     const idempotencyKey = randomUUID();
-    const body = {
-      leaseToken: lease.leaseToken,
-      idempotencyKey,
-      artifact: { uri: 'artifact://once', contentType: 'text/plain' },
-    };
-
+    const body = { leaseToken: lease.leaseToken, idempotencyKey, artifact: { uri: 'artifact://once', contentType: 'text/plain' } };
     await request(app).post(`/v1/tasks/${taskId}/artifacts`).send(body).expect(201);
     await request(app).post(`/v1/tasks/${taskId}/artifacts`).send(body).expect(201);
-
     const count = await pool.query('SELECT COUNT(*)::int AS count FROM artifacts WHERE associated_task_id=$1', [taskId]);
     expect(count.rows[0].count).toBe(1);
   });
