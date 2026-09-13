@@ -23,13 +23,21 @@ function list(env, key) {
   return new Set(String(env[key] || '').split(',').map((v) => v.trim()).filter(Boolean));
 }
 
+function isDirectMessage(channel, channelType = null) {
+  return channelType === 'im' || /^D[A-Z0-9]+$/i.test(String(channel || ''));
+}
+
 function eventData(payload) {
   const event = payload?.event || payload || {};
+  const channel = event.channel_id || event.channel;
+  const channelType = event.channel_type || null;
   return {
     id: payload?.event_id || event.event_id,
     team: payload?.team_id || event.team_id,
     user: event.user_id || event.user,
-    channel: event.channel_id || event.channel,
+    channel,
+    channelType,
+    isDm: isDirectMessage(channel, channelType),
     ts: event.thread_ts || event.ts,
     messageTs: event.ts,
     threadTs: event.thread_ts || null,
@@ -77,7 +85,8 @@ export function authorizeEvent(input, env = process.env) {
   const teams = list(env, 'MSH_SLACK_TEAM_ID');
   const channels = list(env, 'MSH_SLACK_ALLOWED_CHANNELS');
   const users = list(env, 'MSH_SLACK_ALLOWED_USERS');
-  const ok = teams.has(data.team) && channels.has(data.channel) && users.has(data.user);
+  const channelAuthorized = data.isDm || channels.has(data.channel);
+  const ok = teams.has(data.team) && channelAuthorized && users.has(data.user);
   return { ok, reason: ok ? null : 'not_allowlisted', data };
 }
 
@@ -88,7 +97,8 @@ function auditRecord(data, result, agent, reason = null) {
     workspace: data.team || null,
     channel: data.channel || null,
     user: data.user || null,
-    thread: data.ts || null,
+    conversation_type: data.isDm ? 'im' : 'channel',
+    thread: data.threadTs || null,
     agent: agent || null,
     purpose: 'governed Slack collaboration',
     result,
@@ -116,13 +126,26 @@ async function slackThreadRoot({ channel, thread, env = process.env }) {
 
 export async function resolveAddress(data, options = {}) {
   const direct = parseAddress(data.text);
-  if (direct.ok || direct.reason !== 'missing_address' || !data.threadTs) return direct;
+  if (direct.ok || direct.reason !== 'missing_address') return direct;
 
-  const reader = options.threadReader || ((input) => slackThreadRoot({ ...input, env: options.env || process.env }));
-  const root = await reader({ channel: data.channel, thread: data.threadTs });
-  const inherited = parseAddress(root?.text);
-  if (!inherited.ok) return direct;
-  return { ...inherited, prompt: String(data.text || '').trim(), inherited: true };
+  if (data.threadTs) {
+    const reader = options.threadReader || ((input) => slackThreadRoot({ ...input, env: options.env || process.env }));
+    const root = await reader({ channel: data.channel, thread: data.threadTs });
+    const inherited = parseAddress(root?.text);
+    if (inherited.ok) return { ...inherited, prompt: String(data.text || '').trim(), inherited: true };
+  }
+
+  if (data.isDm) {
+    return {
+      ok: true,
+      key: 'nomy',
+      agent: AGENTS.nomy,
+      prompt: String(data.text || '').trim(),
+      defaulted: true
+    };
+  }
+
+  return direct;
 }
 
 function developmentStore() {
@@ -208,10 +231,11 @@ async function governedRuntime(input, env) {
 
 async function postSlackReply({ channel, thread, text, env }) {
   if (!env.SLACK_BOT_TOKEN) throw Object.assign(new Error('slack_bot_token_not_configured'), { transient: false });
+  const message = { channel, text, ...(thread ? { thread_ts: thread } : {}) };
   const response = await withTimeout(fetch('https://slack.com/api/chat.postMessage', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${env.SLACK_BOT_TOKEN}` },
-    body: JSON.stringify({ channel, thread_ts: thread, text })
+    body: JSON.stringify(message)
   }), MAX_SLACK_MS, 'slack');
   if (!response.ok) throw Object.assign(new Error(`slack_http_${response.status}`), { transient: response.status >= 500 || response.status === 429 });
   const body = await response.json();
@@ -225,9 +249,9 @@ export async function handlePayload(payload, options = {}) {
 
   if (payload?.type === 'url_verification') return { status: 200, body: { challenge: payload.challenge } };
   if (data.botId || data.subtype) return { status: 200, body: { ignored: true } };
-  if (!data.id || data.type !== 'message' || !data.user || !data.channel || !data.ts || !data.text) return { status: 400, body: { error: 'malformed_event' } };
+  if (!data.id || data.type !== 'message' || !data.user || !data.channel || !data.messageTs || !data.text) return { status: 400, body: { error: 'malformed_event' } };
 
-  const auth = authorizeEvent({ team_id: data.team, user: data.user, channel: data.channel }, env);
+  const auth = authorizeEvent({ team_id: data.team, user: data.user, channel: data.channel, channel_type: data.channelType }, env);
   if (!auth.ok) {
     const audit = auditRecord(data, 'denied', null, auth.reason);
     emitAudit(audit);
@@ -268,6 +292,7 @@ export async function handlePayload(payload, options = {}) {
 
   const runtime = options.runtime || ((input) => governedRuntime(input, env));
   const publisher = options.publisher || ((input) => postSlackReply({ ...input, env }));
+  const replyThread = data.threadTs || (data.isDm ? null : data.messageTs);
   try {
     const response = await runtime({
       correlation_id: data.id,
@@ -277,13 +302,16 @@ export async function handlePayload(payload, options = {}) {
       mission: address.agent.mission,
       prompt: address.prompt,
       channel: data.channel,
-      thread: data.ts,
-      thread_continuation: Boolean(address.inherited),
+      message_ts: data.messageTs,
+      thread: data.threadTs || data.messageTs,
+      thread_continuation: Boolean(data.threadTs),
+      conversation_type: data.isDm ? 'im' : 'channel',
+      is_dm: data.isDm,
       governed: true,
       source: 'slack'
     });
     if (!response) throw Object.assign(new Error('empty_runtime_response'), { transient: true });
-    await publisher({ channel: data.channel, thread: data.ts, text: `*${address.agent.name} | ${address.agent.role}*\n${response}`, correlation_id: data.id });
+    await publisher({ channel: data.channel, thread: replyThread, text: `*${address.agent.name} | ${address.agent.role}*\n${response}`, correlation_id: data.id });
     const audit = auditRecord(data, 'accepted', address.agent.name);
     emitAudit(audit);
     return { status: 200, body: { accepted: true, agent: address.agent.name }, audit };
