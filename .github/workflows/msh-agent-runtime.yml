@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       agent:
-        description: Agent key (nomy, selah, tessa, mira, ellis, iris, reese, genesis)
+        description: Agent key
         required: true
         type: string
 
@@ -31,6 +31,8 @@ jobs:
       MSH_AGENT_RUNTIME_ENGINE: ${{ vars.MSH_AGENT_RUNTIME_ENGINE || 'node' }}
       LANGGRAPH_CHECKPOINTER: ${{ vars.MSH_LANGGRAPH_CHECKPOINTER || 'memory' }}
       LANGGRAPH_POSTGRES_URI: ${{ secrets.LANGGRAPH_POSTGRES_URI }}
+      MSH_RUNTIME_LIFECYCLE_AUTHORITY: ${{ vars.MSH_RUNTIME_LIFECYCLE_AUTHORITY || 'github' }}
+      DURABLE_RUNTIME_DATABASE_URL: ${{ secrets.DURABLE_RUNTIME_DATABASE_URL }}
       PYTHONPATH: agent-runtime/langgraph
     steps:
       - name: Resolve trusted execution ref
@@ -44,35 +46,17 @@ jobs:
           set -euo pipefail
           ref="main"
           trusted_pr="false"
-
-          pr_json="$(curl -sS -w '\n%{http_code}' \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$ISSUE_NUMBER")"
+          pr_json="$(curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$ISSUE_NUMBER")"
           http_code="${pr_json##*$'\n'}"
           body="${pr_json%$'\n'*}"
-
           if [ "$http_code" = "200" ]; then
             head_repo="$(printf '%s' "$body" | jq -r '.head.repo.full_name // ""')"
             head_sha="$(printf '%s' "$body" | jq -r '.head.sha // ""')"
             labels="$(printf '%s' "$body" | jq -r '[.labels[].name] | join("\n")')"
-
-            if [ "$head_repo" = "$GITHUB_REPOSITORY" ] \
-              && [ -n "$head_sha" ] \
-              && printf '%s\n' "$labels" | grep -Fxq 'execution:approved' \
-              && { [ "$AGENT_NAME" = "selah" ] || [ "$AGENT_NAME" = "tessa" ]; }; then
-              ref="$head_sha"
-              trusted_pr="true"
-            fi
-          elif [ "$http_code" != "404" ]; then
-            echo "Unable to resolve PR metadata for #$ISSUE_NUMBER (HTTP $http_code)." >&2
-            exit 1
-          fi
-
+            if [ "$head_repo" = "$GITHUB_REPOSITORY" ] && [ -n "$head_sha" ] && printf '%s\n' "$labels" | grep -Fxq 'execution:approved' && { [ "$AGENT_NAME" = "selah" ] || [ "$AGENT_NAME" = "tessa" ]; }; then ref="$head_sha"; trusted_pr="true"; fi
+          elif [ "$http_code" != "404" ]; then echo "Unable to resolve PR metadata for #$ISSUE_NUMBER (HTTP $http_code)." >&2; exit 1; fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
           echo "trusted_pr=$trusted_pr" >> "$GITHUB_OUTPUT"
-          echo "Resolved execution ref for #$ISSUE_NUMBER / $AGENT_NAME: $ref (trusted_pr=$trusted_pr)"
 
       - name: Check out repository
         uses: actions/checkout@v5
@@ -92,19 +76,25 @@ jobs:
           DISPATCH_ISSUE: ${{ inputs.issue_number }}
           DISPATCH_AGENT: ${{ inputs.agent }}
         run: |
-          issue="$DISPATCH_ISSUE"
-          agent="$DISPATCH_AGENT"
+          issue="$DISPATCH_ISSUE"; agent="$DISPATCH_AGENT"
+          if [ -z "$issue" ] || [ -z "$agent" ]; then echo "Unable to resolve issue/agent from evaluator dispatch." >&2; exit 1; fi
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"; echo "agent=$agent" >> "$GITHUB_OUTPUT"
 
-          if [ -z "$issue" ] || [ -z "$agent" ]; then
-            echo "Unable to resolve issue/agent from evaluator dispatch." >&2
+      - name: Validate durable lifecycle authority
+        if: env.MSH_RUNTIME_LIFECYCLE_AUTHORITY == 'postgres'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$DURABLE_RUNTIME_DATABASE_URL" ]; then
+            echo "PostgreSQL lifecycle cutover is fail-closed: DURABLE_RUNTIME_DATABASE_URL is required." >&2
             exit 1
           fi
+          echo "Durable lifecycle authority: postgres"
 
-          echo "issue=$issue" >> "$GITHUB_OUTPUT"
-          echo "agent=$agent" >> "$GITHUB_OUTPUT"
-
-      - name: Confirm Node runtime
-        run: node --version
+      - name: Install durable runtime dependencies
+        if: env.MSH_RUNTIME_LIFECYCLE_AUTHORITY == 'postgres'
+        working-directory: agent-runtime/durable-core
+        run: npm install --no-audit --no-fund
 
       - name: Set up Python for LangGraph
         if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
@@ -120,20 +110,17 @@ jobs:
         if: env.MSH_AGENT_RUNTIME_ENGINE == 'langgraph'
         shell: bash
         run: |
-          if [ "$LANGGRAPH_CHECKPOINTER" != "postgres" ]; then
-            echo "LangGraph cutover is fail-closed: MSH_LANGGRAPH_CHECKPOINTER must be postgres." >&2
-            exit 1
-          fi
-          if [ -z "$LANGGRAPH_POSTGRES_URI" ]; then
-            echo "LangGraph cutover is fail-closed: LANGGRAPH_POSTGRES_URI is required." >&2
-            exit 1
-          fi
+          if [ "$LANGGRAPH_CHECKPOINTER" != "postgres" ]; then echo "LangGraph cutover is fail-closed: MSH_LANGGRAPH_CHECKPOINTER must be postgres." >&2; exit 1; fi
+          if [ -z "$LANGGRAPH_POSTGRES_URI" ]; then echo "LangGraph cutover is fail-closed: LANGGRAPH_POSTGRES_URI is required." >&2; exit 1; fi
 
       - name: Run legacy MSH specialist runtime
         if: env.MSH_AGENT_RUNTIME_ENGINE != 'langgraph'
         env:
           ISSUE_NUMBER: ${{ steps.route.outputs.issue }}
           AGENT_NAME: ${{ steps.route.outputs.agent }}
+          MSH_RUNTIME_CORRELATION_ID: github-issue-${{ steps.route.outputs.issue }}
+          MSH_RUNTIME_CAUSATION_ID: ${{ github.run_id }}
+          MSH_RUNTIME_SEQUENCE_VERSION: ${{ github.run_attempt }}
         run: node agent-runtime/run-v2.mjs
 
       - name: Run LangGraph MSH specialist runtime
