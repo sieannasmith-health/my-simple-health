@@ -29,6 +29,18 @@ async function openDurableTurn() {
   return durableTurn;
 }
 
+async function projectDurableAuthority() {
+  if (!durableAuthorityEnabled || !durableTurn) return;
+  const { projectDurableStateToGitHub } = await import('./durable-state-projector.mjs');
+  const projection = await projectDurableStateToGitHub({
+    repository: process.env.GITHUB_REPOSITORY || '',
+    issueNumber: Number(process.env.ISSUE_NUMBER || 0),
+    token: process.env.GITHUB_TOKEN || '',
+    pool: convergenceBridge?.pool || null,
+  });
+  if (projection) console.log(`[MSH Runtime] GitHub state projected from PostgreSQL task=${projection.task_id} status=${projection.task_status}.`);
+}
+
 function runBoundedWorker() {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['agent-runtime/state-hydrated-runner.mjs'], {
@@ -42,25 +54,15 @@ function runBoundedWorker() {
       console.log(line);
       try {
         const parsed = JSON.parse(line);
-        if (parsed && Number(parsed.issue) === Number(process.env.ISSUE_NUMBER || 0) && parsed.agent && parsed.status) {
-          structuredResult = parsed;
-        }
-      } catch {
-        // Non-JSON worker telemetry remains ordinary stdout.
-      }
+        if (parsed && Number(parsed.issue) === Number(process.env.ISSUE_NUMBER || 0) && parsed.agent && parsed.status) structuredResult = parsed;
+      } catch {}
     });
 
     child.stderr.on('data', chunk => process.stderr.write(chunk));
     child.on('error', reject);
     child.on('close', code => {
-      if (code !== 0) {
-        reject(new Error(`Bounded worker exited with code ${code}.`));
-        return;
-      }
-      if (!structuredResult) {
-        reject(new Error('Bounded worker completed without a structured result envelope.'));
-        return;
-      }
+      if (code !== 0) return reject(new Error(`Bounded worker exited with code ${code}.`));
+      if (!structuredResult) return reject(new Error('Bounded worker completed without a structured result envelope.'));
       resolve(structuredResult);
     });
   });
@@ -68,24 +70,8 @@ function runBoundedWorker() {
 
 function enrichReasonCode(result) {
   if (!result || typeof result !== 'object') return result;
-  if (typeof result.reason_code === 'string' && result.reason_code.trim()) {
-    return { ...result, reason_code: result.reason_code.trim() };
-  }
-
-  // Compatibility mapping for the one authority fact that can be derived
-  // without consulting prose. Missing execution approval is operational and
-  // must route to Product coordination, never to a Siea pause.
-  if (
-    result.agent === 'selah' &&
-    result.status === 'blocked' &&
-    result.execution_approved === false
-  ) {
-    return { ...result, reason_code: 'EXECUTION_APPROVAL_REQUIRED' };
-  }
-
-  // A generic requires_human boolean is intentionally insufficient authority
-  // to manufacture a human-only reason code. Explicit Siea-only escalation
-  // requires a typed reason_code from a trusted structured producer.
+  if (typeof result.reason_code === 'string' && result.reason_code.trim()) return { ...result, reason_code: result.reason_code.trim() };
+  if (result.agent === 'selah' && result.status === 'blocked' && result.execution_approved === false) return { ...result, reason_code: 'EXECUTION_APPROVAL_REQUIRED' };
   return { ...result, reason_code: null };
 }
 
@@ -100,14 +86,9 @@ async function completeDurableTurn(result) {
   if (!convergenceBridge || !durableTurn) return;
   const metadata = durableMetadata(result);
   await convergenceBridge.completeTurn({
-    taskId: durableTurn.taskId,
-    attemptId: durableTurn.attemptId,
-    status: result.status,
-    nextAgent: result.next_agent ?? null,
-    requiresHuman: Boolean(result.requires_human),
-    reasonCode: result.reason_code ?? null,
-    message: result.message ?? '',
-    ...metadata,
+    taskId: durableTurn.taskId, attemptId: durableTurn.attemptId, status: result.status,
+    nextAgent: result.next_agent ?? null, requiresHuman: Boolean(result.requires_human),
+    reasonCode: result.reason_code ?? null, message: result.message ?? '', ...metadata,
   });
   console.log(`[MSH Runtime] Durable lifecycle completed task=${durableTurn.taskId} status=${result.status} requires_human=${Boolean(result.requires_human)}.`);
 }
@@ -115,8 +96,7 @@ async function completeDurableTurn(result) {
 async function failDurableTurn(error) {
   if (!convergenceBridge || !durableTurn) return;
   await convergenceBridge.failTurn({
-    taskId: durableTurn.taskId,
-    attemptId: durableTurn.attemptId,
+    taskId: durableTurn.taskId, attemptId: durableTurn.attemptId,
     error: error?.stack || error?.message || String(error),
     correlationId: process.env.MSH_RUNTIME_CORRELATION_ID || process.env.GITHUB_RUN_ID || null,
     causationId: process.env.MSH_RUNTIME_CAUSATION_ID || process.env.GITHUB_RUN_NUMBER || null,
@@ -134,11 +114,13 @@ try {
   const { reconcileTurn } = await import('./post-turn-reconciler.mjs');
   await reconcileTurn(structuredWorkerResult);
   await completeDurableTurn(structuredWorkerResult);
+  await projectDurableAuthority();
 } catch (error) {
   runtimeError = error;
   console.error(`[MSH Runtime] Bounded turn failed before normal completion: ${error?.stack || error?.message || String(error)}`);
   try {
     await failDurableTurn(error);
+    await projectDurableAuthority();
   } catch (durableFailure) {
     console.error(`[MSH Runtime] Durable failure projection failed: ${durableFailure?.stack || durableFailure?.message || String(durableFailure)}`);
   }
@@ -151,8 +133,7 @@ try {
     if (!runtimeError) runtimeError = cleanupError;
   }
   if (convergenceBridge) {
-    try { await convergenceBridge.close(); }
-    catch (closeError) { console.error(`[MSH Runtime] Durable bridge close failed: ${closeError?.message || String(closeError)}`); }
+    try { await convergenceBridge.close(); } catch (closeError) { console.error(`[MSH Runtime] Durable bridge close failed: ${closeError?.message || String(closeError)}`); }
   }
 }
 
